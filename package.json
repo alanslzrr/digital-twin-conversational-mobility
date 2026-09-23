@@ -1,0 +1,37 @@
+{
+  "name": "digital-twin-conversational-mobility",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=24.21.0 <25"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "build:agent": "pnpm --filter @mobility/eve-web build:agent",
+    "typecheck": "turbo run typecheck",
+    "lint": "biome check . && node scripts/check-boundaries.mjs",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "doctor": "node scripts/doctor.mjs",
+    "infra:up": "docker compose --env-file .env.local -f infra/local/compose.yaml up -d --wait",
+    "infra:down": "docker compose --env-file .env.local -f infra/local/compose.yaml down",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "db:check": "node --env-file-if-exists=.env.local scripts/check-database.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "setup:local": "node scripts/setup-local.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "@types/node": "24.12.0",
+    "jose": "6.2.12",
+    "postgres": "3.4.9",
+    "turbo": "2.11.3",
+    "typescript": "7.0.2",
+    "vercel": "59.25.4",
+    "vitest": "5.0.1"
+  }
+}
