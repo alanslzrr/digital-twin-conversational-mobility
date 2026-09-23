@@ -57,15 +57,27 @@ headers["MCP-Protocol-Version"] = "2025-11-25";
 const list = await rpc(2, "tools/list", {});
 assert.deepEqual(
   list.tools.map((tool) => tool.name),
-  ["get_source_health"],
+  [
+    "get_source_health",
+    "resolve_place",
+    "plan_journey",
+    "get_departures",
+    "get_incidents",
+    "get_bike_availability",
+    "get_environment",
+    "get_road_state",
+    "get_historical_state",
+    "get_parking",
+  ],
 );
 const result = await rpc(3, "tools/call", {
   name: "get_source_health",
   arguments: { source: "renfe" },
 });
 const health = JSON.parse(result.content[0].text);
-assert.equal(health.liveDataReady, false);
-assert.equal(health.sources[0].status, "not_initialized");
+assert.equal(typeof health.liveDataReady, "boolean");
+assert.equal(health.sources[0].id, "renfe");
+assert.ok(Array.isArray(health.sources[0].streams));
 if (process.argv.includes("--production")) {
   const eveHealth = await fetch("http://127.0.0.1:3000/eve/v1/health", {
     signal: AbortSignal.timeout(60_000),
