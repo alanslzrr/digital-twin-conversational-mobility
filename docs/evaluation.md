@@ -15,6 +15,10 @@ Los slots permitidos son 1–5. Usa direcciones como identificadores acordados c
 
 Para administrar Neon, cargar `.env.cloud.core.local` y exigir `ALLOW_REMOTE_ADMIN=true`; los archivos se llaman `cloud-slot-*.txt`. Las cuentas locales y cloud son distintas. No copiar la base de producción a previews.
 
+## Interfaz oficial
+
+La UI procede del Web Chat de EVE 0.65.0, con Better Auth como puerta de acceso. Las rutas `/`, `/evaluation` y `/s` muestran el chat oficial; `/s/{sessionId}` reanuda la conversación sin eludir los controles de propietario. **New chat** abre `/s` sin borrar ni resetear la sesión previa. Adjuntos deshabilitados; texto limitado a 1.800 caracteres. No se persisten transcripciones ni contraseñas en localStorage.
+
 ## Límites y retención
 
 - Máximo cinco slots en SQL; cuentas habilitadas hasta 30 días desde su creación.

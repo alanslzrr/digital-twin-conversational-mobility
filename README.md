@@ -64,6 +64,10 @@ El login usa **Better Auth con email y contraseña**, sin registro público ni O
 
 `pnpm smoke:evaluation` verifica login, aislamiento entre usuarios, CSRF, cuotas y revocación sin inferencia. `pnpm smoke:evaluation --live` añade un turno real con la herramienta MCP; requiere clave y consume créditos. Ambos necesitan los servidores productivos locales arrancados y dejan libres los slots temporales 4/5.
 
+## Interfaz
+
+Se utiliza el **Web Chat oficial incluido en EVE 0.65.0** (`eve add channel/web`), no un chat diseñado para este proyecto. Se mantienen tema, tipografía Geist, composer, Markdown, salida de herramientas y conversaciones por URL. `/`, `/evaluation` y `/s` requieren Better Auth; `/s/{sessionId}` reanuda únicamente sesiones del propietario. Nueva conversación no borra la anterior. Procedencia y adaptaciones: [vendor/eve](apps/eve-web/vendor/eve/README.md).
+
 ## Qué incluye esta base
 
 | Componente | Estado real |
