@@ -2,7 +2,7 @@
 
 Base de desarrollo para un gemelo digital de movilidad de Madrid y su interfaz conversacional. Evaluación prevista: hasta cinco usuarios.
 
-**Estado: entorno preparado; producto todavía no operativo.** No se fabrican rutas, incidencias ni llegadas. Las diez fuentes del catálogo devuelven `not_initialized` hasta implementar y activar sus adaptadores.
+**Estado: vertical local funcional con cobertura parcial.** Renfe, BiciMAD, aire, tráfico, aparcamientos y observaciones AEMET Madrid-Retiro reales; OTP local calcula rutas previstas de Cercanías y a pie. EMT, DGT y la red Metro/EMT completa siguen pendientes. No se inventan datos para cubrir esos huecos.
 
 ## Arquitectura
 
@@ -16,11 +16,11 @@ Fuentes → Adaptadores → Raw / Normalización → Identidad y estado canónic
                                               EVE + Next.js
 ```
 
-Dos proyectos Vercel independientes: `mobility-twin-web` y `mobility-twin-core`. El agente solo conoce el MCP; no recibe credenciales de fuentes o almacenamiento. La arquitectura objetivo y lo realmente implementado se distinguen en [docs/architecture.md](docs/architecture.md).
+Dos aplicaciones locales independientes; el despliegue opcional conservaría dos proyectos Vercel: `mobility-twin-web` y `mobility-twin-core`. El agente solo conoce el MCP; no recibe credenciales de fuentes o almacenamiento. La arquitectura objetivo y lo realmente implementado se distinguen en [docs/architecture.md](docs/architecture.md).
 
 ## Inicio local
 
-Requisitos: NVM o Node **24.21.0**, pnpm **10.30.3**, Docker con Compose. Los puertos usados son 3000, 3001, 55432 y 56379.
+Requisitos: NVM o Node **24.21.0**, pnpm **10.30.3**, Docker con Compose. Los puertos usados son 3000, 3001, 4274, 8801, 55432 y 56379. Para datos/routing: Python ≥3.11 y memoria Docker suficiente.
 
 ```bash
 nvm install
@@ -68,6 +68,10 @@ El login usa **Better Auth con email y contraseña**, sin registro público ni O
 
 Se utiliza el **Web Chat oficial incluido en EVE 0.65.0** (`eve add channel/web`), no un chat diseñado para este proyecto. Se mantienen tema, tipografía Geist, composer, Markdown, salida de herramientas y conversaciones por URL. `/`, `/evaluation` y `/s` requieren Better Auth; `/s/{sessionId}` reanuda únicamente sesiones del propietario. Nueva conversación no borra la anterior. Procedencia y adaptaciones: [vendor/eve](apps/eve-web/vendor/eve/README.md).
 
+## Qué funciona localmente
+
+Sigue [la preparación completa de datos, OTP y worker](docs/local-runtime.md). Tras prepararlos, `pnpm start:local` arranca Core, EVE y el worker. `pnpm smoke:mobility` verifica fuentes/rutas/MCP sin llamadas al modelo.
+
 ## Qué incluye esta base
 
 | Componente | Estado real |
@@ -75,35 +79,35 @@ Se utiliza el **Web Chat oficial incluido en EVE 0.65.0** (`eve add channel/web`
 | Monorepo pnpm / TypeScript / Turborepo | Configurado, dependencias fijadas y lockfile |
 | Next.js + integración EVE | GPT-6 Luna directo; turno real MCP verificado |
 | Herramientas generales EVE | Desactivadas: sin bash, web fetch o búsqueda |
-| Mobility MCP | Autenticado; solo `get_source_health` |
+| Mobility MCP | Autenticado; diez tools implementadas, cobertura explícita |
 | Contratos y frescura | Schemas y tests; observado ≠ ingerido |
 | PostgreSQL/PostGIS + Redis local | Compose con credenciales y puertos loopback |
 | Migraciones | Checksum, transacción y bloqueo; idempotentes |
 | CI | Tipos, lint, tests, build, EVE, PostGIS y smoke MCP sin secretos cloud |
-| Fuentes reales y normalizadores | Pendientes |
-| Queues / ingesta adaptativa | SDK instalado; consumidor aún no implementado |
+| Fuentes reales y normalizadores | Renfe, BiciMAD, aire, tráfico y aparcamientos |
+| Ingesta adaptativa local | Worker + Postgres, ventana/leases/backoff; no necesita Queues |
 | Neon, Upstash y Blob cloud | Aprovisionados; conectividad verificada; sin deployments |
-| OTP Sandbox | SDK preparado; benchmark y lifecycle pendientes |
+| OTP local | Grafo Madrid y rutas previstas verificadas; Sandbox diferido |
 | Autenticación de evaluadores | Better Auth, cinco slots, ACL de sesión y cuotas |
 
-Redis local permite preparar políticas/locks, pero **no emula la API REST de Upstash**; el cliente de caché y su adaptación local siguen pendientes. No hay una equivalencia fingida entre ambos servicios.
+Redis local queda disponible, pero esta vertical usa Postgres para estado/leases y no lo necesita. No se finge compatibilidad REST con Upstash.
 
 ## Estructura
 
 ```text
 apps/eve-web/          Next.js, configuración EVE y conexión MCP
-apps/mobility-core/    MCP, autorización y futura ingesta/dominio
+apps/mobility-core/    MCP, autorización, adaptadores, ingesta y routing local
 packages/contracts/   schemas compartidos y tipos
-packages/domain/      catálogo canónico y diagnósticos iniciales
+packages/domain/      catálogo y políticas de cadencia/frescura
 packages/provenance/  cálculo de frescura y calidad
-infra/local/          PostgreSQL/PostGIS y Redis de desarrollo
+infra/local/          PostgreSQL/PostGIS, Redis y perfil OTP
 infra/postgres/       migraciones SQL
-infra/otp/            criterios de viabilidad para el routing
+infra/otp/            configuración OTP fijada y límites de cobertura
 scripts/              bootstrap, doctor, migraciones, límites y smoke
 docs/                 arquitectura, despliegue y plan de implementación
 ```
 
-No se han creado adaptadores vacíos para aparentar cobertura. Se añadirán como paquetes cuando exista una primera implementación verificada.
+Los adaptadores verificados están en `apps/mobility-core/src/adapters`. No se crean paquetes vacíos ni tools ficticias para aparentar cobertura.
 
 ## GitHub y despliegue
 

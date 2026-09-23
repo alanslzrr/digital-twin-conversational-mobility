@@ -1,17 +1,17 @@
-# OTP en Sandbox: prueba pendiente
+# OTP local
 
-No se incluye una imagen OTP ficticia ni se crea un Sandbox durante el bootstrap.
+Implementación de evaluación: OTP 2.10.0 en contenedor arm64/amd64 oficial fijado por digest, Java incluido, heap 4 GiB, contenedor 6 GiB / 4 CPU, puerto `127.0.0.1:8801`.
 
-Antes de adoptar este proveedor:
+1. `pnpm otp:prepare` normaliza/subconjunta GTFS Renfe y registra fuentes/licencias/SHA256 junto al OSM Madrid.
+2. `pnpm otp:build` genera `graph.obj` y `graph-manifest.json`.
+3. `pnpm gtfs:import` importa la misma versión en PostGIS.
+4. `pnpm otp:up` sirve el grafo; `pnpm otp:down` lo detiene sin borrar datos.
+5. `pnpm otp:benchmark --restart` mide arranque y 20 consultas de una muestra de cuatro parejas.
 
-1. Fijar versión de OTP y Java compatible, con checksum de artefactos.
-2. Descargar/verificar GTFS y extracto OSM acotado a Madrid; registrar versión/licencia.
-3. Medir construcción de grafo y consulta: RAM máxima, CPU, disco, cold start y latencia P95.
-4. Validar red, endpoint protegido y arranque/readiness de la JVM dentro de Vercel Sandbox.
-5. Probar el mecanismo real de stop/snapshot/start. **No asumir que un snapshot de disco conserva el heap JVM o el proceso vivo.**
-6. Implementar exclusión mutua para arranque, TTL por inactividad, recuperación tras expiración, límite de duración y parada confirmada.
-7. Medir coste con la cuota/plan de la cuenta; decidir si el cold start es aceptable para cinco usuarios.
+Antes de reconstruir, detener OTP. Los datos/grafo/reportes se guardan en `data/otp/`, ignorado por Git. La API real es GTFS GraphQL `planConnection`, no la API REST de OTP1. El dominio declara rutas previstas: no se instala un polling paralelo de Renfe dentro de OTP que eluda la ventana de actividad.
 
-Si falla el benchmark, documentar el resultado y elegir otro `RoutingProvider` sin cambiar el contrato del MCP. No degradar silenciosamente una petición multimodal/accesible a un router que no la soporte.
+Detalle y límites en [runtime local](../../docs/local-runtime.md). No se ha validado toda la red ni el pico de RAM de construcción; conservar y revisar los informes de importación.
 
-Referencias: [Vercel Sandbox](https://vercel.com/docs/sandbox), [snapshots](https://vercel.com/docs/sandbox/concepts/snapshots), [OTP data sources](https://docs.opentripplanner.org/en/latest/Data-Sources/).
+## Vercel, después
+
+Sandbox no forma parte del runtime actual. Solo después de validar localmente y de autorización explícita se estudiarán cold start, red privada, almacenamiento de grafo, cuotas y lifecycle. Un snapshot de disco **no conserva** por sí mismo heap JVM/proceso vivo. No asumir equivalencia local/cloud ni activar despliegues automáticamente.
