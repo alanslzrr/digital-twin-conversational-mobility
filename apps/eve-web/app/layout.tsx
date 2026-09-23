@@ -1,17 +1,40 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import "./globals.css";
 
+const sans = Geist({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: "variable",
+  display: "swap",
+});
+
+const mono = Geist_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: "variable",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Madrid · Mobility Twin",
-  description: "Entorno de evaluación del gemelo de movilidad de Madrid.",
+  title: "Madrid Mobility",
+  description: "Evaluación privada de movilidad de Madrid.",
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
   return (
-    <html lang="es">
-      <body>{children}</body>
+    <html className={cn(sans.variable, mono.variable)} lang="es">
+      <body>
+        <TooltipProvider>{children}</TooltipProvider>
+      </body>
     </html>
   );
 }
