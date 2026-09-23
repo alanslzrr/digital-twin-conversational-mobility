@@ -32,10 +32,14 @@ pnpm setup:local
 pnpm infra:up
 pnpm db:migrate
 pnpm db:check
+# Añade OPENAI_API_KEY al .env.local raíz antes del siguiente paso
+pnpm configure:openai
+pnpm evaluator create 1 alan@mobility.test Alan
 pnpm dev
 ```
 
 - Web: [http://127.0.0.1:3000](http://127.0.0.1:3000)
+- Evaluación con login: [http://127.0.0.1:3000/evaluation](http://127.0.0.1:3000/evaluation)
 - Core: [http://127.0.0.1:3001/api/health](http://127.0.0.1:3001/api/health)
 - MCP privado: `http://127.0.0.1:3001/mcp`
 
@@ -54,14 +58,18 @@ pnpm smoke --production     # con pnpm start: también EVE health y rechazo de s
 pnpm infra:down             # detiene servicios sin eliminar volúmenes
 ```
 
-No hay modelos ni claves cloud predeterminados. La página inicial es una pantalla de preparación, no un chat. Para ejecutar una sesión local de EVE después de configurar Gateway, define `EVE_MODEL` y credenciales locales en `apps/eve-web/.env.local`. El despliegue usa OIDC y BYOK configurado en Gateway; no copies claves de OpenAI al MCP.
+El modelo está fijado a **`gpt-6-luna` mediante OpenAI Responses directamente**, sin Gateway ni fallback. `configure:openai` copia únicamente `OPENAI_API_KEY` al entorno servidor Web, nunca al Core o navegador. `pnpm check:openai` comprueba acceso al modelo; `pnpm check:openai --live` hace una llamada mínima de pago explícita.
+
+El login usa **Better Auth con email y contraseña**, sin registro público ni OAuth. `evaluator create` guarda las credenciales en un archivo privado ignorado bajo `data/evaluators/`, sin imprimir contraseñas. Admite cinco cuentas, revocación y reset. Consulta [operación de evaluadores](docs/evaluation.md).
+
+`pnpm smoke:evaluation` verifica login, aislamiento entre usuarios, CSRF, cuotas y revocación sin inferencia. `pnpm smoke:evaluation --live` añade un turno real con la herramienta MCP; requiere clave y consume créditos. Ambos necesitan los servidores productivos locales arrancados y dejan libres los slots temporales 4/5.
 
 ## Qué incluye esta base
 
 | Componente | Estado real |
 | --- | --- |
 | Monorepo pnpm / TypeScript / Turborepo | Configurado, dependencias fijadas y lockfile |
-| Next.js + integración EVE | Configurada; selección de modelo explícita |
+| Next.js + integración EVE | GPT-6 Luna directo; turno real MCP verificado |
 | Herramientas generales EVE | Desactivadas: sin bash, web fetch o búsqueda |
 | Mobility MCP | Autenticado; solo `get_source_health` |
 | Contratos y frescura | Schemas y tests; observado ≠ ingerido |
@@ -70,9 +78,9 @@ No hay modelos ni claves cloud predeterminados. La página inicial es una pantal
 | CI | Tipos, lint, tests, build, EVE, PostGIS y smoke MCP sin secretos cloud |
 | Fuentes reales y normalizadores | Pendientes |
 | Queues / ingesta adaptativa | SDK instalado; consumidor aún no implementado |
-| Neon, Upstash y Blob cloud | Pendientes de aprovisionamiento y credenciales |
+| Neon, Upstash y Blob cloud | Aprovisionados; conectividad verificada; sin deployments |
 | OTP Sandbox | SDK preparado; benchmark y lifecycle pendientes |
-| Autenticación de evaluadores | Pendiente; acceso productivo cerrado |
+| Autenticación de evaluadores | Better Auth, cinco slots, ACL de sesión y cuotas |
 
 Redis local permite preparar políticas/locks, pero **no emula la API REST de Upstash**; el cliente de caché y su adaptación local siguen pendientes. No hay una equivalencia fingida entre ambos servicios.
 
