@@ -16,3 +16,9 @@ Do not include credentials, tokens, raw conversation contents or personal travel
 - The static dependency guard is an early warning, not a network firewall.
 
 Before evaluation, add per-user access control and session ownership, rate limits, retention/deletion for conversations, budget controls, credential rotation and deployment-protection checks. Keep production resources isolated from previews. Review source licensing before storing or redistributing payloads.
+
+## Deployment tooling dependencies
+
+`vercel@59.25.4` pins older dependencies with published advisories even though the application production dependency audit is clean. Exact-version overrides in `pnpm-workspace.yaml` replace those releases rather than hiding or dismissing the alerts. CI audits the complete lockfile, including development tooling.
+
+Most overrides stay within the original major version. The exception is the CLI's Undici 5.x, which has no release covering all reported advisories: it is advanced to 6.28.1. The CLI and its Node builder use the preserved fetch/request/Headers interfaces; the project's EVE runtime remains on its own Undici 8 release. Verify CLI version/auth/project reads locally and run the application build and integration suite after changes. Other framework builders and a real cloud deployment are not validated by these checks. Remove overrides only once upstream dependencies and a full audit demonstrate that they are unnecessary.
