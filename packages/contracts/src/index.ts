@@ -57,3 +57,45 @@ export const journeyRequestSchema = z.object({
   }),
 });
 export type JourneyRequest = z.infer<typeof journeyRequestSchema>;
+
+export const resolvePlaceInputSchema = z.object({
+  query: z.string().trim().min(2).max(120),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+export const departuresInputSchema = z.object({
+  placeId: z.uuid(),
+  limit: z.number().int().min(1).max(20).default(10),
+});
+export const incidentsInputSchema = z.object({
+  line: z.string().trim().max(20).optional(),
+  limit: z.number().int().min(1).max(30).default(10),
+});
+export const bikesInputSchema = z.object({
+  placeId: z.uuid().optional(),
+  query: z.string().trim().min(2).max(120).optional(),
+  limit: z.number().int().min(1).max(20).default(5),
+});
+export const environmentInputSchema = z.object({
+  kind: z.enum(["air", "weather"]).default("air"),
+  stationId: z.string().max(30).optional(),
+  pollutant: z
+    .enum(["SO2", "CO", "NO", "NO2", "PM2.5", "PM10", "NOx", "O3"])
+    .optional(),
+  limit: z.number().int().min(1).max(30).default(10),
+});
+export const roadInputSchema = z.object({
+  query: z.string().trim().min(2).max(120),
+  limit: z.number().int().min(1).max(20).default(10),
+});
+export const parkingInputSchema = roadInputSchema;
+export const historyInputSchema = z.object({
+  source: z.enum([
+    "aemet",
+    "renfe",
+    "bicimad",
+    "madrid-air",
+    "madrid-traffic",
+    "madrid-parking",
+  ]),
+  at: z.iso.datetime({ offset: true }),
+});
