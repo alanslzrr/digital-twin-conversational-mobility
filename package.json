@@ -27,7 +27,18 @@
     "db:check": "node --env-file-if-exists=.env.local scripts/check-database.mjs",
     "smoke": "node scripts/smoke.mjs",
     "setup:local": "node scripts/setup-local.mjs",
-    "smoke:evaluation": "node --env-file-if-exists=.env.local scripts/smoke-evaluation.mjs"
+    "smoke:evaluation": "node --env-file-if-exists=.env.local scripts/smoke-evaluation.mjs",
+    "otp:prepare": "python3 scripts/prepare-otp.py",
+    "otp:build": "node scripts/build-otp.mjs",
+    "otp:up": "docker compose --env-file .env.local -f infra/local/compose.yaml --profile routing up -d otp",
+    "otp:down": "docker compose --env-file .env.local -f infra/local/compose.yaml stop otp",
+    "gtfs:import": "node --env-file-if-exists=.env.local scripts/import-renfe.mjs",
+    "mobility:enable": "node scripts/configure-local-mobility.mjs",
+    "ingest": "node --env-file-if-exists=.env.local scripts/ingestion-worker.mjs --activate --once",
+    "worker": "node --env-file-if-exists=.env.local scripts/ingestion-worker.mjs",
+    "smoke:mobility": "node --env-file-if-exists=.env.local scripts/smoke-mobility.mjs",
+    "start:local": "node scripts/start-local.mjs",
+    "otp:benchmark": "node scripts/benchmark-otp.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
