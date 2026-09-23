@@ -1,0 +1,9 @@
+{
+  "transitModelTimeZone": "Europe/Madrid",
+  "dataImportReport": true,
+  "maxDataImportIssuesPerFile": 1000,
+  "osm": [{ "source": "madrid.osm.pbf" }],
+  "transitFeeds": [
+    { "type": "gtfs", "feedId": "renfe", "source": "renfe-madrid.gtfs.zip" }
+  ]
+}
