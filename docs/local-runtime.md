@@ -80,13 +80,20 @@ La versión de base y el manifiesto del grafo deben coincidir. No reemplazar man
 ```sh
 pnpm smoke --production
 pnpm smoke:evaluation        # cuentas temporales 4/5; sin inferencia
+# Solo tras autorizar consumo de créditos:
+pnpm smoke:evaluation --live-mobility  # EVE real: lugares, ruta, meteorología y salud
+pnpm smoke:evaluation --live-weather   # Consulta meteorológica conversacional acotada
 pnpm smoke:mobility          # fuentes reales (+ AEMET si hay clave) + PostGIS + OTP + MCP; abre ventana
 pnpm otp:benchmark --restart # reinicia SOLO OTP; 20 consultas / cuatro parejas
 ```
 
 Para que estas pruebas controlen los ticks sin carreras con otro worker, usar `pnpm start:local --no-worker`; al terminar reiniciar con `pnpm start:local`. Los checks de movilidad también prueban rechazo de lugares desconocidos, modos no implementados y fechas fuera del feed.
 
+Una conversación puede requerir varias peticiones al proveedor: EVE descubre herramientas (`connection_search`), las ejecuta y después redacta. Un límite de tres peticiones no garantiza completar una consulta con varias herramientas. Los modos `--live*` requieren autorización de consumo y guardan solo un resumen de acciones/respuesta visible en `data/validation/`, nunca razonamiento interno ni credenciales.
+
 Los tests unitarios y CI no necesitan API keys ni descargan datos de movilidad. Los dos últimos comandos son opt-in y requieren red hacia los proveedores de datos; AEMET solo se prueba cuando tiene clave. No son parte de `pnpm check`.
+
+La conversación real del 23/09/2026 completó resolución Atocha/Chamartín, ruta prevista de 13 min, observación AEMET con hora/edad y ausencia de EMT. Fueron cinco peticiones en el intento completado; un intento anterior se detuvo al agotar el límite inicial de tres. Tras autorización ampliada: ocho peticiones totales. No se cambiaron modelo, autenticación ni interfaz.
 
 Muestra medida el 23/09/2026: construcción del grafo 40,4 s; reinicio hasta API disponible 5,4 s; 20 consultas de cuatro parejas, p50 47 ms y p95 66 ms; memoria residente posterior 1,261 GiB (no pico de construcción). Smoke MCP Atocha↔Chamartín: tres alternativas por dirección, primer itinerario 13 min, 192/140 ms. Son mediciones locales de una muestra, no un SLA.
 
@@ -101,4 +108,4 @@ Informes locales: `data/otp/manifest.json`, `graph-manifest.json`, `local-valida
 - [AEMET OpenData](https://opendata.aemet.es/dist/), © AEMET: reutilización con atribución conforme a [su nota legal](https://www.aemet.es/es/nota_legal). Solo se persisten observaciones, nunca claves, respuestas de autenticación o URLs temporales.
 - [OTP 2.10.0](https://github.com/opentripplanner/OpenTripPlanner/releases/tag/v2.10.0), imagen multiarch fijada por digest en Compose.
 
-No hay deployments ni nuevas altas cloud. En la validación del 23/09/2026, AEMET autenticó correctamente; EMT rechazó el login oficial con HTTP 403/código 84 (sin token). Hay que revisar la pareja clientId/passKey y los permisos de aplicación antes de validar su adaptador. DGT ha cambiado su publicación DATEX; queda resolver acceso oficial y mapping. No se registran herramientas ficticias para esos servicios.
+No hay deployments ni nuevas altas cloud. En la validación del 23/09/2026, AEMET autenticó correctamente; EMT rechazó el login oficial con HTTP 403/código 84 (sin token). El usuario confirmó después que la aplicación está **pendiente de moderación**. Esperar su aprobación y volver a validar el acceso oficial antes de implementar/validar servicios EMT; no asumir que el código 84 identifica por sí solo esa causa. DGT ha cambiado su publicación DATEX; queda resolver acceso oficial y mapping. No se registran herramientas ficticias para esos servicios.
