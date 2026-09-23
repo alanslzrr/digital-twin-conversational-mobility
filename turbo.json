@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/.env*"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["VERCEL", "VERCEL_ENV", "NEXT_TELEMETRY_DISABLED"]
+    },
+    "typecheck": { "dependsOn": ["^typecheck"], "outputs": [] },
+    "dev": { "cache": false, "persistent": true }
+  }
+}
