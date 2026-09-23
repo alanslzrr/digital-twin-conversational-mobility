@@ -2,7 +2,8 @@ export function GET() {
   return Response.json({
     service: "eve-web",
     status: "ok",
-    stage: "foundation",
-    chatReady: false,
+    stage: "local-evaluation",
+    readiness:
+      "Liveness only; evaluator authentication and model configuration required",
   });
 }
