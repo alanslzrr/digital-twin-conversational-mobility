@@ -1,0 +1,19 @@
+name: Implementation task
+description: Scope a mobility-domain implementation with verifiable acceptance criteria.
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal and scope
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Data access, security, costs and dependencies
