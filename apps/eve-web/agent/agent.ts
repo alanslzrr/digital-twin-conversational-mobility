@@ -1,18 +1,15 @@
 import { defineAgent, defineDynamic } from "eve";
+import { createEvaluationModel } from "../src/model";
 
 export default defineAgent({
   defaultTools: false,
   model: defineDynamic({
     events: {
-      "session.started": () => {
-        const model = process.env.EVE_MODEL?.trim();
-        if (!model?.startsWith("openai/")) {
-          throw new Error(
-            "Configure EVE_MODEL with an OpenAI Gateway model before starting a session",
-          );
-        }
-        return model;
-      },
+      "step.started": () => ({
+        model: createEvaluationModel(),
+        modelContextWindowTokens: 1_050_000,
+        modelOptions: { providerOptions: { openai: { store: false } } },
+      }),
     },
   }),
   limits: {
