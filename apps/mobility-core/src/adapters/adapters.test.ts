@@ -1,12 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { parseBicimad } from "./bicimad";
-import { madridTime, numeric, timestamp } from "./common";
+import { madridTime, numeric, sourceErrorCode, timestamp } from "./common";
 import { parseAir, parseTraffic } from "./madrid";
 import { parseRenfe, spanishText } from "./renfe";
 
 const now = Date.parse("2026-09-23T19:00:00Z");
 const seconds = now / 1000;
 describe("source timestamps", () => {
+  it("reports bounded failure categories without echoing upstream secrets", () => {
+    expect(
+      sourceErrorCode(new DOMException("secret URL", "TimeoutError")),
+    ).toBe("upstream_timeout");
+    expect(
+      sourceErrorCode(
+        new TypeError("failed https://provider.test?api_key=secret"),
+      ),
+    ).toBe("upstream_network_error");
+    expect(sourceErrorCode(new Error("credentials: secret"))).toBe(
+      "source_fetch_or_validation_failed",
+    );
+    expect(sourceErrorCode(new Error("upstream_http_403"))).toBe(
+      "upstream_http_403",
+    );
+  });
   it("rejects future observations, NaN and blank numbers", () => {
     expect(() => timestamp(seconds + 31, now)).toThrow();
     expect(() => timestamp(Number.NaN, now)).toThrow();

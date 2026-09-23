@@ -12,7 +12,7 @@ import {
 import type postgres from "postgres";
 import { fetchWeather } from "./adapters/aemet";
 import { parseBicimad } from "./adapters/bicimad";
-import { fetchText, timestamp } from "./adapters/common";
+import { fetchText, sourceErrorCode, timestamp } from "./adapters/common";
 import { parseAir, parseTraffic } from "./adapters/madrid";
 import { parseParking } from "./adapters/parking";
 import { parseRenfe, spanishText } from "./adapters/renfe";
@@ -241,13 +241,7 @@ export async function ingest(id: JobId) {
     });
   } catch (error) {
     // Never log upstream bodies, URLs with keys, validation payloads or DB credentials.
-    const message = error instanceof Error ? error.message : "";
-    const code =
-      /^(upstream_http_\d{3}|static_feed_missing_or_expired|out_of_order_feed|invalid_observation_time|aemet_credentials_missing|aemet_data_unavailable)$/.test(
-        message,
-      )
-        ? message
-        : "source_fetch_or_validation_failed";
+    const code = sourceErrorCode(error);
     return await sql.begin(async (tx) => {
       const [owned] =
         await tx`UPDATE ingestion_job SET lease_token=NULL,lease_until=NULL,failures=failures+1,error_code=${code},next_due_at=now()+${retryDelay(policy.interval, lease.failures + 1)}*interval '1 second' WHERE id=${id} AND lease_token=${lease.token} RETURNING id`;

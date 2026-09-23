@@ -7,6 +7,19 @@ export const numeric = z
 export const epoch = numeric.pipe(z.number().int().positive());
 export const id = z.string().trim().min(1).max(200);
 
+export function sourceErrorCode(error: unknown) {
+  if (!(error instanceof Error)) return "source_fetch_or_validation_failed";
+  if (error.name === "TimeoutError" || error.name === "AbortError")
+    return "upstream_timeout";
+  if (error.name === "ZodError") return "source_schema_invalid";
+  if (error instanceof TypeError) return "upstream_network_error";
+  return /^(upstream_http_\d{3}|static_feed_missing_or_expired|out_of_order_feed|invalid_observation_time|aemet_credentials_missing|aemet_data_unavailable|invalid_weather_resource|no_valid_weather_observation|unexpected_weather_station)$/.test(
+    error.message,
+  )
+    ? error.message
+    : "source_fetch_or_validation_failed";
+}
+
 export function timestamp(seconds: number, now = Date.now()) {
   const millis = seconds * 1000;
   if (
