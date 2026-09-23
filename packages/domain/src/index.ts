@@ -1,5 +1,13 @@
 import type { SourceId } from "@mobility/contracts";
 
+export {
+  type JobId,
+  jobPolicies,
+  localIngestionEnabled,
+  retryDelay,
+} from "./ingestion";
+export { sameServiceTrip } from "./realtime";
+
 export const sourceCatalog: ReadonlyArray<{
   id: SourceId;
   strategy: "continuous" | "snapshot" | "hybrid";
