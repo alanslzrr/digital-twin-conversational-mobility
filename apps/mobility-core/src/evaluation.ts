@@ -1,3 +1,4 @@
+import { localIngestionEnabled } from "@mobility/domain";
 import { z } from "zod";
 import { getAuth } from "./better-auth";
 import { database } from "./database";
@@ -83,6 +84,8 @@ export async function evaluateAccess(
       }
       await tx`INSERT INTO evaluation_usage(evaluator_id, window_start, window_kind, requests) VALUES (${input.principalId}, date_trunc('minute', now()), 'minute', 1), (${input.principalId}, date_trunc('day', now()), 'day', 1) ON CONFLICT (evaluator_id, window_start, window_kind) DO UPDATE SET requests = evaluation_usage.requests + 1`;
       await tx`DELETE FROM evaluation_usage WHERE evaluator_id = ${input.principalId} AND window_start < now() - interval '8 days'`;
+      if (localIngestionEnabled(process.env))
+        await tx`UPDATE ingestion_activity SET active_until=GREATEST(active_until,now()+interval '30 minutes')`;
     }
     return { status: 200, body: { ok: true } };
   });
