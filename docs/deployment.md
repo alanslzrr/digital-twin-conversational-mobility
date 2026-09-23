@@ -1,56 +1,49 @@
-# Despliegue controlado
+# Preparación cloud sin publicación
 
-## Proyectos
+## Estado al 23 de septiembre de 2026
 
-| Vercel project | Root directory | Node | Build |
-| --- | --- | --- | --- |
-| `mobility-twin-web` | `apps/eve-web` | 24.x | `pnpm build` |
-| `mobility-twin-core` | `apps/mobility-core` | 24.x | `pnpm build` |
+Scope Vercel `alansalazar`, plan Hobby para proyecto universitario. No se ha comprado ningún plan ni creado deployments. Dos proyectos privados de código, Node 24.x, región de Functions `cdg1`:
 
-Ambos comparten el monorepo, no los secretos. Mantener habilitado el acceso a archivos fuera del root para los paquetes workspace. Región objetivo `cdg1`; elegir recursos de datos compatibles/cercanos tras comprobar disponibilidad.
+| Proyecto | Root |
+| --- | --- |
+| mobility-twin-web | apps/eve-web |
+| mobility-twin-core | apps/mobility-core |
 
-`git.deploymentEnabled: false` evita desplegar cada push durante la preparación. No quitarlo hasta completar esta lista. Un despliegue manual sigue siendo posible, por lo que esta opción no sustituye controles de acceso.
+Los dos `vercel.json` mantienen `git.deploymentEnabled:false`; también está desactivado `gitProviderOptions.createDeployments` en Vercel. No ejecutar un despliegue manual sin aprobación. Las URLs configuradas reservan el destino, no acreditan un servicio publicado.
 
-Los dos proyectos ya están creados y conectados al repositorio privado en el scope `alansalazar`, con Node 24.x, región `cdg1` y acceso a paquetes fuera del root. También se ha desactivado `gitProviderOptions.createDeployments` en los ajustes del proyecto. **No existe todavía ningún deployment cloud.** Para activar Git después, hay que revisar ambos controles.
+| Recurso | Plan/configuración | ID |
+| --- | --- | --- |
+| Neon mobility-twin-evaluation | free_v3, fra1, auth integrada desactivada | store_3XxjUJNron1x9oAY |
+| Upstash mobility-twin-cache | free, fra1, autoUpgrade=false, prodPack=false | store_6tttSaGcdEtv3ebx |
+| Blob mobility-twin-raw | privado, fra1, cuota Hobby | store_OiblEykn0UtVgA49 |
 
-La CLI reproducible está fijada como dependencia: `pnpm exec vercel` (59.25.4). Los enlaces locales están en el directorio `.vercel` ignorado de cada app. Al enlazar, Vercel puede renovar el token OIDC local; no versionarlo. La CLI también añade `.env*` al `.gitignore` de la app: conservar la excepción `!.env.example`.
+Todos conectados **solo a production de Core**, no a previews/development. PostGIS 3.6 y tres migraciones verificados; Redis REST y Blob privado probados con escritura/lectura/borrado de datos temporales. Esto no implementa todavía la caché del dominio ni almacenamiento raw de ingesta.
 
-## Antes de habilitar despliegues
+## Variables y separación
 
-1. Confirmar finalidad personal/académica no comercial o plan apropiado. La cuenta inspeccionada era Hobby; no se ha comprado ni cambiado de plan.
-2. Aprovisionar Neon y comprobar `CREATE EXTENSION postgis`, conexión pooled para consultas y unpooled para migraciones. No compartir base de producción con previews.
-3. Aprovisionar Upstash y Blob con revisión de costes, cuotas y retención. Redis TCP local no es el endpoint REST de Upstash.
-4. Configurar credenciales en Vercel, nunca en GitHub Actions ni archivos versionados si no hacen falta allí.
-5. Implementar login/allowlist de hasta cinco evaluadores y autorización de propietario de sesión. El canal EVE actual deniega producción deliberadamente.
-6. Configurar OpenAI BYOK en Gateway, elegir `EVE_MODEL`, establecer límites de gasto/uso y comprobar atribución de peticiones. Desactivar fallback no autorizado a otros proveedores.
-7. Provisionar/rotar credencial de servicio MCP con scope mínimo. El JWT de desarrollo no debe reutilizarse en cloud.
-8. Activar primera fuente solo después de validar permisos/licencia, datos y cadencia. Registrar métricas de lag, errores, duplicados y coste real.
-9. Revisar la viabilidad OTP indicada en `infra/otp/README.md`.
+**Web:** `OPENAI_API_KEY`, `MOBILITY_MCP_URL`, `MOBILITY_MCP_TOKEN`, `EVALUATION_ORIGIN`. Modelo fijo `gpt-6-luna` por Responses directo; sin Gateway, BYOK de Gateway ni selección por `EVE_MODEL`.
 
-## Variables por proyecto
+**Core:** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BETTER_AUTH_SECRET`, `MOBILITY_JWT_SECRET`, `MOBILITY_JWT_ISSUER`, `MOBILITY_JWT_AUDIENCE`, `EVALUATION_ORIGIN`, `BLOB_READ_WRITE_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`. La integración Upstash genera también `KV_REST_API_*`: los aliases están configurados. Credenciales de fuentes se añadirán después.
 
-**Web/EVE:** `MOBILITY_MCP_URL` (HTTPS en cloud), `MOBILITY_MCP_TOKEN`, `EVE_MODEL`; OIDC de Vercel para Gateway. La clave OpenAI BYOK se gestiona en Gateway, no en el contexto del modelo.
+`INGESTION_ENABLED=false` y `OTP_SANDBOX_ENABLED=false`; no hay consumidores ni proveedor OTP que ejecutar. No hay Cron de tiempo real ni Sandbox iniciado.
 
-**Core:** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `BLOB_READ_WRITE_TOKEN`, `MOBILITY_JWT_SECRET`, `MOBILITY_JWT_ISSUER`, `MOBILITY_JWT_AUDIENCE`. Después, credenciales de adaptadores y opciones de activación.
-
-Las banderas `INGESTION_ENABLED` y `OTP_SANDBOX_ENABLED` documentan los interruptores requeridos; **aún no hay un consumidor ni un proveedor OTP que las ejecute**. No confundir variables declaradas con integraciones implementadas.
-
-## Migraciones remotas
-
-El script rechaza hosts no locales sin `--allow-remote`. Usar una conexión unpooled suministrada por el entorno, revisar destino, respaldo y SQL antes de ejecutarlo:
+Los archivos `.env.cloud.*.local` están ignorados y con permisos 0600. **Vercel devuelve `[SENSITIVE]` al descargar secretos marcados sensibles**: nunca sobrescribir las copias locales reales con esos marcadores. `configure:vercel --apply` exige la copia local de Core y la clave raíz, conserva secretos existentes y renueva el JWT de servicio de siete días. No despliega ni contrata recursos.
 
 ```bash
-node scripts/migrate.mjs --allow-remote
+pnpm configure:vercel --apply
+node --env-file=.env.cloud.core.local scripts/migrate.mjs --allow-remote
+node --env-file=.env.cloud.core.local scripts/check-cloud.mjs --probe
+ALLOW_REMOTE_ADMIN=true node --env-file=.env.cloud.core.local scripts/evaluator.mjs list
 ```
 
-El script verifica checksums y aplica migraciones en una transacción bajo advisory lock. Nunca se ejecuta automáticamente durante un build de Vercel.
+Las migraciones tienen checksum, transacción y advisory lock. Nunca se ejecutan durante un build. `check-cloud --probe` escribe y elimina un objeto pequeño por almacén; no es una ingesta de movilidad.
 
-## Operación
+## Antes de publicar, con autorización nueva
 
-- Workflow queda reservado a conversaciones; Queues, a ingestión con ventana activa.
-- No hay Cron de tiempo real, colas autorecurrentes ni Sandbox OTP activado por esta preparación.
-- No tratar las 129.600 ejecuciones teóricas mensuales como estimación de coste: contar envíos, entregas, reintentos, CPU, red y almacenamiento.
-- El JWT de desarrollo expira en siete días. Las claves externas tienen ciclos de vida independientes: comprobar condiciones actuales de cada proveedor, no copiar fechas del brief sin validarlas.
-- No se ha comprobado end-to-end una sesión de modelo ni un despliegue cloud. El smoke local prueba servicios HTTP y MCP.
+1. Renovar JWT de servicio si han pasado siete días; comprobar expiración de evaluadores y límites de gasto de la cuenta del modelo. Las cuotas de la aplicación no son un límite monetario absoluto.
+2. Acordar retención y borrado físico de Workflow, descritos en [evaluation.md](evaluation.md).
+3. Probar HTTPS/cookies/login y streaming en un despliegue deliberado; el flujo real actual se verificó en builds productivos **locales**, no en cloud.
+4. Revisar OTP con el usuario; licencias, permisos y cadencia de fuentes antes de implementar ingestión.
+5. Si se habilita Git, revisar tanto los archivos de proyecto como el control remoto. Mantener previews aislados.
 
-Referencias: [monorepos Vercel](https://vercel.com/docs/monorepos), [control de despliegues Git](https://vercel.com/docs/project-configuration/git-configuration), [AI Gateway](https://vercel.com/docs/ai-gateway), [condiciones Hobby](https://vercel.com/docs/plans/hobby).
+CLI reproducible `pnpm exec vercel` 59.25.4; enlaces `.vercel` ignorados por aplicación. Las instalaciones Marketplace pueden añadir skills/lockfiles auxiliares: no incluirlos como código del producto.
