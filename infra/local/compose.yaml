@@ -1,0 +1,38 @@
+name: mobility-twin-local
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    # The official tag is amd64; Docker Desktop emulates it on Apple Silicon.
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run pnpm setup:local}
+      POSTGRES_DB: ${POSTGRES_DB:?Run pnpm setup:local}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm setup:local}
+    ports:
+      - 127.0.0.1:55432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: "no"
+  redis:
+    image: redis:7.4-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run pnpm setup:local}
+    command: [sh, -c, 'exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes']
+    ports:
+      - 127.0.0.1:56379:6379
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: "no"
+volumes:
+  postgres-data:
+  redis-data:
