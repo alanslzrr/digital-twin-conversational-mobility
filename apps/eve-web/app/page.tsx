@@ -37,7 +37,7 @@ export default function HomePage() {
         ))}
       </ol>
       <footer>
-        <span>El chat se habilitará al configurar fuentes e identidad.</span>
+        <a href="/evaluation">Entrar al laboratorio conversacional →</a>
         <a href="/api/health">
           Estado del servicio <span aria-hidden="true">↗</span>
         </a>
