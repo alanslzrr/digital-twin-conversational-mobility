@@ -1,5 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  chmodSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { parseEnv } from "node:util";
 import { SignJWT } from "jose";
 
@@ -25,6 +31,14 @@ MOBILITY_JWT_SECRET=${randomBytes(32).toString("hex")}
   );
 }
 const local = parseEnv(readFileSync(".env.local", "utf8"));
+if (!local.BETTER_AUTH_SECRET) {
+  local.BETTER_AUTH_SECRET = randomBytes(32).toString("hex");
+  appendFileSync(
+    ".env.local",
+    `\nBETTER_AUTH_SECRET=${local.BETTER_AUTH_SECRET}\n`,
+  );
+}
+chmodSync(".env.local", 0o600);
 if (
   !local.MOBILITY_JWT_SECRET ||
   local.MOBILITY_JWT_SECRET.length < 32 ||
@@ -46,7 +60,19 @@ INGESTION_ENABLED=false
 OTP_SANDBOX_ENABLED=false
 `,
 );
-const token = await new SignJWT({ scope: "mobility.diagnostics.read" })
+const corePath = "apps/mobility-core/.env.local";
+const coreValues = parseEnv(readFileSync(corePath, "utf8"));
+if (!coreValues.BETTER_AUTH_SECRET)
+  appendFileSync(
+    corePath,
+    `\nBETTER_AUTH_SECRET=${local.BETTER_AUTH_SECRET}\n`,
+  );
+if (!coreValues.EVALUATION_ORIGIN)
+  appendFileSync(corePath, "\nEVALUATION_ORIGIN=http://127.0.0.1:3000\n");
+chmodSync(corePath, 0o600);
+const token = await new SignJWT({
+  scope: "mobility.diagnostics.read mobility.evaluation.manage",
+})
   .setProtectedHeader({ alg: "HS256" })
   .setSubject("eve-web-local")
   .setIssuer("mobility-local")
@@ -57,8 +83,13 @@ const token = await new SignJWT({ scope: "mobility.diagnostics.read" })
 const webPath = "apps/eve-web/.env.local";
 create(
   webPath,
-  `MOBILITY_MCP_URL=http://127.0.0.1:3001/mcp\nMOBILITY_MCP_TOKEN=${token}\nEVE_MODEL=\nAI_GATEWAY_API_KEY=\n`,
+  `MOBILITY_MCP_URL=http://127.0.0.1:3001/mcp\nMOBILITY_MCP_TOKEN=${token}\nOPENAI_API_KEY=\n`,
 );
+const webValues = parseEnv(readFileSync(webPath, "utf8"));
+if (!webValues.EVALUATION_ORIGIN) {
+  appendFileSync(webPath, "\nEVALUATION_ORIGIN=http://127.0.0.1:3000\n");
+}
+chmodSync(webPath, 0o600);
 if (process.argv.includes("--refresh-token")) {
   const contents = readFileSync(webPath, "utf8");
   const web = parseEnv(contents);
