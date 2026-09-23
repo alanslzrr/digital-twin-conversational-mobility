@@ -16,4 +16,4 @@ coverage/
 *.log
 data/
 tmp/
-
+next-env.d.ts
