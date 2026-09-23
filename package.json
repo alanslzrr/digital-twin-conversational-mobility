@@ -16,13 +16,18 @@
     "format": "biome check --write .",
     "test": "vitest run",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "doctor": "node scripts/doctor.mjs",
+    "env:doctor": "node scripts/doctor.mjs",
+    "configure:openai": "node scripts/configure-openai.mjs",
+    "configure:vercel": "node scripts/configure-vercel.mjs",
+    "check:openai": "node scripts/check-openai.mjs",
+    "evaluator": "node --env-file-if-exists=.env.local scripts/evaluator.mjs",
     "infra:up": "docker compose --env-file .env.local -f infra/local/compose.yaml up -d --wait",
     "infra:down": "docker compose --env-file .env.local -f infra/local/compose.yaml down",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
     "db:check": "node --env-file-if-exists=.env.local scripts/check-database.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "setup:local": "node scripts/setup-local.mjs"
+    "setup:local": "node scripts/setup-local.mjs",
+    "smoke:evaluation": "node --env-file-if-exists=.env.local scripts/smoke-evaluation.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
