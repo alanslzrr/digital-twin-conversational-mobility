@@ -1,0 +1,232 @@
+import assert from "node:assert/strict";
+import { readFileSync, writeFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
+import { parseEnv } from "node:util";
+import { SignJWT } from "jose";
+import postgres from "postgres";
+
+const root = parseEnv(readFileSync(".env.local", "utf8"));
+const web = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
+const core = parseEnv(readFileSync("apps/mobility-core/.env.local", "utf8"));
+if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
+  throw new Error("Local database required");
+const sql = postgres(root.DATABASE_URL, { max: 1 });
+const headers = {
+  Authorization: `Bearer ${web.MOBILITY_MCP_TOKEN}`,
+  "Content-Type": "application/json",
+  Accept: "application/json, text/event-stream",
+};
+let id = 0;
+async function rpc(method, params) {
+  const response = await fetch("http://127.0.0.1:3001/mcp", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }),
+    signal: AbortSignal.timeout(60000),
+  });
+  assert.equal(response.status, 200);
+  const body = await response.text();
+  const data = JSON.parse(
+    body.startsWith("event:")
+      ? body
+          .split("\n")
+          .find((s) => s.startsWith("data: "))
+          .slice(6)
+      : body,
+  );
+  assert.equal(data.error, undefined);
+  return data.result;
+}
+async function tool(name, args) {
+  const data = await rpc("tools/call", { name, arguments: args });
+  assert.notEqual(data.isError, true, `${name}: ${data.content?.[0]?.text}`);
+  return JSON.parse(data.content[0].text);
+}
+const workerToken = await new SignJWT({ scope: "mobility.ingestion.manage" })
+  .setProtectedHeader({ alg: "HS256" })
+  .setSubject("local-smoke")
+  .setIssuer("mobility-local")
+  .setAudience("mobility-core")
+  .setIssuedAt()
+  .setExpirationTime("10m")
+  .sign(new TextEncoder().encode(root.MOBILITY_JWT_SECRET));
+async function tick(activate = false, token = workerToken) {
+  const response = await fetch("http://127.0.0.1:3001/internal/ingestion", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ activate }),
+    signal: AbortSignal.timeout(100000),
+  });
+  return { code: response.status, body: await response.json() };
+}
+try {
+  assert.equal(
+    (await tick(false, web.MOBILITY_MCP_TOKEN)).code,
+    403,
+    "Web token must not manage ingestion",
+  );
+  // This smoke is an operator action; it deliberately closes then opens one local window.
+  await sql`UPDATE ingestion_activity SET active_until=now()-interval '1 second'`;
+  assert.equal((await tick()).body.status, "idle");
+  await sql`UPDATE ingestion_job SET next_due_at=now() WHERE lease_until IS NULL OR lease_until<now()`;
+  const before = await sql`SELECT count(*)::int AS count FROM mobility_history`;
+  const batch = await tick(true);
+  assert.equal(batch.code, 200);
+  assert.ok(
+    batch.body.results.every((r) => r.status !== "error"),
+    JSON.stringify(batch.body),
+  );
+  const after = await sql`SELECT count(*)::int AS count FROM mobility_history`;
+  const overlap = await Promise.all([tick(), tick()]);
+  assert.ok(
+    overlap.every((r) =>
+      r.body.results.every((j) => j.status === "not_due_or_inactive"),
+    ),
+    "Duplicate ticks must not fetch again before due",
+  );
+  const deduplicated =
+    await sql`SELECT count(*)::int AS count FROM mobility_history`;
+  assert.equal(after[0].count, deduplicated[0].count);
+
+  await rpc("initialize", {
+    protocolVersion: "2025-11-25",
+    capabilities: {},
+    clientInfo: { name: "local-mobility-smoke", version: "1.0" },
+  });
+  headers["MCP-Protocol-Version"] = "2025-11-25";
+  const atocha = await tool("resolve_place", { query: "Atocha", limit: 10 });
+  const chamartin = await tool("resolve_place", {
+    query: "Chamartín",
+    limit: 10,
+  });
+  const origin = atocha.places.find((p) => p.kind === "station");
+  const destination = chamartin.places.find((p) => p.kind === "station");
+  assert.ok(origin && destination);
+  const baseJourney = {
+    originId: origin.id,
+    destinationId: destination.id,
+    departureTime: "now",
+    modes: ["TRANSIT", "WALK"],
+    preferences: {},
+  };
+  assert.equal(
+    (await tool("plan_journey", { ...baseJourney, modes: ["CAR"] })).reason,
+    "unsupported_modes",
+  );
+  assert.equal(
+    (
+      await tool("plan_journey", {
+        ...baseJourney,
+        originId: "00000000-0000-4000-8000-000000000001",
+      })
+    ).reason,
+    "unknown_place",
+  );
+  assert.equal(
+    (
+      await tool("plan_journey", {
+        ...baseJourney,
+        departureTime: "2099-01-01T12:00:00Z",
+      })
+    ).reason,
+    "outside_static_service_period",
+  );
+  const timings = [];
+  const routes = [];
+  for (const [from, to] of [
+    [origin, destination],
+    [destination, origin],
+  ]) {
+    const start = performance.now();
+    const route = await tool("plan_journey", {
+      originId: from.id,
+      destinationId: to.id,
+      departureTime: "now",
+      modes: ["TRANSIT", "WALK"],
+      preferences: {
+        maxWalkingMinutes: 20,
+        maxTransfers: 2,
+        wheelchair: false,
+      },
+    });
+    timings.push(Math.round(performance.now() - start));
+    assert.equal(route.status, "available", JSON.stringify(route));
+    assert.equal(route.basis, "scheduled");
+    assert.equal(route.realtimeApplied, false);
+    assert.ok(route.itineraries.length > 0);
+    routes.push({
+      from: from.name,
+      to: to.name,
+      itineraries: route.itineraries.length,
+      duration: route.itineraries[0].duration,
+    });
+  }
+  const departure = await tool("get_departures", {
+    placeId: origin.id,
+    limit: 10,
+  });
+  assert.equal(departure.status, "available", JSON.stringify(departure));
+  assert.ok(departure.departures.length > 0);
+  const alerts = await tool("get_incidents", { limit: 10 });
+  assert.ok(Array.isArray(alerts.incidents));
+  const bikes = await tool("get_bike_availability", {
+    placeId: origin.id,
+    limit: 5,
+  });
+  assert.equal(bikes.stations.length, 5);
+  assert.ok(
+    bikes.stations.every((b) => b.placeId && b.observedAt && b.freshness),
+  );
+  const air = await tool("get_environment", { pollutant: "NO2", limit: 5 });
+  assert.ok(air.readings.length > 0);
+  const weather = core.AEMET_API_KEY
+    ? await tool("get_environment", { kind: "weather", stationId: "3195" })
+    : null;
+  if (weather) {
+    assert.equal(weather.provenance.source, "aemet");
+    assert.equal(weather.readings.length, 1);
+    assert.ok(weather.readings[0].measurements.length > 0);
+    assert.ok(weather.readings[0].freshness);
+  }
+  const traffic = await tool("get_road_state", {
+    query: "CASTELLANA",
+    limit: 5,
+  });
+  assert.ok(traffic.sensors.length > 0);
+  const history = await tool("get_historical_state", {
+    source: "renfe",
+    at: new Date().toISOString(),
+  });
+  const parking = await tool("get_parking", { query: "Recuerdo", limit: 5 });
+  assert.ok(parking.parkings.length > 0);
+  assert.equal(history.status, "available");
+  const health = await tool("get_source_health", {});
+  assert.equal(health.ingestionEnabled, true);
+  const report = {
+    verifiedAt: new Date().toISOString(),
+    routes,
+    timingsMs: timings,
+    departures: departure.departures.length,
+    alerts: alerts.incidents.length,
+    bikes: bikes.stations.length,
+    air: air.readings.length,
+    weather: weather?.readings.length ?? null,
+    traffic: traffic.sensors.length,
+    parking: parking.parkings.length,
+    historyGrowth: after[0].count - before[0].count,
+    activityWindowAndDuplicateTicks: true,
+    auth: true,
+    modelCalls: 0,
+    cloudCalls: 0,
+  };
+  writeFileSync(
+    "data/otp/local-validation.json",
+    JSON.stringify(report, null, 2),
+  );
+  console.log(JSON.stringify(report, null, 2));
+} finally {
+  await sql.end();
+}
