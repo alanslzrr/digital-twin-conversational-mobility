@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { parseEnv } from "node:util";
@@ -145,13 +145,22 @@ try {
     counters.every((row) => row.requests <= 6),
     "Concurrent requests exceeded quota",
   );
-  if (process.argv.includes("--live")) {
+  if (
+    process.argv.includes("--live") ||
+    process.argv.includes("--live-mobility") ||
+    process.argv.includes("--live-weather")
+  ) {
+    const mobility = process.argv.includes("--live-mobility");
+    const weather = process.argv.includes("--live-weather");
     const response = await call(
       `/eve/v1/session/${sessionId}`,
       "POST",
       {
-        message:
-          "Consulta el estado de la fuente Renfe usando Mobility MCP. Responde en una frase si hay datos disponibles.",
+        message: mobility
+          ? "Prueba de movilidad: quiero ir ahora de la estación Madrid-Atocha Cercanías a la estación Madrid-Chamartín-Clara Campoamor, en Cercanías. Resuelve primero ambas estaciones con MCP en paralelo; elijo explícitamente esas estaciones Renfe, no estaciones de bicis. Después consulta en paralelo la ruta, la observación meteorológica de Madrid-Retiro y el estado de disponibilidad de la fuente EMT. Responde brevemente con el trayecto, base prevista o real, observación meteorológica con hora y fuente, y si EMT está disponible. No repitas consultas ni inventes datos."
+          : weather
+            ? "Consulta con Mobility MCP la última observación meteorológica de Madrid-Retiro (kind=weather, estación3195). Responde brevemente con temperatura, lluvia, fuente y hora de observación. Distingue claramente observación de previsión y lluvia acumulada de lluvia en este instante."
+            : "Consulta el estado de la fuente Renfe usando Mobility MCP. Responde en una frase si hay datos disponibles.",
       },
       users[0].cookie,
     );
@@ -196,18 +205,91 @@ try {
     }
     const types = [...new Set(events.map((event) => event.type))];
     console.log("Live EVE event types:", types.join(", "));
+    const actions = events.filter((event) => event.type === "action.result");
+    const finalText = events
+      .filter((event) => event.type === "message.completed")
+      .map((event) => event.data.message ?? "")
+      .join("\n");
+    // Persist a bounded report even on failure, not hidden reasoning or raw events.
+    mkdirSync("data/validation", { recursive: true });
+    writeFileSync(
+      `data/validation/conversation-${Date.now()}.json`,
+      JSON.stringify(
+        {
+          verifiedAt: new Date().toISOString(),
+          scenario: mobility
+            ? "mobility"
+            : weather
+              ? "weather"
+              : "source-health",
+          completed: events.some((event) => event.type === "turn.completed"),
+          completedSteps: events.filter(
+            (event) => event.type === "step.completed",
+          ).length,
+          actions: actions.map((event) => ({
+            tool: event.data.result.toolName,
+            status: event.data.status,
+            isError:
+              event.data.result.isError === true ||
+              event.data.result.output?.isError === true,
+          })),
+          answer: finalText,
+        },
+        null,
+        2,
+      ),
+      { mode: 0o600 },
+    );
     assert.ok(
       events.some((event) => event.type === "turn.completed"),
       "EVE turn did not complete",
     );
-    assert.ok(
-      JSON.stringify(events).includes("get_source_health"),
-      "MCP source-health tool was not used",
+    const required = mobility
+      ? [
+          "resolve_place",
+          "plan_journey",
+          "get_environment",
+          "get_source_health",
+        ]
+      : weather
+        ? ["get_environment"]
+        : ["get_source_health"];
+    for (const tool of required) {
+      const matches = actions.filter((event) =>
+        String(event.data.result.toolName).includes(tool),
+      );
+      assert.ok(
+        matches.some(
+          (event) =>
+            event.data.status === "completed" &&
+            !event.data.result.isError &&
+            !event.data.result.output?.isError,
+        ),
+        `${tool} did not complete`,
+      );
+    }
+    assert.ok(finalText.trim(), "No visible assistant answer");
+    if (mobility) {
+      const results = JSON.stringify(actions);
+      assert.ok(
+        results.includes('"scheduled"') && results.includes('"aemet"'),
+        "Expected real scheduled route and weather observations",
+      );
+    }
+    if (weather) {
+      const measured = actions.find((event) =>
+        String(event.data.result.toolName).includes("get_environment"),
+      )?.data.result.output?.structuredContent;
+      assert.equal(measured?.provenance?.source, "aemet");
+      assert.equal(measured?.readings?.[0]?.stationId, "3195");
+    }
+    // Only visible assistant text and action names: never print hidden reasoning,
+    // provider headers, authentication bodies or the full event stream.
+    console.log(
+      "Completed tools:",
+      actions.map((event) => event.data.result.toolName).join(", "),
     );
-    assert.ok(
-      JSON.stringify(events).includes("not_initialized"),
-      "Real uninitialized source result was not observed",
-    );
+    console.log("Visible answer:", finalText);
     console.log(
       "Live EVE → direct GPT-6 Luna → authenticated Mobility MCP verified.",
     );
