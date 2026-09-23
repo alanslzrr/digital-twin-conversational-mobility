@@ -32,6 +32,10 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Audit runtime and development dependencies
+        run: pnpm audit --audit-level=high
+      - name: Verify patched deployment CLI
+        run: pnpm exec vercel --version
       - run: pnpm check
       - run: pnpm build:agent
       - name: Verify local database and HTTP boundaries
