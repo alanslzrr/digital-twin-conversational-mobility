@@ -2,10 +2,18 @@
 
 La base de entorno no debe convertirse en una implementación ficticia de todas las fuentes.
 
-## P0 · Habilitar evaluación segura
+## Preparación cerrada (sin publicar)
 
-1. Confirmar uso/plan, provisionar recursos cloud, conectar credenciales y definir presupuesto. Verificar límites en la cuenta.
-2. Autenticación/allowlist de evaluadores, propiedad de sesiones EVE, rate limiting y retención de conversaciones.
+- Proyecto universitario; Neon free, Upstash free sin auto-upgrade y Blob privado aprovisionados y verificados.
+- OpenAI Responses directo con `gpt-6-luna`, clave existente, sin Gateway. Turno EVE con MCP real verificado.
+- Better Auth email/password sin signup, cinco cuentas preaprovisionables, ACL de sesiones, cuotas y revocación.
+- CI sin secretos cloud/inferencia; despliegues Git y manuales no activados.
+- Retención de acceso documentada; borrado físico de conversaciones Workflow y sus garantías deben comprobarse antes de publicación.
+
+## P0 · Implementación posterior, fuera del cierre actual
+
+El siguiente punto de revisión con el usuario es OTP. No se ejecuta ingestión ni benchmark OTP durante esta preparación.
+
 3. Primera vertical Renfe: GTFS versionado → IDs canónicos → protobuf RT → raw durable → normalización → estado/frescura → herramienta de dominio. Tests con fixtures sanitizados y fallo de proveedor.
 4. Ingestión activa con Queues: ventana atómica, leases, idempotencia, outbox, reconciliación, retries y aislamiento de fuentes. Tests de entrega duplicada, carreras y terminación.
 

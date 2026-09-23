@@ -5,8 +5,8 @@
 1. Dos aplicaciones separadas; Next.js alberga frontend/EVE y otro proyecto Next.js sirve el MCP. Usar Next en Core es una decisión de empaquetado de Route Handlers, no una dependencia del dominio respecto al frontend.
 2. Identidad, timestamps y calidad pertenecen al dominio. El modelo explica resultados estructurados, no calcula coordenadas o itinerarios.
 3. EVE tiene `defaultTools: false`. Quitar secretos no impide consultar una API pública; también deben retirarse web/shell y evitar nuevas herramientas de acceso directo.
-4. Construcciones y CI sin secretos cloud ni llamadas de pago. El modelo se elige al iniciar una sesión mediante `EVE_MODEL`; no hay un fallback silencioso a otro proveedor.
-5. Neon/PostGIS, Upstash, Blob, Queues y OTP bajo demanda son el objetivo de despliegue, no recursos ya provisionados.
+4. Construcciones y CI sin secretos cloud ni llamadas de pago. El modelo es `gpt-6-luna`, vía SDK nativo Responses con clave explícita del servidor Web. EVE lo resuelve en `step.started`, con ventana de contexto explícita para evitar consultar metadatos de Gateway. No hay fallback ni selector de modelo.
+5. Neon/PostGIS, Upstash y Blob privado están aprovisionados. Queues e ingestión no están implementados; OTP sigue pendiente de validación. No hay despliegues.
 
 ```mermaid
 flowchart LR
@@ -24,7 +24,7 @@ flowchart LR
   Normalize --> Cache
 ```
 
-El diagrama representa el destino. En esta base solo están implementados el runtime/configuración EVE, el MCP de diagnóstico, contratos, frescura y esquema inicial local.
+El diagrama representa el destino. Están implementados EVE con proveedor directo, login Better Auth, ACL y cuotas durables, MCP diagnóstico, contratos, frescura y tres migraciones locales/cloud. Las flechas de ingesta, caché de dominio y routing siguen siendo diseño futuro.
 
 ## Ingesta adaptativa: contrato de implementación
 
@@ -51,7 +51,7 @@ Redis es caché/lease, no única fuente de verdad. Los IDs externos incluyen nam
 ## Acceso y huecos
 
 - El MCP implementa JWT de servicio scoped para bootstrap. OAuth/rotación/asimetría son trabajo posterior.
-- EVE local no equivale a autorización multiusuario: la auth del canal no impone propiedad de sesiones. No habilitar usuarios reales sin esa comprobación.
+- El canal EVE está envuelto por un guard de identidad, origen, propiedad y cuotas. No se depende del middleware Next: las rutas EVE pueden resolverse antes. Better Auth vive en Core; Web reenvía cookies por un proxy autenticado de mismo origen. PostgreSQL impone hasta cinco evaluadores y ACL por sesión.
 - Datos estáticos CRTM no equivalen a tiempo real Metro/interurbanos. Accesibilidad estática no garantiza ascensores operativos.
 - El estado `not_initialized` no es un error del proveedor y el catálogo no prueba acceso, licencia o disponibilidad.
 
