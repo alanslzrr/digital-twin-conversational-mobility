@@ -57,6 +57,7 @@ jobs:
             sleep 2
           done
           pnpm smoke --production
+          pnpm smoke:evaluation
       - name: Stop local services
         if: always()
         run: |

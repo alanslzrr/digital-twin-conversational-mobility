@@ -1,0 +1,260 @@
+import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
+import { parseEnv } from "node:util";
+import postgres from "postgres";
+import { authOptions } from "../apps/mobility-core/src/better-auth.ts";
+
+const root = parseEnv(readFileSync(".env.local", "utf8"));
+const web = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
+if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
+  throw new Error("Smoke requires the local database");
+const require = createRequire(
+  new URL("../apps/mobility-core/package.json", import.meta.url),
+);
+const { betterAuth } = await import(
+  pathToFileURL(require.resolve("better-auth")).href
+);
+const { Pool } = require("pg");
+const sql = postgres(root.DATABASE_URL, { max: 1 });
+const pool = new Pool({ connectionString: root.DATABASE_URL, max: 1 });
+const base = "http://127.0.0.1:3000";
+const auth = betterAuth(authOptions(pool, root.BETTER_AUTH_SECRET, base, true));
+const users = [];
+let sessionId;
+async function call(path, method = "GET", body, cookie) {
+  return fetch(`${base}${path}`, {
+    method,
+    headers: {
+      Origin: base,
+      "Content-Type": "application/json",
+      ...(cookie ? { Cookie: cookie } : {}),
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    signal: AbortSignal.timeout(30_000),
+  });
+}
+async function access(body) {
+  return fetch("http://127.0.0.1:3001/internal/evaluation", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${web.MOBILITY_MCP_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000),
+  });
+}
+try {
+  for (const slot of [4, 5]) {
+    const [existing] = await sql`SELECT id FROM evaluator WHERE slot=${slot}`;
+    if (existing)
+      throw new Error(`Smoke slot ${slot} is occupied; refusing to change it`);
+    const email = `smoke-${randomBytes(8).toString("hex")}@mobility.test`;
+    const password = randomBytes(24).toString("base64url");
+    const account = await auth.api.signUpEmail({
+      body: { email, password, name: `Smoke ${slot}` },
+    });
+    const user = { authId: account.user.id, email, password };
+    users.push(user);
+    const [row] =
+      await sql`INSERT INTO evaluator(slot,label,auth_user_id) VALUES (${slot},${`Smoke ${slot}`},${account.user.id}) RETURNING id`;
+    user.id = row.id;
+    const response = await call("/api/auth/sign-in/email", "POST", {
+      email,
+      password,
+    });
+    assert.equal(
+      response.status,
+      200,
+      `Better Auth login failed (${response.status})`,
+    );
+    user.cookie = response.headers
+      .getSetCookie()
+      .map((value) => value.split(";")[0])
+      .join("; ");
+    assert.ok(user.cookie);
+    const identity = await call(
+      "/api/evaluation",
+      "GET",
+      undefined,
+      user.cookie,
+    );
+    assert.equal(identity.status, 200);
+    assert.equal((await identity.json()).principalId, user.id);
+  }
+  console.log("Better Auth login and explicit evaluator identities verified.");
+  assert.equal(
+    (
+      await call("/api/auth/sign-up/email", "POST", {
+        email: "intruder@mobility.test",
+        password: "not-allowed-to-sign-up",
+        name: "Unknown",
+      })
+    ).status,
+    404,
+  );
+  assert.equal((await call("/eve/v1/session", "POST", {})).status, 401);
+  const csrf = await fetch(`${base}/api/auth/sign-in/email`, {
+    method: "POST",
+    headers: {
+      Origin: "https://evil.example",
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+  });
+  assert.equal(csrf.status, 403);
+  const created = await call("/eve/v1/session", "POST", {}, users[0].cookie);
+  assert.equal(
+    created.status,
+    202,
+    `Parked session failed (${created.status})`,
+  );
+  sessionId = (await created.json()).sessionId;
+  assert.ok(sessionId);
+  for (const suffix of [
+    "",
+    "/cancel",
+    "/compact",
+    "/clear",
+    "/reset",
+    "/stream",
+  ]) {
+    const result = await call(
+      `/eve/v1/session/${sessionId}${suffix}`,
+      suffix === "/stream" ? "GET" : "POST",
+      suffix === "/stream" ? undefined : {},
+      users[1].cookie,
+    );
+    assert.equal(result.status, 403, `Cross-user ${suffix} must be denied`);
+  }
+  console.log(
+    "Anonymous access, closed registration, CSRF and cross-user session controls verified.",
+  );
+  const quota = await Promise.all(
+    Array.from({ length: 18 }, () =>
+      access({ action: "authorize", principalId: users[1].id, consume: true }),
+    ),
+  );
+  assert.ok(quota.some((response) => response.status === 429));
+  const counters =
+    await sql`SELECT requests FROM evaluation_usage WHERE evaluator_id=${users[1].id} AND window_kind='minute'`;
+  assert.ok(
+    counters.every((row) => row.requests <= 6),
+    "Concurrent requests exceeded quota",
+  );
+  if (process.argv.includes("--live")) {
+    const response = await call(
+      `/eve/v1/session/${sessionId}`,
+      "POST",
+      {
+        message:
+          "Consulta el estado de la fuente Renfe usando Mobility MCP. Responde en una frase si hay datos disponibles.",
+      },
+      users[0].cookie,
+    );
+    assert.equal(response.status, 202);
+    const stream = await fetch(
+      `${base}/eve/v1/session/${sessionId}/stream?startIndex=0`,
+      {
+        headers: { Cookie: users[0].cookie },
+        signal: AbortSignal.timeout(120_000),
+      },
+    );
+    assert.equal(stream.status, 200);
+    const reader = stream.body.getReader();
+    const decoder = new TextDecoder();
+    let pending = "";
+    const events = [];
+    let completed = false;
+    try {
+      while (!completed) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        pending += decoder.decode(chunk.value, { stream: true });
+        while (pending.includes("\n")) {
+          const index = pending.indexOf("\n");
+          const line = pending.slice(0, index);
+          pending = pending.slice(index + 1);
+          if (!line.trim()) continue;
+          const event = JSON.parse(line);
+          events.push(event);
+          if (
+            event.type === "turn.completed" ||
+            event.type === "turn.failed" ||
+            event.type === "session.failed"
+          ) {
+            completed = true;
+            break;
+          }
+        }
+      }
+    } finally {
+      await reader.cancel();
+    }
+    const types = [...new Set(events.map((event) => event.type))];
+    console.log("Live EVE event types:", types.join(", "));
+    assert.ok(
+      events.some((event) => event.type === "turn.completed"),
+      "EVE turn did not complete",
+    );
+    assert.ok(
+      JSON.stringify(events).includes("get_source_health"),
+      "MCP source-health tool was not used",
+    );
+    assert.ok(
+      JSON.stringify(events).includes("not_initialized"),
+      "Real uninitialized source result was not observed",
+    );
+    console.log(
+      "Live EVE → direct GPT-6 Luna → authenticated Mobility MCP verified.",
+    );
+  }
+  const reset = await call(
+    `/eve/v1/session/${sessionId}/reset`,
+    "POST",
+    {},
+    users[0].cookie,
+  );
+  assert.equal(reset.status, 200);
+  assert.equal(
+    (
+      await call(
+        `/eve/v1/session/${sessionId}/stream`,
+        "GET",
+        undefined,
+        users[0].cookie,
+      )
+    ).status,
+    403,
+  );
+  await sql`UPDATE evaluator SET enabled=false WHERE id=${users[1].id}`;
+  assert.equal(
+    (await call("/api/evaluation", "GET", undefined, users[1].cookie)).status,
+    401,
+  );
+  assert.equal(
+    (await call("/api/auth/sign-out", "POST", {}, users[0].cookie)).status,
+    200,
+  );
+  assert.equal(
+    (await call("/api/evaluation", "GET", undefined, users[0].cookie)).status,
+    401,
+  );
+  console.log(
+    "Atomic quotas, session reset, evaluator revocation and logout verified.",
+  );
+} finally {
+  for (const user of users) {
+    if (user.id) {
+      await sql`DELETE FROM evaluation_usage WHERE evaluator_id=${user.id}`;
+      await sql`DELETE FROM evaluation_session WHERE evaluator_id=${user.id}`;
+      await sql`DELETE FROM evaluator WHERE id=${user.id}`;
+    }
+    await sql`DELETE FROM auth_user WHERE id=${user.authId}`;
+  }
+  await sql.end();
+  await pool.end();
+}
