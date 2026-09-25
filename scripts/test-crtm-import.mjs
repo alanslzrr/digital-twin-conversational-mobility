@@ -24,16 +24,19 @@ const schema = `crtm_test_${randomUUID().replaceAll("-", "")}`;
 try {
   await sql.unsafe(`CREATE SCHEMA ${schema}`);
   await sql.unsafe(`SET search_path TO ${schema},public`);
-  await sql.unsafe(
-    await readFile(
-      new URL(
-        "../infra/postgres/migrations/0014_crtm_static.sql",
-        import.meta.url,
+  for (const file of [
+    "0001_foundation.sql",
+    "0004_local_mobility.sql",
+    "0014_crtm_static.sql",
+    "0016_routing_releases.sql",
+  ])
+    await sql.unsafe(
+      await readFile(
+        new URL(`../infra/postgres/migrations/${file}`, import.meta.url),
+        "utf8",
       ),
-      "utf8",
-    ),
-  );
-  for (const dataset of ["metro", "light-rail", "interurban"]) {
+    );
+  for (const dataset of ["metro", "light-rail", "interurban", "emt"]) {
     const root = new URL(`../data/sources/crtm/${dataset}/`, import.meta.url);
     const versions = (await readdir(root)).filter((x) =>
       /^[a-f0-9]{64}$/.test(x),

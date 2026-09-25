@@ -24,7 +24,7 @@ export async function importCrtm(sql, directory) {
   );
   const dataset = manifest.datasetId;
   if (
-    !["metro", "light-rail", "interurban"].includes(dataset) ||
+    !["metro", "light-rail", "interurban", "emt"].includes(dataset) ||
     manifest.parserVersion !== "crtm-gtfs-v1" ||
     manifest.timezone !== "Europe/Madrid" ||
     !/^[a-f0-9]{64}$/.test(manifest.version)
@@ -35,7 +35,7 @@ export async function importCrtm(sql, directory) {
     await tx`SET LOCAL statement_timeout = '5min'`;
     await tx`SELECT pg_advisory_xact_lock(90123014)`;
     const [previous] =
-      await tx`SELECT version, manifest FROM crtm_feed WHERE dataset_id=${dataset}`;
+      await tx`SELECT version, manifest, enabled FROM crtm_feed WHERE dataset_id=${dataset}`;
     // Stage and hash the exact bytes consumed by COPY, including on a retry.
     for (const table of tables) {
       if (
@@ -75,7 +75,7 @@ export async function importCrtm(sql, directory) {
       if (count.total !== manifest.counts[table] || count.wrong)
         throw Error(`CRTM row mismatch: ${table}`);
     }
-    if (previous?.version === manifest.version) {
+    if (previous?.version === manifest.version && previous.enabled) {
       const comparable = ({ fetchedAt: _f, publishedAt: _p, ...rest }) => rest;
       if (
         !isDeepStrictEqual(comparable(previous.manifest), comparable(manifest))
@@ -87,7 +87,7 @@ export async function importCrtm(sql, directory) {
       VALUES(${dataset},${manifest.version},${manifest.fetchedAt},${manifest.publishedAt},${manifest.serviceStart},${manifest.serviceEnd},${tx.json(manifest)})
       ON CONFLICT(dataset_id) DO UPDATE SET version=excluded.version,fetched_at=excluded.fetched_at,
       published_at=excluded.published_at,service_start=excluded.service_start,service_end=excluded.service_end,
-      manifest=excluded.manifest,imported_at=now()`;
+      manifest=excluded.manifest,imported_at=now(),enabled=true`;
     for (const table of [...tables].reverse())
       await tx.unsafe(`DELETE FROM crtm_${table} WHERE dataset_id=$1`, [
         dataset,
