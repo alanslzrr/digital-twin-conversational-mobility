@@ -3,11 +3,12 @@ import { defineMcpClientConnection } from "eve/connections";
 export default defineMcpClientConnection({
   url: process.env.MOBILITY_MCP_URL ?? "http://127.0.0.1:3001/mcp",
   description:
-    "Movilidad local de Madrid: horarios CRTM Metro/Metro Ligero/interurbanos y correspondencias documentadas (resolve_place source=crtm, get_crtm_timetable; sin rutas ni RT), Renfe, paradas y próximas llegadas EMT (resolve_place con source=emt, get_emt_arrivals), avisos e incidencias EMT (get_incidents, source=emt), rutas previstas, BiciMAD, AEMET, aire, tráfico y parking. Histórico retenido: get_historical_state (knowledge/event, minutos relativos calculados en Core). Busca por nombres exactos y reutiliza herramientas descubiertas; cada herramienta declara límites y frescura.",
+    "Movilidad local de Madrid: direcciones públicas mediante resolve_address (catálogos primero, fallback externo con consentimiento y caché), horarios CRTM Metro/Metro Ligero/interurbanos y correspondencias documentadas (resolve_place source=crtm, get_crtm_timetable; sin rutas ni RT), Renfe, paradas y próximas llegadas EMT (resolve_place con source=emt, get_emt_arrivals), avisos e incidencias EMT (get_incidents, source=emt), rutas previstas, BiciMAD, AEMET, aire, tráfico y parking. Histórico retenido: get_historical_state (knowledge/event, minutos relativos calculados en Core). Busca por nombres exactos y reutiliza herramientas descubiertas; cada herramienta declara límites y frescura.",
   tools: {
     allow: [
       "get_source_health",
       "resolve_place",
+      "resolve_address",
       "plan_journey",
       "get_departures",
       "get_emt_arrivals",
