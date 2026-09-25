@@ -10,6 +10,10 @@ Actualizado el **25/09/2026**, tras el reporte manual del usuario y reproducció
 
 **Siguiente paso: E7, catálogo y próximas llegadas EMT**, seguido de CRTM/Metro/interurbanos, DGT, geocodificación, routing y herramientas agregadas. E2 no se reabre. Pruebas proporcionales a cada cambio; no campañas nuevas como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
 
+### Corrección puntual posterior a E8
+
+El reporte manual detectó que el agente omitió el histórico disponible y duplicó resultados/búsquedas. La [corrección acotada](acceptance/2026-09-25-post-e8-findings.md) explicita descubrimiento/reutilización, knowledge y reloj de servidor, y elimina la segunda copia MCP. 254 pruebas offline y comprobación puntual MCP; sin nueva inferencia ni cambios de límites. Renfe continúa con un problema TLS observado desde este equipo, no una caída global confirmada: conservar degradación/backoff y no bloquear E7. No se afirma ahorro conversacional medido.
+
 ## Pasos 1–5: qué hay y qué falta
 
 | Paso | Implementado | Estado / falta para cierre |
