@@ -20,8 +20,10 @@ def sha256(path):
         return hashlib.file_digest(file, "sha256").hexdigest()
 
 
-def prepare(download=False):
-    sources, target = ROOT / "data/sources", ROOT / "data/otp"
+def prepare(download=False, output_dir=None, source_dir=None):
+    sources, target = source_dir or ROOT / "data/sources", output_dir or ROOT / "data/otp"
+    if target.is_symlink():
+        raise ValueError("Active release is immutable; use --output-dir and --source-dir for staging")
     sources.mkdir(parents=True, exist_ok=True)
     target.mkdir(parents=True, exist_ok=True)
     for url, path in [(GTFS_URL, sources / "renfe.gtfs.zip"), (OSM_URL, target / "madrid.osm.pbf")]:
@@ -97,4 +99,7 @@ def prepare(download=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--download", action="store_true", help="Refresh both source downloads explicitly")
-    prepare(parser.parse_args().download)
+    parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--source-dir", type=Path)
+    args = parser.parse_args()
+    prepare(args.download, args.output_dir, args.source_dir)
