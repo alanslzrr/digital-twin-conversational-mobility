@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sameServiceTrip } from "./realtime";
+import { alertPeriodStatus, sameServiceTrip } from "./realtime";
 
 const serviceDay = Date.parse("2026-09-23T00:00:00+02:00") / 1000;
 describe("realtime trip identity", () => {
@@ -55,5 +55,19 @@ describe("realtime trip identity", () => {
         serviceDay,
       ),
     ).toBe(false);
+  });
+});
+
+describe("published notice periods", () => {
+  it.each([
+    [[], "unknown"],
+    [[{ start: 110 }], "upcoming"],
+    [[{ end: 90 }], "expired"],
+    [[{ start: 90, end: 110 }], "active"],
+    [[{ start: 110, end: 90 }], "unknown"],
+    [[{ end: 90 }, { start: 110 }], "upcoming"],
+    [[{}, { start: 110 }], "unknown"],
+  ] as const)("classifies %j as %s", (periods, expected) => {
+    expect(alertPeriodStatus(periods, 100)).toBe(expected);
   });
 });
