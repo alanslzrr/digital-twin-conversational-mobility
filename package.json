@@ -37,6 +37,7 @@
     "ingest": "node --env-file-if-exists=.env.local scripts/ingestion-worker.mjs --activate --once",
     "worker": "node --env-file-if-exists=.env.local scripts/ingestion-worker.mjs",
     "smoke:mobility": "node --env-file-if-exists=.env.local scripts/smoke-mobility.mjs",
+    "smoke:routing": "node scripts/smoke-routing.mjs",
     "start:local": "node scripts/start-local.mjs",
     "otp:benchmark": "node scripts/benchmark-otp.mjs"
   },
