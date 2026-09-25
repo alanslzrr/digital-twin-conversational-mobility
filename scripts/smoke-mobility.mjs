@@ -7,7 +7,7 @@ import postgres from "postgres";
 
 const options = new Map(
   process.argv.slice(2).map((arg) => {
-    assert.match(arg, /^--(?:port=\d+|read-only)$/);
+    assert.match(arg, /^--(?:port=\d+|read-only|emt-only)$/);
     const [key, value] = arg.slice(2).split("=");
     return [key, value ?? true];
   }),
@@ -15,12 +15,18 @@ const options = new Map(
 const port = Number(options.get("port") ?? 3001);
 assert.ok(Number.isInteger(port) && port >= 1024 && port <= 65535);
 const readOnly = options.has("read-only");
+const emtOnly = options.has("emt-only");
+assert.ok(
+  !(readOnly && emtOnly),
+  "EMT smoke explicitly exercises on-demand refresh",
+);
 const root = parseEnv(readFileSync(".env.local", "utf8"));
 const web = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
 const core = parseEnv(readFileSync("apps/mobility-core/.env.local", "utf8"));
 if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
   throw new Error("Local database required");
-const sql = readOnly ? null : postgres(root.DATABASE_URL, { max: 1 });
+const sql =
+  readOnly || emtOnly ? null : postgres(root.DATABASE_URL, { max: 1 });
 const headers = {
   Authorization: `Bearer ${web.MOBILITY_MCP_TOKEN}`,
   "Content-Type": "application/json",
@@ -51,6 +57,73 @@ async function tool(name, args) {
   const data = await rpc("tools/call", { name, arguments: args });
   assert.notEqual(data.isError, true, `${name}: ${data.content?.[0]?.text}`);
   return JSON.parse(data.content[0].text);
+}
+// Focused E7 regression using the existing MCP harness; no model or global tick.
+if (emtOnly) {
+  await rpc("initialize", {
+    protocolVersion: "2025-11-25",
+    capabilities: {},
+    clientInfo: { name: "emt-smoke", version: "1.0" },
+  });
+  headers["MCP-Protocol-Version"] = "2025-11-25";
+  const resolved = await tool("resolve_place", {
+    source: "emt",
+    query: "72",
+    limit: 5,
+  });
+  const place = resolved.places.find((p) =>
+    p.identifiers.some((i) => i.source === "emt" && i.externalId === "72"),
+  );
+  assert.ok(place, "Import the EMT catalog first");
+  assert.ok(place.emtLines.length > 0);
+  const first = await tool("get_emt_arrivals", { placeId: place.id, limit: 5 });
+  assert.equal(first.status, "available");
+  assert.equal(first.freshness.status, "fresh");
+  assert.equal(first.provenance.source, "emt");
+  const second = await tool("get_emt_arrivals", {
+    placeId: place.id,
+    limit: 5,
+  });
+  assert.deepEqual(
+    second.provenance,
+    first.provenance,
+    "Immediate repeat must reuse cached observation",
+  );
+  assert.ok(
+    first.arrivals.every(
+      (a) =>
+        a.destinationEvidence &&
+        a.observedAt &&
+        (a.estimatedArrivalAt ||
+          a.estimateStatus === "beyond_prediction_horizon"),
+    ),
+  );
+  const invalid = await tool("get_emt_arrivals", {
+    placeId: "00000000-0000-4000-8000-000000000000",
+  });
+  assert.equal(invalid.reason, "current_emt_stop_required");
+  const health = await tool("get_source_health", { source: "emt" });
+  assert.ok(health.sources[0].stopCatalog.version);
+  mkdirSync("data/validation", { recursive: true });
+  writeFileSync(
+    "data/validation/e7-emt.json",
+    JSON.stringify(
+      {
+        checkedAt: new Date().toISOString(),
+        place,
+        first,
+        cached: second.provenance,
+        modelCalls: 0,
+      },
+      null,
+      2,
+    ),
+    { mode: 0o600 },
+  );
+  console.log(
+    "EMT MCP smoke passed: stop resolution, fresh arrivals, repeated cache, unknown place, source coverage; no model.",
+  );
+  process.exit(0);
 }
 const workerToken = await new SignJWT({ scope: "mobility.ingestion.manage" })
   .setProtectedHeader({ alg: "HS256" })
