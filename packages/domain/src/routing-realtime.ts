@@ -1,3 +1,6 @@
+import { gtfsServiceEpoch, madridDate } from "./crtm";
+import { sameServiceTrip } from "./realtime";
+
 export type RoutingLeg = {
   mode: string;
   from: { name: string; stop?: { gtfsId: string } | null | undefined };
@@ -9,6 +12,7 @@ export type RoutingLeg = {
   serviceDate?: string | null | undefined;
 };
 export type RoutingUpdate = {
+  delay?: number | undefined;
   trip: {
     tripId: string;
     startDate?: string | undefined;
@@ -56,10 +60,13 @@ export function applyRoutingEvidence(
     alerts: RoutingAlert[];
     uniqueTrips: Set<string>;
     now: string;
+    earliest?: string | undefined;
   },
 ) {
   let rejected: string | null = null;
-  let cursor: number | null = null;
+  let cursor: number | null = evidence.earliest
+    ? Date.parse(evidence.earliest)
+    : null;
   const enriched = legs.map((leg) => {
     const scheduledStart = Date.parse(leg.start.scheduledTime),
       scheduledEnd = Date.parse(leg.end.scheduledTime);
@@ -67,6 +74,7 @@ export function applyRoutingEvidence(
       end = scheduledEnd;
     let realtimeStatus = leg.trip ? "no_matching_update" : "not_applicable";
     let observedAt: string | null = null;
+    let estimateBasis: string | null = null;
     const id = leg.trip?.gtfsId.startsWith("renfe:")
       ? leg.trip.gtfsId.slice(6)
       : null;
@@ -74,15 +82,29 @@ export function applyRoutingEvidence(
       ? evidence.updates.filter(
           (update) =>
             update.trip.tripId === id &&
+            (!update.trip.scheduleRelationship ||
+              ["SCHEDULED", "CANCELED", "DELETED"].includes(
+                update.trip.scheduleRelationship,
+              )) &&
             !!leg.serviceDate &&
-            update.trip.startDate === leg.serviceDate.replaceAll("-", "") &&
+            sameServiceTrip(
+              { ...update.trip, observedAt: update.observedAt },
+              id,
+              gtfsServiceEpoch(leg.serviceDate) / 1000,
+            ) &&
+            (update.trip.startDate !== undefined ||
+              (madridDate(new Date(scheduledStart)) === leg.serviceDate &&
+                Math.abs(scheduledStart - Date.parse(update.observedAt)) <=
+                  2 * 60 * 60 * 1000)) &&
             routingObservationFresh(update.observedAt, evidence.now, 40),
         )
       : [];
     const update = matching.length === 1 ? matching[0] : undefined;
     if (update) {
       observedAt = update.observedAt;
-      if (update.trip.scheduleRelationship === "CANCELED")
+      if (
+        ["CANCELED", "DELETED"].includes(update.trip.scheduleRelationship ?? "")
+      )
         rejected = "trip_cancelled";
       realtimeStatus = "unmatched_stop_identity";
       if (id && evidence.uniqueTrips.has(id)) {
@@ -100,19 +122,45 @@ export function applyRoutingEvidence(
           alight?.scheduleRelationship === "SKIPPED"
         )
           rejected = "stop_skipped";
+        // Trip delay is usable without a full stop sequence only when every
+        // supplied stop agrees. A conflicting override/NO_DATA disables it.
+        const updates = update.stopTimeUpdate ?? [];
+        const globalDelay =
+          typeof update.delay === "number" &&
+          Number.isFinite(update.delay) &&
+          Math.abs(update.delay) <= 7200 &&
+          new Set(updates.map((s) => s.stopId)).size === updates.length &&
+          updates.every(
+            (s) =>
+              (!s.scheduleRelationship ||
+                s.scheduleRelationship === "SCHEDULED") &&
+              [s.arrival, s.departure].every(
+                (e) => !e || e.delay === update.delay,
+              ),
+          )
+            ? update.delay
+            : null;
         const estimate = (
           stop: typeof board,
           event: "departure" | "arrival",
           scheduled: number,
         ) => {
-          if (!stop || stop.scheduleRelationship === "NO_DATA") return null;
-          const value = stop[event];
+          if (
+            stop?.scheduleRelationship &&
+            stop.scheduleRelationship !== "SCHEDULED"
+          )
+            return null;
+          const value = stop?.[event];
           if (value?.time !== undefined && Number.isFinite(value.time))
             return value.time * 1000;
           if (value?.delay !== undefined && Number.isFinite(value.delay))
             return scheduled + value.delay * 1000;
-          return null;
+          return globalDelay === null ? null : scheduled + globalDelay * 1000;
         };
+        estimateBasis =
+          globalDelay === null
+            ? "endpoint_update"
+            : "consistent_trip_delay_with_endpoint_precedence";
         const departure = estimate(board, "departure", start),
           arrival = estimate(alight, "arrival", end);
         if (departure !== null) start = departure;
@@ -128,12 +176,12 @@ export function applyRoutingEvidence(
     const alerts = id
       ? evidence.alerts.filter(
           (alert) =>
-            (alert.activePeriods.length === 0 ||
-              alert.activePeriods.some(
-                (period) =>
-                  (period.start === undefined || period.start * 1000 <= end) &&
-                  (period.end === undefined || period.end * 1000 > start),
-              )) &&
+            alert.activePeriods.some(
+              (period) =>
+                (period.start !== undefined || period.end !== undefined) &&
+                (period.start === undefined || period.start * 1000 <= end) &&
+                (period.end === undefined || period.end * 1000 > start),
+            ) &&
             alert.selectors?.some(
               (selector) =>
                 (!selector.routeId ||
@@ -167,6 +215,12 @@ export function applyRoutingEvidence(
       effectiveEnd: new Date(end).toISOString(),
       realtimeStatus,
       observedAt,
+      estimateBasis,
+      serviceDateMatch: update
+        ? update.trip.startDate
+          ? "explicit"
+          : "observation_day_nearby_schedule"
+        : null,
       alerts: alerts.map(({ id, title, effect }) => ({ id, title, effect })),
     };
   });
