@@ -7,7 +7,7 @@ import {
 import type postgres from "postgres";
 import { database } from "./database";
 
-type Network = "metro" | "light-rail" | "interurban";
+type Network = "metro" | "light-rail" | "interurban" | "emt";
 type Sql = postgres.TransactionSql;
 type Place = {
   id: string;
@@ -64,7 +64,7 @@ async function correspondences(sql: Sql, p: Place) {
     FROM crtm_stops anchor JOIN crtm_stops s ON s.external_id=anchor.external_id AND s.location_type=1
     JOIN crtm_stop_identity i ON i.dataset_id=s.dataset_id AND i.external_id=s.external_id
     JOIN crtm_feed f ON f.dataset_id=s.dataset_id
-    WHERE anchor.dataset_id=${p.dataset_id} AND anchor.external_id=${station} AND anchor.location_type=1
+    WHERE f.enabled AND anchor.dataset_id=${p.dataset_id} AND anchor.external_id=${station} AND anchor.location_type=1
     AND (s.dataset_id<>${p.dataset_id} OR s.external_id<>${p.external_id})
     AND ST_DWithin(ST_SetSRID(ST_MakePoint(anchor.longitude,anchor.latitude),4326)::geography,
       ST_SetSRID(ST_MakePoint(s.longitude,s.latitude),4326)::geography,100)
@@ -85,7 +85,7 @@ export async function resolveCrtm(
       >`SELECT s.*,i.id,f.version,f.fetched_at,f.published_at,f.imported_at,
       f.service_start::text,f.service_end::text,f.manifest FROM crtm_stops s
       JOIN crtm_stop_identity i USING(dataset_id,external_id) JOIN crtm_feed f USING(dataset_id)
-      WHERE s.location_type<>2 AND (${network ?? null}::text IS NULL OR s.dataset_id=${network ?? null})
+      WHERE f.enabled AND s.location_type<>2 AND (${network ?? null}::text IS NULL OR s.dataset_id=${network ?? null})
       AND (unaccent(lower(s.name)) LIKE unaccent(lower(${pattern})) OR s.external_id=${query} OR s.stop_code=${query})
       ORDER BY (s.external_id=${query} OR coalesce(s.stop_code=${query},false)) DESC,
       (unaccent(lower(s.name))=unaccent(lower(${query}))) DESC,(s.location_type=1) DESC,s.name,s.dataset_id,s.external_id LIMIT ${limit}`;
@@ -139,7 +139,7 @@ export async function crtmTimetable(input: {
         Place[]
       >`SELECT s.*,i.id,f.version,f.fetched_at,f.published_at,f.imported_at,
       f.service_start::text,f.service_end::text,f.manifest FROM crtm_stops s
-      JOIN crtm_stop_identity i USING(dataset_id,external_id) JOIN crtm_feed f USING(dataset_id) WHERE i.id=${input.placeId}`;
+      JOIN crtm_stop_identity i USING(dataset_id,external_id) JOIN crtm_feed f USING(dataset_id) WHERE f.enabled AND i.id=${input.placeId}`;
       if (!p)
         return {
           status: "unavailable",
@@ -249,5 +249,5 @@ export async function crtmHealth() {
     imported_at AS "ingestedAt",service_start::text AS "serviceStart",service_end::text AS "serviceEnd",
     ${today}::date BETWEEN service_start AND service_end AS "currentServiceEnvelope",
     manifest->>'sourceUrl' AS "sourceUrl",manifest->>'termsUrl' AS "termsUrl",manifest->>'attribution' AS attribution
-    FROM crtm_feed ORDER BY dataset_id`;
+    FROM crtm_feed WHERE enabled ORDER BY dataset_id`;
 }

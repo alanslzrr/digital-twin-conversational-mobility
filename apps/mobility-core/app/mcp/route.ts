@@ -74,7 +74,7 @@ const handler = createMcpHandler(
       {
         title: "Resolve a canonical Madrid place",
         description:
-          "Search imported Renfe, EMT, BiciMAD and CRTM places by name or exact stop number. Use source=emt for buses or source=crtm with network=metro/light-rail/interurban. CRTM includes static validity and evidence-backed station correspondences; its IDs are for get_crtm_timetable, not routing. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
+          "Search imported Renfe, EMT, BiciMAD and CRTM places by name or exact stop number. Use source=emt for buses or source=crtm with network=metro/light-rail/interurban. CRTM includes static validity and evidence-backed station correspondences; its IDs support timetable and routing with active graph coverage. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
         inputSchema: resolvePlaceInputSchema,
         annotations,
       },
@@ -98,7 +98,7 @@ const handler = createMcpHandler(
       {
         title: "Plan a scheduled journey",
         description:
-          "OTP local routes from canonical place IDs. Renfe plus walking ONLY; no Metro/EMT, bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled times, not real-time routes. Walking limit applies to the sum of walking legs.",
+          "OTP local routes from canonical place IDs. Active release includes Renfe, EMT, Metro Ligero and interurban schedules plus walking. Metro expired schedules are excluded; no bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled baseline with matched fresh Renfe RT and alerts applied through Core; inspect per-leg status. Frequency-based times are planning estimates, not exact departures. Walking limit applies to the sum of walking legs.",
         inputSchema: journeyRequestSchema,
         annotations,
       },
