@@ -12,3 +12,5 @@ Local adaptations:
 - Minimal login/logout controls use the same UI primitives. No gateway, provider, quota, ingestion or routing changes.
 
 When upgrading, compare this exact template version and reapply only these adaptations. Do not replace the official interface with custom chat markup.
+
+Server-side E2 extensions live in `agent/hooks/` and `agent/memory/`: budget admission, numeric telemetry, bounded tool execution and lossless evidence retention. These use EVE public extension points; upstream Web Chat markup and styling are unchanged. See `docs/audits/2026-09-25-e2-instrumentation.md` for limits and offline acceptance.
