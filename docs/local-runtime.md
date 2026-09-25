@@ -23,7 +23,7 @@ pnpm start:local             # Core + EVE oficial + worker; Ctrl-C termina sus p
 
 Antes de reconstruir un grafo existente, detener OTP con `pnpm otp:down`; después volver a arrancarlo. Tras modificar código o variables, reconstruir/reiniciar las aplicaciones. No ejecutar dos supervisores sobre los mismos puertos.
 
-Para meteorología, añade `AEMET_API_KEY` únicamente a `apps/mobility-core/.env.local` **antes** de `pnpm mobility:enable`. Sin clave, esa fuente permanece deshabilitada. EMT usa `EMT_CLIENT_ID` y `EMT_PASSKEY` en ese mismo archivo; su autenticación/integración sigue pendiente. No copiar estas variables al frontend.
+Para meteorología, añade `AEMET_API_KEY` únicamente a `apps/mobility-core/.env.local` **antes** de `pnpm mobility:enable`. Sin clave, esa fuente permanece deshabilitada. EMT usa `EMT_CLIENT_ID` y `EMT_PASSKEY` en ese mismo archivo; sus avisos se habilitan al ejecutar `pnpm db:migrate && pnpm mobility:enable`. Consulta `get_incidents` con `source: "emt"`; Renfe sigue siendo el valor por defecto. No copiar estas variables al frontend.
 
 La cuenta del evaluador, su contraseña y la clave del modelo se preparan con los comandos ya existentes de `README.md`. No repetir `evaluator create` si el slot ya existe. No desactivar Better Auth para probar.
 
@@ -108,4 +108,14 @@ Informes locales: `data/otp/manifest.json`, `graph-manifest.json`, `local-valida
 - [AEMET OpenData](https://opendata.aemet.es/dist/), © AEMET: reutilización con atribución conforme a [su nota legal](https://www.aemet.es/es/nota_legal). Solo se persisten observaciones, nunca claves, respuestas de autenticación o URLs temporales.
 - [OTP 2.10.0](https://github.com/opentripplanner/OpenTripPlanner/releases/tag/v2.10.0), imagen multiarch fijada por digest en Compose.
 
-No hay deployments ni nuevas altas cloud. En la validación del 23/09/2026, AEMET autenticó correctamente; EMT rechazó el login oficial con HTTP 403/código 84 (sin token). El usuario confirmó después que la aplicación está **pendiente de moderación**. Esperar su aprobación y volver a validar el acceso oficial antes de implementar/validar servicios EMT; no asumir que el código 84 identifica por sí solo esa causa. DGT ha cambiado su publicación DATEX; queda resolver acceso oficial y mapping. No se registran herramientas ficticias para esos servicios.
+No hay deployments ni nuevas altas cloud. El 25/09/2026 EMT autenticó y devolvió incidencias con HTTP 200/código 00, tras aprobarse la aplicación. El adaptador guarda solo la respuesta de incidencias (nunca login/token), reutiliza el token en memoria, respeta backoff y la ventana de actividad. Job `emt-alerts`: 120 s, frescura máxima 600 s basada en `lastBuildDate`, no en la hora de consulta. Los períodos se interpretan en Europe/Madrid; períodos desconocidos no se presentan como activos. El MCP excluye avisos caducados y permite filtrar por línea. Avisos no equivalen a llegadas en tiempo real ni cobertura de rutas EMT. DGT ha cambiado su publicación DATEX; queda resolver acceso oficial y mapping. No se registran herramientas ficticias para esos servicios.
+
+## Validación adicional 25/09/2026
+
+- `pnpm check`: lint, límites arquitectónicos, tipos, pruebas y builds locales.
+- `pnpm build:agent` requiere acceso al Docker local para que EVE detecte su sandbox; no se añade microsandbox ni se habilitan herramientas por defecto.
+- Smoke movilidad completo: rutas Atocha↔Chamartín (13 min previstas), Renfe, EMT con filtro por línea, BiciMAD, aire, AEMET, tráfico, parking, histórico, actividad y deduplicación.
+- OTP: 20 consultas / cuatro pares, p50 142 ms, p95 256 ms, memoria residente 1.338 GiB. No es certificación de red completa ni pico de construcción.
+- `pnpm smoke:evaluation --live-emt`: conversación real EVE → gpt-6-luna directo → MCP. Descubrió y consultó `get_incidents`, explicó la antigüedad del feed y distinguió avisos futuros de activos. Un primer intento falló por catálogo/instrucciones EVE desactualizados; se corrigieron y se repitió satisfactoriamente.
+- AEMET mostró fallos intermitentes de conexión. El cliente permite un único reintento de conexión; después conserva el backoff y la señalización de error. No reintenta denegaciones HTTP.
+- No se ha publicado en Vercel. DGT, llegadas EMT, red completa y los demás pendientes del roadmap no quedan certificados por estas pruebas.

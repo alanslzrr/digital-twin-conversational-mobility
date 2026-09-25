@@ -8,7 +8,7 @@ Vercel sigue siendo opcional. No se publica ni se aprovisiona nada para cerrar l
 2. **Renfe real:** GTFS normalizado/importado, viajes/alertas oficiales JSON, snapshots, procedencia y matching. Pendiente replay masivo, regresiones con cambios diarios de feed y aplicar RT dentro del routing (ahora las rutas son previstas).
 3. **Ingestión local adaptativa:** worker, ventana monótona de 30 min, leases, cadencias, backoff, dos carriles, deduplicación/read-through y retención. Pendiente pruebas de caída forzada en todos los puntos de persistencia; Queues no es un requisito local.
 4. **Dominio/MCP:** resolución canónica, rutas, salidas, avisos, BiciMAD, aire/meteorología, tráfico, parking e índice histórico. Pendientes direcciones arbitrarias, identidades CRTM/Metro/interurbanos, estado de línea/red agregado y snapshot multidominio completo. No se registran esas capacidades sin implementación.
-5. **Ampliación:** BiciMAD oficial, aire, tráfico, aparcamientos y observaciones AEMET de Madrid-Retiro integrados. **No cerrado:** la aplicación EMT está pendiente de moderación (confirmado por el usuario) y el login devuelve HTTP 403/código 84; esperar aprobación y después validar autenticación e implementar sus servicios, sin eludir ese estado. DGT requiere resolver acceso oficial DATEX y mapping. No confundir estos huecos con problemas de despliegue.
+5. **Ampliación:** BiciMAD oficial, aire, tráfico, aparcamientos y observaciones AEMET de Madrid-Retiro integrados. **EMT:** acceso aprobado y avisos autenticados integrados en job local/MCP; pendientes llegadas y cobertura de rutas EMT. DGT requiere resolver acceso oficial DATEX y mapping. No confundir estos huecos con problemas de despliegue.
 
 ## Cierre de evaluación local
 
