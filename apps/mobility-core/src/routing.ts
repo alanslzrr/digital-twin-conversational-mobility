@@ -392,9 +392,14 @@ export async function planJourney(request: JourneyRequest) {
               ...leg,
               staticVersion: network ? release.feeds[network]?.version : null,
               basis:
-                frequency?.exact_times === 0
-                  ? "frequency_planning_estimate"
-                  : "scheduled",
+                "realtimeStatus" in leg && leg.realtimeStatus === "estimated"
+                  ? "realtime_estimate"
+                  : "realtimeStatus" in leg &&
+                      leg.realtimeStatus === "partially_estimated"
+                    ? "partial_realtime_estimate"
+                    : frequency?.exact_times === 0
+                      ? "frequency_planning_estimate"
+                      : "scheduled",
               headwaySeconds: frequency?.headway_seconds ?? null,
             };
           }),
@@ -445,12 +450,12 @@ export async function planJourney(request: JourneyRequest) {
       status: itineraries.length ? "available" : "no_route",
       provider: "otp-local-2.10.0",
       asOf,
-      basis: overlay.itineraries.some(
+      basis: itineraries.some(
         (route) => "realtimeApplied" in route && route.realtimeApplied,
       )
         ? "scheduled_with_partial_realtime"
         : "scheduled",
-      realtimeApplied: overlay.itineraries.some(
+      realtimeApplied: itineraries.some(
         (route) => "realtimeApplied" in route && route.realtimeApplied,
       ),
       realtime: {
