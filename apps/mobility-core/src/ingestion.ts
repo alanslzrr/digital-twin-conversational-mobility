@@ -28,7 +28,7 @@ async function acquire(id: JobId) {
   const sql = database();
   const token = randomUUID();
   const [job] =
-    await sql`UPDATE ingestion_job SET lease_until=now()+interval '90 seconds', lease_token=${token}
+    await sql`UPDATE ingestion_job SET lease_until=now()+interval '90 seconds', lease_token=${token}, last_attempt_at=now(), last_finished_at=NULL, attempts=attempts+1, recovered_leases=recovered_leases+CASE WHEN lease_token IS NOT NULL THEN 1 ELSE 0 END
     WHERE id=${id} AND next_due_at<=now() AND (lease_until IS NULL OR lease_until<now())
     AND EXISTS (SELECT 1 FROM source_catalog s WHERE s.id=ingestion_job.source_id AND s.enabled)
     AND EXISTS (SELECT 1 FROM ingestion_activity WHERE active_until>now()) RETURNING failures`;
@@ -114,6 +114,14 @@ async function load(id: JobId) {
         updates,
         staticVersion: version.version,
         unmatchedTrips: ids.length - updates.length,
+        matching: {
+          denominator: "trip_updates_in_received_national_feed",
+          received: ids.length,
+          matchedMadrid: updates.length,
+          unmatchedCoverageUnknown: ids.length - updates.length,
+          matchedFraction: ids.length ? updates.length / ids.length : null,
+          note: "Unmatched does not imply a Madrid matching error; no regional identity is asserted for unmatched trips.",
+        },
         coverage: "Matched Madrid GTFS trips only",
       },
     };
@@ -132,7 +140,10 @@ async function load(id: JobId) {
       }),
       observedAt: parsed.observedAt,
       interval: parsed.ttl,
-      payload: { stations: parsed.stations },
+      payload: {
+        stations: parsed.stations,
+        feedObservedAt: parsed.feedObservedAt,
+      },
     };
   }
   if (id === "madrid-air") {
@@ -187,10 +198,12 @@ export async function ingest(id: JobId) {
   if (!lease) return { job: id, status: "not_due_or_inactive" };
   const sql = database();
   const policy = jobPolicies[id];
+  let stage: "source" | "raw_storage" | "publication" = "source";
   try {
     const result = await load(id);
     const hash = createHash("sha256").update(result.raw).digest("hex");
     const filename = `${id}-${hash}.gz`;
+    stage = "raw_storage";
     await mkdir(rawRoot(), { recursive: true });
     // Content address deduplicates retries. Files never enter the web app or model.
     await writeFile(resolve(rawRoot(), filename), await compress(result.raw), {
@@ -199,21 +212,21 @@ export async function ingest(id: JobId) {
     const payload = JSON.parse(
       JSON.stringify(result.payload),
     ) as postgres.JSONValue;
+    stage = "publication";
     return await sql.begin(async (tx) => {
       const [owned] =
         await tx`SELECT id FROM ingestion_job WHERE id=${id} AND lease_token=${lease.token} AND lease_until>now() FOR UPDATE`;
       if (!owned) return { job: id, status: "lease_lost" };
       const [previous] =
         await tx`SELECT observed_at FROM mobility_snapshot WHERE job_id=${id}`;
-      if (
+      const historicalOnly =
         previous &&
-        new Date(previous.observed_at).getTime() > Date.parse(result.observedAt)
-      )
-        throw new Error("out_of_order_feed");
+        new Date(previous.observed_at).getTime() >
+          Date.parse(result.observedAt);
       const observed = new Date(result.observedAt);
       const ingested = new Date();
       const reference = `sha256:${hash}`;
-      if ("stations" in result.payload) {
+      if (!historicalOnly && "stations" in result.payload) {
         const identifiers =
           await tx`SELECT external_id,place_id FROM place_external_identifier WHERE source_id='bicimad' AND namespace='gbfs.station'`;
         const ids = new Map(
@@ -233,23 +246,48 @@ export async function ingest(id: JobId) {
         if (places.length)
           await tx`INSERT INTO place_external_identifier ${tx(places.map((p) => ({ source_id: "bicimad", namespace: "gbfs.station", external_id: p.external_id, place_id: p.id })))} ON CONFLICT DO NOTHING`;
       }
-      await tx`INSERT INTO raw_batch(source_id,object_key,sha256,fetched_at,expires_at,parser_version,content_type) VALUES (${policy.source},${filename},${hash},${ingested},${new Date(ingested.getTime() + 86400000)},'local-v1',${id === "madrid-traffic" || id === "madrid-parking" ? "application/xml" : "application/json"}) ON CONFLICT (object_key) DO UPDATE SET expires_at=excluded.expires_at`;
-      await tx`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES (${id},${policy.source},${observed},${ingested},'provisional',${reference},${tx.json(payload)}) ON CONFLICT (job_id) DO UPDATE SET observed_at=excluded.observed_at,ingested_at=excluded.ingested_at,quality=excluded.quality,raw_reference=excluded.raw_reference,payload=excluded.payload`;
-      await tx`INSERT INTO mobility_history(job_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES (${id},${observed},${ingested},'provisional',${reference},${tx.json(payload)}) ON CONFLICT DO NOTHING`;
-      await tx`UPDATE ingestion_job SET lease_token=NULL,lease_until=NULL,failures=0,error_code=NULL,observed_at=${observed},ingested_at=${ingested},next_due_at=now()+${Math.max(policy.interval, result.interval)}*interval '1 second' WHERE id=${id}`;
+      await tx`INSERT INTO raw_batch(source_id,object_key,sha256,fetched_at,expires_at,parser_version,content_type) VALUES (${policy.source},${filename},${hash},${ingested},${new Date(ingested.getTime() + 86400000)},'local-v2',${id === "madrid-traffic" || id === "madrid-parking" ? "application/xml" : "application/json"}) ON CONFLICT (object_key) DO UPDATE SET expires_at=excluded.expires_at`;
+      if (!historicalOnly)
+        await tx`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES (${id},${policy.source},${observed},${ingested},'provisional',${reference},${tx.json(payload)}) ON CONFLICT (job_id) DO UPDATE SET observed_at=excluded.observed_at,ingested_at=excluded.ingested_at,quality=excluded.quality,raw_reference=excluded.raw_reference,payload=excluded.payload`;
+      const parserVersion = "local-v2";
+      const contentHash = createHash("sha256")
+        .update(JSON.stringify({ parserVersion, payload }))
+        .digest("hex");
+      const [lastRevision] =
+        await tx`SELECT content_hash,parser_version FROM mobility_history
+        WHERE job_id=${id} AND observed_at=${observed}
+        ORDER BY ingested_at DESC,revision_id DESC LIMIT 1`;
+      if (
+        lastRevision?.content_hash !== contentHash ||
+        lastRevision?.parser_version !== parserVersion
+      )
+        await tx`INSERT INTO mobility_history(job_id,observed_at,ingested_at,quality,raw_reference,payload,parser_version,static_version,content_hash)
+          VALUES (${id},${observed},${ingested},'provisional',${reference},${tx.json(payload)},${parserVersion},${"staticVersion" in result.payload ? (result.payload.staticVersion as string) : null},${contentHash})`;
+      const currentObserved = historicalOnly
+        ? new Date(previous.observed_at)
+        : observed;
+      await tx`UPDATE ingestion_job SET lease_token=NULL,lease_until=NULL,failures=0,error_code=NULL,error_stage=NULL,last_finished_at=now(),observed_at=${currentObserved},ingested_at=CASE WHEN ${Boolean(historicalOnly)} THEN ingested_at ELSE ${ingested} END,next_due_at=now()+${Math.max(policy.interval, result.interval)}*interval '1 second' WHERE id=${id}`;
       const health =
-        Date.now() - observed.getTime() > policy.maxAge * 1000
+        Date.now() - currentObserved.getTime() > policy.maxAge * 1000
           ? "degraded"
           : "healthy";
-      await tx`UPDATE source_health SET status=${health},last_attempt_at=now(),last_success_at=now(),last_observed_at=${observed},error_code=NULL WHERE source_id=${policy.source}`;
-      return { job: id, status: health, observedAt: result.observedAt };
+      await tx`UPDATE source_health SET status=${health},last_attempt_at=now(),last_success_at=now(),last_observed_at=${currentObserved},error_code=NULL WHERE source_id=${policy.source}`;
+      return {
+        job: id,
+        status: historicalOnly ? "historical_only" : health,
+        observedAt: result.observedAt,
+      };
     });
   } catch (error) {
     // Never log upstream bodies, URLs with keys, validation payloads or DB credentials.
-    const code = sourceErrorCode(error);
+    const code =
+      stage === "source" ||
+      (error instanceof Error && error.message === "out_of_order_feed")
+        ? sourceErrorCode(error)
+        : "ingestion_storage_error";
     return await sql.begin(async (tx) => {
       const [owned] =
-        await tx`UPDATE ingestion_job SET lease_token=NULL,lease_until=NULL,failures=failures+1,error_code=${code},next_due_at=now()+${retryDelay(policy.interval, lease.failures + 1)}*interval '1 second' WHERE id=${id} AND lease_token=${lease.token} RETURNING id`;
+        await tx`UPDATE ingestion_job SET lease_token=NULL,lease_until=NULL,failures=failures+1,error_code=${code},error_stage=${stage},last_finished_at=now(),next_due_at=now()+${retryDelay(policy.interval, lease.failures + 1)}*interval '1 second' WHERE id=${id} AND lease_token=${lease.token} AND lease_until>now() RETURNING id`;
       if (!owned) return { job: id, status: "lease_lost" };
       await tx`UPDATE source_health SET status='degraded',last_attempt_at=now(),error_code=${code} WHERE source_id=${policy.source}`;
       return { job: id, status: "error", error: code };
@@ -281,21 +319,47 @@ export async function prune() {
   }
 }
 
-export async function tick() {
+// A worker lane requests one eligible job at a time. There is no batch barrier:
+// the other lane can keep draining due jobs while this lane waits for a provider.
+export async function tick(lane?: "0" | "1") {
   if (!ingestionEnabled()) return { status: "disabled" };
+  const sql = database();
+  if (lane)
+    await sql`UPDATE ingestion_worker SET last_seen_at=now() WHERE id=${lane}`;
   const [activity] =
-    await database()`SELECT active_until>now() AS active FROM ingestion_activity`;
+    await sql`SELECT active_until>now() AS active FROM ingestion_activity`;
   if (!activity?.active) return { status: "idle" };
-  const queue = Object.keys(jobPolicies) as JobId[];
-  // Two independent lanes bound concurrency; a slow source does not hold a DB lock.
-  const lanes = await Promise.all(
-    [0, 1].map(async () => {
-      const results = [];
-      for (let id = queue.shift(); id; id = queue.shift())
-        results.push(await ingest(id));
-      return results;
-    }),
-  );
-  await prune();
-  return { status: "active", results: lanes.flat() };
+  const due = await sql`SELECT id FROM ingestion_job
+    WHERE next_due_at<=now() AND (lease_until IS NULL OR lease_until<now())
+    ORDER BY next_due_at,id`;
+  const queue = due.map((row) => row.id as JobId);
+  const run = async () => {
+    const results = [];
+    for (let id = queue.shift(); id; id = queue.shift()) {
+      try {
+        const result = await ingest(id);
+        results.push(result);
+        if (lane && result.status !== "not_due_or_inactive") break;
+      } catch {
+        // Storage/acquisition failures must not reject a sibling lane or expose
+        // credentials. An acquired lease expires normally before another attempt.
+        results.push({ job: id, status: "storage_error" });
+        if (lane) break;
+      }
+    }
+    return results;
+  };
+  const results = lane
+    ? await run()
+    : (await Promise.all([run(), run()])).flat();
+  if (lane)
+    await sql`UPDATE ingestion_worker SET last_seen_at=now() WHERE id=${lane}`;
+  // Retention is maintained by the full/manual tick, or once per minute by lane 0.
+  const maintenance =
+    lane === "0"
+      ? await sql`UPDATE ingestion_worker SET last_pruned_at=now()
+        WHERE id='0' AND (last_pruned_at IS NULL OR last_pruned_at<now()-interval '1 minute') RETURNING id`
+      : [];
+  if (!lane || maintenance.length) await prune();
+  return { status: "active", results };
 }
