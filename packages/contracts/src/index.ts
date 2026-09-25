@@ -69,6 +69,7 @@ export const routingFailureReasonSchema = z.enum([
   "unknown_place",
   "outside_static_service_period",
   "graph_not_ready",
+  "routing_update_in_progress",
   "graph_static_version_mismatch",
   "routing_not_configured",
   "routing_not_local",
@@ -86,7 +87,7 @@ export const resolvePlaceInputSchema = z.object({
   query: z.string().trim().min(1).max(120),
   source: z.enum(["renfe", "emt", "bicimad", "crtm"]).optional(),
   network: z
-    .enum(["metro", "light-rail", "interurban"])
+    .enum(["metro", "light-rail", "interurban", "emt"])
     .optional()
     .describe("CRTM network filter; use with source=crtm."),
   limit: z.number().int().min(1).max(10).default(5),
