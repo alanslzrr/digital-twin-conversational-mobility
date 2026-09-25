@@ -25,8 +25,18 @@ export async function POST(request: Request) {
         { status: 413, headers },
       );
     const input = JSON.parse(text || "{}");
+    if (
+      !input ||
+      typeof input !== "object" ||
+      Array.isArray(input) ||
+      (input.lane !== undefined && input.lane !== "0" && input.lane !== "1")
+    )
+      return Response.json(
+        { error: "invalid_ingestion_request" },
+        { status: 400, headers },
+      );
     if (input.activate === true) await activate();
-    return Response.json(await tick(), { headers });
+    return Response.json(await tick(input.lane), { headers });
   } catch {
     return Response.json(
       { error: "ingestion_unavailable" },
