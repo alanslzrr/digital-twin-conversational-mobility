@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  canonicalLocalEvaluationUrl,
+  evaluationLoginError,
+} from "@/src/evaluation-login";
 
 type Identity = { principalId: string; label: string };
 
@@ -14,11 +18,20 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [canonicalUrl, setCanonicalUrl] = useState<string | null>(null);
   useEffect(() => {
+    const canonical = canonicalLocalEvaluationUrl(window.location.href);
+    if (canonical) {
+      setCanonicalUrl(canonical);
+      setLoading(false);
+      return;
+    }
     const controller = new AbortController();
     fetch("/api/evaluation", { signal: controller.signal, cache: "no-store" })
       .then(async (response) => {
         if (response.ok) setIdentity(await response.json());
+        else if (response.status !== 401)
+          setError(evaluationLoginError(response.status));
       })
       .catch(() => {})
       .finally(() => {
@@ -73,6 +86,7 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
         className="flex w-full max-w-sm flex-col gap-5"
         onSubmit={async (event) => {
           event.preventDefault();
+          if (canonicalUrl) return;
           const data = new FormData(event.currentTarget);
           setLoading(true);
           setError("");
@@ -86,15 +100,15 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
               }),
             });
             if (!response.ok)
-              throw new Error(
-                "Credenciales incorrectas o límite de acceso alcanzado. Inténtalo de nuevo en un minuto.",
-              );
+              throw new Error(evaluationLoginError(response.status));
             const access = await fetch("/api/evaluation", {
               cache: "no-store",
             });
             if (!access.ok)
               throw new Error(
-                "Esta cuenta no está habilitada para la evaluación.",
+                access.status >= 500 || access.status === 429
+                  ? evaluationLoginError(access.status)
+                  : "Esta cuenta no está habilitada para la evaluación.",
               );
             setIdentity(await access.json());
           } catch (failure) {
@@ -145,7 +159,18 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
             {error}
           </p>
         ) : null}
-        <Button type="submit">Entrar</Button>
+        {canonicalUrl ? (
+          <p role="alert" className="text-sm text-muted-foreground">
+            Este origen no admite el acceso local. Abre{" "}
+            <a href={canonicalUrl} className="underline">
+              {canonicalUrl}
+            </a>{" "}
+            para iniciar sesión.
+          </p>
+        ) : null}
+        <Button type="submit" disabled={Boolean(canonicalUrl)}>
+          Entrar
+        </Button>
         <p className="text-xs text-muted-foreground">
           Acceso privado · Sin registro público
         </p>
