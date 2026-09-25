@@ -1,6 +1,6 @@
 # Plan de resolución de la auditoría local
 
-Fecha: **25/09/2026**. Estado: **ejecución iniciada por autorización del usuario; E0 mínimo y E1 implementados y validados localmente**. E2–E8 pendientes; R0–R2 no cerrados. [Evidencia de la primera entrega](../acceptance/2026-09-25-routing.md).
+Fecha: **25/09/2026**. Estado: **ejecución iniciada por autorización del usuario; E0 mínimo y E1 implementados y validados localmente**. E2 cerrado con criterio revisado por el usuario; E3–E8 pendientes; R0–R2 no cerrados. [Evidencia de la primera entrega](../acceptance/2026-09-25-routing.md).
 
 Referencias: [auditoría F01–F09 y casos T01–T13](../audits/2026-09-25-evaluation.md), [roadmap R0–R3](../roadmap.md), [operación local](../local-runtime.md) y [evaluadores](../evaluation.md).
 
@@ -63,20 +63,23 @@ La instrumentación y las regresiones empiezan en E0; no se dejan para el final.
 
 **Zonas:** `apps/mobility-core/src/routing.ts`, `packages/contracts/src/index.ts`, tests nuevos de routing y smoke MCP. Rama sugerida: `alanslzrr/fix-otp-transit`.
 
-## E2 — Medir y limitar conversaciones, no subir el techo
+## E2 — Control conversacional: cerrado con aceptación offline
 
-Las cuotas actuales de **6 operaciones/minuto y 60/día por evaluador** controlan operaciones, no tokens ni llamadas internas al modelo. El límite EVE actual de **100.000 tokens de entrada / 10.000 de salida por sesión** tampoco certifica un tope preventivo por petición.
+**Criterio vigente por decisión del usuario:** alcanzar el límite pausa y muestra
+el aviso oficial EVE; aprobar permite continuar, rechazar detiene el turno sin
+perder la conversación. No se exige consumir 100.000/10.000 tokens ni ejecutar una
+campaña de pago para verificarlo.
 
-1. Instrumentar los hooks disponibles en la versión EVE instalada: llamada, turno, sesión y evaluador pseudonimizado; input/output/cache según campos reales del proveedor, pasos, herramientas, compactaciones, duración y motivo de parada. Separar desconocido de cero y documentar si cache es un subconjunto de input para no sumarlo dos veces.
-2. Medir qué contenido llega realmente al contexto: catálogo, `connection_search`, resultados retenidos y posible duplicación `content`/`structuredContent`. No dar por demostrada esa duplicación.
-3. Centralizar la política de presupuesto en servidor: límite por turno/sesión/evaluador y reserva previa por llamada, incluyendo llamadas de compactación y reintentos; reconciliar con uso real y serializar/reservar ante concurrencia. EVE usa el canal autorizado de evaluación hacia Core, sin acceso directo a la base.
-4. Acotar pasos, tiempo, resultados y búsquedas fallidas. Detectar repeticiones idénticas sin progreso; no impedir una reconsulta legítima con nueva observación. La instrucción actual de dos búsquedas sin resultado debe tener prueba y control efectivo, no solo texto de prompt.
-5. Comprobar compactación conservando lugares elegidos, preferencias, fechas, incertidumbre y procedencia; nunca convertir un dato antiguo en actual al resumir. Si EVE no ofrece hooks suficientes, documentar el límite y diseñar una adaptación mínima antes de prometer enforcement.
-6. Ante límite o contabilidad ausente, detener nuevas llamadas con explicación clara; sin ampliación automática. Una aprobación de continuidad no puede saltarse el presupuesto global autorizado. Coste monetario solo con uso y tarifas verificables; no inferir factura de los 594.473 tokens acumulados.
+Se mantienen telemetría por intento/turno/sesión, uso desconocido distinto de cero,
+tiempos, límites de herramientas y conservación de evidencia al compactar.
+El ledger preventivo no renovable queda disponible solo para campañas opt-in;
+no bloquea el flujo interactivo normal. Esto sustituye el criterio anterior que
+prohibía renovar el presupuesto mediante aprobación.
 
-**Pruebas de cierre:** mocks de uso y límites, dos turnos concurrentes, cancelación, reintento, compactación, usage ausente y reinicio; después T01–T13 aislados y en una sola sesión con autorización de gasto. Cero bucles y continuaciones inesperadas; cada llamada atribuible a turno y sesión. Comparar exactitud antes/después de compactar. Si la batería no cabe, optimizar o reabrir la decisión con evidencia, no elevar el límite en silencio.
-
-**Zonas:** `apps/eve-web/agent/agent.ts`, `apps/eve-web/agent/instructions.md`, conexión/canal EVE, guardas de evaluación y contabilidad en `apps/mobility-core/src/evaluation.ts`. Separar telemetría, enforcement y compactación en cambios revisables. Rama sugerida: `alanslzrr/conversation-budget`.
+**Aceptación:** pruebas deterministas del código nativo EVE para pausa, petición,
+ausencia de consentimiento, approve/reject y conservación de historia; transporte
+simulado y regresiones de compactación. [Acta de cierre](../acceptance/2026-09-25-e2-closure.md).
+T01–T13 con modelo forman parte de la aceptación global posterior, no de E2.
 
 ## E3 — Explicar huecos y demostrar recuperación
 
@@ -177,7 +180,7 @@ Conservar las políticas actuales como referencia, sin presentarlas como SLO cum
 | --- | --- |
 | Modelo | Cero llamadas de pago hasta autorización específica con tope total de la campaña; incluir compactación, reintentos y cinco usuarios. Si falta una contabilidad fiable para respetar ese tope, no iniciar/continuar llamadas. |
 | Turno | Propuesta inicial: máximo 8 llamadas al modelo, 2 búsquedas consecutivas sin capacidad y 90 s de ejecución; validar viabilidad y aprobar antes de la batería viva. Contar compactación/reintentos, no esconderlos. |
-| Sesión | Referencia actual 100.000 input / 10.000 output y timeout configurado de 30 min. Fijar presupuesto preventivo, margen de reserva y política de agotamiento en E2; no sustituirlo por más ventanas aprobadas. |
+| Sesión | Referencia actual 100.000 input / 10.000 output y timeout configurado de 30 min. Modo interactivo: ventana renovable mediante aprobación explícita EVE. Modo campaña opt-in: reservas preventivas y presupuesto no renovable. |
 | Latencia | Fijar p50/p95 y timeout por clase: caché local, read-through, OTP y conversación. Publicar tamaño de muestra y errores/timeouts; no excluir fallos para mejorar percentiles. Medir una calibración separada y congelar los objetivos antes de la aceptación. |
 | Ingestión | Por job: interval/maxAge vigentes, p95 de retraso sobre `next_due_at`, tiempo máximo de recuperación y error/backoff. No aumentar maxAge para aprobar. Frescura de proveedor y puntualidad del scheduler son métricas distintas. |
 | Integridad/seguridad | Cero acceso cruzado, fuga de secretos, duplicaciones efectivas o regresiones de snapshot en los escenarios definidos. Límites atómicos también con cinco consumidores. |
