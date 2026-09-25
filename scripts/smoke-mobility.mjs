@@ -7,7 +7,7 @@ import postgres from "postgres";
 
 const options = new Map(
   process.argv.slice(2).map((arg) => {
-    assert.match(arg, /^--(?:port=\d+|read-only|emt-only)$/);
+    assert.match(arg, /^--(?:port=\d+|read-only|emt-only|crtm-only)$/);
     const [key, value] = arg.slice(2).split("=");
     return [key, value ?? true];
   }),
@@ -16,6 +16,7 @@ const port = Number(options.get("port") ?? 3001);
 assert.ok(Number.isInteger(port) && port >= 1024 && port <= 65535);
 const readOnly = options.has("read-only");
 const emtOnly = options.has("emt-only");
+const crtmOnly = options.has("crtm-only");
 assert.ok(
   !(readOnly && emtOnly),
   "EMT smoke explicitly exercises on-demand refresh",
@@ -26,7 +27,9 @@ const core = parseEnv(readFileSync("apps/mobility-core/.env.local", "utf8"));
 if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
   throw new Error("Local database required");
 const sql =
-  readOnly || emtOnly ? null : postgres(root.DATABASE_URL, { max: 1 });
+  readOnly || emtOnly || crtmOnly
+    ? null
+    : postgres(root.DATABASE_URL, { max: 1 });
 const headers = {
   Authorization: `Bearer ${web.MOBILITY_MCP_TOKEN}`,
   "Content-Type": "application/json",
@@ -57,6 +60,66 @@ async function tool(name, args) {
   const data = await rpc("tools/call", { name, arguments: args });
   assert.notEqual(data.isError, true, `${name}: ${data.content?.[0]?.text}`);
   return JSON.parse(data.content[0].text);
+}
+// Static CRTM regression: no provider requests, model calls or OTP queries.
+if (crtmOnly) {
+  await rpc("initialize", {
+    protocolVersion: "2025-11-25",
+    capabilities: {},
+    clientInfo: { name: "crtm-smoke", version: "1.0" },
+  });
+  headers["MCP-Protocol-Version"] = "2025-11-25";
+  const date = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Madrid",
+  }).format(new Date());
+  const evidence = [];
+  for (const [network, query] of [
+    ["light-rail", "par_10_1"],
+    ["interurban", "par_8_09568"],
+    ["metro", "est_90_21"],
+  ]) {
+    const resolved = await tool("resolve_place", {
+      source: "crtm",
+      network,
+      query,
+      limit: 5,
+    });
+    const place = resolved.places.find((p) =>
+      p.identifiers.some((i) => i.externalId === query),
+    );
+    assert.ok(place, `Missing prepared ${network} place`);
+    const result = await tool("get_crtm_timetable", {
+      placeId: place.id,
+      serviceDate: date,
+      afterTime: "00:00:00",
+      limit: 5,
+    });
+    assert.equal(result.provenance.realtime, false);
+    if (place.provenance.currentServiceEnvelope) {
+      assert.equal(result.status, "available");
+      assert.ok(result.departures.length > 0);
+      assert.ok(
+        result.departures.every(
+          (d) => d.kind === "scheduled" || d.kind === "frequency_window",
+        ),
+      );
+    } else assert.equal(result.reason, "outside_static_service_period");
+    if (network === "metro")
+      assert.ok(place.correspondences.some((c) => c.network === "interurban"));
+    evidence.push({ network, resolved, result });
+  }
+  const health = await tool("get_source_health", { source: "crtm" });
+  assert.equal(health.sources[0].capability, "static_catalog_and_timetable");
+  assert.equal(health.sources[0].staticCatalogs.length, 3);
+  mkdirSync("data/evaluation", { recursive: true });
+  writeFileSync(
+    "data/evaluation/crtm-smoke.json",
+    JSON.stringify({ at: new Date().toISOString(), evidence, health }, null, 2),
+  );
+  console.log(
+    "CRTM MCP: resolution, timetables, expired coverage, correspondences and source health passed",
+  );
+  process.exit(0);
 }
 // Focused E7 regression using the existing MCP harness; no model or global tick.
 if (emtOnly) {
