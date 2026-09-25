@@ -127,3 +127,7 @@ modelo real: esa comprobación pertenece a la campaña pendiente.
    registra en Core. No restaurar reservas desconocidas sin reconciliación.
 4. Ejecutar T01–T13 aislados y continuos, comparar precisión antes/después de
    compactación y revisar el informe. No elevar límites para conseguir que pase.
+
+## Estado tras correcciones de revisión
+
+Los tres bloqueos de revisión están corregidos; ver [resoluciones, pruebas y transición](2026-09-25-e2-review.md#4-correcciones-aplicadas-y-preparación-de-e3). Estado vigente: 182 pruebas offline, 17 DB aisladas y check estándar aprobados. E3 puede iniciarse sin gasto; aceptación conversacional E2 pendiente. La migración aditiva 0009 conserva violaciones de presupuesto; no se ha aplicado al runtime habitual.
