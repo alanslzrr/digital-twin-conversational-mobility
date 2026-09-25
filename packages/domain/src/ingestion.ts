@@ -29,3 +29,16 @@ export function localIngestionEnabled(env: Record<string, string | undefined>) {
     return false;
   }
 }
+
+// Orthogonal to data freshness: a live worker can serve old provider readings,
+// and an inactive window can still contain fresh data. Never infer provider health.
+export function ingestionWorkerState(
+  enabled: boolean,
+  active: boolean,
+  heartbeatAgeSeconds: number | null,
+) {
+  if (!enabled) return "disabled";
+  if (heartbeatAgeSeconds === null) return "not_seen";
+  if (heartbeatAgeSeconds > 120) return "stopped_or_unreachable";
+  return active ? "running" : "inactive_window";
+}
