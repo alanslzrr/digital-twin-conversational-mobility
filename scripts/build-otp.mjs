@@ -1,8 +1,12 @@
 import { spawn } from "node:child_process";
-import { copyFile, readFile, writeFile } from "node:fs/promises";
+import { copyFile, lstat, readFile, writeFile } from "node:fs/promises";
 import { performance } from "node:perf_hooks";
 
 if (process.env.VERCEL) throw new Error("OTP graph builds are local-only");
+if ((await lstat("data/otp")).isSymbolicLink())
+  throw new Error(
+    "Use immutable routing release preparation/build; active release cannot be overwritten",
+  );
 const start = performance.now();
 const manifest = JSON.parse(await readFile("data/otp/manifest.json", "utf8"));
 const result = await new Promise((resolve, reject) => {
