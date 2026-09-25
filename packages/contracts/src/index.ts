@@ -67,6 +67,7 @@ export const departuresInputSchema = z.object({
   limit: z.number().int().min(1).max(20).default(10),
 });
 export const incidentsInputSchema = z.object({
+  source: z.enum(["renfe", "emt"]).default("renfe"),
   line: z.string().trim().max(20).optional(),
   limit: z.number().int().min(1).max(30).default(10),
 });

@@ -13,6 +13,7 @@ import type postgres from "postgres";
 import { fetchWeather } from "./adapters/aemet";
 import { parseBicimad } from "./adapters/bicimad";
 import { fetchText, sourceErrorCode, timestamp } from "./adapters/common";
+import { fetchEmtIncidents } from "./adapters/emt";
 import { parseAir, parseTraffic } from "./adapters/madrid";
 import { parseParking } from "./adapters/parking";
 import { parseRenfe, spanishText } from "./adapters/renfe";
@@ -36,6 +37,10 @@ async function acquire(id: JobId) {
 
 async function load(id: JobId) {
   const sql = database();
+  if (id === "emt-alerts") {
+    const { raw, observedAt, alerts } = await fetchEmtIncidents();
+    return { raw, observedAt, interval: 120, payload: { alerts } };
+  }
   if (id === "aemet") {
     const { raw, observedAt, readings } = await fetchWeather();
     return { raw, observedAt, interval: 600, payload: { readings } };

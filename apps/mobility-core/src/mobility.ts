@@ -15,6 +15,7 @@ import { getFreshness } from "@mobility/provenance";
 import type { z } from "zod";
 import type { parseWeather } from "./adapters/aemet";
 import type { parseBicimad } from "./adapters/bicimad";
+import type { parseEmtIncidents } from "./adapters/emt";
 import type { parseAir, parseTraffic } from "./adapters/madrid";
 import type { parseParking } from "./adapters/parking";
 import type { parseRenfe } from "./adapters/renfe";
@@ -91,7 +92,7 @@ export async function sourceHealth(source?: SourceId) {
             ? "fresh"
             : "partial_or_unavailable"
           : entry.id === "emt"
-            ? "authentication_and_adapter_validation_pending"
+            ? "adapter_not_initialized"
             : "not_implemented",
         streams,
         staticFeed: feeds.find((feed) => feed.source_id === entry.id) ?? null,
@@ -206,6 +207,39 @@ export async function departures(placeId: string, limit: number) {
 }
 
 export async function incidents(input: z.infer<typeof incidentsInputSchema>) {
+  if (input.source === "emt") {
+    const state = await snapshot("emt-alerts");
+    if (!state) return { status: "unavailable", reason: "no_observation" };
+    const alerts = state.payload.alerts as ReturnType<
+      typeof parseEmtIncidents
+    >["alerts"];
+    const now = Date.now();
+    return {
+      provenance: state.provenance,
+      freshness: state.freshness,
+      incidents: alerts
+        .filter(
+          (a) =>
+            (!input.line ||
+              a.lines.some(
+                (line) => folded(line) === folded(input.line ?? ""),
+              )) &&
+            (!a.endsAt || Date.parse(a.endsAt) >= now),
+        )
+        .slice(0, input.limit)
+        .map((a) => ({
+          ...a,
+          temporalStatus:
+            !a.startsAt || !a.endsAt || a.startsAt > a.endsAt
+              ? "unknown"
+              : Date.parse(a.startsAt) > now
+                ? "upcoming"
+                : "active",
+        })),
+      warning:
+        "EMT published notices only, including upcoming and uncertain periods. Empty results do not establish normal service. Not bus arrival estimates or routing coverage.",
+    };
+  }
   const state = await snapshot("renfe-alerts");
   if (!state) return { status: "unavailable", reason: "no_observation" };
   const routes =
