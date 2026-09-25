@@ -63,8 +63,10 @@ export type RoutingResult =
 export { gtfsClock, gtfsInstant, gtfsServiceEpoch, madridDate } from "./crtm";
 export {
   applyRoutingEvidence,
+  matchingEmtRoutingAlerts,
   type RoutingAlert,
   type RoutingLeg,
+  type RoutingLineAlert,
   type RoutingUpdate,
   routingObservationFresh,
 } from "./routing-realtime";
