@@ -255,3 +255,82 @@ describe("provider budget transport (no network)", () => {
     });
   });
 });
+
+describe("interactive transport delegates renewable limits to EVE", () => {
+  it("requires no campaign or token-count request and records actual attempt usage", async () => {
+    const test = setup();
+    test.access.mockResolvedValue(json({}, 429));
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
+    try {
+      const interactive = budgetedFetch(
+        context,
+        test.access,
+        test.network,
+        "interactive",
+      );
+      const response = await interactive(
+        endpoint,
+        request({ max_output_tokens: 99999 }),
+      );
+      expect(response.status).toBe(200);
+      expect(test.access).not.toHaveBeenCalled();
+      expect(test.network).toHaveBeenCalledTimes(1);
+      expect(String(test.network.mock.calls[0]?.[0])).toBe(endpoint);
+      expect(
+        JSON.parse(String(test.network.mock.calls[0]?.[1]?.body)),
+      ).toMatchObject({ max_output_tokens: 2048, store: false });
+      const metric = log.mock.calls
+        .map(([value]) => JSON.parse(String(value)))
+        .find((value) => value.kind === "mobility.provider.metric");
+      expect(metric).toMatchObject({
+        mode: "interactive",
+        inputTokens: 100,
+        outputTokens: 20,
+        cacheReadTokens: 80,
+        dispatched: true,
+      });
+      expect(metric.latencyMs).toBeGreaterThanOrEqual(0);
+    } finally {
+      log.mockRestore();
+    }
+  });
+  it("preserves streaming bytes and reports unknown usage on cancellation", async () => {
+    const bytes =
+      'data: {"type":"response.output_text.delta","delta":"hola"}\n\n';
+    const test = setup(
+      () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode(bytes));
+            },
+          }),
+        ),
+    );
+    const log = vi.spyOn(console, "info").mockImplementation(() => {});
+    try {
+      const response = await budgetedFetch(
+        context,
+        test.access,
+        test.network,
+        "interactive",
+      )(endpoint, request({ stream: true }));
+      const reader = response.body?.getReader();
+      expect(new TextDecoder().decode((await reader?.read())?.value)).toBe(
+        bytes,
+      );
+      await reader?.cancel();
+      expect(test.access).not.toHaveBeenCalled();
+      const metric = log.mock.calls
+        .map(([value]) => JSON.parse(String(value)))
+        .find((value) => value.kind === "mobility.provider.metric");
+      expect(metric).toMatchObject({
+        inputTokens: null,
+        outputTokens: null,
+        cacheReadTokens: null,
+      });
+    } finally {
+      log.mockRestore();
+    }
+  });
+});
