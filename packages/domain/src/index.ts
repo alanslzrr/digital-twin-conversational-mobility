@@ -1,12 +1,13 @@
 import type { SourceId } from "@mobility/contracts";
 
 export {
+  ingestionWorkerState,
   type JobId,
   jobPolicies,
   localIngestionEnabled,
   retryDelay,
 } from "./ingestion";
-export { sameServiceTrip } from "./realtime";
+export { alertPeriodStatus, sameServiceTrip } from "./realtime";
 export { journeyModePolicy } from "./routing";
 
 export const sourceCatalog: ReadonlyArray<{
@@ -58,3 +59,11 @@ export type RoutingResult =
         arrivalTime: string;
       }>;
     };
+
+export {
+  type DestinationEvidence,
+  deriveDestinationEvidence,
+  normalizeLine,
+  resolveLine,
+  tripDestination,
+} from "./transit-identity";
