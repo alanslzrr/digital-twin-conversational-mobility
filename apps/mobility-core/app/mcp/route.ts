@@ -82,7 +82,7 @@ const handler = createMcpHandler(
       {
         title: "Plan a scheduled journey",
         description:
-          "OTP local routes from canonical place IDs. Renfe plus walking ONLY; no Metro/EMT, bicycle or car routing. Scheduled times, not real-time routes. Walking limit applies to the sum of walking legs.",
+          "OTP local routes from canonical place IDs. Renfe plus walking ONLY; no Metro/EMT, bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled times, not real-time routes. Walking limit applies to the sum of walking legs.",
         inputSchema: journeyRequestSchema,
         annotations,
       },

@@ -1,23 +1,75 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { JourneyRequest } from "@mobility/contracts";
+import {
+  type JourneyRequest,
+  journeyRequestSchema,
+  type RoutingFailureReason,
+} from "@mobility/contracts";
+import { journeyModePolicy } from "@mobility/domain";
 import { z } from "zod";
 import { database } from "./database";
 
 const time = z.iso.datetime({ offset: true });
-async function assertGraphVersion(version: string) {
-  const manifest = JSON.parse(
-    await readFile(
-      resolve(
-        process.env.LOCAL_DATA_DIR ?? "../../data",
-        "otp/graph-manifest.json",
-      ),
-      "utf8",
-    ),
-  );
-  if (manifest.staticVersion !== version)
-    throw new Error("graph_static_version_mismatch");
+class RoutingFailure extends Error {
+  constructor(readonly reason: RoutingFailureReason) {
+    super(reason);
+  }
 }
+
+async function assertGraphVersion(version: string) {
+  let manifest: { staticVersion: string };
+  try {
+    manifest = z
+      .object({ staticVersion: z.string().min(1) })
+      .parse(
+        JSON.parse(
+          await readFile(
+            resolve(
+              process.env.LOCAL_DATA_DIR ?? "../../data",
+              "otp/graph-manifest.json",
+            ),
+            "utf8",
+          ),
+        ),
+      );
+  } catch {
+    throw new RoutingFailure("graph_not_ready");
+  }
+  if (manifest.staticVersion !== version)
+    throw new RoutingFailure("graph_static_version_mismatch");
+}
+
+// Verified against the installed OTP 2.10.0 GraphQL schema. Direct must remain
+// nonempty even when transitOnly disables walking-only alternatives.
+export function otpJourneyModes(
+  policy: NonNullable<ReturnType<typeof journeyModePolicy>>,
+) {
+  return {
+    direct: ["WALK"],
+    directOnly: !policy.allowTransit,
+    transitOnly: !policy.allowWalkingOnly,
+    ...(policy.allowTransit
+      ? {
+          transit: {
+            access: ["WALK"],
+            egress: ["WALK"],
+            transfer: ["WALK"],
+          },
+        }
+      : {}),
+  };
+}
+
+const routingErrorCodeSchema = z.enum([
+  "LOCATION_NOT_FOUND",
+  "NO_DIRECT_MODE_CONNECTION",
+  "NO_STOPS_IN_RANGE",
+  "NO_TRANSIT_CONNECTION",
+  "NO_TRANSIT_CONNECTION_IN_SEARCH_WINDOW",
+  "OUTSIDE_BOUNDS",
+  "OUTSIDE_SERVICE_PERIOD",
+  "WALKING_BETTER_THAN_TRANSIT",
+]);
 const itinerarySchema = z.object({
   duration: z.number().nonnegative(),
   start: time,
@@ -44,7 +96,8 @@ const planSchema = z.object({
   data: z.object({
     planConnection: z.object({
       routingErrors: z.array(
-        z.object({ code: z.string(), description: z.string() }),
+        // Only allowlisted codes cross the adapter boundary, not provider text.
+        z.object({ code: routingErrorCodeSchema }),
       ),
       edges: z.array(z.object({ node: itinerarySchema })),
     }),
@@ -77,27 +130,50 @@ export async function otpQuery(
   variables: Record<string, unknown>,
 ) {
   const endpoint = process.env.OTP_URL;
-  if (!endpoint) throw new Error("routing_not_configured");
+  if (!endpoint) throw new RoutingFailure("routing_not_configured");
   // Local implementation deliberately cannot make requests to arbitrary hosts.
-  const url = new URL(endpoint);
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    throw new RoutingFailure("routing_not_local");
+  }
   if (
     process.env.VERCEL ||
     url.protocol !== "http:" ||
+    url.username ||
+    url.password ||
     !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)
   )
-    throw new Error("routing_not_local");
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables }),
-    signal: AbortSignal.timeout(10_000),
-    redirect: "error",
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error("routing_unavailable");
-  const data = await response.json();
-  if (data.errors) throw new Error("routing_contract_error");
-  return data as unknown;
+    throw new RoutingFailure("routing_not_local");
+  const signal = AbortSignal.timeout(10_000);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables }),
+      signal,
+      redirect: "error",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new RoutingFailure("routing_unavailable");
+    const data = z
+      .object({ errors: z.array(z.unknown()).optional() })
+      .passthrough()
+      .parse(await response.json());
+    if (data.errors?.length) throw new RoutingFailure("routing_contract_error");
+    return data as unknown;
+  } catch (error) {
+    if (error instanceof RoutingFailure) throw error;
+    if (
+      signal.aborted ||
+      (error instanceof Error && error.name === "TimeoutError")
+    )
+      throw new RoutingFailure("routing_timeout");
+    if (error instanceof SyntaxError || error instanceof z.ZodError)
+      throw new RoutingFailure("routing_invalid_response");
+    throw new RoutingFailure("routing_unavailable");
+  }
 }
 
 export async function routingPlace(id: string) {
@@ -106,43 +182,66 @@ export async function routingPlace(id: string) {
   return place ?? null;
 }
 
-export async function planJourney(input: JourneyRequest) {
+export async function planJourney(request: JourneyRequest) {
   const asOf = new Date().toISOString();
-  if (input.modes.some((mode) => mode !== "WALK" && mode !== "TRANSIT"))
+  const parsed = journeyRequestSchema.safeParse(request);
+  if (!parsed.success)
+    return { status: "unavailable", reason: "invalid_request", asOf };
+  const input = parsed.data;
+  const policy = journeyModePolicy(input.modes);
+  if (!policy)
     return {
       status: "unavailable",
       reason: "unsupported_modes",
       supportedModes: ["TRANSIT", "WALK"],
+      asOf,
     };
-  const [origin, destination] = await Promise.all([
-    routingPlace(input.originId),
-    routingPlace(input.destinationId),
-  ]);
-  if (!origin || !destination)
-    return { status: "unavailable", reason: "unknown_place" };
-  const date = input.departureTime === "now" ? asOf : input.departureTime;
-  const [feed] =
-    await database()`SELECT version,manifest FROM static_feed WHERE source_id='renfe' AND service_start<=(${date}::timestamptz AT TIME ZONE 'Europe/Madrid')::date AND service_end>=(${date}::timestamptz AT TIME ZONE 'Europe/Madrid')::date`;
-  if (!feed)
-    return { status: "unavailable", reason: "outside_static_service_period" };
-  const location = (place: NonNullable<typeof origin>) => ({
-    label: place.name,
-    location:
-      place.source_id === "renfe"
-        ? { stopLocation: { stopLocationId: `renfe:${place.external_id}` } }
-        : {
-            coordinate: {
-              latitude: place.latitude,
-              longitude: place.longitude,
-            },
-          },
-  });
   try {
+    let origin: Awaited<ReturnType<typeof routingPlace>>;
+    let destination: Awaited<ReturnType<typeof routingPlace>>;
+    let feed: { version: string; manifest: { coverage: unknown } } | undefined;
+    const date = input.departureTime === "now" ? asOf : input.departureTime;
+    try {
+      [origin, destination] = await Promise.all([
+        routingPlace(input.originId),
+        routingPlace(input.destinationId),
+      ]);
+      if (!origin || !destination)
+        return { status: "unavailable", reason: "unknown_place", asOf };
+      const [row] =
+        await database()`SELECT version,manifest FROM static_feed WHERE source_id='renfe' AND service_start<=(${date}::timestamptz AT TIME ZONE 'Europe/Madrid')::date AND service_end>=(${date}::timestamptz AT TIME ZONE 'Europe/Madrid')::date`;
+      if (!row)
+        return {
+          status: "unavailable",
+          reason: "outside_static_service_period",
+          asOf,
+        };
+      feed = z
+        .object({
+          version: z.string().min(1),
+          manifest: z.object({ coverage: z.unknown() }),
+        })
+        .parse(row);
+    } catch {
+      throw new RoutingFailure("routing_backend_unavailable");
+    }
+    const location = (place: NonNullable<typeof origin>) => ({
+      label: place.name,
+      location:
+        place.source_id === "renfe"
+          ? { stopLocation: { stopLocationId: `renfe:${place.external_id}` } }
+          : {
+              coordinate: {
+                latitude: place.latitude,
+                longitude: place.longitude,
+              },
+            },
+    });
     await assertGraphVersion(feed.version);
     const raw = await otpQuery(
       `query Journey($origin:PlanLabeledLocationInput!,$destination:PlanLabeledLocationInput!,$date:PlanDateTimeInput,$preferences:PlanPreferencesInput,$modes:PlanModesInput){
       planConnection(origin:$origin,destination:$destination,dateTime:$date,preferences:$preferences,modes:$modes,first:5){
-        routingErrors{code description} edges{node{duration start end walkTime numberOfTransfers
+        routingErrors{code} edges{node{duration start end walkTime numberOfTransfers
           legs{mode from{name}to{name}start{scheduledTime}end{scheduledTime}route{shortName gtfsId}trip{gtfsId}}}}
       }}`,
       {
@@ -158,10 +257,7 @@ export async function planJourney(input: JourneyRequest) {
             timetable: { excludeRealTimeUpdates: true },
           },
         },
-        modes: {
-          direct: input.modes.includes("WALK") ? ["WALK"] : [],
-          directOnly: !input.modes.includes("TRANSIT"),
-        },
+        modes: otpJourneyModes(policy),
       },
     );
     const result = planSchema.parse(raw).data.planConnection;
@@ -170,9 +266,33 @@ export async function planJourney(input: JourneyRequest) {
       .filter(
         (route) =>
           route.walkTime <= input.preferences.maxWalkingMinutes * 60 &&
-          route.numberOfTransfers <= input.preferences.maxTransfers,
+          route.numberOfTransfers <= input.preferences.maxTransfers &&
+          // Defensive check as well as the OTP request flags: never relax modes.
+          (route.legs.every((leg) => leg.mode === "WALK")
+            ? policy.allowWalkingOnly
+            : policy.allowTransit &&
+              route.legs.some((leg) => leg.trip !== null) &&
+              route.legs.every(
+                (leg) => leg.mode === "WALK" || leg.trip !== null,
+              )),
       )
       .slice(0, 3);
+    if (!itineraries.length) {
+      if (
+        result.routingErrors.some(
+          (error) => error.code === "OUTSIDE_SERVICE_PERIOD",
+        )
+      )
+        throw new RoutingFailure("outside_static_service_period");
+      if (
+        result.routingErrors.some(
+          (error) =>
+            error.code === "OUTSIDE_BOUNDS" ||
+            error.code === "LOCATION_NOT_FOUND",
+        )
+      )
+        throw new RoutingFailure("routing_outside_coverage");
+    }
     return {
       status: itineraries.length ? "available" : "no_route",
       provider: "otp-local-2.10.0",
@@ -189,10 +309,15 @@ export async function planJourney(input: JourneyRequest) {
       itineraries,
       errors: result.routingErrors,
     };
-  } catch {
+  } catch (error) {
     return {
       status: "unavailable",
-      reason: "routing_unavailable_or_invalid_response",
+      reason:
+        error instanceof RoutingFailure
+          ? error.reason
+          : error instanceof z.ZodError
+            ? "routing_invalid_response"
+            : "routing_internal_error",
       asOf,
     };
   }
