@@ -90,7 +90,7 @@ export function parseTraffic(xml: string, now = Date.now()) {
       isArray: (name) => name === "pm",
     }).parse(xml),
   ).pms;
-  const match = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/.exec(
+  const match = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2})$/.exec(
     data.fecha_hora,
   );
   if (!match) throw new Error("invalid_traffic_date");
