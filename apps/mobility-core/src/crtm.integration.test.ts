@@ -31,17 +31,23 @@ describe.skipIf(process.env.RUN_CRTM_DB_TESTS !== "1")(
         onnotice: () => {},
       });
       fixture.sql = sql;
-      await sql.unsafe(
-        await readFile(
-          new URL(
-            "../../../infra/postgres/migrations/0014_crtm_static.sql",
-            import.meta.url,
+      for (const file of [
+        "0001_foundation.sql",
+        "0004_local_mobility.sql",
+        "0014_crtm_static.sql",
+        "0016_routing_releases.sql",
+      ])
+        await sql.unsafe(
+          await readFile(
+            new URL(
+              `../../../infra/postgres/migrations/${file}`,
+              import.meta.url,
+            ),
+            "utf8",
           ),
-          "utf8",
-        ),
-      );
+        );
       for (const network of ["metro", "light-rail", "interurban"]) {
-        await sql`INSERT INTO crtm_feed VALUES(${network},'v1','2026-09-20','2026-09-19',now(),'2026-01-01','2026-12-31',${sql.json({ sourceUrl: "https://example.invalid/fixture", termsUrl: "fixture", attribution: "fixture" })})`;
+        await sql`INSERT INTO crtm_feed(dataset_id,version,fetched_at,published_at,imported_at,service_start,service_end,manifest) VALUES(${network},'v1','2026-09-20','2026-09-19',now(),'2026-01-01','2026-12-31',${sql.json({ sourceUrl: "https://example.invalid/fixture", termsUrl: "fixture", attribution: "fixture" })})`;
         await sql`INSERT INTO crtm_stops VALUES(${network},'station','S','Intercambiador',40.4,-3.7,null,1,0),
         (${network},'stop','0072','Andén circular',40.4,-3.7,'station',0,1)`;
         await sql`INSERT INTO crtm_stop_identity(dataset_id,external_id) SELECT dataset_id,external_id FROM crtm_stops WHERE dataset_id=${network}`;
