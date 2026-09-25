@@ -148,11 +148,11 @@ y agente compatibles, y sesiones nuevas para no reutilizar cápsulas anteriores 
 la corrección. No hay llamada al modelo hasta enviar una conversación; estas
 pruebas y builds no ejecutan inferencias.
 
-## Actualización E4 pendiente en el runtime habitual
+## Actualización E4 aplicada mediante E8
 
 Antes de activar el código E4, aplicar `0011_trip_destination.sql` junto con las migraciones pendientes y regenerar/reimportar el export normalizado Renfe para obtener terminales. Con las fuentes locales ya disponibles, `python3 scripts/prepare-otp.py` sin `--download` conserva también la secuencia necesaria; comprobar la versión frente al grafo y después `pnpm gtfs:import`. Una exportación antigua sin `stopTimes` sigue siendo importable, pero no permite deducir terminales. No es necesario reconstruir OTP si la versión GTFS no cambia. [Evidencia E4 y límites](acceptance/2026-09-25-line-destinations.md).
 
-## Actualización E5 pendiente en el runtime habitual
+## Actualización E5 aplicada mediante E8
 
 `0012_history_revisions.sql` conserva el histórico existente y habilita revisiones. Para integrarla, parar Core/worker, respaldar la base y actualizar código y esquema juntos; no mezclar escritores antiguos con esta migración. Una reversión al escritor anterior requiere la copia previa de la base, no borrar revisiones para reconstruir su PK.
 
@@ -175,3 +175,9 @@ Aplicar **todas** las migraciones pendientes con `pnpm db:migrate`, no ejecutar 
 7. Comprobar health de Web/Core/agente y heartbeat del worker. No se exige campaña conversacional ni benchmark.
 
 Rollback: parar nuevamente todos los escritores y restaurar copia de base + revisión de código/export compatibles. No arrancar el escritor antiguo contra 0012 ni borrar revisiones para reconstruir su PK. El arranque/parada normal sigue siendo `pnpm start:local` / Ctrl-C; para actualización bajo demanda usar el chat, y para una actualización manual acotada `pnpm ingest` (abre ventana y consulta proveedores).
+
+### Estado tras entrega E8 (25/09/2026)
+
+PR #16 integrada; base habitual migrada de 0007 a 0012, destinos reimportados con la misma versión de grafo y builds Core/Web/agente actualizados. [Registro de entrega](acceptance/2026-09-25-local-delivery.md).
+
+La instancia entregada está en segundo plano, supervisada por `scripts/start-local.mjs`; PID en `data/runtime/local.pid` y log privado en `data/runtime/e8-local.log`. Para pararla, comprobar primero `ps -p "$(cat data/runtime/local.pid)" -o command=` y que sea el supervisor de este repositorio, después `kill -TERM "$(cat data/runtime/local.pid)"`. No matar todos los procesos Node. Para arrancar de nuevo en primer plano: `pnpm start:local`; Ctrl-C para detener. Postgres/Redis/OTP se gestionan por separado con los comandos de infraestructura anteriores.
