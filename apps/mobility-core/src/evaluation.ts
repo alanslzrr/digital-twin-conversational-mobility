@@ -1,6 +1,7 @@
 import { localIngestionEnabled } from "@mobility/domain";
 import { z } from "zod";
 import { getAuth } from "./better-auth";
+import { budgetAction, evaluateBudget } from "./conversation-budget";
 import { database } from "./database";
 
 const principal = z.string().uuid();
@@ -9,41 +10,51 @@ const session = z
   .min(1)
   .max(160)
   .regex(/^[A-Za-z0-9_-]+$/);
-export const evaluationAction = z.discriminatedUnion("action", [
-  z
-    .object({
-      action: z.literal("identify"),
-    })
-    .strict(),
-  z
-    .object({
-      action: z.literal("authorize"),
-      principalId: principal,
-      sessionId: session.optional(),
-      consume: z.boolean(),
-    })
-    .strict(),
-  z
-    .object({
-      action: z.literal("register"),
-      principalId: principal,
-      sessionId: session,
-    })
-    .strict(),
-  z
-    .object({
-      action: z.literal("revoke"),
-      principalId: principal,
-      sessionId: session,
-    })
-    .strict(),
-]);
+export const evaluationAction = z
+  .discriminatedUnion("action", [
+    z
+      .object({
+        action: z.literal("identify"),
+      })
+      .strict(),
+    z
+      .object({
+        action: z.literal("authorize"),
+        principalId: principal,
+        sessionId: session.optional(),
+        consume: z.boolean(),
+      })
+      .strict(),
+    z
+      .object({
+        action: z.literal("register"),
+        principalId: principal,
+        sessionId: session,
+      })
+      .strict(),
+    z
+      .object({
+        action: z.literal("revoke"),
+        principalId: principal,
+        sessionId: session,
+      })
+      .strict(),
+  ])
+  .or(budgetAction);
 export type EvaluationAction = z.infer<typeof evaluationAction>;
 
 export async function evaluateAccess(
   input: EvaluationAction,
   headers = new Headers(),
 ) {
+  const budget = budgetAction.safeParse(input);
+  if (budget.success) return evaluateBudget(budget.data);
+  if (
+    input.action === "budget_begin" ||
+    input.action === "budget_dispatch" ||
+    input.action === "budget_finish"
+  )
+    throw new Error("Invalid budget action");
   const sql = database();
   if (input.action === "identify") {
     const session = await getAuth().api.getSession({ headers });
