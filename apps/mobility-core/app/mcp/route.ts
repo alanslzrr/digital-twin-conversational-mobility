@@ -8,6 +8,7 @@ import {
   incidentsInputSchema,
   journeyRequestSchema,
   parkingInputSchema,
+  resolveAddressInputSchema,
   resolvePlaceInputSchema,
   roadInputSchema,
   sourceHealthInputSchema,
@@ -16,6 +17,7 @@ import { createMcpHandler } from "mcp-handler";
 import { authorize } from "../../src/auth";
 import { crtmTimetable } from "../../src/crtm";
 import { emtArrivals } from "../../src/emt-arrivals";
+import { resolveAddress } from "../../src/geocoding";
 import { historicalQuery } from "../../src/history";
 import { activate } from "../../src/ingestion";
 import { mcpResult } from "../../src/mcp-result";
@@ -78,6 +80,18 @@ const handler = createMcpHandler(
       },
       ({ query, limit, source, network }) =>
         run(() => resolvePlace(query, limit, source, network)),
+    );
+    server.registerTool(
+      "resolve_address",
+      {
+        title: "Resolve a public address with catalog-first fallback",
+        description:
+          "Resolve Madrid addresses: local mobility catalogs first, then configured external geocoder with explicit consent, bounded shared rate and cache. Preserve candidates and ask to confirm ambiguity/precision. No autocomplete/bulk lookup or confidential/personal addresses. Attribution/provenance required.",
+        inputSchema: resolveAddressInputSchema,
+        annotations,
+      },
+      ({ query, allowExternal }) =>
+        run(() => resolveAddress(query, allowExternal)),
     );
     server.registerTool(
       "plan_journey",
