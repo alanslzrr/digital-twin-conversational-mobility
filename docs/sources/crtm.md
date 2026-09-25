@@ -79,7 +79,8 @@ para respetar cambios de horario. No es replay de lo conocido en una fecha.
 
 Las excepciones prevalecen sobre el calendario, incluidos servicios definidos solo
 por excepciones. Una estación consulta sus andenes de la misma red. Las visitas
-repetidas mantienen secuencia. Destino: stop_headsign, después trip_headsign, o
+repetidas mantienen secuencia; la última visita sin parada posterior no es una
+salida, aunque el feed publique departure_time y pickup_type=0. Destino: stop_headsign, después trip_headsign, o
 **desconocido**. Se omiten puntos sin hora, sin interpolar; timepoint=0 es aproximado.
 Las ventanas de frecuencia desplazan la plantilla según la secuencia de parada y
 mantienen exact_times, intervalo y extremo final exclusivo; no se fabrican llegadas.
@@ -129,3 +130,7 @@ Comprobación MCP del runtime: `pnpm smoke:mobility --crtm-only`. No llama al mo
 ni a proveedores ni OTP; como las otras herramientas, puede renovar la ventana de
 actividad local. Los datos y la compilación se actualizan explícitamente, no mediante
 un nuevo scheduler.
+
+El catálogo puede incluir paradas sin stop_times (por ejemplo, `par_8_09568` en el
+export interurbano comprobado). Resolver una parada no garantiza disponer de su
+horario; una respuesta vacía no demuestra ausencia de servicio real.
