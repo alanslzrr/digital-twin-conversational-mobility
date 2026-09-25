@@ -13,7 +13,7 @@ export function sourceErrorCode(error: unknown) {
     return "upstream_timeout";
   if (error.name === "ZodError") return "source_schema_invalid";
   if (error instanceof TypeError) return "upstream_network_error";
-  return /^(upstream_http_\d{3}|static_feed_missing_or_expired|out_of_order_feed|invalid_observation_time|aemet_credentials_missing|aemet_data_unavailable|invalid_weather_resource|no_valid_weather_observation|unexpected_weather_station)$/.test(
+  return /^(upstream_http_\d{3}|static_feed_missing_or_expired|out_of_order_feed|invalid_observation_time|emt_credentials_missing|emt_authentication_failed|emt_data_unavailable|aemet_credentials_missing|aemet_data_unavailable|invalid_weather_resource|no_valid_weather_observation|unexpected_weather_station)$/.test(
     error.message,
   )
     ? error.message
@@ -86,13 +86,22 @@ export async function fetchText(
   accept = "application/json",
   options: Pick<RequestInit, "method" | "headers" | "body"> = {},
 ) {
-  const response = await fetch(url, {
-    ...options,
-    headers: { Accept: accept, ...options.headers },
-    signal: AbortSignal.timeout(12_000),
-    redirect: "error",
-    cache: "no-store",
-  });
+  const request = () =>
+    fetch(url, {
+      ...options,
+      headers: { Accept: accept, ...options.headers },
+      signal: AbortSignal.timeout(12_000),
+      redirect: "error",
+      cache: "no-store",
+    });
+  // One bounded retry for connection failures only; HTTP/schema errors use job backoff.
+  let response: Response;
+  try {
+    response = await request();
+  } catch (error) {
+    if (!(error instanceof TypeError)) throw error;
+    response = await request();
+  }
   if (!response.ok || !response.body)
     throw new Error(`upstream_http_${response.status}`);
   const chunks: Uint8Array[] = [];
