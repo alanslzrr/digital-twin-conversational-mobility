@@ -554,4 +554,33 @@ it("searches one bounded earlier window and keeps a still-boardable delayed trai
     String(fetchMock.mock.calls[1]?.[1]?.body),
   ).variables;
   expect(variables.date.earliestDeparture).toBe("2026-09-25T08:04:00.000Z");
+  expect(result).toMatchObject({
+    itineraries: [{ legs: [{ basis: "realtime_estimate" }] }],
+  });
+  const scheduledOptions = [1, 2, 3].map((id) => ({
+    ...itinerary,
+    legs: [
+      {
+        ...itinerary.legs[0],
+        serviceDate: "2026-09-25",
+        trip: { gtfsId: `renfe:other-${id}` },
+      },
+    ],
+  }));
+  fetchMock.mockImplementation(async () =>
+    Response.json({
+      data: {
+        planConnection: {
+          routingErrors: [],
+          edges: [...scheduledOptions, delayed].map((node) => ({ node })),
+        },
+      },
+    }),
+  );
+  const selected = await planJourney({ ...request, departureTime: "now" });
+  expect(selected).toMatchObject({
+    status: "available",
+    realtimeApplied: false,
+    basis: "scheduled",
+  });
 });
