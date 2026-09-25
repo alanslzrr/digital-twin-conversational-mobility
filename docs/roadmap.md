@@ -12,7 +12,7 @@ Actualizado el **25/09/2026**, tras geocodificación controlada y routing multio
 
 **Geocodificación implementada en PR #25**: catálogos primero, caché, consentimiento, ambigüedad, procedencia y límites globales. Migración 0015 instalada. **El proveedor externo permanece desactivado hasta su elección informada**; no se presenta como servicio externo disponible.
 
-**Routing ampliado instalado localmente (PR #26)**: Renfe, EMT, Metro Ligero e interurbanos; actualización explícita de GTFS/OSM/catálogos/grafo mediante releases verificados, activación en mantenimiento y rollback comprobado. RT Renfe se aplica solo con identidad/fecha/versión/frescura válidas; avisos EMT se adjuntan por línea y vigencia sin inventar desvíos. Metro conserva catálogo pero horarios caducados quedan fuera del grafo. [Operación y límites](routing-releases.md).
+**Routing ampliado instalado localmente (PR #26)**: Renfe, EMT, Metro Ligero e interurbanos; actualización explícita de GTFS/OSM/catálogos/grafo mediante releases verificados, activación en mantenimiento y rollback comprobado. RT Renfe se aplica solo con identidad/fecha/versión/frescura válidas; avisos EMT se adjuntan por línea y vigencia sin inventar desvíos. Metro conserva catálogo pero horarios caducados quedan fuera del grafo. [Operación y límites](routing-releases.md), [evidencia de instalación y regresiones](acceptance/2026-09-25-routing-releases.md).
 
 **Siguiente bloque funcional: DGT y herramientas agregadas**, sin olvidar la elección del geocoder y los pendientes de cobertura/RT/replay descritos abajo.
 
