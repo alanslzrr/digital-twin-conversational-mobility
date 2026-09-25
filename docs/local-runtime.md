@@ -240,3 +240,8 @@ importador preserva UUIDs y sustituye cada red en una transacción; no sincroniz
 grafo. Para rollback de código, parar los procesos y reconstruir la revisión previa;
 0014 es aditiva y puede permanecer. Para restaurar todo el estado, usar el respaldo
 previo con todos los escritores parados. No borrar manualmente identidades CRTM.
+
+
+## Actualización de routing multioperador
+
+La instalación usa releases inmutables con `data/otp` como symlink. Para actualizar GTFS/OSM/catálogos/grafo, activar, revertir o recuperar una transición interrumpida, seguir [routing-releases.md](routing-releases.md). No ejecutar el preparador/build legacy sobre el release activo. El [acta local](acceptance/2026-09-25-routing-releases.md) registra migraciones 0015–0016, backup y rollback comprobado. El geocoder externo sigue desactivado hasta elegir proveedor.
