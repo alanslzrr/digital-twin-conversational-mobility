@@ -12,12 +12,13 @@ import {
 } from "@mobility/contracts";
 import { createMcpHandler } from "mcp-handler";
 import { authorize } from "../../src/auth";
+import { historicalQuery } from "../../src/history";
 import { activate } from "../../src/ingestion";
+import { mcpResult } from "../../src/mcp-result";
 import {
   bikes,
   departures,
   environment,
-  history,
   incidents,
   parking,
   resolvePlace,
@@ -34,17 +35,13 @@ const annotations = {
   idempotentHint: true,
   openWorldHint: false,
 };
-const result = (value: object) => ({
-  content: [{ type: "text" as const, text: JSON.stringify(value) }],
-  structuredContent: value as Record<string, unknown>,
-});
 async function run(action: () => Promise<object>) {
   try {
     await activate();
-    return result(await action());
+    return mcpResult(await action());
   } catch {
     return {
-      ...result({
+      ...mcpResult({
         status: "unavailable",
         reason: "mobility_backend_unavailable",
       }),
@@ -148,11 +145,11 @@ const handler = createMcpHandler(
       {
         title: "Historical observation index",
         description:
-          "Index of retained observations within 24 hours. event may include later corrections; knowledge includes only information ingested by that instant. Includes EMT published notices. Not a full network reconstruction.",
+          "Historical state / histórico BiciMAD, Renfe, EMT, weather, air, traffic and parking within retained 24 hours. Supply at (ISO offset) OR minutesAgo (server clock). Use knowledge for what the system knew then; event may include later corrections. Partial index with at most five sample entities, not a full reconstruction.",
         inputSchema: historyInputSchema,
         annotations,
       },
-      ({ source, at, mode }) => run(() => history(source, at, mode)),
+      (input) => run(() => historicalQuery(input)),
     );
     server.registerTool(
       "get_parking",
