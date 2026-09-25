@@ -47,3 +47,39 @@ export function getFreshness(
     ageSeconds: Math.floor(Math.max(0, ageMs) / 1_000),
   };
 }
+
+// Entity time never falls back to the collection's newest observation.
+export function entityObservation(
+  collection: Provenance,
+  observedAt: string | null | undefined,
+  maxAgeSeconds: number,
+  now = new Date(),
+) {
+  const provenance = observedAt ? { ...collection, observedAt } : null;
+  return {
+    provenance,
+    freshness: getFreshness(provenance, maxAgeSeconds, now),
+  };
+}
+
+export function temporalCoverage(
+  collection: Provenance,
+  times: readonly (string | null | undefined)[],
+  maxAgeSeconds: number,
+  now = new Date(),
+) {
+  const states = times.map((time) =>
+    entityObservation(collection, time, maxAgeSeconds, now),
+  );
+  const counts = { total: times.length, fresh: 0, stale: 0, unavailable: 0 };
+  for (const state of states) counts[state.freshness.status]++;
+  return {
+    ...counts,
+    status:
+      counts.total === 0
+        ? "unavailable"
+        : counts.fresh === counts.total
+          ? "fresh"
+          : "partial_or_unavailable",
+  };
+}
