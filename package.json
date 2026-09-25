@@ -39,7 +39,9 @@
     "smoke:mobility": "node --env-file-if-exists=.env.local scripts/smoke-mobility.mjs",
     "smoke:routing": "node scripts/smoke-routing.mjs",
     "start:local": "node scripts/start-local.mjs",
-    "otp:benchmark": "node scripts/benchmark-otp.mjs"
+    "otp:benchmark": "node scripts/benchmark-otp.mjs",
+    "budget:report": "node --env-file-if-exists=.env.local scripts/report-conversation-budget.mjs",
+    "test:budget:db": "RUN_BUDGET_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/conversation-budget.integration.test.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
