@@ -9,7 +9,25 @@ export function preserveEvidence(
   messages: readonly ModelMessage[],
 ): Evidence {
   const incoming: string[] = [];
+  let checkpoint = false;
   for (const message of messages) {
+    // EVE 0.65 uses a structural kind, not text, before its generated summary.
+    if (checkpoint) {
+      if (message.role !== "assistant")
+        throw new Error(
+          "Unexpected EVE checkpoint; original history must be retained",
+        );
+      checkpoint = false;
+      continue;
+    }
+    if (
+      message.role === "user" &&
+      "kind" in message &&
+      message.kind === "context.compaction"
+    ) {
+      checkpoint = true;
+      continue;
+    }
     // EVE 0.65.0 marks recalled records. Do not recursively copy our own capsule.
     if (
       "metadata" in message &&
@@ -26,6 +44,10 @@ export function preserveEvidence(
     if (Array.isArray(content) && content.length === 0) continue;
     incoming.push(JSON.stringify({ role: message.role, content }));
   }
+  if (checkpoint)
+    throw new Error(
+      "Incomplete EVE checkpoint; original history must be retained",
+    );
   // Only remove a contiguous repeated prefix. Repeated preferences after a correction
   // are meaningful and must not be collapsed by a Set.
   let overlap = Math.min(previous.entries.length, incoming.length);
