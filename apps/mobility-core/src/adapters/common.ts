@@ -12,7 +12,29 @@ export function sourceErrorCode(error: unknown) {
   if (error.name === "TimeoutError" || error.name === "AbortError")
     return "upstream_timeout";
   if (error.name === "ZodError") return "source_schema_invalid";
-  if (error instanceof TypeError) return "upstream_network_error";
+  if (error instanceof TypeError) {
+    // Inspect only bounded allowlisted cause codes, never expose URLs/messages.
+    const cause = error.cause;
+    const code =
+      cause && typeof cause === "object" && "code" in cause
+        ? cause.code
+        : undefined;
+    if (code === "UND_ERR_CONNECT_TIMEOUT" || code === "ETIMEDOUT")
+      return "upstream_connection_timeout";
+    if (code === "ENOTFOUND" || code === "EAI_AGAIN")
+      return "upstream_dns_error";
+    if (
+      typeof code === "string" &&
+      [
+        "CERT_HAS_EXPIRED",
+        "DEPTH_ZERO_SELF_SIGNED_CERT",
+        "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "ERR_TLS_CERT_ALTNAME_INVALID",
+      ].includes(code)
+    )
+      return "upstream_tls_error";
+    return "upstream_network_error";
+  }
   return /^(upstream_http_\d{3}|static_feed_missing_or_expired|out_of_order_feed|invalid_observation_time|emt_credentials_missing|emt_authentication_failed|emt_data_unavailable|aemet_credentials_missing|aemet_data_unavailable|invalid_weather_resource|no_valid_weather_observation|unexpected_weather_station)$/.test(
     error.message,
   )
