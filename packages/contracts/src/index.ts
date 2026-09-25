@@ -116,6 +116,7 @@ export const parkingInputSchema = roadInputSchema;
 export const historyInputSchema = z.object({
   source: z.enum([
     "aemet",
+    "emt",
     "renfe",
     "bicimad",
     "madrid-air",
@@ -123,4 +124,10 @@ export const historyInputSchema = z.object({
     "madrid-parking",
   ]),
   at: z.iso.datetime({ offset: true }),
+  mode: z
+    .enum(["event", "knowledge"])
+    .default("event")
+    .describe(
+      "event: latest retained revision of observations at/before at, possibly learned later. knowledge: only revisions ingested at/before at.",
+    ),
 });
