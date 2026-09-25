@@ -2,7 +2,7 @@
 
 Actualizado el **25/09/2026**, tras el reporte manual del usuario y reproducción contra MCP/OTP. Base auditada: `f9ef91e`.
 
-**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; presupuesto conversacional y fiabilidad siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
+**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; el control de presupuesto conversacional está implementado y probado offline en la rama E2, pero su aceptación conversacional real y la fiabilidad continuada siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
 
 Evidencia, evaluación individual de los 13 ejemplos y hallazgos: [auditoría completa](audits/2026-09-25-evaluation.md). Instrucciones operativas: [runtime local](local-runtime.md).
 
@@ -23,7 +23,7 @@ Ejecución iniciada del [plan E0–E8](plans/2026-09-25-remediation.md). [Primer
 Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 
 - [x] **F01 / P0 — routing (rama local):** mapping TRANSIT→OTP corregido, regresiones de modos/preferencias/errores y tres baterías MCP de 11 casos aprobadas. Entrada del reporte: tres itinerarios previstos de 13 min. [Evidencia y límites](acceptance/2026-09-25-routing.md). Integración en main/runtime habitual y aceptación conversacional siguen separadas.
-- [ ] **F02 / P0 — presupuesto:** telemetría por turno/sesión, control efectivo de pasos/tokens y compactación. Ejecutar batería aislada y continua sin ampliaciones inesperadas. Mantener modelo fijo y UI oficial; no aumentar límites como sustituto del diagnóstico.
+- [ ] **F02 / P0 — presupuesto (implementado offline):** ledger persistente, reservas previas por intento, límites globales/concurrencia/reintentos, métricas y cápsula de evidencia acotada. 181 pruebas offline + 12 DB aisladas aprobadas. [Evidencia E2 y límites](audits/2026-09-25-e2-instrumentation.md). Aceptación T01–T13 con modelo pendiente por decisión explícita de no gastar; `pnpm check` bloqueado en Turbopack por permisos del worker CSS. Sin integración en main/runtime habitual.
 - [ ] **F03 / P1 — continuidad:** registrar intentos/heartbeat/ventana/lease/backoff, probar recuperación y proveedor lento; medir objetivos de frescura sin inventar timestamps.
 - [ ] **F04 / P1 — identidad de línea:** C-5/C5 equivalentes; no confundir C4/C4a/C4b ni EMT002/2; línea inexistente ≠ línea sin avisos.
 - [ ] **F05 / P1 — salidas útiles:** destino/sentido trazable cuando la fuente lo permita, ausencia explícita en caso contrario; no usar llegada como salida.
