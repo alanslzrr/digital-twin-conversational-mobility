@@ -2,15 +2,17 @@
 
 Actualizado el **25/09/2026**, tras el reporte manual del usuario y reproducción contra MCP/OTP. Base auditada: `f9ef91e`.
 
-**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** La consulta central de rutas tiene un fallo reproducible con `TRANSIT` y la evaluación continua necesita control de presupuesto/fiabilidad. Las 74 pruebas aprobadas no cubrían esos casos.
+**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; presupuesto conversacional y fiabilidad siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
 
 Evidencia, evaluación individual de los 13 ejemplos y hallazgos: [auditoría completa](audits/2026-09-25-evaluation.md). Instrucciones operativas: [runtime local](local-runtime.md).
+
+Ejecución iniciada del [plan E0–E8](plans/2026-09-25-remediation.md). [Primera entrega y matriz de aceptación](acceptance/2026-09-25-routing.md): E0 mínimo y E1 implementados localmente, sin integración en main ni reinicio del runtime habitual. Gasto, benchmarks y despliegues conservan autorización separada.
 
 ## Pasos 1–5: qué hay y qué falta
 
 | Paso | Implementado | Estado / falta para cierre |
 | --- | --- | --- |
-| 1. OTP local | Grafo real Renfe/OSM versionado; benchmark Atocha/Chamartín/Sol; rutas previstas | **Parcial, aceptación fallida.** Corregir TRANSIT-only; probar límites, pares, horarios y accesibilidad; medir RAM máxima de build. Metro/EMT y RT en itinerarios no implementados. |
+| 1. OTP local | Grafo real Renfe/OSM versionado; benchmark Atocha/Chamartín/Sol; rutas previstas; fix TRANSIT probado por MCP local | **Parcial.** F01 corregido en rama; faltan aceptación EVE, ampliar cobertura de pares/accesibilidad y medir RAM máxima de build. Metro/EMT y RT en itinerarios no implementados. |
 | 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Parcial.** Alias C-5/C5, destinos de viajes, replay y cambios diarios; cancelaciones/NO_DATA/SKIPPED; RT en routing y semántica histórica. |
 | 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **Implementada, fiabilidad pendiente.** Diagnosticar huecos, heartbeat/latencias y fallos por etapa; suspender/reanudar y aislar fuentes lentas. Cadencia configurada no equivale a cadencia medida. |
 | 4. Dominio/MCP/EVE | Diez tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** Control de tokens/sesiones largas, normalización, histórico; geocoder general y herramientas de línea/red/snapshot faltantes. |
@@ -20,7 +22,7 @@ Evidencia, evaluación individual de los 13 ejemplos y hallazgos: [auditoría co
 
 Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 
-- [ ] **F01 / P0 — routing:** corregir mapping TRANSIT→OTP. Test contractual del error GraphQL, variantes TRANSIT/WALK y errores diferenciados. La entrada real del reporte debe devolver rutas o ausencia legítima, no error interno.
+- [x] **F01 / P0 — routing (rama local):** mapping TRANSIT→OTP corregido, regresiones de modos/preferencias/errores y tres baterías MCP de 11 casos aprobadas. Entrada del reporte: tres itinerarios previstos de 13 min. [Evidencia y límites](acceptance/2026-09-25-routing.md). Integración en main/runtime habitual y aceptación conversacional siguen separadas.
 - [ ] **F02 / P0 — presupuesto:** telemetría por turno/sesión, control efectivo de pasos/tokens y compactación. Ejecutar batería aislada y continua sin ampliaciones inesperadas. Mantener modelo fijo y UI oficial; no aumentar límites como sustituto del diagnóstico.
 - [ ] **F03 / P1 — continuidad:** registrar intentos/heartbeat/ventana/lease/backoff, probar recuperación y proveedor lento; medir objetivos de frescura sin inventar timestamps.
 - [ ] **F04 / P1 — identidad de línea:** C-5/C5 equivalentes; no confundir C4/C4a/C4b ni EMT002/2; línea inexistente ≠ línea sin avisos.
