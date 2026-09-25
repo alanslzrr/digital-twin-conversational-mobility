@@ -178,3 +178,39 @@ export function applyRoutingEvidence(
     ),
   };
 }
+
+export type RoutingLineAlert = {
+  id: string;
+  title: string;
+  lines: string[];
+  startsAt: string | null;
+  endsAt: string | null;
+  effect: string | null;
+};
+// EMT's published line labels are case-insensitive, but leading zeroes carry
+// meaning (e.g. 001 != 1). A line-level notice does not identify a cancelled trip.
+export function matchingEmtRoutingAlerts(
+  leg: RoutingLeg,
+  alerts: RoutingLineAlert[],
+) {
+  if (!leg.route?.gtfsId.startsWith("emt:") || !leg.route.shortName) return [];
+  const label = leg.route.shortName.trim().toUpperCase();
+  return alerts
+    .filter(
+      (alert) =>
+        alert.lines.some((line) => line.trim().toUpperCase() === label) &&
+        alert.startsAt &&
+        alert.endsAt &&
+        Date.parse(alert.startsAt) < Date.parse(alert.endsAt) &&
+        Date.parse(alert.startsAt) <= Date.parse(leg.end.scheduledTime) &&
+        Date.parse(alert.endsAt) > Date.parse(leg.start.scheduledTime),
+    )
+    .map((alert) => ({
+      ...alert,
+      source: "emt",
+      impactApplied: false,
+      scope: "published_line_notice",
+      warning:
+        "El aviso puede afectar al trayecto; no se ha reconstruido el desvío ni demostrado la cancelación del viaje.",
+    }));
+}

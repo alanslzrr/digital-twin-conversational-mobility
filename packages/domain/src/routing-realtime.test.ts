@@ -152,3 +152,36 @@ it("rejects invalid and far-future observations", () => {
   expect(routingObservationFresh("invalid", now, 40)).toBe(false);
   expect(routingObservationFresh("2026-09-25T08:00:31Z", now, 40)).toBe(false);
 });
+it("annotates overlapping EMT public-line notices without cancelling or conflating zero-prefixed labels", async () => {
+  const { matchingEmtRoutingAlerts } = await import("./routing-realtime");
+  const bus = { ...leg, route: { gtfsId: "emt:001", shortName: "1" } };
+  const notice = {
+    id: "emt-a",
+    title: "Diversion",
+    lines: ["1"],
+    startsAt: now,
+    endsAt: "2026-09-25T10:00:00Z",
+    effect: "05 - Desvío programado",
+  };
+  expect(matchingEmtRoutingAlerts(bus, [notice])).toMatchObject([
+    { impactApplied: false, source: "emt" },
+  ]);
+  expect(
+    matchingEmtRoutingAlerts(
+      { ...bus, route: { gtfsId: "emt:361", shortName: "001" } },
+      [notice],
+    ),
+  ).toEqual([]);
+  expect(
+    matchingEmtRoutingAlerts(bus, [{ ...notice, startsAt: null }]),
+  ).toEqual([]);
+  expect(
+    matchingEmtRoutingAlerts(bus, [
+      {
+        ...notice,
+        startsAt: "2026-09-26T08:00:00Z",
+        endsAt: "2026-09-26T10:00:00Z",
+      },
+    ]),
+  ).toEqual([]);
+});
