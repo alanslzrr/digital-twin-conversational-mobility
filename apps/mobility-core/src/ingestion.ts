@@ -250,7 +250,8 @@ export async function ingest(id: JobId) {
       await tx`INSERT INTO raw_batch(source_id,object_key,sha256,fetched_at,expires_at,parser_version,content_type) VALUES (${policy.source},${filename},${hash},${ingested},${new Date(ingested.getTime() + 86400000)},'local-v2',${id === "madrid-traffic" || id === "madrid-parking" ? "application/xml" : "application/json"}) ON CONFLICT (object_key) DO UPDATE SET expires_at=excluded.expires_at`;
       if (!historicalOnly)
         await tx`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES (${id},${policy.source},${observed},${ingested},'provisional',${reference},${tx.json(payload)}) ON CONFLICT (job_id) DO UPDATE SET observed_at=excluded.observed_at,ingested_at=excluded.ingested_at,quality=excluded.quality,raw_reference=excluded.raw_reference,payload=excluded.payload`;
-      const parserVersion = "local-v2";
+      const parserVersion =
+        id === "renfe-alerts" ? "local-v3-selectors" : "local-v2";
       const contentHash = createHash("sha256")
         .update(JSON.stringify({ parserVersion, payload }))
         .digest("hex");
