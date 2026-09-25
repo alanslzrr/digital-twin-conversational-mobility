@@ -49,7 +49,12 @@ export const journeyRequestSchema = z.object({
   originId: z.uuid(),
   destinationId: z.uuid(),
   departureTime: z.union([z.literal("now"), z.iso.datetime({ offset: true })]),
-  modes: z.array(z.enum(["TRANSIT", "WALK", "BIKE", "CAR"])).min(1),
+  modes: z
+    .array(z.enum(["TRANSIT", "WALK", "BIKE", "CAR"]))
+    .min(1)
+    .describe(
+      "TRANSIT requires a transit leg and allows walking access/egress/transfers within maxWalkingMinutes. WALK allows entirely walking routes. TRANSIT+WALK allows either. BIKE/CAR are currently unsupported.",
+    ),
   preferences: z.object({
     maxWalkingMinutes: z.number().int().min(0).max(120).default(15),
     maxTransfers: z.number().int().min(0).max(6).default(2),
@@ -57,6 +62,25 @@ export const journeyRequestSchema = z.object({
   }),
 });
 export type JourneyRequest = z.infer<typeof journeyRequestSchema>;
+
+export const routingFailureReasonSchema = z.enum([
+  "invalid_request",
+  "unsupported_modes",
+  "unknown_place",
+  "outside_static_service_period",
+  "graph_not_ready",
+  "graph_static_version_mismatch",
+  "routing_not_configured",
+  "routing_not_local",
+  "routing_timeout",
+  "routing_unavailable",
+  "routing_contract_error",
+  "routing_invalid_response",
+  "routing_outside_coverage",
+  "routing_backend_unavailable",
+  "routing_internal_error",
+]);
+export type RoutingFailureReason = z.infer<typeof routingFailureReasonSchema>;
 
 export const resolvePlaceInputSchema = z.object({
   query: z.string().trim().min(2).max(120),
