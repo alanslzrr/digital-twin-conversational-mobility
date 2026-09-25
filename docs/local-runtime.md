@@ -59,6 +59,7 @@ Los umbrales son políticas de evaluación, no garantías de los proveedores. Lo
 - El grafo actual contiene 95 estaciones y 118 variantes de ruta del fichero descargado. Calendario: 23/09/2026–22/10/2026. **No sirve indefinidamente**: actualizar GTFS, reconstruir OTP e importar la misma versión antes de su vencimiento.
 - OSM: extracto Geofabrik Madrid. Algunas líneas de Cercanías llegan fuera del extracto; no se garantiza acceso peatonal completo allí.
 - `plan_journey`: rutas **previstas**, Renfe + caminar. No aplica RT al itinerario ni incluye Metro/EMT/bici/coche. Rechaza modos no implementados y fechas fuera del calendario; filtra tiempo total a pie y transbordos. La opción de silla de ruedas no garantiza ascensores operativos.
+- Contrato de modos tras F01: `TRANSIT` exige un tramo de transporte público y permite acceso/egreso/transbordos a pie dentro del límite; `WALK` permite rutas íntegramente peatonales; `TRANSIT+WALK` permite cualquiera de las dos. No se relajan minutos a pie ni transbordos para encontrar una alternativa. Errores de contrato, timeout, grafo y cobertura se distinguen de `no_route`.
 - `get_departures`: horarios OTP y estimaciones Renfe cuando coinciden viaje/parada y están frescas. Una estimación de llegada NO es una de salida. Un viaje sin RT conserva base `scheduled`, nunca "puntual".
 - `resolve_place`: estaciones Renfe y BiciMAD importadas, búsqueda sin acentos; candidatos ambiguos requieren aclaración. No geocodifica direcciones arbitrarias.
 - BiciMAD usa GBFS **oficial EMT**, no el feed comunitario con nombre similar. Se conservan `last_reported`, flags de servicio y TTL.
@@ -84,6 +85,7 @@ pnpm smoke:evaluation        # cuentas temporales 4/5; sin inferencia
 pnpm smoke:evaluation --live-mobility  # EVE real: lugares, ruta, meteorología y salud
 pnpm smoke:evaluation --live-weather   # Consulta meteorológica conversacional acotada
 pnpm smoke:mobility          # fuentes reales (+ AEMET si hay clave) + PostGIS + OTP + MCP; abre ventana
+pnpm smoke:routing           # aceptación MCP/OTP sin modelo; renueva ventana de actividad
 pnpm otp:benchmark --restart # reinicia SOLO OTP; 20 consultas / cuatro parejas
 ```
 
@@ -91,7 +93,9 @@ Para que estas pruebas controlen los ticks sin carreras con otro worker, usar `p
 
 Una conversación puede requerir varias peticiones al proveedor: EVE descubre herramientas (`connection_search`), las ejecuta y después redacta. Un límite de tres peticiones no garantiza completar una consulta con varias herramientas. Los modos `--live*` requieren autorización de consumo y guardan solo un resumen de acciones/respuesta visible en `data/validation/`, nunca razonamiento interno ni credenciales.
 
-Los tests unitarios y CI no necesitan API keys ni descargan datos de movilidad. Los dos últimos comandos son opt-in y requieren red hacia los proveedores de datos; AEMET solo se prueba cuando tiene clave. No son parte de `pnpm check`.
+Los tests unitarios y CI no necesitan API keys ni descargan datos de movilidad. `smoke:mobility` es opt-in y requiere red hacia proveedores; AEMET solo se prueba cuando tiene clave. `smoke:routing` usa servicios locales y el benchmark OTP requiere autorización operativa separada. Ninguno forma parte de `pnpm check`.
+
+`smoke:routing` requiere Core/OTP/Postgres locales y token MCP vigente; no reinicia servicios ni llama directamente a proveedores externos. Admite `--port=3011` para un Core temporal y `--at=2026-09-25T08:08:58.823Z` para reproducir el instante de la auditoría mientras exista ese calendario. Guarda entradas, resultados, versiones y latencia bajo `data/validation/routing-*/result.json`; falla si una ruta positiva esperada no aparece. [Evidencia de E1 y matriz pendiente](acceptance/2026-09-25-routing.md).
 
 La conversación real del 23/09/2026 completó resolución Atocha/Chamartín, ruta prevista de 13 min, observación AEMET con hora/edad y ausencia de EMT. Fueron cinco peticiones en el intento completado; un intento anterior se detuvo al agotar el límite inicial de tres. Tras autorización ampliada: ocho peticiones totales. No se cambiaron modelo, autenticación ni interfaz.
 
