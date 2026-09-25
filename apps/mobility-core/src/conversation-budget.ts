@@ -49,22 +49,24 @@ const denied = (status = 429) => ({
   body: { error: "conversation_budget_denied" },
 });
 
-/** All admission and reconciliation serialize on the campaign row, across workers. */
+/** Admission and reconciliation share a transaction lock across campaigns/workers. */
 export async function evaluateBudget(input: BudgetAction) {
   const sql = database();
   return sql.begin(async (tx) => {
+    // Dedicated namespace/key; acquire before row locks, including reconciliation.
+    await tx`SELECT pg_advisory_xact_lock(1297040457, 2)`;
     const [campaign] =
       input.action === "budget_begin"
         ? await tx`SELECT * FROM conversation_campaign WHERE enabled FOR UPDATE`
         : await tx`SELECT c.* FROM conversation_campaign c JOIN conversation_attempt a ON a.campaign_id=c.id WHERE a.id=${input.attemptId} FOR UPDATE OF c`;
     if (!campaign) return denied();
+    const [owner] =
+      await tx`SELECT s.session_id FROM evaluation_session s JOIN evaluator e ON e.id=s.evaluator_id WHERE s.session_id=${input.sessionId} AND e.id=${input.principalId} AND e.enabled AND e.expires_at>clock_timestamp() AND s.revoked_at IS NULL AND s.expires_at>clock_timestamp() FOR UPDATE OF e,s`;
+    if (!owner) return denied(403);
     const [clock] =
       await tx`SELECT (extract(epoch FROM clock_timestamp())*1000)::bigint AS ms`;
     const now = Number(clock?.ms);
     if (!Number.isFinite(now)) return denied();
-    const [owner] =
-      await tx`SELECT s.session_id FROM evaluation_session s JOIN evaluator e ON e.id=s.evaluator_id WHERE s.session_id=${input.sessionId} AND e.id=${input.principalId} AND e.enabled AND e.expires_at>now() AND s.revoked_at IS NULL AND s.expires_at>now() FOR UPDATE OF e,s`;
-    if (!owner) return denied(403);
     if (input.action === "budget_begin") {
       if (
         !campaign.enabled ||
@@ -73,29 +75,31 @@ export async function evaluateBudget(input: BudgetAction) {
       )
         return denied();
       // Ambiguous/crashed calls retain both reservation and concurrency slot. No lease refunds.
+      const [global] = await tx`SELECT
+        count(*)::int AS active,
+        count(*) FILTER (WHERE evaluator_id=${input.principalId})::int AS evaluator_active
+        FROM conversation_attempt WHERE state IN ('reserved','dispatched','unknown','violation')`;
       const [totals] = await tx`SELECT count(*)::int AS calls,
-        count(*) FILTER (WHERE state IN ('reserved','dispatched','unknown'))::int AS active,
-        count(*) FILTER (WHERE evaluator_id=${input.principalId} AND state IN ('reserved','dispatched','unknown'))::int AS evaluator_active,
-        coalesce(sum(CASE WHEN state='not_sent' THEN 0 ELSE coalesce(input_tokens,reserved_input) END),0)::int AS input,
-        coalesce(sum(CASE WHEN state='not_sent' THEN 0 ELSE coalesce(output_tokens,reserved_output) END),0)::int AS output,
+        coalesce(sum(CASE WHEN state='not_sent' THEN 0 WHEN state='violation' THEN greatest(input_tokens,reserved_input) ELSE coalesce(input_tokens,reserved_input) END),0)::int AS input,
+        coalesce(sum(CASE WHEN state='not_sent' THEN 0 WHEN state='violation' THEN greatest(output_tokens,reserved_output) ELSE coalesce(output_tokens,reserved_output) END),0)::int AS output,
         count(*) FILTER (WHERE session_id=${input.sessionId} AND turn_id=${input.turnId})::int AS turn_calls,
-        coalesce(sum(CASE WHEN state='not_sent' THEN 0 ELSE coalesce(input_tokens,reserved_input) END) FILTER (WHERE session_id=${input.sessionId} AND turn_id=${input.turnId}),0)::int AS turn_input,
-        coalesce(sum(CASE WHEN state='not_sent' THEN 0 ELSE coalesce(output_tokens,reserved_output) END) FILTER (WHERE session_id=${input.sessionId} AND turn_id=${input.turnId}),0)::int AS turn_output,
-        count(*) FILTER (WHERE session_id=${input.sessionId} AND state IN ('reserved','dispatched','unknown'))::int AS session_active,
+        coalesce(sum(CASE WHEN state='not_sent' THEN 0 WHEN state='violation' THEN greatest(input_tokens,reserved_input) ELSE coalesce(input_tokens,reserved_input) END) FILTER (WHERE session_id=${input.sessionId} AND turn_id=${input.turnId}),0)::int AS turn_input,
+        coalesce(sum(CASE WHEN state='not_sent' THEN 0 WHEN state='violation' THEN greatest(output_tokens,reserved_output) ELSE coalesce(output_tokens,reserved_output) END) FILTER (WHERE session_id=${input.sessionId} AND turn_id=${input.turnId}),0)::int AS turn_output,
+        count(*) FILTER (WHERE session_id=${input.sessionId} AND state IN ('reserved','dispatched','unknown','violation'))::int AS session_active,
         min(created_at) FILTER (WHERE session_id=${input.sessionId} AND turn_id=${input.turnId}) AS turn_start
         FROM conversation_attempt WHERE campaign_id=${campaign.id}`;
       const [session] = await tx`SELECT min(created_at) AS started,
         count(*)::int AS calls,
-        count(*) FILTER (WHERE state IN ('reserved','dispatched','unknown'))::int AS active,
-        coalesce(sum(CASE WHEN state='not_sent' THEN 0 ELSE coalesce(input_tokens,reserved_input) END),0)::int AS input,
-        coalesce(sum(CASE WHEN state='not_sent' THEN 0 ELSE coalesce(output_tokens,reserved_output) END),0)::int AS output,
+        count(*) FILTER (WHERE state IN ('reserved','dispatched','unknown','violation'))::int AS active,
+        coalesce(sum(CASE WHEN state='not_sent' THEN 0 WHEN state='violation' THEN greatest(input_tokens,reserved_input) ELSE coalesce(input_tokens,reserved_input) END),0)::int AS input,
+        coalesce(sum(CASE WHEN state='not_sent' THEN 0 WHEN state='violation' THEN greatest(output_tokens,reserved_output) ELSE coalesce(output_tokens,reserved_output) END),0)::int AS output,
         count(*) FILTER (WHERE turn_id=${input.turnId} AND step_index=${input.stepIndex} AND purpose=${input.purpose})::int AS step_calls
         FROM conversation_attempt WHERE session_id=${input.sessionId}`;
       if (
         !totals ||
         totals.calls >= campaign.call_limit ||
-        totals.active >= 5 ||
-        totals.evaluator_active >= 1 ||
+        (global?.active ?? 5) >= 5 ||
+        (global?.evaluator_active ?? 1) >= 1 ||
         totals.session_active > 0 ||
         (session?.active ?? 0) > 0 ||
         (session?.calls ?? 0) >= 30 ||
@@ -162,8 +166,12 @@ export async function evaluateBudget(input: BudgetAction) {
       await tx`UPDATE conversation_attempt SET state='dispatched',dispatched_at=clock_timestamp(),inference_requests=1,counted_input_tokens=${input.inputTokens} WHERE id=${input.attemptId}`;
       return { status: 200, body: { ok: true } };
     }
+    // Violations are terminal audit evidence; retries cannot erase or refund them.
+    if (attempt.state === "violation") return denied(409);
     if (input.notSent && input.usage !== null) return denied(409);
-    if (["settled", "not_sent", "unknown"].includes(attempt.state)) {
+    if (
+      ["settled", "not_sent", "unknown", "violation"].includes(attempt.state)
+    ) {
       const same =
         (attempt.state === "not_sent" && input.notSent) ||
         (attempt.state === "unknown" &&
@@ -190,7 +198,7 @@ export async function evaluateBudget(input: BudgetAction) {
         (input.usage.cached ?? 0) > input.usage.input)
     ) {
       await tx`UPDATE conversation_campaign SET blocked=true WHERE id=${campaign.id}`;
-      await tx`UPDATE conversation_attempt SET state='unknown',finished_at=clock_timestamp() WHERE id=${input.attemptId}`;
+      await tx`UPDATE conversation_attempt SET state='violation',input_tokens=${input.usage.input},output_tokens=${input.usage.output},cache_read_tokens=${input.usage.cached},finished_at=clock_timestamp() WHERE id=${input.attemptId}`;
       return denied(409);
     }
     await tx`UPDATE conversation_attempt SET state=${state},input_tokens=${input.usage?.input ?? null},output_tokens=${input.usage?.output ?? null},cache_read_tokens=${input.usage?.cached ?? null},finished_at=clock_timestamp() WHERE id=${input.attemptId}`;
