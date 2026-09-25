@@ -88,7 +88,7 @@ def prepare(download=False):
         "counts": {table: len(rows) for table, rows in tables.items()}}
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     # Compact normalized inputs for the database importer, not a second GTFS parser.
-    (sources / "renfe-madrid.json").write_text(json.dumps({"manifest": manifest, "stops": stops, "routes": routes, "trips": trips}))
+    (sources / "renfe-madrid.json").write_text(json.dumps({"manifest": manifest, "stops": stops, "routes": routes, "trips": trips, "stopTimes": [{k: row.get(k, "") for k in ("trip_id", "stop_id", "stop_sequence", "stop_headsign")} for row in times]}))
     for name in ("build-config.json", "router-config.json", "otp-config.json"):
         shutil.copyfile(ROOT / "infra/otp" / name, target / name)
     print(json.dumps(manifest, indent=2))

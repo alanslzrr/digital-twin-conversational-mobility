@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import postgres from "postgres";
+import { deriveDestinationEvidence } from "../packages/domain/src/transit-identity.ts";
 
 const url = process.env.DATABASE_URL;
 if (
@@ -7,12 +8,19 @@ if (
   !["localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname)
 )
   throw new Error("This import is local-only");
-const { manifest, stops, routes, trips } = JSON.parse(
+const { manifest, stops, routes, trips, stopTimes } = JSON.parse(
   await readFile(
     new URL("../data/sources/renfe-madrid.json", import.meta.url),
     "utf8",
   ),
 );
+const stopNames = new Map(stops.map((stop) => [stop.stop_id, stop.stop_name]));
+const timesByTrip = new Map();
+for (const time of stopTimes ?? []) {
+  const times = timesByTrip.get(time.trip_id) ?? [];
+  times.push(time);
+  timesByTrip.set(time.trip_id, times);
+}
 const sql = postgres(url, { max: 1 });
 const isoDate = (value) => value.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
 try {
@@ -35,7 +43,7 @@ try {
     await tx`DELETE FROM transit_route WHERE source_id='renfe'`;
     await tx`INSERT INTO transit_route ${tx(routes.map((r) => ({ source_id: "renfe", external_id: r.route_id, short_name: r.route_short_name, long_name: r.route_long_name })))}`;
     for (let index = 0; index < trips.length; index += 2000) {
-      await tx`INSERT INTO transit_trip ${tx(trips.slice(index, index + 2000).map((t) => ({ source_id: "renfe", external_id: t.trip_id, route_id: t.route_id, headsign: t.trip_headsign })))}`;
+      await tx`INSERT INTO transit_trip ${tx(trips.slice(index, index + 2000).map((t) => ({ source_id: "renfe", external_id: t.trip_id, route_id: t.route_id, headsign: t.trip_headsign ?? "", destination_evidence: tx.json(deriveDestinationEvidence(timesByTrip.get(t.trip_id), stopNames)) })))}`;
     }
     await tx`DELETE FROM place_external_identifier WHERE source_id='renfe' AND namespace='gtfs.stop' AND source_version<>${manifest.staticVersion}`;
     await tx`INSERT INTO static_feed(source_id,version,service_start,service_end,manifest) VALUES ('renfe',${manifest.staticVersion},${isoDate(manifest.serviceStart)},${isoDate(manifest.serviceEnd)},${tx.json(manifest)}) ON CONFLICT (source_id) DO UPDATE SET version=excluded.version,service_start=excluded.service_start,service_end=excluded.service_end,manifest=excluded.manifest,imported_at=now()`;
