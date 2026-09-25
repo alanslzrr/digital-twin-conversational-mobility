@@ -1,5 +1,7 @@
 # E2 — presupuesto conversacional: implementación y aceptación offline
 
+**Revisión posterior:** [check estándar limpio y tres hallazgos reproducidos](2026-09-25-e2-review.md). Este documento conserva la evidencia inicial; no implica que E2 esté listo para integrar.
+
 **Estado:** implementación local y pruebas sin gasto completadas. La aceptación
 conversacional real T01–T13 queda pendiente: el usuario confirmó **«Solo pruebas
 sin gasto por ahora»**. No se ha activado una campaña ni llamado al proveedor.
