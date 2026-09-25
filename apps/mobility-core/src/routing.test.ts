@@ -47,7 +47,7 @@ beforeEach(() => {
   mocks.sql
     .mockReset()
     .mockImplementation(async (query: TemplateStringsArray) =>
-      query.join("").includes("static_feed")
+      query.join("").startsWith("SELECT version")
         ? [{ version: "test-feed", manifest: { coverage: "Offline fixture" } }]
         : [
             {
@@ -258,7 +258,7 @@ it.each([
     await planJourney({ ...request, departureTime });
     expect(variables().date).toEqual({ earliestDeparture: departureTime });
     const call = mocks.sql.mock.calls.find(([query]) =>
-      query.join("").includes("static_feed"),
+      query.join("").startsWith("SELECT version"),
     );
     expect(call?.slice(1)).toEqual([departureTime, departureTime]);
     expect(call?.[0].join("")).toContain("AT TIME ZONE 'Europe/Madrid'");

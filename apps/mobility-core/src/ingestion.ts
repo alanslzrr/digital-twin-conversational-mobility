@@ -70,6 +70,7 @@ async function load(id: JobId) {
             effect: a.effect ?? "UNKNOWN_EFFECT",
             cause: a.cause ?? "UNKNOWN_CAUSE",
             activePeriods: a.activePeriod ?? [],
+            selectors: a.informedEntity,
             routeIds: a.informedEntity.flatMap((v) =>
               v.routeId && routeIds.has(v.routeId) ? [v.routeId] : [],
             ),
