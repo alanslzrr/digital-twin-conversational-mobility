@@ -22,3 +22,24 @@ it("bounds failures and does not retry HTTP denials", async () => {
   );
   expect(request).toHaveBeenCalledTimes(1);
 });
+
+it("classifies bounded connection, DNS and certificate causes without exposing messages", async () => {
+  const { sourceErrorCode } = await import("./common");
+  for (const [code, expected] of [
+    ["UND_ERR_CONNECT_TIMEOUT", "upstream_connection_timeout"],
+    ["ETIMEDOUT", "upstream_connection_timeout"],
+    ["ENOTFOUND", "upstream_dns_error"],
+    ["EAI_AGAIN", "upstream_dns_error"],
+    ["CERT_HAS_EXPIRED", "upstream_tls_error"],
+    ["ERR_TLS_CERT_ALTNAME_INVALID", "upstream_tls_error"],
+    ["some-secret-provider-payload", "upstream_network_error"],
+  ]) {
+    expect(
+      sourceErrorCode(
+        new TypeError("secret URL", {
+          cause: Object.assign(new Error("private"), { code }),
+        }),
+      ),
+    ).toBe(expected);
+  }
+});
