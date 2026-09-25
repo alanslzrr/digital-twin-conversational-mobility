@@ -23,7 +23,7 @@ pnpm start:local             # Core + EVE oficial + worker; Ctrl-C termina sus p
 
 Antes de reconstruir un grafo existente, detener OTP con `pnpm otp:down`; después volver a arrancarlo. Tras modificar código o variables, reconstruir/reiniciar las aplicaciones. No ejecutar dos supervisores sobre los mismos puertos.
 
-Para meteorología, añade `AEMET_API_KEY` únicamente a `apps/mobility-core/.env.local` **antes** de `pnpm mobility:enable`. Sin clave, esa fuente permanece deshabilitada. EMT usa `EMT_CLIENT_ID` y `EMT_PASSKEY` en ese mismo archivo; sus avisos se habilitan al ejecutar `pnpm db:migrate && pnpm mobility:enable`. Consulta `get_incidents` con `source: "emt"`; Renfe sigue siendo el valor por defecto. No copiar estas variables al frontend.
+Para meteorología, añade `AEMET_API_KEY` únicamente a `apps/mobility-core/.env.local` **antes** de `pnpm mobility:enable`. Sin clave, esa fuente permanece deshabilitada. EMT usa `EMT_CLIENT_ID` y `EMT_PASSKEY` en ese mismo archivo; sus avisos y llegadas bajo demanda se habilitan al ejecutar `pnpm db:migrate && pnpm mobility:enable`. Consulta `get_incidents` con `source: "emt"`; Renfe sigue siendo el valor por defecto. No copiar estas variables al frontend.
 
 La cuenta del evaluador, su contraseña y la clave del modelo se preparan con los comandos ya existentes de `README.md`. No repetir `evaluator create` si el slot ya existe. No desactivar Better Auth para probar.
 
@@ -62,7 +62,7 @@ Los umbrales son políticas de evaluación, no garantías de los proveedores. Lo
 - `plan_journey`: rutas **previstas**, Renfe + caminar. No aplica RT al itinerario ni incluye Metro/EMT/bici/coche. Rechaza modos no implementados y fechas fuera del calendario; filtra tiempo total a pie y transbordos. La opción de silla de ruedas no garantiza ascensores operativos.
 - Contrato de modos tras F01: `TRANSIT` exige un tramo de transporte público y permite acceso/egreso/transbordos a pie dentro del límite; `WALK` permite rutas íntegramente peatonales; `TRANSIT+WALK` permite cualquiera de las dos. No se relajan minutos a pie ni transbordos para encontrar una alternativa. Errores de contrato, timeout, grafo y cobertura se distinguen de `no_route`.
 - `get_departures`: horarios OTP y estimaciones Renfe cuando coinciden viaje/parada y están frescas. Una estimación de llegada NO es una de salida. Un viaje sin RT conserva base `scheduled`, nunca "puntual".
-- `resolve_place`: estaciones Renfe y BiciMAD importadas, búsqueda sin acentos; candidatos ambiguos requieren aclaración. No geocodifica direcciones arbitrarias.
+- `resolve_place`: estaciones Renfe, paradas EMT y BiciMAD importadas, búsqueda sin acentos; candidatos ambiguos requieren aclaración. No geocodifica direcciones arbitrarias.
 - BiciMAD usa GBFS **oficial EMT**, no el feed comunitario con nombre similar. Se conservan `last_reported`, flags de servicio y TTL.
 - Aire: lecturas válidas (`V`) con magnitud/unidad; hora civil Europe/Madrid, H24 es fin del día. Horas DST ambiguas/no existentes se omiten. No interpreta riesgo sanitario.
 - AEMET: observaciones de Madrid-Retiro (`3195`), no previsiones/avisos ni cobertura regional. `fint` está en UTC según su metadata, incluso cuando no trae offset; no usar la conversión horaria municipal. Lluvia acumulada 60 min, viento medio 10 min; temperatura/humedad/presión instantáneas (`periodMinutes=0`).
@@ -181,3 +181,28 @@ Rollback: parar nuevamente todos los escritores y restaurar copia de base + revi
 PR #16 integrada; base habitual migrada de 0007 a 0012, destinos reimportados con la misma versión de grafo y builds Core/Web/agente actualizados. [Registro de entrega](acceptance/2026-09-25-local-delivery.md).
 
 La instancia entregada está en segundo plano, supervisada por `scripts/start-local.mjs`; PID en `data/runtime/local.pid` y log privado en `data/runtime/e8-local.log`. Para pararla, comprobar primero `ps -p "$(cat data/runtime/local.pid)" -o command=` y que sea el supervisor de este repositorio, después `kill -TERM "$(cat data/runtime/local.pid)"`. No matar todos los procesos Node. Para arrancar de nuevo en primer plano: `pnpm start:local`; Ctrl-C para detener. Postgres/Redis/OTP se gestionan por separado con los comandos de infraestructura anteriores.
+
+## EMT: catálogo y llegadas bajo demanda (E7)
+
+Después de respaldar la base y parar Core/worker para actualizar código: `pnpm db:migrate` aplica también `0013`. Con las credenciales EMT solo en Core:
+
+```sh
+pnpm emt:import       # Dos endpoints: catálogo completo de paradas + líneas del día Madrid
+pnpm check
+pnpm build:agent
+pnpm start:local
+pnpm smoke:mobility --emt-only  # Una parada, caché repetida y resolución; sin modelo ni tick global
+```
+
+`emt:import` es explícito, local y transaccional: fallo de descarga/validación no sustituye el catálogo. Repetir para actualizarlo (preferiblemente antes del uso diario); no hay actualización automática coordinada de catálogos/GTFS/OTP todavía. Guarda export normalizado versionado en `data/sources/emt/<sha256>.json`, fuera de Git. No incluye credenciales. No cambia el grafo.
+
+En una **sesión nueva**, el evaluador puede pedir «Próximas llegadas EMT de la parada 72, con destino y antigüedad», y luego preguntar por una parada ambigua como Cibeles. `resolve_place` acepta `source=emt` y nombre o número exacto; entrega candidatos y sentidos. `get_emt_arrivals` requiere el UUID elegido, no el número. No se ha medido el comportamiento conversacional nuevo mediante inferencias automáticas.
+
+- Frescura/caché: 30 s por parada, cooldown global de llegadas 5 s, un refresh simultáneo, lease 90 s y backoff 60–900 s. Son políticas locales, no cuotas ni garantías EMT. El worker no recorre paradas; se respeta la ventana y `INGESTION_ENABLED` existentes.
+- Un fallo conserva el último resultado y su antigüedad. Una cuenta atrás antigua no es live; un vacío no demuestra ausencia de servicio. La hora es la operación del proveedor, no una lectura individual de GPS.
+- El catálogo expone fecha de referencia/versión; si `currentDay=false`, actualizar antes de asumir vigencia de líneas/sentidos. Sentidos 1/2 se conservan sin deducir destino desde el nombre; el destino de llegada procede del proveedor.
+- Solo última observación por parada. Pasadas 24 h no se ofrece como estimación utilizable, aunque la última fila persista hasta reemplazo o retirada de la parada. No se añade replay/histórico de llegadas. `rawReference` es checksum del resultado, no archivo raw archivado.
+- Mantener atribución **Powered by EMT de Madrid**, fuente, fecha y [condiciones de uso](https://mobilitylabs.emtmadrid.es/sip/terms-of-use). Las credenciales dinámicas nunca se exportan.
+- `0013` es aditiva. Para rollback de código a PR #18, parar procesos y reconstruir la revisión anterior; las tablas EMT pueden permanecer. Para restauración íntegra de base, usar el backup privado previo con todos los escritores detenidos. No borrar manualmente identificadores de paradas.
+
+Pendientes no bloqueantes: Renfe TLS sigue sin resolución confirmada; la eficiencia de descubrimiento se observa en uso normal. No subir límites ni reabrir E2.
