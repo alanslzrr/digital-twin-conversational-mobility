@@ -60,6 +60,7 @@ assert.deepEqual(
   [
     "get_source_health",
     "resolve_place",
+    "resolve_address",
     "plan_journey",
     "get_emt_arrivals",
     "get_crtm_timetable",

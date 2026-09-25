@@ -179,3 +179,18 @@ export const crtmTimetableInputSchema = z.object({
     ),
   limit: z.number().int().min(1).max(20).default(10),
 });
+
+export const resolveAddressInputSchema = z.object({
+  query: z
+    .string()
+    .trim()
+    .min(3)
+    .max(160)
+    .regex(/^\P{Cc}+$/u),
+  allowExternal: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Only true when the user requests looking up this public address/place externally after privacy disclosure. Never personal/confidential data. Local catalogs are always searched first.",
+    ),
+});
