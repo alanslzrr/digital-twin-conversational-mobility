@@ -78,6 +78,7 @@ describe.skipIf(!enabled)(
       for (const name of [
         "0003_evaluation_access.sql",
         "0008_conversation_budget.sql",
+        "0009_budget_violations.sql",
       ])
         await sql.unsafe(
           await readFile(
@@ -101,6 +102,112 @@ describe.skipIf(!enabled)(
         "session6",
       ])
         await sql`INSERT INTO evaluation_session(session_id,evaluator_id) VALUES (${sessionId},${begin(sessionId).principalId})`;
+    });
+    it("retains overrun reports conservatively and makes retries immutable", async () => {
+      const request = begin();
+      await evaluateBudget(request);
+      await evaluateBudget(
+        action(request, "budget_dispatch", { inputTokens: 100 }),
+      );
+      const finish = action(request, "budget_finish", {
+        usage: { input: 20001, output: 1, cached: 0 },
+        notSent: false,
+      });
+      expect((await evaluateBudget(finish)).status).toBe(409);
+      expect((await evaluateBudget(finish)).status).toBe(409);
+      expect(
+        (
+          await evaluateBudget(
+            action(request, "budget_finish", { usage: null, notSent: false }),
+          )
+        ).status,
+      ).toBe(409);
+      const [report] =
+        await sql`SELECT * FROM conversation_budget_report WHERE evaluator_id IS NULL`;
+      expect(Number(report?.reported_input_tokens)).toBe(20001);
+      expect(Number(report?.charged_input_tokens)).toBe(20001);
+      expect(Number(report?.charged_output_tokens)).toBe(2048);
+      expect(report?.budget_violations).toBe(1);
+      expect(report?.unresolved_attempts).toBe(1);
+    });
+    it("retains unresolved evaluator slots across campaign rotation but releases settled ones", async () => {
+      const request = begin();
+      await evaluateBudget(request);
+      await evaluateBudget(
+        action(request, "budget_dispatch", { inputTokens: 100 }),
+      );
+      await evaluateBudget(
+        action(request, "budget_finish", { usage: null, notSent: false }),
+      );
+      await sql`UPDATE conversation_campaign SET enabled=false`;
+      await sql`INSERT INTO conversation_campaign(id,enabled,approval,expires_at,input_limit,output_limit,call_limit) VALUES ('rotated',true,'synthetic',now()+interval '1 hour',100000,10000,30)`;
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => evaluateBudget(begin("session6"))),
+      );
+      expect(results.every((result) => result.status === 429)).toBe(true);
+      // Independent settled evaluator does not prevent a new session/turn.
+      const settled = begin("session2");
+      expect((await evaluateBudget(settled)).status).toBe(200);
+      await evaluateBudget(
+        action(settled, "budget_finish", { usage: null, notSent: true }),
+      );
+      expect((await evaluateBudget(begin("session2", "turn2"))).status).toBe(
+        200,
+      );
+    });
+    it("enforces five unresolved slots across campaigns", async () => {
+      const requests = Array.from({ length: 5 }, (_, i) =>
+        begin(`session${i + 1}`),
+      );
+      for (const request of requests)
+        expect((await evaluateBudget(request)).status).toBe(200);
+      await sql`UPDATE conversation_campaign SET enabled=false`;
+      await sql`INSERT INTO conversation_campaign(id,enabled,approval,expires_at,input_limit,output_limit,call_limit) VALUES ('next',true,'synthetic',now()+interval '1 hour',100000,10000,30)`;
+      expect((await evaluateBudget(begin("session6"))).status).toBe(429);
+      const request = requests[0];
+      if (!request) throw new Error("Missing synthetic request");
+      await evaluateBudget(
+        action(request, "budget_finish", { usage: null, notSent: true }),
+      );
+      expect((await evaluateBudget(begin("session6"))).status).toBe(200);
+    });
+    it("keeps inconsistent cache reports as violations, never valid settlements", async () => {
+      const request = begin();
+      await evaluateBudget(request);
+      await evaluateBudget(
+        action(request, "budget_dispatch", { inputTokens: 100 }),
+      );
+      expect(
+        (
+          await evaluateBudget(
+            action(request, "budget_finish", {
+              usage: { input: 100, output: 1, cached: 101 },
+              notSent: false,
+            }),
+          )
+        ).status,
+      ).toBe(409);
+      const [attempt] =
+        await sql`SELECT * FROM conversation_attempt WHERE id=${request.attemptId}`;
+      expect(attempt?.state).toBe("violation");
+      expect(attempt?.cache_read_tokens).toBe(101);
+      expect((await evaluateBudget(begin("session2"))).status).toBe(429);
+    });
+    it("allows settled history after rotation without releasing unknown history", async () => {
+      const request = begin();
+      await evaluateBudget(request);
+      await evaluateBudget(
+        action(request, "budget_dispatch", { inputTokens: 100 }),
+      );
+      await evaluateBudget(
+        action(request, "budget_finish", {
+          usage: { input: 100, output: 1, cached: 0 },
+          notSent: false,
+        }),
+      );
+      await sql`UPDATE conversation_campaign SET enabled=false`;
+      await sql`INSERT INTO conversation_campaign(id,enabled,approval,expires_at,input_limit,output_limit,call_limit) VALUES ('settled-rotation',true,'synthetic',now()+interval '1 hour',100000,10000,30)`;
+      expect((await evaluateBudget(begin("session6"))).status).toBe(200);
     });
     beforeEach(async () => {
       await sql`DELETE FROM conversation_attempt`;
