@@ -1,15 +1,33 @@
-import type { SourceId } from "@mobility/contracts";
+import { historyInputSchema, type SourceId } from "@mobility/contracts";
 import { type JobId, jobPolicies } from "@mobility/domain";
 import { getFreshness } from "@mobility/provenance";
 import { database } from "./database";
+
+/** Resolve relative requests in Core, never against a stale observation or chat timestamp. */
+export async function historicalQuery(input: unknown) {
+  const { source, at, minutesAgo, mode } = historyInputSchema.parse(input);
+  const now = new Date();
+  const requestedAt =
+    at ??
+    new Date(now.getTime() - (minutesAgo as number) * 60_000).toISOString();
+  return {
+    ...(await history(source, requestedAt, mode, now)),
+    timeReference: {
+      clock: "mobility_core_server",
+      resolvedAt: now.toISOString(),
+      timezone: "Europe/Madrid",
+      input: minutesAgo === undefined ? "absolute" : "relative_minutes",
+    },
+  };
+}
 
 export async function history(
   source: SourceId,
   at: string,
   mode: "event" | "knowledge" = "event",
+  now = new Date(),
 ) {
   const requested = new Date(at);
-  const now = new Date();
   if (!Number.isFinite(requested.getTime()))
     return { status: "unavailable", reason: "invalid_timestamp" };
   if (requested > now || requested.getTime() < now.getTime() - 86400000)

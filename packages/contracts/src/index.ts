@@ -113,21 +113,36 @@ export const roadInputSchema = z.object({
   limit: z.number().int().min(1).max(20).default(10),
 });
 export const parkingInputSchema = roadInputSchema;
-export const historyInputSchema = z.object({
-  source: z.enum([
-    "aemet",
-    "emt",
-    "renfe",
-    "bicimad",
-    "madrid-air",
-    "madrid-traffic",
-    "madrid-parking",
-  ]),
-  at: z.iso.datetime({ offset: true }),
-  mode: z
-    .enum(["event", "knowledge"])
-    .default("event")
-    .describe(
-      "event: latest retained revision of observations at/before at, possibly learned later. knowledge: only revisions ingested at/before at.",
-    ),
-});
+export const historyInputSchema = z
+  .object({
+    source: z.enum([
+      "aemet",
+      "emt",
+      "renfe",
+      "bicimad",
+      "madrid-air",
+      "madrid-traffic",
+      "madrid-parking",
+    ]),
+    at: z.iso.datetime({ offset: true }).optional(),
+    minutesAgo: z
+      .number()
+      .min(0)
+      .max(1440)
+      .optional()
+      .describe(
+        "Relative time in elapsed minutes, resolved using the Core server clock. Supply exactly one of at or minutesAgo.",
+      ),
+    mode: z
+      .enum(["event", "knowledge"])
+      .default("event")
+      .describe(
+        "event: latest retained revision of observations at/before at, possibly learned later. knowledge: only revisions ingested at/before at.",
+      ),
+  })
+  .refine(
+    (input) => (input.at !== undefined) !== (input.minutesAgo !== undefined),
+    {
+      message: "Supply exactly one of at or minutesAgo",
+    },
+  );
