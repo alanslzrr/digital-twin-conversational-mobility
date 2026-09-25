@@ -18,3 +18,5 @@ Server-side E2 extensions live in `agent/hooks/` and `agent/memory/`: budget adm
 Evidence capture additionally recognizes the EVE 0.65.0 structural user-message kind `context.compaction` and skips its immediately following assistant checkpoint. This is a pinned harness-shape assumption (not text matching or a private import); review it and the consecutive-compaction regression when upgrading EVE. Unexpected checkpoint structure fails before destructive compaction.
 
 Normal operation uses native EVE session-limit continuation (Approve/Stop), verified against installed harness modules in offline tests; no custom approval UI. The nonrenewable campaign ledger is now explicit opt-in via `MOBILITY_BUDGET_MODE=campaign`. Interactive mode still records provider-attempt usage/latency and keeps identity, fixed endpoint, per-request timeout and output bounds.
+
+The login gate links accidental `localhost:3000` visits to the canonical loopback origin without forwarding session URLs, and distinguishes access/origin, rate-limit and service errors from invalid credentials. Upstream chat markup remains unchanged.
