@@ -29,6 +29,8 @@ writeFileSync(path, contents, { mode: 0o600 });
 const sql = postgres(current.DATABASE_URL, { max: 1 });
 try {
   await sql`UPDATE source_catalog SET enabled=true,license_reviewed_at=COALESCE(license_reviewed_at,now()) WHERE id IN ('renfe','bicimad','madrid-air','madrid-traffic','madrid-parking')`;
+  if (current.EMT_CLIENT_ID && current.EMT_PASSKEY)
+    await sql`UPDATE source_catalog SET enabled=true WHERE id='emt'`;
   if (current.AEMET_API_KEY)
     await sql`UPDATE source_catalog SET enabled=true,license_reviewed_at=COALESCE(license_reviewed_at,now()) WHERE id='aemet'`;
 } finally {
