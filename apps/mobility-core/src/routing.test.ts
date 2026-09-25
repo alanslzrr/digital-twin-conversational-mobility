@@ -468,3 +468,90 @@ it("keeps the shared OTP transport compatible with scheduled departures", async 
     staticVersion: "test-feed",
   });
 });
+it("searches one bounded earlier window and keeps a still-boardable delayed train", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-09-25T08:06:00Z"));
+  const release = {
+    releaseId: "a".repeat(64),
+    staticVersion: "test-feed",
+    catalogs: {},
+    feeds: {
+      renfe: {
+        version: "test-feed",
+        serviceStart: "2026-09-01",
+        serviceEnd: "2026-10-01",
+      },
+    },
+    coverage: "offline",
+  };
+  mocks.readFile.mockResolvedValue(JSON.stringify(release));
+  mocks.sql.mockImplementation(async (query: TemplateStringsArray) => {
+    const q = query.join("");
+    if (q.includes("FROM routing_release"))
+      return [
+        { id: release.releaseId, manifest: { otpVerifiedAt: "verified" } },
+      ];
+    if (q.startsWith("SELECT dataset_id")) return [];
+    if (q.startsWith("SELECT version"))
+      return [{ version: "test-feed", manifest: { coverage: "offline" } }];
+    if (q.includes("FROM mobility_snapshot"))
+      return [
+        {
+          job_id: "renfe-trips",
+          observed_at: new Date(),
+          ingested_at: new Date(),
+          payload: {
+            staticVersion: "test-feed",
+            updates: [
+              {
+                trip: { tripId: "test-trip" },
+                delay: 120,
+                observedAt: new Date().toISOString(),
+                stopTimeUpdate: [],
+              },
+            ],
+          },
+        },
+      ];
+    if (q.includes("FROM transit_trip")) return [{ external_id: "test-trip" }];
+    return [{ name: "Station", source_id: "renfe", external_id: "test-stop" }];
+  });
+  const delayed = {
+    ...itinerary,
+    start: "2026-09-25T08:05:00Z",
+    legs: [
+      {
+        ...itinerary.legs[0],
+        serviceDate: "2026-09-25",
+        start: { scheduledTime: "2026-09-25T08:05:00Z" },
+      },
+    ],
+  };
+  fetchMock.mockResolvedValue(
+    Response.json({
+      data: {
+        planConnection: { routingErrors: [], edges: [{ node: delayed }] },
+      },
+    }),
+  );
+  // Each fetch needs an independently readable Response body.
+  fetchMock.mockImplementation(async () =>
+    Response.json({
+      data: {
+        planConnection: { routingErrors: [], edges: [{ node: delayed }] },
+      },
+    }),
+  );
+  const result = await planJourney({ ...request, departureTime: "now" });
+  expect(result).toMatchObject({
+    status: "available",
+    realtimeApplied: true,
+    delayedServiceSearch: { status: "searched", lookbackSeconds: 120 },
+    itineraries: [{ start: "2026-09-25T08:07:00.000Z" }],
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  const variables = JSON.parse(
+    String(fetchMock.mock.calls[1]?.[1]?.body),
+  ).variables;
+  expect(variables.date.earliestDeparture).toBe("2026-09-25T08:04:00.000Z");
+});
