@@ -172,6 +172,23 @@ try {
   assert.ok(departure.departures.length > 0);
   const alerts = await tool("get_incidents", { limit: 10 });
   assert.ok(Array.isArray(alerts.incidents));
+  if (core.EMT_CLIENT_ID && core.EMT_PASSKEY) {
+    const emt = await tool("get_incidents", { source: "emt", limit: 30 });
+    assert.equal(emt.provenance.source, "emt");
+    assert.ok(Array.isArray(emt.incidents));
+    assert.ok(emt.freshness && emt.provenance.observedAt);
+    assert.ok(
+      emt.incidents.every((a) =>
+        ["active", "upcoming", "unknown"].includes(a.temporalStatus),
+      ),
+    );
+    const filtered = await tool("get_incidents", {
+      source: "emt",
+      line: "27",
+      limit: 30,
+    });
+    assert.ok(filtered.incidents.every((a) => a.lines.includes("27")));
+  }
   const bikes = await tool("get_bike_availability", {
     placeId: origin.id,
     limit: 5,
