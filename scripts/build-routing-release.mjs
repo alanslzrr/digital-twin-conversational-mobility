@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { rename, writeFile } from "node:fs/promises";
+import { access, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileHash, verifyRelease } from "./routing-release-files.mjs";
 
@@ -7,6 +7,14 @@ const id = process.argv[2];
 if (process.env.VERCEL || !/^[a-f0-9]{64}$/.test(id ?? ""))
   throw Error("Usage: build-routing-release.mjs <release-id>; local only");
 const dir = resolve("data/routing-releases", id);
+try {
+  await access(resolve(dir, "graph-manifest.json"));
+  await verifyRelease(dir);
+  console.log(JSON.stringify({ release: id, built: true, reused: true }));
+  process.exit(0); // Completed releases are immutable, including the active one.
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
+}
 const manifest = await verifyRelease(dir, false);
 if (
   manifest.releaseId !== id ||
