@@ -14,3 +14,5 @@ Local adaptations:
 When upgrading, compare this exact template version and reapply only these adaptations. Do not replace the official interface with custom chat markup.
 
 Server-side E2 extensions live in `agent/hooks/` and `agent/memory/`: budget admission, numeric telemetry, bounded tool execution and lossless evidence retention. These use EVE public extension points; upstream Web Chat markup and styling are unchanged. See `docs/audits/2026-09-25-e2-instrumentation.md` for limits and offline acceptance.
+
+Evidence capture additionally recognizes the EVE 0.65.0 structural user-message kind `context.compaction` and skips its immediately following assistant checkpoint. This is a pinned harness-shape assumption (not text matching or a private import); review it and the consecutive-compaction regression when upgrading EVE. Unexpected checkpoint structure fails before destructive compaction.

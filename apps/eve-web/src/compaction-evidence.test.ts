@@ -73,6 +73,29 @@ describe("lossless compaction evidence", () => {
       expect(again.entries).toContain(entry);
     expect(preserveEvidence(again, [summary, ...messages])).toEqual(again);
   });
+  it("excludes consecutive framework checkpoints without dropping literal user corrections", () => {
+    const marker = {
+      role: "user",
+      kind: "context.compaction",
+      content: "checkpoint",
+    } as ModelMessage;
+    const summary: ModelMessage = {
+      role: "assistant",
+      content: "invented live zero spaces",
+    };
+    const original = preserveEvidence({ entries: [] }, messages);
+    const correction: ModelMessage = { role: "user", content: "checkpoint" };
+    const once = preserveEvidence(original, [marker, summary, correction]);
+    const twice = preserveEvidence(once, [marker, summary, correction]);
+    expect(twice).toEqual(once);
+    expect(JSON.stringify(twice)).not.toContain("invented");
+    expect(twice.entries.at(-1)).toContain("checkpoint");
+    for (const entry of original.entries)
+      expect(twice.entries).toContain(entry);
+    expect(() => preserveEvidence(original, [marker, correction])).toThrow(
+      "original history",
+    );
+  });
   it("retains contradictory explicit corrections in order rather than guessing", () => {
     const correction: ModelMessage = {
       role: "user",
