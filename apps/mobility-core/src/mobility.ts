@@ -254,7 +254,7 @@ export async function resolvePlace(
   query: string,
   limit: number,
   source?: "renfe" | "emt" | "bicimad" | "crtm",
-  network?: "metro" | "light-rail" | "interurban",
+  network?: "metro" | "light-rail" | "interurban" | "emt",
 ) {
   if (source === "crtm" || (!source && network))
     return resolveCrtm(query, limit, network);
@@ -267,6 +267,7 @@ export async function resolvePlace(
     WHERE (unaccent(lower(p.name)) LIKE unaccent(lower(${pattern})) OR i.external_id=${query})
     AND (${source ?? null}::text IS NULL OR i.source_id=${source ?? null})
     AND i.namespace<>'geocoder.osm'
+    AND (i.source_id<>'renfe' OR EXISTS(SELECT 1 FROM static_feed f WHERE f.source_id='renfe' AND f.version=i.source_version))
     AND (i.source_id<>'emt' OR EXISTS(SELECT 1 FROM emt_catalog c WHERE c.version=i.source_version))
     GROUP BY p.id ORDER BY bool_or(i.external_id=${query}) DESC,(unaccent(lower(p.name))=unaccent(lower(${query}))) DESC,(p.kind='station') DESC,p.name LIMIT ${limit}`;
   const crtm = !source ? await resolveCrtm(query, limit) : { places: [] };
@@ -291,7 +292,7 @@ export async function resolvePlace(
     places: combined,
     ambiguous: combined.length > 1,
     coverage:
-      "Imported Renfe, EMT, BiciMAD and CRTM places; up to limit per catalog. Use source and CRTM network to narrow ambiguity. CRTM UUIDs are for get_crtm_timetable, not OTP routing. No arbitrary-address geocoder.",
+      "Imported Renfe, EMT, BiciMAD and CRTM places; up to limit per catalog. Use source and CRTM network to narrow ambiguity. CRTM UUIDs support timetable and routing where the active graph has valid schedules. Use resolve_address for external geocoding.",
   };
 }
 
