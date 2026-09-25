@@ -205,4 +205,4 @@ En una **sesión nueva**, el evaluador puede pedir «Próximas llegadas EMT de l
 - Mantener atribución **Powered by EMT de Madrid**, fuente, fecha y [condiciones de uso](https://mobilitylabs.emtmadrid.es/sip/terms-of-use). Las credenciales dinámicas nunca se exportan.
 - `0013` es aditiva. Para rollback de código a PR #18, parar procesos y reconstruir la revisión anterior; las tablas EMT pueden permanecer. Para restauración íntegra de base, usar el backup privado previo con todos los escritores detenidos. No borrar manualmente identificadores de paradas.
 
-Pendientes no bloqueantes: Renfe TLS sigue sin resolución confirmada; la eficiencia de descubrimiento se observa en uso normal. No subir límites ni reabrir E2.
+Pendientes no bloqueantes: Renfe volvió a actualizar durante el arranque E7, pero la causa del episodio TLS sigue sin identificar; la eficiencia de descubrimiento se observa en uso normal. No subir límites ni reabrir E2.
