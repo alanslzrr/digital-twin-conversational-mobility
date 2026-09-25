@@ -49,3 +49,32 @@ it("fails closed on rejected authentication", async () => {
   );
   expect(request).toHaveBeenCalledTimes(1);
 });
+it("invalidates rejected API tokens without immediate reauthentication loops", async () => {
+  vi.stubEnv("EMT_CLIENT_ID", "test-client");
+  vi.stubEnv("EMT_PASSKEY", "test-key");
+  const login = () =>
+    new Response(
+      JSON.stringify({
+        code: "00",
+        data: [{ accessToken: "test-token", tokenSecExpiration: 1800 }],
+      }),
+    );
+  const request = vi
+    .fn()
+    .mockResolvedValueOnce(login())
+    .mockResolvedValueOnce(
+      new Response(JSON.stringify({ code: "84", data: [] })),
+    )
+    .mockResolvedValueOnce(login())
+    .mockResolvedValueOnce(
+      new Response(JSON.stringify({ code: "00", data: [] })),
+    );
+  vi.stubGlobal("fetch", request);
+  const { emtRequest } = await import("./emt-client");
+  await expect(
+    emtRequest("/v1/transport/busemtmad/stops/list/", []),
+  ).rejects.toThrow("emt_data_unavailable");
+  expect(request).toHaveBeenCalledTimes(2);
+  await emtRequest("/v1/transport/busemtmad/stops/list/", []);
+  expect(request).toHaveBeenCalledTimes(4);
+});
