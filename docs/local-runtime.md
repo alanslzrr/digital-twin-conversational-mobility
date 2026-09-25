@@ -36,7 +36,8 @@ Para desarrollo: `pnpm dev` y `pnpm worker` en terminales distintas, con PostGIS
 - Cada interacción autorizada que consume cuota y cada consulta MCP abre/renueva una ventana de 30 minutos, monótonamente.
 - El worker no renueva la ventana. Fuera de ella devuelve `idle` sin consultar proveedores.
 - Cada job tiene `next_due_at`, lease de 90 s con propietario, timeout HTTP de 12 s y backoff limitado a 15 min.
-- Hay dos carriles concurrentes. Los ticks duplicados y el read-through comparten los mismos leases; no son temporizadores exactos de tiempo real.
+- E3 (tras migración `0010` y actualización conjunta de Core/worker): dos carriles independientes, un job vencido por petición y pausa de 5 s por carril, sin barrera entre ciclos. Los ticks duplicados y el read-through comparten los mismos leases; no son temporizadores exactos de tiempo real. No ejecutar el worker nuevo contra el Core anterior.
+- Salud muestra ventana, heartbeat por carril, inicio/fin y duración del último intento, etapa del error y recuperación de leases. Un heartbeat ausente más de 120 s significa detenido **o** inaccesible, no un error confirmado del proveedor. La frescura se informa por separado.
 - Si cae el worker, el próximo tick retoma los jobs vencidos. Las consultas pueden refrescar su fuente si está vencida y no tiene lease. Un refresh fallido no convierte el último dato en fresco.
 - `INGESTION_ENABLED=false` desactiva los fetches. `source_catalog.enabled=false` desactiva una fuente. En Vercel o con Postgres remoto, este worker falla cerrado aunque el flag sea `true`.
 - `pnpm ingest` abre una ventana explícita y ejecuta un único tick; `pnpm worker` permanece disponible sin mantener la ventana abierta.
@@ -146,3 +147,31 @@ posterior: copia de seguridad, migraciones pendientes en orden, build de Core/We
 y agente compatibles, y sesiones nuevas para no reutilizar cápsulas anteriores a
 la corrección. No hay llamada al modelo hasta enviar una conversación; estas
 pruebas y builds no ejecutan inferencias.
+
+## Actualización E4 pendiente en el runtime habitual
+
+Antes de activar el código E4, aplicar `0011_trip_destination.sql` junto con las migraciones pendientes y regenerar/reimportar el export normalizado Renfe para obtener terminales. Con las fuentes locales ya disponibles, `python3 scripts/prepare-otp.py` sin `--download` conserva también la secuencia necesaria; comprobar la versión frente al grafo y después `pnpm gtfs:import`. Una exportación antigua sin `stopTimes` sigue siendo importable, pero no permite deducir terminales. No es necesario reconstruir OTP si la versión GTFS no cambia. [Evidencia E4 y límites](acceptance/2026-09-25-line-destinations.md).
+
+## Actualización E5 pendiente en el runtime habitual
+
+`0012_history_revisions.sql` conserva el histórico existente y habilita revisiones. Para integrarla, parar Core/worker, respaldar la base y actualizar código y esquema juntos; no mezclar escritores antiguos con esta migración. Una reversión al escritor anterior requiere la copia previa de la base, no borrar revisiones para reconstruir su PK.
+
+`get_historical_state` acepta EMT y `mode=event` (predeterminado, puede incluir correcciones posteriores) o `mode=knowledge` (solo lo conocido entonces). Mantiene índice parcial/retención 24 h, muestra de cinco entidades y desfase explícito. La frescura por entidad no hereda la hora más reciente de la colección. [Semántica, pruebas y límites E5](acceptance/2026-09-25-history-quality.md).
+
+### Reutilizar el smoke sin ingestión
+
+`pnpm smoke:mobility --port=3011 --read-only` permite comprobar un Core local alternativo con `INGESTION_ENABLED=false`. No activa ventana ni ejecuta ticks de ingestión; falla si el servidor no confirma esa configuración. Consulta los datos existentes (que pueden ser antiguos), MCP y OTP; no llama al modelo. No sustituye las regresiones de recuperación/deduplicación. Véase [E6](acceptance/2026-09-25-functional-continuity.md).
+
+## E8 — Integración desde el esquema habitual 0007
+
+Aplicar **todas** las migraciones pendientes con `pnpm db:migrate`, no ejecutar solamente 0010–0012: esta transición incorpora 0008–0012 en orden, incluidas las tablas E2 aunque el modo normal siga siendo interactivo.
+
+1. Integrar la PR y sincronizar `main` sin descartar cambios locales.
+2. Parar el supervisor `start:local` (Ctrl-C en su terminal): termina Core, Web/agente y worker; mantener Postgres/OTP. Comprobar que sus procesos han terminado.
+3. Guardar un `pg_dump -Fc` local con permisos restringidos y verificar su índice con `pg_restore --list`; respaldar también export/manifiestos. El dump contiene datos privados de autenticación: nunca subirlo a Git ni publicarlo.
+4. Ejecutar `pnpm db:migrate`; comprobar la lista aplicada hasta 0012.
+5. Regenerar el export desde el GTFS local en un directorio temporal, comprobar que su staticVersion coincide con el grafo activo y copiar únicamente `renfe-madrid.json`; ejecutar `pnpm gtfs:import`. No reescribir archivos de OTP vivo. Si cambia la versión, parar OTP y seguir el procedimiento completo de actualización del grafo.
+6. `pnpm check && pnpm build:agent`, luego `pnpm start:local`. Usar sesiones nuevas para no reutilizar cápsulas anteriores a la corrección E2. El arranque no llama al modelo; la ingestión solo trabaja dentro de su ventana.
+7. Comprobar health de Web/Core/agente y heartbeat del worker. No se exige campaña conversacional ni benchmark.
+
+Rollback: parar nuevamente todos los escritores y restaurar copia de base + revisión de código/export compatibles. No arrancar el escritor antiguo contra 0012 ni borrar revisiones para reconstruir su PK. El arranque/parada normal sigue siendo `pnpm start:local` / Ctrl-C; para actualización bajo demanda usar el chat, y para una actualización manual acotada `pnpm ingest` (abre ventana y consulta proveedores).
