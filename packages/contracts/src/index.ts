@@ -83,12 +83,21 @@ export const routingFailureReasonSchema = z.enum([
 export type RoutingFailureReason = z.infer<typeof routingFailureReasonSchema>;
 
 export const resolvePlaceInputSchema = z.object({
-  query: z.string().trim().min(2).max(120),
+  query: z.string().trim().min(1).max(120),
+  source: z.enum(["renfe", "emt", "bicimad"]).optional(),
   limit: z.number().int().min(1).max(10).default(5),
 });
 export const departuresInputSchema = z.object({
   placeId: z.uuid(),
   limit: z.number().int().min(1).max(20).default(10),
+});
+export const emtArrivalsInputSchema = z.object({
+  placeId: z
+    .uuid()
+    .describe(
+      "Canonical EMT stop UUID returned by resolve_place with source=emt; not a stop number or a Renfe place.",
+    ),
+  limit: z.number().int().min(1).max(20).default(5),
 });
 export const incidentsInputSchema = z.object({
   source: z.enum(["renfe", "emt"]).default("renfe"),
