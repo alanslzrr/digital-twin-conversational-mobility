@@ -244,7 +244,7 @@ try {
     });
   if (evidence.graphManifest.feeds?.emt) {
     for (const [network, from, to] of [
-      ["emt", "4514", "273"],
+      ["emt", "1890", "4676"],
       ["light-rail", "par_10_1", "par_10_9"],
       ["interurban", "par_8_10614", "par_8_17472"],
     ]) {
@@ -276,13 +276,23 @@ try {
         );
       });
       if (network === "interurban") {
+        const outer = await tool("resolve_place", {
+          source: "crtm",
+          network: "light-rail",
+          query: "par_10_38",
+          limit: 5,
+        });
+        const outerPlace = outer.places.find((p) =>
+          p.identifiers.some((i) => i.externalId === "par_10_38"),
+        );
+        assert.ok(outerPlace);
         const combined = {
           ...base,
-          originId: a.id,
+          originId: outerPlace.id,
           destinationId: sol.id,
           preferences: {
             ...base.preferences,
-            maxWalkingMinutes: 30,
+            maxWalkingMinutes: 15,
             maxTransfers: 3,
           },
         };
