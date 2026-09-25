@@ -62,7 +62,7 @@ it("does not match yesterday, stale, missing date, duplicate updates or circular
   for (const updates of [
     [{ ...update, trip: { tripId: "t", startDate: "20260924" } }],
     [{ ...update, observedAt: "2026-09-25T07:59:19Z" }],
-    [{ ...update, trip: { tripId: "t" } }],
+    [{ ...update, trip: { tripId: "t" }, observedAt: "2026-09-24T08:00:00Z" }],
     [update, update],
   ])
     expect(
@@ -184,4 +184,74 @@ it("annotates overlapping EMT public-line notices without cancelling or conflati
       },
     ]),
   ).toEqual([]);
+});
+it("uses bounded Madrid observation-day evidence when Renfe omits startDate", () => {
+  const u = {
+    ...update,
+    trip: { tripId: "t" },
+    delay: 120,
+    stopTimeUpdate: [{ stopId: "other", arrival: { delay: 120 } }],
+  };
+  const result = applyRoutingEvidence([leg], { ...evidence, updates: [u] });
+  expect(result).toMatchObject({
+    realtimeApplied: true,
+    legs: [
+      {
+        serviceDateMatch: "observation_day_nearby_schedule",
+        effectiveStart: "2026-09-25T08:07:00.000Z",
+        effectiveEnd: "2026-09-25T08:17:00.000Z",
+      },
+    ],
+  });
+  expect(
+    applyRoutingEvidence([{ ...leg, serviceDate: "2026-09-24" }], {
+      ...evidence,
+      updates: [u],
+    }).realtimeApplied,
+  ).toBe(false);
+  expect(
+    applyRoutingEvidence(
+      [{ ...leg, start: { scheduledTime: "2026-09-25T12:00:00Z" } }],
+      { ...evidence, updates: [u] },
+    ).realtimeApplied,
+  ).toBe(false);
+});
+it("does not propagate trip delay past conflicting, undated absolute, duplicate or NO_DATA updates", () => {
+  for (const stops of [
+    [{ stopId: "other", arrival: { delay: 180 } }],
+    [{ stopId: "other", arrival: { time: 123 } }],
+    [{ stopId: "other", scheduleRelationship: "NO_DATA" }],
+    [
+      { stopId: "other", arrival: { delay: 120 } },
+      { stopId: "other", arrival: { delay: 120 } },
+    ],
+  ]) {
+    const u = { ...update, delay: 120, stopTimeUpdate: stops };
+    expect(
+      applyRoutingEvidence([leg], { ...evidence, updates: [u] })
+        .realtimeApplied,
+    ).toBe(false);
+  }
+});
+it("moves access walking to the requested time when a delayed departure is still reachable", () => {
+  const walk: RoutingLeg = {
+    ...leg,
+    mode: "WALK",
+    trip: null,
+    route: null,
+    start: { scheduledTime: "2026-09-25T08:00:00Z" },
+    end: { scheduledTime: "2026-09-25T08:03:00Z" },
+  };
+  const result = applyRoutingEvidence([walk, leg], {
+    ...evidence,
+    earliest: "2026-09-25T08:04:00Z",
+  });
+  expect(result.rejected).toBe(null);
+  expect(result.legs[0]?.effectiveEnd).toBe("2026-09-25T08:07:00.000Z");
+  expect(
+    applyRoutingEvidence([walk, leg], {
+      ...evidence,
+      earliest: "2026-09-25T08:05:00Z",
+    }).rejected,
+  ).toBe("missed_connection");
 });
