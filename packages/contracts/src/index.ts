@@ -84,7 +84,11 @@ export type RoutingFailureReason = z.infer<typeof routingFailureReasonSchema>;
 
 export const resolvePlaceInputSchema = z.object({
   query: z.string().trim().min(1).max(120),
-  source: z.enum(["renfe", "emt", "bicimad"]).optional(),
+  source: z.enum(["renfe", "emt", "bicimad", "crtm"]).optional(),
+  network: z
+    .enum(["metro", "light-rail", "interurban"])
+    .optional()
+    .describe("CRTM network filter; use with source=crtm."),
   limit: z.number().int().min(1).max(10).default(5),
 });
 export const departuresInputSchema = z.object({
@@ -155,3 +159,23 @@ export const historyInputSchema = z
       message: "Supply exactly one of at or minutesAgo",
     },
   );
+
+export const crtmTimetableInputSchema = z.object({
+  placeId: z
+    .uuid()
+    .describe("CRTM UUID returned by resolve_place(source=crtm)."),
+  serviceDate: z.iso
+    .date()
+    .optional()
+    .describe(
+      "Madrid GTFS service date; defaults to today. Not a historical knowledge query.",
+    ),
+  afterTime: z
+    .string()
+    .regex(/^(?:[0-6]\d|7[01]):[0-5]\d:[0-5]\d$/)
+    .optional()
+    .describe(
+      "GTFS clock HH:mm:ss, allows >24h. Defaults to now for today's service date, otherwise 00:00:00. Only this service day is searched.",
+    ),
+  limit: z.number().int().min(1).max(20).default(10),
+});
