@@ -42,6 +42,7 @@ export function budgetedFetch(
   context: () => BudgetContext,
   access: typeof coreAccess = coreAccess,
   network: typeof fetch = globalThis.fetch,
+  mode: "campaign" | "interactive" = "campaign",
 ): typeof fetch {
   return async (url, init) => {
     if (
@@ -73,12 +74,22 @@ export function budgetedFetch(
       if (!result.ok) throw fail();
       return object(await result.json());
     };
-    const grant = await call({
-      action: "budget_begin",
-      turnId: scope.turnId,
-      stepIndex: scope.stepIndex,
-      purpose: scope.purpose,
-    });
+    const startedAt = Date.now();
+    // Interactive sessions use EVE's server-side approval gate, not an operator campaign.
+    // Campaign mode remains an explicit opt-in for separately bounded experiments.
+    const grant =
+      mode === "campaign"
+        ? await call({
+            action: "budget_begin",
+            turnId: scope.turnId,
+            stepIndex: scope.stepIndex,
+            purpose: scope.purpose,
+          })
+        : {
+            inputLimit: 0,
+            outputLimit: 2048,
+            deadline: new Date(startedAt + 60_000).toISOString(),
+          };
     if (
       !integer(grant.inputLimit) ||
       !integer(grant.outputLimit) ||
@@ -96,7 +107,24 @@ export function budgetedFetch(
     let finished = false;
     const finish = async (usage: Usage | null) => {
       if (finished) return;
-      await call({ action: "budget_finish", notSent: !dispatched, usage });
+      if (mode === "campaign")
+        await call({ action: "budget_finish", notSent: !dispatched, usage });
+      console.info(
+        JSON.stringify({
+          kind: "mobility.provider.metric",
+          attemptId,
+          sessionId: scope.sessionId,
+          turnId: scope.turnId,
+          stepIndex: scope.stepIndex,
+          purpose: scope.purpose,
+          mode,
+          dispatched,
+          latencyMs: Date.now() - startedAt,
+          inputTokens: usage?.input ?? null,
+          outputTokens: usage?.output ?? null,
+          cacheReadTokens: usage?.cached ?? null,
+        }),
+      );
       finished = true;
     };
     try {
@@ -117,47 +145,51 @@ export function budgetedFetch(
           ...contextFootprint(body),
         }),
       );
-      // Count the same context, schemas and formatting used for generation; no local tokenizer estimate.
-      const countBody = Object.fromEntries(
-        [
-          "model",
-          "input",
-          "instructions",
-          "tools",
-          "tool_choice",
-          "parallel_tool_calls",
-          "text",
-          "reasoning",
-          "truncation",
-        ]
-          .filter((key) => body[key] !== undefined)
-          .map((key) => [key, body[key]]),
-      );
-      const counted = await network(`${endpoint}/input_tokens`, {
-        ...init,
-        redirect: "error",
-        signal,
-        body: JSON.stringify(countBody),
-      });
-      if (!counted.ok) {
-        await counted.body?.cancel();
-        throw fail();
+      if (mode === "campaign") {
+        // Count the same context, schemas and formatting used for generation; no local tokenizer estimate.
+        const countBody = Object.fromEntries(
+          [
+            "model",
+            "input",
+            "instructions",
+            "tools",
+            "tool_choice",
+            "parallel_tool_calls",
+            "text",
+            "reasoning",
+            "truncation",
+          ]
+            .filter((key) => body[key] !== undefined)
+            .map((key) => [key, body[key]]),
+        );
+        const counted = await network(`${endpoint}/input_tokens`, {
+          ...init,
+          redirect: "error",
+          signal,
+          body: JSON.stringify(countBody),
+        });
+        if (!counted.ok) {
+          await counted.body?.cancel();
+          throw fail();
+        }
+        const count = object(JSON.parse(await boundedText(counted)));
+        if (
+          count.object !== "response.input_tokens" ||
+          !integer(count.input_tokens) ||
+          count.input_tokens <= 0 ||
+          count.input_tokens > grant.inputLimit
+        )
+          throw fail();
+        signal.throwIfAborted();
+        // Treat a lost dispatch response as possibly dispatched: never refund it.
+        dispatched = true;
+        await call({
+          action: "budget_dispatch",
+          inputTokens: count.input_tokens,
+        });
+      } else {
+        dispatched = true;
       }
-      const count = object(JSON.parse(await boundedText(counted)));
-      if (
-        count.object !== "response.input_tokens" ||
-        !integer(count.input_tokens) ||
-        count.input_tokens <= 0 ||
-        count.input_tokens > grant.inputLimit
-      )
-        throw fail();
-      signal.throwIfAborted();
-      // Treat a lost dispatch response as possibly dispatched: never refund it.
-      dispatched = true;
-      await call({
-        action: "budget_dispatch",
-        inputTokens: count.input_tokens,
-      });
       signal.throwIfAborted();
       const response = await network(url, {
         ...init,
