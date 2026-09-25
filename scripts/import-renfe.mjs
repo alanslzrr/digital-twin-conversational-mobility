@@ -1,29 +1,23 @@
 import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import postgres from "postgres";
 import { deriveDestinationEvidence } from "../packages/domain/src/transit-identity.ts";
-
-const url = process.env.DATABASE_URL;
-if (
-  !url ||
-  !["localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname)
-)
-  throw new Error("This import is local-only");
-const { manifest, stops, routes, trips, stopTimes } = JSON.parse(
-  await readFile(
-    new URL("../data/sources/renfe-madrid.json", import.meta.url),
-    "utf8",
-  ),
-);
-const stopNames = new Map(stops.map((stop) => [stop.stop_id, stop.stop_name]));
-const timesByTrip = new Map();
-for (const time of stopTimes ?? []) {
-  const times = timesByTrip.get(time.trip_id) ?? [];
-  times.push(time);
-  timesByTrip.set(time.trip_id, times);
-}
-const sql = postgres(url, { max: 1 });
-const isoDate = (value) => value.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
-try {
+export async function importRenfe(sql, file) {
+  const { manifest, stops, routes, trips, stopTimes } = JSON.parse(
+    await readFile(file, "utf8"),
+  );
+  const stopNames = new Map(
+    stops.map((stop) => [stop.stop_id, stop.stop_name]),
+  );
+  const timesByTrip = new Map();
+  for (const time of stopTimes ?? []) {
+    const times = timesByTrip.get(time.trip_id) ?? [];
+    times.push(time);
+    timesByTrip.set(time.trip_id, times);
+  }
+  const isoDate = (value) =>
+    value.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
   await sql.begin(async (tx) => {
     await tx`SELECT pg_advisory_xact_lock(90123002)`;
     for (const stop of stops) {
@@ -43,15 +37,34 @@ try {
     await tx`DELETE FROM transit_route WHERE source_id='renfe'`;
     await tx`INSERT INTO transit_route ${tx(routes.map((r) => ({ source_id: "renfe", external_id: r.route_id, short_name: r.route_short_name, long_name: r.route_long_name })))}`;
     for (let index = 0; index < trips.length; index += 2000) {
-      await tx`INSERT INTO transit_trip ${tx(trips.slice(index, index + 2000).map((t) => ({ source_id: "renfe", external_id: t.trip_id, route_id: t.route_id, headsign: t.trip_headsign ?? "", destination_evidence: tx.json(deriveDestinationEvidence(timesByTrip.get(t.trip_id), stopNames)) })))}`;
+      await tx`INSERT INTO transit_trip ${tx(trips.slice(index, index + 2000).map((t) => ({ source_id: "renfe", external_id: t.trip_id, route_id: t.route_id, headsign: t.trip_headsign ?? "", stops_unique: Boolean(timesByTrip.get(t.trip_id)?.length) && new Set((timesByTrip.get(t.trip_id) ?? []).map((s) => s.stop_id)).size === timesByTrip.get(t.trip_id).length, destination_evidence: tx.json(deriveDestinationEvidence(timesByTrip.get(t.trip_id), stopNames)) })))}`;
     }
-    await tx`DELETE FROM place_external_identifier WHERE source_id='renfe' AND namespace='gtfs.stop' AND source_version<>${manifest.staticVersion}`;
+    // Retain identities across disappearance/reappearance; readers filter active source_version.
     await tx`INSERT INTO static_feed(source_id,version,service_start,service_end,manifest) VALUES ('renfe',${manifest.staticVersion},${isoDate(manifest.serviceStart)},${isoDate(manifest.serviceEnd)},${tx.json(manifest)}) ON CONFLICT (source_id) DO UPDATE SET version=excluded.version,service_start=excluded.service_start,service_end=excluded.service_end,manifest=excluded.manifest,imported_at=now()`;
     await tx`UPDATE source_catalog SET enabled=true, license_reviewed_at=now() WHERE id IN ('renfe','osm')`;
   });
   console.log(
     `Imported ${stops.length} Madrid stations, ${routes.length} routes, ${trips.length} trips. Valid ${manifest.serviceStart}–${manifest.serviceEnd}.`,
   );
-} finally {
-  await sql.end();
+}
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
+) {
+  const url = process.env.DATABASE_URL;
+  if (
+    !url ||
+    !["localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname)
+  )
+    throw Error("This import is local-only");
+  const sql = postgres(url, { max: 1 });
+  try {
+    await importRenfe(
+      sql,
+      process.argv[2] ??
+        new URL("../data/sources/renfe-madrid.json", import.meta.url),
+    );
+  } finally {
+    await sql.end();
+  }
 }

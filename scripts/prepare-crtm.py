@@ -248,6 +248,7 @@ def prepare(dataset, download_sources=False, source_dir=None):
         else:
             shutil.move(temp, target)
     print(json.dumps({"export": str(target), **{k: manifest[k] for k in ["datasetId", "serviceStart", "serviceEnd", "counts", "repeatedStopTrips"]}}))
+    return target
 
 
 if __name__ == "__main__":
