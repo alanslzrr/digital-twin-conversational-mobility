@@ -18,6 +18,7 @@ const trip = z.object({
 });
 const update = z.object({
   trip,
+  delay: z.number().optional(),
   observedAt: z.string(),
   stopTimeUpdate: z
     .array(
@@ -105,12 +106,21 @@ export async function enrichRouting<
     end: string;
     duration: number;
   },
->(routes: T[], version: string, now: string, earliest: string = now) {
-  const evidence = await routingEvidence(version, now);
+>(
+  routes: T[],
+  version: string,
+  now: string,
+  earliest: string = now,
+  loaded?: Awaited<ReturnType<typeof routingEvidence>>,
+) {
+  const evidence = loaded ?? (await routingEvidence(version, now));
   const filtered: { reason: string }[] = [];
   const itineraries = routes
     .flatMap((route) => {
-      const result = applyRoutingEvidence(route.legs, evidence);
+      const result = applyRoutingEvidence(route.legs, {
+        ...evidence,
+        earliest,
+      });
       if (
         result.legs[0] &&
         Date.parse(result.legs[0].effectiveStart) < Date.parse(earliest)

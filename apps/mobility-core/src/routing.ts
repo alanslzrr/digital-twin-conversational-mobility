@@ -8,7 +8,7 @@ import {
 import { journeyModePolicy } from "@mobility/domain";
 import { z } from "zod";
 import { database } from "./database";
-import { enrichRouting } from "./routing-evidence";
+import { enrichRouting, routingEvidence } from "./routing-evidence";
 import { coveredFeeds, routingRelease } from "./routing-release";
 
 const time = z.iso.datetime({ offset: true });
@@ -279,31 +279,86 @@ export async function planJourney(request: JourneyRequest) {
             },
     });
     await assertGraphVersion(feed.version);
-    const raw = await otpQuery(
-      `query Journey($origin:PlanLabeledLocationInput!,$destination:PlanLabeledLocationInput!,$date:PlanDateTimeInput,$preferences:PlanPreferencesInput,$modes:PlanModesInput){
+    const evidence = release
+      ? await routingEvidence(feed.version, asOf)
+      : undefined;
+    const query = `query Journey($origin:PlanLabeledLocationInput!,$destination:PlanLabeledLocationInput!,$date:PlanDateTimeInput,$preferences:PlanPreferencesInput,$modes:PlanModesInput){
       planConnection(origin:$origin,destination:$destination,dateTime:$date,preferences:$preferences,modes:$modes,first:10){
         routingErrors{code} edges{node{duration start end walkTime numberOfTransfers
           legs{mode distance serviceDate from{name stop{gtfsId}}to{name stop{gtfsId}}start{scheduledTime}end{scheduledTime}route{shortName gtfsId}trip{gtfsId}}}}
-      }}`,
-      {
-        origin: location(origin),
-        destination: location(destination),
-        date: { earliestDeparture: date },
-        preferences: {
-          accessibility: {
-            wheelchair: { enabled: input.preferences.wheelchair },
-          },
-          transit: {
-            transfer: { maximumTransfers: input.preferences.maxTransfers },
-            timetable: { excludeRealTimeUpdates: true },
-          },
+      }}`;
+    const variables = {
+      origin: location(origin),
+      destination: location(destination),
+      date: { earliestDeparture: date },
+      preferences: {
+        accessibility: {
+          wheelchair: { enabled: input.preferences.wheelchair },
         },
-        modes: otpJourneyModes(policy),
+        transit: {
+          transfer: { maximumTransfers: input.preferences.maxTransfers },
+          timetable: { excludeRealTimeUpdates: true },
+        },
       },
-    );
+      modes: otpJourneyModes(policy),
+    };
+    const raw = await otpQuery(query, variables);
+    const result = planSchema.parse(raw).data.planConnection;
+    let lateSearchStatus = "not_needed";
+    // One bounded supplemental window discovers delayed trains that have
+    // already left the scheduled departure window. No provider refresh/poll.
+    const lookback =
+      evidence &&
+      policy.allowTransit &&
+      Math.abs(Date.parse(date) - Date.parse(asOf)) <= 120_000
+        ? Math.min(
+            1800,
+            Math.max(0, ...evidence.updates.map((update) => update.delay ?? 0)),
+          )
+        : 0;
+    if (lookback > 0) {
+      try {
+        const extra = planSchema.parse(
+          await otpQuery(query, {
+            ...variables,
+            date: {
+              earliestDeparture: new Date(
+                Date.parse(date) - lookback * 1000,
+              ).toISOString(),
+            },
+          }),
+        ).data.planConnection;
+        const keys = new Set(
+          result.edges.map((edge) =>
+            JSON.stringify(
+              edge.node.legs.map((leg) => [
+                leg.trip?.gtfsId,
+                leg.start.scheduledTime,
+                leg.end.scheduledTime,
+              ]),
+            ),
+          ),
+        );
+        for (const edge of extra.edges) {
+          const key = JSON.stringify(
+            edge.node.legs.map((leg) => [
+              leg.trip?.gtfsId,
+              leg.start.scheduledTime,
+              leg.end.scheduledTime,
+            ]),
+          );
+          if (!keys.has(key)) {
+            result.edges.push(edge);
+            keys.add(key);
+          }
+        }
+        lateSearchStatus = "searched";
+      } catch {
+        lateSearchStatus = "unavailable";
+      }
+    }
     if (release && (await routingRelease())?.releaseId !== release.releaseId)
       throw new RoutingFailure("routing_update_in_progress");
-    const result = planSchema.parse(raw).data.planConnection;
     const scheduled = result.edges
       .map((edge) => edge.node)
       .filter(
@@ -320,7 +375,7 @@ export async function planJourney(request: JourneyRequest) {
               )),
       );
     const overlay = release
-      ? await enrichRouting(scheduled, feed.version, asOf, date)
+      ? await enrichRouting(scheduled, feed.version, asOf, date, evidence)
       : { itineraries: scheduled, filtered: [], provenance: [] };
     const itineraries = await Promise.all(
       overlay.itineraries.slice(0, 3).map(async (route) => {
@@ -405,8 +460,12 @@ export async function planJourney(request: JourneyRequest) {
           "Matched Renfe RT and scoped alerts; EMT line notices are advisory, arrival predictions have no verified GTFS trip identity",
       },
       releaseId: release?.releaseId ?? null,
+      delayedServiceSearch: {
+        status: lateSearchStatus,
+        lookbackSeconds: lookback,
+      },
       searchScope:
-        "Up to ten OTP candidates filtered by requested walking/transfers and verified realtime evidence; no_route is not proof that no connection exists anywhere in the network",
+        "Up to ten OTP candidates plus one bounded delayed-service window (at most ten more) filtered by requested walking/transfers and verified realtime evidence; no_route is not proof that no connection exists anywhere in the network",
       networks,
       staticVersion: feed.version,
       coverage: release?.coverage ?? feed.manifest.coverage,
