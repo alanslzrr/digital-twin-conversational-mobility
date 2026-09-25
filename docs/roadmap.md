@@ -2,7 +2,7 @@
 
 Actualizado el **25/09/2026**, tras el reporte manual del usuario y reproducción contra MCP/OTP. Base auditada: `f9ef91e`.
 
-**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; el control de presupuesto conversacional está implementado y probado offline en la rama E2, pero su aceptación conversacional real y la fiabilidad continuada siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
+**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; E2 está cerrado en la rama con aceptación offline del flujo nativo de pausa/aprobación/rechazo. La aceptación global de movilidad y la fiabilidad continuada siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
 
 Evidencia, evaluación individual de los 13 ejemplos y hallazgos: [auditoría completa](audits/2026-09-25-evaluation.md). Instrucciones operativas: [runtime local](local-runtime.md).
 
@@ -15,7 +15,7 @@ Ejecución iniciada del [plan E0–E8](plans/2026-09-25-remediation.md). [Primer
 | 1. OTP local | Grafo real Renfe/OSM versionado; benchmark Atocha/Chamartín/Sol; rutas previstas; fix TRANSIT probado por MCP local | **Parcial.** F01 corregido en rama; faltan aceptación EVE, ampliar cobertura de pares/accesibilidad y medir RAM máxima de build. Metro/EMT y RT en itinerarios no implementados. |
 | 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Parcial.** Alias C-5/C5, destinos de viajes, replay y cambios diarios; cancelaciones/NO_DATA/SKIPPED; RT en routing y semántica histórica. |
 | 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **Implementada, fiabilidad pendiente.** Diagnosticar huecos, heartbeat/latencias y fallos por etapa; suspender/reanudar y aislar fuentes lentas. Cadencia configurada no equivale a cadencia medida. |
-| 4. Dominio/MCP/EVE | Diez tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** Control de tokens/sesiones largas, normalización, histórico; geocoder general y herramientas de línea/red/snapshot faltantes. |
+| 4. Dominio/MCP/EVE | Diez tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado; quedan normalización, histórico; geocoder general y herramientas de línea/red/snapshot faltantes. |
 | 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro y avisos EMT | **Parcial.** Llegadas/catálogos EMT; CRTM/Metro/interurbanos, DGT y mapping; ampliar fuentes conforme al brief o documentar exclusiones aprobadas. |
 
 ## R0 — Estabilizar y aceptar la vertical existente
@@ -23,7 +23,7 @@ Ejecución iniciada del [plan E0–E8](plans/2026-09-25-remediation.md). [Primer
 Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 
 - [x] **F01 / P0 — routing (rama local):** mapping TRANSIT→OTP corregido, regresiones de modos/preferencias/errores y tres baterías MCP de 11 casos aprobadas. Entrada del reporte: tres itinerarios previstos de 13 min. [Evidencia y límites](acceptance/2026-09-25-routing.md). Integración en main/runtime habitual y aceptación conversacional siguen separadas.
-- [ ] **F02 / P0 — presupuesto (implementado offline):** ledger persistente, reservas previas por intento, límites globales/concurrencia/reintentos, métricas y cápsula de evidencia acotada. 182 pruebas offline + 17 DB aisladas aprobadas tras las correcciones de revisión. [Evidencia E2 y límites](audits/2026-09-25-e2-instrumentation.md). Aceptación T01–T13 con modelo pendiente por decisión explícita de no gastar; `pnpm check` estándar aprobado en checkout aislado con caché limpia; [revisión posterior](audits/2026-09-25-e2-review.md) documenta tres hallazgos de contabilidad/concurrencia/evidencia ya corregidos con regresiones. Preparado para iniciar E3 sin gasto; transición del runtime separada. Sin integración en main/runtime habitual.
+- [x] **F02 / P0 — control conversacional (E2 cerrado en rama):** telemetría, compactación con evidencia y límites nativos EVE: pausa y aviso, aprobar continúa, rechazar detiene. Verificado sin gasto; no exige consumir 100.000/10.000 tokens ni campaña real. Campañas con ledger quedan como modo experimental opt-in, no requisito del chat. [Cierre y evidencia](acceptance/2026-09-25-e2-closure.md). Integración en main/runtime habitual separada. Siguiente paso: E3.
 - [ ] **F03 / P1 — continuidad:** registrar intentos/heartbeat/ventana/lease/backoff, probar recuperación y proveedor lento; medir objetivos de frescura sin inventar timestamps.
 - [ ] **F04 / P1 — identidad de línea:** C-5/C5 equivalentes; no confundir C4/C4a/C4b ni EMT002/2; línea inexistente ≠ línea sin avisos.
 - [ ] **F05 / P1 — salidas útiles:** destino/sentido trazable cuando la fuente lo permita, ausencia explícita en caso contrario; no usar llegada como salida.
