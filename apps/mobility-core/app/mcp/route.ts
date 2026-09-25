@@ -148,11 +148,11 @@ const handler = createMcpHandler(
       {
         title: "Historical observation index",
         description:
-          "Index of stored observations at or before the requested instant, within 24 hours. Not a full historical network reconstruction.",
+          "Index of retained observations within 24 hours. event may include later corrections; knowledge includes only information ingested by that instant. Includes EMT published notices. Not a full network reconstruction.",
         inputSchema: historyInputSchema,
         annotations,
       },
-      ({ source, at }) => run(() => history(source, at)),
+      ({ source, at, mode }) => run(() => history(source, at, mode)),
     );
     server.registerTool(
       "get_parking",
