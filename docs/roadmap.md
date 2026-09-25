@@ -2,20 +2,24 @@
 
 Actualizado el **25/09/2026**, tras el reporte manual del usuario y reproducción contra MCP/OTP. Base auditada: `f9ef91e`.
 
-**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; E2 está cerrado en la rama con aceptación offline del flujo nativo de pausa/aprobación/rechazo. La aceptación global de movilidad y la fiabilidad continuada siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
+**Estado actual: prototipo vertical local funcional, no roadmap cerrado.** El fallo `TRANSIT` de la auditoría está corregido en la rama de trabajo y validado por MCP/OTP local; E2 está cerrado en la rama con aceptación offline del flujo nativo de pausa/aprobación/rechazo. E3–E6 completan localmente la vertical R0; integración habitual E8 y ampliación E7 siguen pendientes. Las 74 pruebas de la auditoría no lo detectaban; la primera entrega añade 69 regresiones (143 pruebas en total).
 
 Evidencia, evaluación individual de los 13 ejemplos y hallazgos: [auditoría completa](audits/2026-09-25-evaluation.md). Instrucciones operativas: [runtime local](local-runtime.md).
 
 Ejecución iniciada del [plan E0–E8](plans/2026-09-25-remediation.md). [Primera entrega y matriz de aceptación](acceptance/2026-09-25-routing.md): E0 mínimo y E1 implementados localmente, sin integración en main ni reinicio del runtime habitual. Gasto, benchmarks y despliegues conservan autorización separada.
+
+## Continuidad vigente
+
+E2 no se reabre. E3–E6 están implementados y probados localmente; continuar con E7 o integrar mediante E8. [Evidencia E6](acceptance/2026-09-25-functional-continuity.md) reutiliza pruebas existentes y regresiones de comportamiento modificado. Campañas experimentales, consumo y benchmarks son opcionales y requieren autorización separada: las propuestas históricas de R2 no añaden barreras al funcionamiento local. E8 incluye PR/integración, migraciones y actualización del runtime habitual; puede integrar E1–E3 antes de terminar E7. Vercel queda para después.
 
 ## Pasos 1–5: qué hay y qué falta
 
 | Paso | Implementado | Estado / falta para cierre |
 | --- | --- | --- |
 | 1. OTP local | Grafo real Renfe/OSM versionado; benchmark Atocha/Chamartín/Sol; rutas previstas; fix TRANSIT probado por MCP local | **Parcial.** F01 corregido en rama; faltan aceptación EVE, ampliar cobertura de pares/accesibilidad y medir RAM máxima de build. Metro/EMT y RT en itinerarios no implementados. |
-| 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Parcial.** Alias C-5/C5, destinos de viajes, replay y cambios diarios; cancelaciones/NO_DATA/SKIPPED; RT en routing y semántica histórica. |
-| 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **Implementada, fiabilidad pendiente.** Diagnosticar huecos, heartbeat/latencias y fallos por etapa; suspender/reanudar y aislar fuentes lentas. Cadencia configurada no equivale a cadencia medida. |
-| 4. Dominio/MCP/EVE | Diez tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado; quedan normalización, histórico; geocoder general y herramientas de línea/red/snapshot faltantes. |
+| 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Parcial.** Alias/destinos corregidos localmente en E4; falta reimportar/integrar, replay y cambios diarios; RT en routing y reconstrucción histórica completa. Cancelaciones/NO_DATA/SKIPPED y modos históricos event/knowledge están probados localmente. |
+| 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **E3 implementado localmente.** Carriles independientes, heartbeat, fallos por etapa y recuperación sin replay probados con proveedores simulados/DB aislada. Integración pendiente; cadencia configurada no equivale a SLO medido. |
+| 4. Dominio/MCP/EVE | Diez tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado, E3–E6 implementados localmente; queda integración E8; geocoder general y herramientas de línea/red/snapshot faltantes. |
 | 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro y avisos EMT | **Parcial.** Llegadas/catálogos EMT; CRTM/Metro/interurbanos, DGT y mapping; ampliar fuentes conforme al brief o documentar exclusiones aprobadas. |
 
 ## R0 — Estabilizar y aceptar la vertical existente
@@ -23,15 +27,15 @@ Ejecución iniciada del [plan E0–E8](plans/2026-09-25-remediation.md). [Primer
 Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 
 - [x] **F01 / P0 — routing (rama local):** mapping TRANSIT→OTP corregido, regresiones de modos/preferencias/errores y tres baterías MCP de 11 casos aprobadas. Entrada del reporte: tres itinerarios previstos de 13 min. [Evidencia y límites](acceptance/2026-09-25-routing.md). Integración en main/runtime habitual y aceptación conversacional siguen separadas.
-- [x] **F02 / P0 — control conversacional (E2 cerrado en rama):** telemetría, compactación con evidencia y límites nativos EVE: pausa y aviso, aprobar continúa, rechazar detiene. Verificado sin gasto; no exige consumir 100.000/10.000 tokens ni campaña real. Campañas con ledger quedan como modo experimental opt-in, no requisito del chat. [Cierre y evidencia](acceptance/2026-09-25-e2-closure.md). Integración en main/runtime habitual separada. Siguiente paso: E3.
-- [ ] **F03 / P1 — continuidad:** registrar intentos/heartbeat/ventana/lease/backoff, probar recuperación y proveedor lento; medir objetivos de frescura sin inventar timestamps.
-- [ ] **F04 / P1 — identidad de línea:** C-5/C5 equivalentes; no confundir C4/C4a/C4b ni EMT002/2; línea inexistente ≠ línea sin avisos.
-- [ ] **F05 / P1 — salidas útiles:** destino/sentido trazable cuando la fuente lo permita, ausencia explícita en caso contrario; no usar llegada como salida.
-- [ ] **F06 / P1 — histórico:** definir tiempo observado vs conocido, ingesta tardía, desfase/retención, correcciones con mismo timestamp y EMT en histórico.
-- [ ] **F07 / P1 — calidad por entidad:** estático vs dinámico en salud, catálogo de estaciones de aire, timestamps de parking por entidad y BiciMAD por estación.
-- [ ] **F08 / P1 — aceptación:** automatizar 13 ejemplos + cinco negativos; comprobar exactitud, no solo tools llamadas/HTTP200. URL canónica `http://127.0.0.1:3000/evaluation`; errores de login sin debilitar CSRF.
+- [x] **F02 / P0 — control conversacional (E2 cerrado en rama):** telemetría, compactación con evidencia y límites nativos EVE: pausa y aviso, aprobar continúa, rechazar detiene. Verificado sin gasto; no exige consumir 100.000/10.000 tokens ni campaña real. Campañas con ledger quedan como modo experimental opt-in, no requisito del chat. [Cierre y evidencia](acceptance/2026-09-25-e2-closure.md). Integración en main/runtime habitual separada. E3 implementado localmente; siguiente paso funcional: E7.
+- [x] **F03 / P1 — continuidad (E3 local):** carriles independientes sin barrera de lote, recuperación de leases y backoff sin replay; heartbeat/ventana/errores/frescura separados y nueve regresiones PostgreSQL aisladas. Migración `0010` e integración en runtime habitual pendientes en E8; no se afirma un SLO medido. [Cambios y evidencia](acceptance/2026-09-25-ingestion.md).
+- [x] **F04 / P1 — identidad de línea (E4 local):** alias Renfe contra catálogo, ramales/ceros EMT preservados; identidad conocida/desconocida/catálogo ausente separada de avisos. Catálogo EMT pendiente E7. [Evidencia E4](acceptance/2026-09-25-line-destinations.md).
+- [x] **F05 / P1 — salidas útiles (E4 local):** destino explícito o terminal derivado por viaje, con versión y origen; CIVIS no se presenta como destino, ausencia explícita y llegada/salida separadas. `0011`, reimportación e integración habitual pendientes E8. [Cobertura y límites](acceptance/2026-09-25-line-destinations.md).
+- [x] **F06 / P1 — histórico (E5 local):** modos event/knowledge, revisiones/correcciones idempotentes, EMT, ingestas tardías sin regresión, desfase y límites de retención. Índice parcial, no reconstrucción completa. `0012` pendiente de integración. [Evidencia y transición](acceptance/2026-09-25-history-quality.md).
+- [x] **F07 / P1 — calidad por entidad (E5 local):** parking/categorías, aire y BiciMAD con procedencia propia; catálogo oficial de aire versionado, identidad parcial si no hay correspondencia, salud con cobertura por entidad y capacidad estática separada. [Límites](acceptance/2026-09-25-history-quality.md).
+- [x] **F08 / P1 — continuidad funcional (E6 local):** corregidos avisos futuros, explicación del RT y login canónico/errores sin debilitar CSRF. 242 pruebas offline y smokes MCP/OTP existentes aprobados, sin campaña conversacional nueva. [Evidencia y límites E6](acceptance/2026-09-25-functional-continuity.md). Integración habitual pendiente E8.
 
-**Puerta R0:** todos los casos de la vertical pasan o devuelven una limitación esperada y verificable; sin P0/P1 de esa vertical abiertos; regresiones de los defectos del reporte y evidencia de consumo/latencia. No marca los pasos 1–5 como completos.
+**R0 local completado en el alcance acordado:** funcionalidad existente y regresiones verificadas sin exigir otra campaña de aceptación, consumo o benchmark. E8 integra y actualiza el runtime habitual; E7 amplía cobertura. No equivale a servicio operativo ni marca los pasos 1–5 como completos.
 
 ## R1 — Completar el alcance original del dominio
 
