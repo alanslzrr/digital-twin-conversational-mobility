@@ -8,7 +8,7 @@ Actualizado el **25/09/2026**, tras el reporte manual del usuario y reproducció
 
 ## Continuidad vigente
 
-**Siguiente paso: E7, catálogo y próximas llegadas EMT**, seguido de CRTM/Metro/interurbanos, DGT, geocodificación, routing y herramientas agregadas. E2 no se reabre. Pruebas proporcionales a cada cambio; no campañas nuevas como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
+**E7: primera entrega EMT implementada** — catálogo y próximas llegadas bajo demanda; ver [evidencia y límites](acceptance/2026-09-25-emt.md). Siguiente entrega: CRTM/Metro/interurbanos, después geocodificación/routing, DGT y herramientas agregadas. E2 no se reabre. Pruebas proporcionales a cada cambio; no campañas nuevas como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
 
 ### Corrección puntual posterior a E8
 
@@ -21,8 +21,8 @@ El reporte manual detectó que el agente omitió el histórico disponible y dupl
 | 1. OTP local | Grafo real Renfe/OSM versionado; benchmark Atocha/Chamartín/Sol; rutas previstas; fix TRANSIT probado por MCP local | **Parcial.** F01 integrado. Ampliar cobertura de pares/accesibilidad y medir RAM máxima de build son trabajos adicionales, no bloqueos de R0. Metro/EMT y RT en itinerarios no implementados. |
 | 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Parcial.** Alias/destinos E4 integrados y reimportados; faltan replay y cambios diarios; RT en routing y reconstrucción histórica completa. Cancelaciones/NO_DATA/SKIPPED y modos históricos event/knowledge están probados localmente. |
 | 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **E3 integrado.** Carriles independientes, heartbeat, fallos por etapa y recuperación sin replay probados con proveedores simulados/DB aislada. Runtime actualizado; cadencia configurada no equivale a SLO medido. |
-| 4. Dominio/MCP/EVE | Diez tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado, E3–E6 integrados mediante E8; geocoder general y herramientas de línea/red/snapshot faltantes. |
-| 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro y avisos EMT | **Parcial.** Llegadas/catálogos EMT; CRTM/Metro/interurbanos, DGT y mapping; ampliar fuentes conforme al brief o documentar exclusiones aprobadas. |
+| 4. Dominio/MCP/EVE | Once tools reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado, E3–E6 integrados mediante E8; geocoder general y herramientas de línea/red/snapshot faltantes. |
+| 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro, avisos y catálogo/llegadas EMT | **Parcial.** CRTM/Metro/interurbanos, DGT y mapping; ampliar fuentes conforme al brief o documentar exclusiones aprobadas. |
 
 ## R0 — Estabilizar y aceptar la vertical existente
 
@@ -31,7 +31,7 @@ Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 - [x] **F01 / P0 — routing integrado:** mapping TRANSIT→OTP corregido, regresiones de modos/preferencias/errores y tres baterías MCP de 11 casos aprobadas. Entrada del reporte: tres itinerarios previstos de 13 min. [Evidencia y límites](acceptance/2026-09-25-routing.md). Integrado en main/runtime habitual; no se exige nueva campaña conversacional.
 - [x] **F02 / P0 — control conversacional (E2 cerrado e integrado):** telemetría, compactación con evidencia y límites nativos EVE: pausa y aviso, aprobar continúa, rechazar detiene. Verificado sin gasto; no exige consumir 100.000/10.000 tokens ni campaña real. Campañas con ledger quedan como modo experimental opt-in, no requisito del chat. [Cierre y evidencia](acceptance/2026-09-25-e2-closure.md). Integrado en main/runtime habitual; siguiente paso funcional: E7.
 - [x] **F03 / P1 — continuidad (E3 local):** carriles independientes sin barrera de lote, recuperación de leases y backoff sin replay; heartbeat/ventana/errores/frescura separados y nueve regresiones PostgreSQL aisladas. Migración `0010` e integración habitual aplicadas en E8; no se afirma un SLO medido. [Cambios y evidencia](acceptance/2026-09-25-ingestion.md).
-- [x] **F04 / P1 — identidad de línea (E4 local):** alias Renfe contra catálogo, ramales/ceros EMT preservados; identidad conocida/desconocida/catálogo ausente separada de avisos. Catálogo EMT pendiente E7. [Evidencia E4](acceptance/2026-09-25-line-destinations.md).
+- [x] **F04 / P1 — identidad de línea (E4 local):** alias Renfe contra catálogo, ramales/ceros EMT preservados; identidad conocida/desconocida/catálogo ausente separada de avisos. Catálogo EMT incorporado en la primera entrega E7. [Evidencia E4](acceptance/2026-09-25-line-destinations.md).
 - [x] **F05 / P1 — salidas útiles (E4 local):** destino explícito o terminal derivado por viaje, con versión y origen; CIVIS no se presenta como destino, ausencia explícita y llegada/salida separadas. `0011`, reimportación e integración habitual completadas E8. [Cobertura y límites](acceptance/2026-09-25-line-destinations.md).
 - [x] **F06 / P1 — histórico (E5 local):** modos event/knowledge, revisiones/correcciones idempotentes, EMT, ingestas tardías sin regresión, desfase y límites de retención. Índice parcial, no reconstrucción completa. `0012` aplicada mediante E8. [Evidencia y transición](acceptance/2026-09-25-history-quality.md).
 - [x] **F07 / P1 — calidad por entidad (E5 local):** parking/categorías, aire y BiciMAD con procedencia propia; catálogo oficial de aire versionado, identidad parcial si no hay correspondencia, salud con cobertura por entidad y capacidad estática separada. [Límites](acceptance/2026-09-25-history-quality.md).
@@ -44,9 +44,11 @@ Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 Orden por dependencias, no por número de endpoints:
 
 - [ ] Registro de fuentes: contrato, cobertura espacial/temporal, licencias/atribución, credenciales/caducidad, límites y GAPs con evidencia. Activar una fuente no equivale a revisar su licencia.
-- [ ] Identidad/catálogos EMT y CRTM; lugares/paradas/líneas/viajes versionados y mapping entre operadores sin colisiones.
-- [ ] Llegadas EMT con caché/read-through acotado y normalización; no polling global continuo de todas las paradas.
+- [x] Catálogo EMT: paradas con UUID estable y namespace propio, líneas internas/etiquetas y sentidos versionados. No incluye horarios/viajes ni correspondencias entre operadores.
+- [ ] Catálogos CRTM/Metro/interurbanos; horarios/viajes versionados y correspondencias entre operadores sin mezclar identificadores.
+- [x] Llegadas EMT por parada bajo demanda: caché persistente, lease/backoff, destino del proveedor y antigüedad; no polling global. Comprobación conversacional con evaluadores durante uso normal, sin campaña nueva como requisito.
 - [ ] Incorporar GTFS CRTM/Metro/interurbanos al routing según disponibilidad oficial y validar correspondencias/servicios. Distinguir siempre cobertura estática de RT.
+- [ ] Actualización coordinada y reversible de GTFS, catálogos y grafo; la importación manual EMT no resuelve esta operación entre fuentes.
 - [ ] Integración RT/alertas en routing con una sola política de actividad/ingestión; degradación a previsto explícita y probada, sin segundo polling oculto en OTP.
 - [ ] Accesibilidad estática trazable; ascensores/escaleras RT como GAP externo hasta disponer de fuente oficial. No garantizar accesibilidad operativa desde atributos estáticos.
 - [ ] DGT: verificar acceso/versión DATEX, adaptar eventos/geometrías, deduplicar y probar cancelación/expiración; no sustituir por tráfico municipal.
@@ -61,9 +63,9 @@ Orden por dependencias, no por número de endpoints:
 
 - [ ] R0/R1 satisfechos para el alcance explícitamente acordado.
 - [ ] Cinco cuentas concurrentes: sesiones aisladas, CSRF, scopes, cuotas atómicas, revocación, logout y ausencia de secretos en navegador/modelo/logs.
-- [ ] Batería de conversaciones aisladas y continuas: las 13 consultas y negativos, ambigüedad, antigüedad, ausencia, cancelación y error de proveedor.
-- [ ] Presupuestos de tokens/coste y objetivos p50/p95 de latencia/frescura aprobados y medidos, separando caché, red externa, routing y modelo.
-- [ ] Soak propuesto de dos horas, 30 min sin usuarios y reactivación; recuperación de procesos y fallos de persistencia sin duplicados ni retrocesos. Fijar umbrales antes de probar, no después de ver resultados.
+- [ ] Comprobar el uso con evaluadores reutilizando las consultas existentes y los casos afectados por cada entrega. No se exige otra campaña general para avanzar.
+- [ ] Observar métricas de uso normal, separando caché, red externa, routing y modelo, para comprobar la reducción real de búsquedas tras PR #18. Ensayos específicos de consumo/latencia son opcionales y requieren aprobación; E2 sigue cerrado.
+- [ ] Opcional, no condición de avance: soak propuesto de dos horas, 30 min sin usuarios y reactivación; recuperación de procesos y fallos de persistencia sin duplicados ni retrocesos. Fijar umbrales antes de probar, no después de ver resultados.
 - [ ] Más pares OTP, horarios/días y accesibilidad; pico RAM de build, arranque y residencia documentados. No extrapolar cuatro pares a toda la red.
 - [ ] Runbook reproducible: iniciar/parar, healthcheck, actualizar GTFS/OSM/graph atómicamente, revertir, rotar claves y borrar conversaciones/raw. El calendario actual termina el **22/10/2026**.
 - [ ] Acta final: casos aprobados, errores abiertos, evidencia, cobertura y limitaciones aceptadas. Sin afirmar «TODO» a partir de un smoke exitoso.
