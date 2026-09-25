@@ -147,20 +147,24 @@ try {
   );
   if (
     process.argv.includes("--live") ||
+    process.argv.includes("--live-emt") ||
     process.argv.includes("--live-mobility") ||
     process.argv.includes("--live-weather")
   ) {
+    const emt = process.argv.includes("--live-emt");
     const mobility = process.argv.includes("--live-mobility");
     const weather = process.argv.includes("--live-weather");
     const response = await call(
       `/eve/v1/session/${sessionId}`,
       "POST",
       {
-        message: mobility
-          ? "Prueba de movilidad: quiero ir ahora de la estación Madrid-Atocha Cercanías a la estación Madrid-Chamartín-Clara Campoamor, en Cercanías. Resuelve primero ambas estaciones con MCP en paralelo; elijo explícitamente esas estaciones Renfe, no estaciones de bicis. Después consulta en paralelo la ruta, la observación meteorológica de Madrid-Retiro y el estado de disponibilidad de la fuente EMT. Responde brevemente con el trayecto, base prevista o real, observación meteorológica con hora y fuente, y si EMT está disponible. No repitas consultas ni inventes datos."
-          : weather
-            ? "Consulta con Mobility MCP la última observación meteorológica de Madrid-Retiro (kind=weather, estación3195). Responde brevemente con temperatura, lluvia, fuente y hora de observación. Distingue claramente observación de previsión y lluvia acumulada de lluvia en este instante."
-            : "Consulta el estado de la fuente Renfe usando Mobility MCP. Responde en una frase si hay datos disponibles.",
+        message: emt
+          ? "Consulta con Mobility MCP los avisos de autobuses EMT (get_incidents, source=emt, limit=3). Indica fuente y hora de actualización, advierte si el feed está desactualizado y distingue períodos futuros o desconocidos. No consultes rutas ni llegadas, no asumas que todos los avisos están activos y no repitas consultas."
+          : mobility
+            ? "Prueba de movilidad: quiero ir ahora de la estación Madrid-Atocha Cercanías a la estación Madrid-Chamartín-Clara Campoamor, en Cercanías. Resuelve primero ambas estaciones con MCP en paralelo; elijo explícitamente esas estaciones Renfe, no estaciones de bicis. Después consulta en paralelo la ruta, la observación meteorológica de Madrid-Retiro y el estado de disponibilidad de la fuente EMT. Responde brevemente con el trayecto, base prevista o real, observación meteorológica con hora y fuente, y si EMT está disponible. No repitas consultas ni inventes datos."
+            : weather
+              ? "Consulta con Mobility MCP la última observación meteorológica de Madrid-Retiro (kind=weather, estación3195). Responde brevemente con temperatura, lluvia, fuente y hora de observación. Distingue claramente observación de previsión y lluvia acumulada de lluvia en este instante."
+              : "Consulta el estado de la fuente Renfe usando Mobility MCP. Responde en una frase si hay datos disponibles.",
       },
       users[0].cookie,
     );
@@ -217,11 +221,13 @@ try {
       JSON.stringify(
         {
           verifiedAt: new Date().toISOString(),
-          scenario: mobility
-            ? "mobility"
-            : weather
-              ? "weather"
-              : "source-health",
+          scenario: emt
+            ? "emt-incidents"
+            : mobility
+              ? "mobility"
+              : weather
+                ? "weather"
+                : "source-health",
           completed: events.some((event) => event.type === "turn.completed"),
           completedSteps: events.filter(
             (event) => event.type === "step.completed",
@@ -244,16 +250,18 @@ try {
       events.some((event) => event.type === "turn.completed"),
       "EVE turn did not complete",
     );
-    const required = mobility
-      ? [
-          "resolve_place",
-          "plan_journey",
-          "get_environment",
-          "get_source_health",
-        ]
-      : weather
-        ? ["get_environment"]
-        : ["get_source_health"];
+    const required = emt
+      ? ["get_incidents"]
+      : mobility
+        ? [
+            "resolve_place",
+            "plan_journey",
+            "get_environment",
+            "get_source_health",
+          ]
+        : weather
+          ? ["get_environment"]
+          : ["get_source_health"];
     for (const tool of required) {
       const matches = actions.filter((event) =>
         String(event.data.result.toolName).includes(tool),
@@ -274,6 +282,12 @@ try {
       assert.ok(
         results.includes('"scheduled"') && results.includes('"aemet"'),
         "Expected real scheduled route and weather observations",
+      );
+    }
+    if (emt) {
+      assert.ok(
+        JSON.stringify(actions).includes('"emt"'),
+        "Expected EMT provenance",
       );
     }
     if (weather) {
