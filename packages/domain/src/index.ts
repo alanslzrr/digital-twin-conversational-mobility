@@ -60,6 +60,7 @@ export type RoutingResult =
       }>;
     };
 
+export { gtfsClock, gtfsInstant, gtfsServiceEpoch, madridDate } from "./crtm";
 export {
   type DestinationEvidence,
   deriveDestinationEvidence,
