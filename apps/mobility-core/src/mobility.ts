@@ -30,6 +30,7 @@ import type { parseAir, parseTraffic } from "./adapters/madrid";
 import type { parseParking } from "./adapters/parking";
 import type { parseRenfe } from "./adapters/renfe";
 import { airStationIdentity } from "./catalogs/air-stations";
+import { crtmHealth, resolveCrtm } from "./crtm";
 import { database } from "./database";
 import { ingest, ingestionEnabled } from "./ingestion";
 import { routingPlace, scheduledDepartures } from "./routing";
@@ -72,6 +73,7 @@ export async function sourceHealth(source?: SourceId) {
     !source || source === "emt"
       ? await database()`SELECT version,fetched_at,imported_at,manifest FROM emt_catalog`
       : [];
+  const crtmFeeds = !source || source === "crtm" ? await crtmHealth() : [];
   const sources = sourceCatalog
     .filter((entry) => !source || entry.id === source)
     .map((entry) => {
@@ -169,25 +171,42 @@ export async function sourceHealth(source?: SourceId) {
         });
       return {
         ...entry,
-        capability: streams.length
-          ? "dynamic_observations"
-          : feeds.some((f) => f.source_id === entry.id)
-            ? "static_feed"
-            : entry.id === "osm"
-              ? "static_routing_input_not_verified_here"
-              : "not_implemented",
-        status: streams.length
-          ? streams.every(
-              (s) =>
-                s.status === "fresh" &&
-                (!s.entityCoverage || s.entityCoverage.status === "fresh"),
-            )
-            ? "fresh"
-            : "partial_or_unavailable"
-          : entry.id === "emt"
-            ? "adapter_not_initialized"
-            : "not_implemented",
+        capability:
+          entry.id === "crtm" && crtmFeeds.length
+            ? "static_catalog_and_timetable"
+            : streams.length
+              ? "dynamic_observations"
+              : feeds.some((f) => f.source_id === entry.id)
+                ? "static_feed"
+                : entry.id === "osm"
+                  ? "static_routing_input_not_verified_here"
+                  : "not_implemented",
+        status:
+          entry.id === "crtm"
+            ? crtmFeeds.length
+              ? crtmFeeds.every((f) => f.currentServiceEnvelope)
+                ? "static_available"
+                : "partial_or_expired_static_coverage"
+              : "not_initialized"
+            : streams.length
+              ? streams.every(
+                  (s) =>
+                    s.status === "fresh" &&
+                    (!s.entityCoverage || s.entityCoverage.status === "fresh"),
+                )
+                ? "fresh"
+                : "partial_or_unavailable"
+              : entry.id === "emt"
+                ? "adapter_not_initialized"
+                : "not_implemented",
         streams,
+        ...(entry.id === "crtm"
+          ? {
+              staticCatalogs: crtmFeeds,
+              realtime: false,
+              routingIncluded: false,
+            }
+          : {}),
         ...(entry.id === "emt"
           ? {
               stopCatalog: emtCatalog ?? null,
@@ -234,8 +253,11 @@ export async function sourceHealth(source?: SourceId) {
 export async function resolvePlace(
   query: string,
   limit: number,
-  source?: "renfe" | "emt" | "bicimad",
+  source?: "renfe" | "emt" | "bicimad" | "crtm",
+  network?: "metro" | "light-rail" | "interurban",
 ) {
+  if (source === "crtm" || (!source && network))
+    return resolveCrtm(query, limit, network);
   // Parameterized LIKE with escaped metacharacters, accent-insensitive. Canonical only.
   const pattern = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
   const places =
@@ -246,25 +268,29 @@ export async function resolvePlace(
     AND (${source ?? null}::text IS NULL OR i.source_id=${source ?? null})
     AND (i.source_id<>'emt' OR EXISTS(SELECT 1 FROM emt_catalog c WHERE c.version=i.source_version))
     GROUP BY p.id ORDER BY bool_or(i.external_id=${query}) DESC,(unaccent(lower(p.name))=unaccent(lower(${query}))) DESC,(p.kind='station') DESC,p.name LIMIT ${limit}`;
-  return {
-    status: places.length ? "found" : "not_found",
-    places: await Promise.all(
-      places.map(async (place) => ({
-        ...place,
-        id: place.id as string,
-        emtLines: (
-          place.identifiers as { source: string; externalId: string }[]
-        ).some((i) => i.source === "emt")
-          ? await database()`SELECT r.external_id AS "lineId",r.short_name AS label,s.direction,r.long_name AS headers
+  const crtm = !source ? await resolveCrtm(query, limit) : { places: [] };
+  const found = await Promise.all(
+    places.map(async (place) => ({
+      ...place,
+      id: place.id as string,
+      emtLines: (
+        place.identifiers as { source: string; externalId: string }[]
+      ).some((i) => i.source === "emt")
+        ? await database()`SELECT r.external_id AS "lineId",r.short_name AS label,s.direction,r.long_name AS headers
           FROM emt_stop_line s JOIN transit_route r ON r.source_id='emt' AND r.external_id=s.line_id
           JOIN place_external_identifier i ON i.source_id='emt' AND i.namespace='api.stop' AND i.external_id=s.stop_id
           WHERE i.place_id=${place.id} ORDER BY r.short_name,s.direction`
-          : [],
-      })),
-    ),
-    ambiguous: places.length > 1,
+        : [],
+    })),
+  );
+  // Keep candidates from both catalogs: never silently choose an operator by name.
+  const combined = [...found, ...crtm.places];
+  return {
+    status: combined.length ? "found" : "not_found",
+    places: combined,
+    ambiguous: combined.length > 1,
     coverage:
-      "Imported Renfe, EMT stops and BiciMAD places; source=emt and exact stop number narrow candidates. EMT catalog is not routing coverage. No arbitrary-address geocoder.",
+      "Imported Renfe, EMT, BiciMAD and CRTM places; up to limit per catalog. Use source and CRTM network to narrow ambiguity. CRTM UUIDs are for get_crtm_timetable, not OTP routing. No arbitrary-address geocoder.",
   };
 }
 

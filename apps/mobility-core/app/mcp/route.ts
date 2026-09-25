@@ -1,5 +1,6 @@
 import {
   bikesInputSchema,
+  crtmTimetableInputSchema,
   departuresInputSchema,
   emtArrivalsInputSchema,
   environmentInputSchema,
@@ -13,6 +14,7 @@ import {
 } from "@mobility/contracts";
 import { createMcpHandler } from "mcp-handler";
 import { authorize } from "../../src/auth";
+import { crtmTimetable } from "../../src/crtm";
 import { emtArrivals } from "../../src/emt-arrivals";
 import { historicalQuery } from "../../src/history";
 import { activate } from "../../src/ingestion";
@@ -70,12 +72,12 @@ const handler = createMcpHandler(
       {
         title: "Resolve a canonical Madrid place",
         description:
-          "Search imported Renfe, EMT bus stops and BiciMAD places by name or exact stop number. Use source=emt for bus stops. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
+          "Search imported Renfe, EMT, BiciMAD and CRTM places by name or exact stop number. Use source=emt for buses or source=crtm with network=metro/light-rail/interurban. CRTM includes static validity and evidence-backed station correspondences; its IDs are for get_crtm_timetable, not routing. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
         inputSchema: resolvePlaceInputSchema,
         annotations,
       },
-      ({ query, limit, source }) =>
-        run(() => resolvePlace(query, limit, source)),
+      ({ query, limit, source, network }) =>
+        run(() => resolvePlace(query, limit, source, network)),
     );
     server.registerTool(
       "plan_journey",
@@ -98,6 +100,17 @@ const handler = createMcpHandler(
         annotations,
       },
       ({ placeId, limit }) => run(() => emtArrivals(placeId, limit)),
+    );
+    server.registerTool(
+      "get_crtm_timetable",
+      {
+        title: "CRTM static service-day timetable",
+        description:
+          "Horarios Metro, Metro Ligero e interurbanos CRTM. Resolve source=crtm first. One Madrid service day, calendars/exceptions applied, >24h times preserved. Date/time default to server today/now. Frequency windows are not individual arrivals. Expired coverage is unavailable; no RT, routing or knowledge replay. Report provenance, validity, destinations and unknowns.",
+        inputSchema: crtmTimetableInputSchema,
+        annotations,
+      },
+      (input) => run(() => crtmTimetable(input)),
     );
     server.registerTool(
       "get_departures",
