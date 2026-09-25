@@ -7,6 +7,7 @@ export {
   retryDelay,
 } from "./ingestion";
 export { sameServiceTrip } from "./realtime";
+export { journeyModePolicy } from "./routing";
 
 export const sourceCatalog: ReadonlyArray<{
   id: SourceId;
