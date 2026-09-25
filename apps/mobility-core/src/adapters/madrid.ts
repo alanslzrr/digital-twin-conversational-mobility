@@ -1,5 +1,6 @@
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { z } from "zod";
+import { airStationIdentity } from "../catalogs/air-stations";
 import { madridTime, numeric, timestamp } from "./common";
 
 const air = z.object({
@@ -40,6 +41,10 @@ export function parseAir(input: unknown, now = Date.now()) {
           {
             stationId: r.ESTACION ?? "",
             samplingPoint: r.PUNTO_MUESTREO ?? "",
+            stationIdentity: airStationIdentity(
+              r.ESTACION ?? "",
+              r.PUNTO_MUESTREO ?? "",
+            ),
             ...pollutant,
             value: value.data,
             observedAt,

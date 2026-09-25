@@ -133,6 +133,18 @@ const status = {
   },
 };
 describe("BiciMAD GBFS", () => {
+  it("preserves last_reported even when newer than the feed header", () => {
+    const result = parseBicimad(
+      info,
+      { ...status, last_updated: seconds - 300 },
+      now,
+    );
+    expect(result.stations[0]?.observedAt).toBe(timestamp(seconds - 200, now));
+    expect(result.stations[0]?.feedObservedAt).toBe(
+      timestamp(seconds - 300, now),
+    );
+    expect(result.stations[0]?.timestampConsistency).toBe("station_after_feed");
+  });
   it("preserves station observation time and zero availability", () => {
     const data = parseBicimad(info, status, now);
     expect(data.stations[0]?.bikes).toBe(0);

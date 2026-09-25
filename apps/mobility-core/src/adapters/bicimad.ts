@@ -47,7 +47,14 @@ export function parseBicimad(info: unknown, state: unknown, now = Date.now()) {
     places.data.stations.map((station) => [station.station_id, station]),
   );
   return {
-    observedAt: timestamp(live.last_updated, now),
+    observedAt: timestamp(
+      Math.max(
+        live.last_updated,
+        ...live.data.stations.map((s) => s.last_reported),
+      ),
+      now,
+    ),
+    feedObservedAt: timestamp(live.last_updated, now),
     ttl: Math.max(20, live.ttl),
     stations: live.data.stations.flatMap((s) => {
       const place = byId.get(s.station_id);
@@ -64,10 +71,12 @@ export function parseBicimad(info: unknown, state: unknown, now = Date.now()) {
           installed: s.is_installed,
           renting: s.is_renting,
           returning: s.is_returning,
-          observedAt: timestamp(
-            Math.min(s.last_reported, live.last_updated),
-            now,
-          ),
+          observedAt: timestamp(s.last_reported, now),
+          feedObservedAt: timestamp(live.last_updated, now),
+          timestampConsistency:
+            s.last_reported > live.last_updated
+              ? "station_after_feed"
+              : "consistent",
         },
       ];
     }),
