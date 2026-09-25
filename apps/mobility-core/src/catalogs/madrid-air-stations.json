@@ -1,0 +1,177 @@
+{
+  "sourceUrl": "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire/resource/212629-0-estaciones-control-aire-csv/download/212629-0-estaciones-control-aire-csv.csv",
+  "catalogUrl": "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire/information",
+  "attribution": "Ayuntamiento de Madrid, CC BY 4.0. Reduced to station identity and geographic coordinates.",
+  "retrievedAt": "2026-09-25T11:08:59.897344+00:00",
+  "sha256": "2c84ca974088a6d5de13509489196ddefeee83fcae4999798b00603aa951cd1b",
+  "stations": [
+    {
+      "id": "28079004",
+      "shortId": "4",
+      "name": "Plaza de España",
+      "longitude": -3.7122567,
+      "latitude": 40.4238823
+    },
+    {
+      "id": "28079008",
+      "shortId": "8",
+      "name": "Escuelas Aguirre",
+      "longitude": -3.6823158,
+      "latitude": 40.4215533
+    },
+    {
+      "id": "28079011",
+      "shortId": "11",
+      "name": "Ramón y Cajal",
+      "longitude": -3.6773491,
+      "latitude": 40.4514734
+    },
+    {
+      "id": "28079016",
+      "shortId": "16",
+      "name": "Arturo Soria",
+      "longitude": -3.6392422,
+      "latitude": 40.4400457
+    },
+    {
+      "id": "28079017",
+      "shortId": "17",
+      "name": "Villaverde",
+      "longitude": -3.7133167,
+      "latitude": 40.347147
+    },
+    {
+      "id": "28079018",
+      "shortId": "18",
+      "name": "Farolillo",
+      "longitude": -3.7318356,
+      "latitude": 40.3947825
+    },
+    {
+      "id": "28079024",
+      "shortId": "24",
+      "name": "Casa de Campo",
+      "longitude": -3.7473445,
+      "latitude": 40.4193577
+    },
+    {
+      "id": "28079027",
+      "shortId": "27",
+      "name": "Barajas Pueblo",
+      "longitude": -3.5800258,
+      "latitude": 40.4769179
+    },
+    {
+      "id": "28079035",
+      "shortId": "35",
+      "name": "Plaza del Carmen",
+      "longitude": -3.7031662,
+      "latitude": 40.4192091
+    },
+    {
+      "id": "28079036",
+      "shortId": "36",
+      "name": "Moratalaz",
+      "longitude": -3.6453104,
+      "latitude": 40.4079517
+    },
+    {
+      "id": "28079038",
+      "shortId": "38",
+      "name": "Cuatro Caminos",
+      "longitude": -3.7071303,
+      "latitude": 40.4455439
+    },
+    {
+      "id": "28079039",
+      "shortId": "39",
+      "name": "Barrio del Pilar",
+      "longitude": -3.7115364,
+      "latitude": 40.4782322
+    },
+    {
+      "id": "28079040",
+      "shortId": "40",
+      "name": "Vallecas",
+      "longitude": -3.6515286,
+      "latitude": 40.3881478
+    },
+    {
+      "id": "28079047",
+      "shortId": "47",
+      "name": "Méndez Álvaro",
+      "longitude": -3.6868138,
+      "latitude": 40.3980991
+    },
+    {
+      "id": "28079048",
+      "shortId": "48",
+      "name": "Castellana",
+      "longitude": -3.6903729,
+      "latitude": 40.4398904
+    },
+    {
+      "id": "28079049",
+      "shortId": "49",
+      "name": "Parque del Retiro",
+      "longitude": -3.6824999,
+      "latitude": 40.4144444
+    },
+    {
+      "id": "28079050",
+      "shortId": "50",
+      "name": "Plaza Castilla",
+      "longitude": -3.6887449,
+      "latitude": 40.4655841
+    },
+    {
+      "id": "28079054",
+      "shortId": "54",
+      "name": "Ensanche de Vallecas",
+      "longitude": -3.6121394,
+      "latitude": 40.3730118
+    },
+    {
+      "id": "28079055",
+      "shortId": "55",
+      "name": "Urb. Embajada",
+      "longitude": -3.5805649,
+      "latitude": 40.4623628
+    },
+    {
+      "id": "28079056",
+      "shortId": "56",
+      "name": "Plaza Elíptica",
+      "longitude": -3.7187679,
+      "latitude": 40.3850336
+    },
+    {
+      "id": "28079057",
+      "shortId": "57",
+      "name": "Sanchinarro",
+      "longitude": -3.6605173,
+      "latitude": 40.4942012
+    },
+    {
+      "id": "28079058",
+      "shortId": "58",
+      "name": "El Pardo",
+      "longitude": -3.7746101,
+      "latitude": 40.5180701
+    },
+    {
+      "id": "28079059",
+      "shortId": "59",
+      "name": "Juan Carlos I",
+      "longitude": -3.609031,
+      "latitude": 40.465144
+    },
+    {
+      "id": "28079060",
+      "shortId": "60",
+      "name": "Tres Olivos",
+      "longitude": -3.6897308,
+      "latitude": 40.5005477
+    }
+  ]
+}
