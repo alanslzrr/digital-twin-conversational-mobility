@@ -266,6 +266,7 @@ export async function resolvePlace(
     FROM canonical_place p JOIN place_external_identifier i ON i.place_id=p.id
     WHERE (unaccent(lower(p.name)) LIKE unaccent(lower(${pattern})) OR i.external_id=${query})
     AND (${source ?? null}::text IS NULL OR i.source_id=${source ?? null})
+    AND i.namespace<>'geocoder.osm'
     AND (i.source_id<>'emt' OR EXISTS(SELECT 1 FROM emt_catalog c WHERE c.version=i.source_version))
     GROUP BY p.id ORDER BY bool_or(i.external_id=${query}) DESC,(unaccent(lower(p.name))=unaccent(lower(${query}))) DESC,(p.kind='station') DESC,p.name LIMIT ${limit}`;
   const crtm = !source ? await resolveCrtm(query, limit) : { places: [] };
