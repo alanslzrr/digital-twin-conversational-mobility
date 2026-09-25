@@ -1,5 +1,6 @@
 import {
   applyRoutingEvidence,
+  matchingEmtRoutingAlerts,
   type RoutingLeg,
   routingObservationFresh,
 } from "@mobility/domain";
@@ -46,14 +47,22 @@ const alert = z.object({
     )
     .optional(),
 });
+const emtAlert = z.object({
+  id: z.string(),
+  title: z.string(),
+  lines: z.array(z.string()),
+  startsAt: z.string().nullable(),
+  endsAt: z.string().nullable(),
+  effect: z.string().nullable(),
+});
 export async function routingEvidence(version: string, now: string) {
   const rows =
-    await database()`SELECT job_id,observed_at,ingested_at,payload FROM mobility_snapshot WHERE job_id IN ('renfe-trips','renfe-alerts')`;
+    await database()`SELECT job_id,observed_at,ingested_at,payload FROM mobility_snapshot WHERE job_id IN ('renfe-trips','renfe-alerts','emt-alerts')`;
   const get = (job: string, maxAge: number) =>
     rows.find(
       (row) =>
         row.job_id === job &&
-        row.payload.staticVersion === version &&
+        (job === "emt-alerts" || row.payload.staticVersion === version) &&
         routingObservationFresh(
           new Date(row.observed_at).toISOString(),
           now,
@@ -67,13 +76,23 @@ export async function routingEvidence(version: string, now: string) {
   return {
     updates: z.array(update).safeParse(trips?.payload.updates).data ?? [],
     alerts: z.array(alert).safeParse(alerts?.payload.alerts).data ?? [],
+    emtAlerts:
+      z.array(emtAlert).safeParse(get("emt-alerts", 600)?.payload.alerts)
+        .data ?? [],
     uniqueTrips: new Set<string>(unique.map((row) => row.external_id)),
     now,
     provenance: rows.map((row) => ({
       source: row.job_id,
       observedAt: new Date(row.observed_at).toISOString(),
       ingestedAt: new Date(row.ingested_at).toISOString(),
-      status: get(row.job_id, row.job_id === "renfe-trips" ? 40 : 90)
+      status: get(
+        row.job_id,
+        row.job_id === "renfe-trips"
+          ? 40
+          : row.job_id === "emt-alerts"
+            ? 600
+            : 90,
+      )
         ? "fresh"
         : "stale_or_version_mismatch",
     })),
@@ -106,7 +125,10 @@ export async function enrichRouting<
       return [
         {
           ...route,
-          legs: result.legs,
+          legs: result.legs.map((leg) => ({
+            ...leg,
+            lineNotices: matchingEmtRoutingAlerts(leg, evidence.emtAlerts),
+          })),
           scheduledStart: route.start,
           scheduledEnd: route.end,
           start,

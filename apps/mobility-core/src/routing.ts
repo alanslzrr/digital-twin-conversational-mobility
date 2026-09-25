@@ -402,9 +402,11 @@ export async function planJourney(request: JourneyRequest) {
         provenance: overlay.provenance,
         filtered: overlay.filtered,
         coverage:
-          "Matched Renfe trips only; EMT arrival predictions have no verified GTFS trip identity",
+          "Matched Renfe RT and scoped alerts; EMT line notices are advisory, arrival predictions have no verified GTFS trip identity",
       },
       releaseId: release?.releaseId ?? null,
+      searchScope:
+        "Up to ten OTP candidates filtered by requested walking/transfers and verified realtime evidence; no_route is not proof that no connection exists anywhere in the network",
       networks,
       staticVersion: feed.version,
       coverage: release?.coverage ?? feed.manifest.coverage,
