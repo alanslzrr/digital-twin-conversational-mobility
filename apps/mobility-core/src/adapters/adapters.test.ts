@@ -206,3 +206,11 @@ describe("municipal observations", () => {
     expect(() => parseTraffic("<broken>", now)).toThrow();
   });
 });
+
+it("accepts municipal single-digit hours", () => {
+  const xml =
+    "<pms><fecha_hora>25/09/2026 8:50:02</fecha_hora><pm><idelem>1</idelem><descripcion>CALLE</descripcion><intensidad>0</intensidad><ocupacion>0</ocupacion><carga>0</carga><nivelServicio>0</nivelServicio><error>N</error></pm></pms>";
+  expect(parseTraffic(xml, Date.parse("2026-09-25T08:00:00Z")).observedAt).toBe(
+    "2026-09-25T06:50:02.000Z",
+  );
+});
