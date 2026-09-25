@@ -51,7 +51,8 @@ describe.skipIf(process.env.RUN_CRTM_DB_TESTS !== "1")(
         await sql`INSERT INTO crtm_stop_times VALUES
         (${network},'trip',1,'stop',36000,36000,null,0,0,1),
         (${network},'trip',2,'stop',36600,36600,'Destino publicado',0,0,0),
-        (${network},'trip',3,'stop',90000,90000,null,0,0,1)`;
+        (${network},'trip',3,'stop',90000,90000,null,0,0,1),
+        (${network},'trip',4,'stop',93600,93600,'Terminal',0,0,1)`;
       }
       const resolved = await resolveCrtm("0072", 5, "light-rail");
       const first = resolved.places[0];
@@ -80,7 +81,7 @@ describe.skipIf(process.env.RUN_CRTM_DB_TESTS !== "1")(
       ).toHaveLength(2);
       await sql`UPDATE crtm_stops SET latitude=40.4 WHERE dataset_id='metro' AND external_id='station'`;
     });
-    it("preserves repeated visits, unknown destinations, >24h and station children", async () => {
+    it("preserves repeated visits and >24h but excludes the terminal visit even with pickup=0", async () => {
       const result = await crtmTimetable({
         placeId: station,
         serviceDate: "2026-09-25",

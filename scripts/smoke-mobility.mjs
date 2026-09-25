@@ -75,7 +75,7 @@ if (crtmOnly) {
   const evidence = [];
   for (const [network, query] of [
     ["light-rail", "par_10_1"],
-    ["interurban", "par_8_09568"],
+    ["interurban", "par_8_17480"],
     ["metro", "est_90_21"],
   ]) {
     const resolved = await tool("resolve_place", {
@@ -108,6 +108,25 @@ if (crtmOnly) {
       assert.ok(place.correspondences.some((c) => c.network === "interurban"));
     evidence.push({ network, resolved, result });
   }
+  const catalogOnly = await tool("resolve_place", {
+    source: "crtm",
+    network: "interurban",
+    query: "par_8_09568",
+  });
+  assert.ok(catalogOnly.places[0]);
+  const empty = await tool("get_crtm_timetable", {
+    placeId: catalogOnly.places[0].id,
+    serviceDate: date,
+    afterTime: "00:00:00",
+    limit: 5,
+  });
+  assert.equal(empty.status, "available");
+  assert.deepEqual(empty.departures, []);
+  evidence.push({
+    network: "interurban_catalog_only",
+    resolved: catalogOnly,
+    result: empty,
+  });
   const health = await tool("get_source_health", { source: "crtm" });
   assert.equal(health.sources[0].capability, "static_catalog_and_timetable");
   assert.equal(health.sources[0].staticCatalogs.length, 3);

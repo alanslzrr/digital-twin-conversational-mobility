@@ -184,6 +184,8 @@ export async function crtmTimetable(input: {
         WHERE first_stop.dataset_id=t.dataset_id AND first_stop.trip_id=t.external_id ORDER BY sequence LIMIT 1) first_time ON true
       WHERE (s.external_id=${p.external_id} OR (${p.location_type}=1 AND s.parent_id=${p.external_id}))
         AND st.pickup_type<>1 AND st.departure_seconds IS NOT NULL
+        AND EXISTS(SELECT 1 FROM crtm_stop_times onward WHERE onward.dataset_id=st.dataset_id
+          AND onward.trip_id=st.trip_id AND onward.sequence>st.sequence)
     ) SELECT * FROM candidates WHERE (start_seconds IS NULL AND departure_seconds>=${after})
       OR (start_seconds IS NOT NULL AND stop_offset>=0 AND end_seconds+stop_offset>${after})
       ORDER BY CASE WHEN start_seconds IS NULL THEN departure_seconds ELSE greatest(start_seconds+stop_offset,${after}) END,
@@ -235,7 +237,7 @@ export async function crtmTimetable(input: {
               }),
         })),
         limits:
-          "Only the requested GTFS service day, including >24h times; adjacent service days are not searched. Non-timed stops are omitted, not interpolated. Pickup codes 2/3 require arrangements. Accessibility codes are not an operational guarantee.",
+          "Only the requested GTFS service day, including >24h times; adjacent service days are not searched. Terminal visits without a subsequent stop and non-timed stops are omitted, not interpolated. Pickup codes 2/3 require arrangements. Accessibility codes are not an operational guarantee.",
       };
     },
   );
