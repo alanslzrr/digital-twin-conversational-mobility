@@ -32,6 +32,7 @@
     "otp:build": "node scripts/build-otp.mjs",
     "otp:up": "docker compose --env-file .env.local -f infra/local/compose.yaml --profile routing up -d otp",
     "otp:down": "docker compose --env-file .env.local -f infra/local/compose.yaml stop otp",
+    "emt:import": "node --env-file-if-exists=.env.local --env-file-if-exists=apps/mobility-core/.env.local scripts/import-emt.mjs",
     "gtfs:import": "node --env-file-if-exists=.env.local scripts/import-renfe.mjs",
     "mobility:enable": "node scripts/configure-local-mobility.mjs",
     "ingest": "node --env-file-if-exists=.env.local scripts/ingestion-worker.mjs --activate --once",
