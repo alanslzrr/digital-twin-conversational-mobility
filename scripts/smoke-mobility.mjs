@@ -1,16 +1,26 @@
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { parseEnv } from "node:util";
 import { SignJWT } from "jose";
 import postgres from "postgres";
 
+const options = new Map(
+  process.argv.slice(2).map((arg) => {
+    assert.match(arg, /^--(?:port=\d+|read-only)$/);
+    const [key, value] = arg.slice(2).split("=");
+    return [key, value ?? true];
+  }),
+);
+const port = Number(options.get("port") ?? 3001);
+assert.ok(Number.isInteger(port) && port >= 1024 && port <= 65535);
+const readOnly = options.has("read-only");
 const root = parseEnv(readFileSync(".env.local", "utf8"));
 const web = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
 const core = parseEnv(readFileSync("apps/mobility-core/.env.local", "utf8"));
 if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
   throw new Error("Local database required");
-const sql = postgres(root.DATABASE_URL, { max: 1 });
+const sql = readOnly ? null : postgres(root.DATABASE_URL, { max: 1 });
 const headers = {
   Authorization: `Bearer ${web.MOBILITY_MCP_TOKEN}`,
   "Content-Type": "application/json",
@@ -18,7 +28,7 @@ const headers = {
 };
 let id = 0;
 async function rpc(method, params) {
-  const response = await fetch("http://127.0.0.1:3001/mcp", {
+  const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
     method: "POST",
     headers,
     body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }),
@@ -51,7 +61,7 @@ const workerToken = await new SignJWT({ scope: "mobility.ingestion.manage" })
   .setExpirationTime("10m")
   .sign(new TextEncoder().encode(root.MOBILITY_JWT_SECRET));
 async function tick(activate = false, token = workerToken) {
-  const response = await fetch("http://127.0.0.1:3001/internal/ingestion", {
+  const response = await fetch(`http://127.0.0.1:${port}/internal/ingestion`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -68,29 +78,43 @@ try {
     403,
     "Web token must not manage ingestion",
   );
-  // This smoke is an operator action; it deliberately closes then opens one local window.
-  await sql`UPDATE ingestion_activity SET active_until=now()-interval '1 second'`;
-  assert.equal((await tick()).body.status, "idle");
-  await sql`UPDATE ingestion_job SET next_due_at=now() WHERE lease_until IS NULL OR lease_until<now()`;
-  const before = await sql`SELECT count(*)::int AS count FROM mobility_history`;
-  const batch = await tick(true);
-  assert.equal(batch.code, 200);
-  assert.ok(
-    batch.body.results.every((r) => r.status !== "error"),
-    JSON.stringify(batch.body),
-  );
-  const after = await sql`SELECT count(*)::int AS count FROM mobility_history`;
-  const overlap = await Promise.all([tick(), tick()]);
-  assert.ok(
-    overlap.every((r) =>
-      r.body.results.every((j) => j.status === "not_due_or_inactive"),
-    ),
-    "Duplicate ticks must not fetch again before due",
-  );
-  const deduplicated =
-    await sql`SELECT count(*)::int AS count FROM mobility_history`;
-  assert.equal(after[0].count, deduplicated[0].count);
+  let before, after;
+  if (!readOnly) {
+    // This smoke is an operator action; it deliberately closes then opens one local window.
+    await sql`UPDATE ingestion_activity SET active_until=now()-interval '1 second'`;
+    assert.equal((await tick()).body.status, "idle");
+    await sql`UPDATE ingestion_job SET next_due_at=now() WHERE lease_until IS NULL OR lease_until<now()`;
+    before = await sql`SELECT count(*)::int AS count FROM mobility_history`;
+    const batch = await tick(true);
+    assert.equal(batch.code, 200);
+    assert.ok(
+      batch.body.results.every((r) => r.status !== "error"),
+      JSON.stringify(batch.body),
+    );
+    after = await sql`SELECT count(*)::int AS count FROM mobility_history`;
+    const overlap = await Promise.all([tick(), tick()]);
+    assert.ok(
+      overlap.every((r) =>
+        r.body.results.every((j) => j.status === "not_due_or_inactive"),
+      ),
+      "Duplicate ticks must not fetch again before due",
+    );
+    const deduplicated =
+      await sql`SELECT count(*)::int AS count FROM mobility_history`;
+    assert.equal(after[0].count, deduplicated[0].count);
+  }
 
+  if (readOnly) {
+    const probe = await fetch(`http://127.0.0.1:${port}/api/health`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    assert.equal(probe.status, 200);
+    assert.equal(
+      (await probe.json()).ingestionEnabled,
+      false,
+      "Read-only smoke requires INGESTION_ENABLED=false on the target Core",
+    );
+  }
   await rpc("initialize", {
     protocolVersion: "2025-11-25",
     capabilities: {},
@@ -172,6 +196,24 @@ try {
   assert.ok(departure.departures.length > 0);
   const alerts = await tool("get_incidents", { limit: 10 });
   assert.ok(Array.isArray(alerts.incidents));
+  const aliases = await Promise.all(
+    ["C5", "C-5"].map((line) =>
+      tool("get_incidents", { source: "renfe", line, limit: 30 }),
+    ),
+  );
+  assert.deepEqual(
+    aliases[0].incidents.map((a) => a.id).sort(),
+    aliases[1].incidents.map((a) => a.id).sort(),
+  );
+  assert.equal(
+    (await tool("get_incidents", { source: "renfe", line: "C999" })).status,
+    "unknown_line",
+  );
+  assert.ok(
+    departure.departures.every(
+      (d) => d.estimatedDeparture !== null || d.departureBasis === "scheduled",
+    ),
+  );
   if (core.EMT_CLIENT_ID && core.EMT_PASSKEY) {
     const emt = await tool("get_incidents", { source: "emt", limit: 30 });
     assert.equal(emt.provenance.source, "emt");
@@ -221,7 +263,7 @@ try {
   assert.ok(parking.parkings.length > 0);
   assert.equal(history.status, "available");
   const health = await tool("get_source_health", {});
-  assert.equal(health.ingestionEnabled, true);
+  assert.equal(health.ingestionEnabled, !readOnly);
   const report = {
     verifiedAt: new Date().toISOString(),
     routes,
@@ -233,17 +275,22 @@ try {
     weather: weather?.readings.length ?? null,
     traffic: traffic.sensors.length,
     parking: parking.parkings.length,
-    historyGrowth: after[0].count - before[0].count,
-    activityWindowAndDuplicateTicks: true,
+    historyGrowth: readOnly ? null : after[0].count - before[0].count,
+    activityWindowAndDuplicateTicks: readOnly ? "not_exercised" : true,
+    readOnly,
+    endpoint: `http://127.0.0.1:${port}/mcp`,
     auth: true,
     modelCalls: 0,
     cloudCalls: 0,
   };
+  if (readOnly) mkdirSync("data/validation", { recursive: true });
   writeFileSync(
-    "data/otp/local-validation.json",
+    readOnly
+      ? "data/validation/e6-mobility-read-only.json"
+      : "data/otp/local-validation.json",
     JSON.stringify(report, null, 2),
   );
   console.log(JSON.stringify(report, null, 2));
 } finally {
-  await sql.end();
+  await sql?.end();
 }
