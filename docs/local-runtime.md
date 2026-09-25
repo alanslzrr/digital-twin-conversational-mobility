@@ -123,3 +123,26 @@ No hay deployments ni nuevas altas cloud. El 25/09/2026 EMT autenticó y devolvi
 - `pnpm smoke:evaluation --live-emt`: conversación real EVE → gpt-6-luna directo → MCP. Descubrió y consultó `get_incidents`, explicó la antigüedad del feed y distinguió avisos futuros de activos. Un primer intento falló por catálogo/instrucciones EVE desactualizados; se corrigieron y se repitió satisfactoriamente.
 - AEMET mostró fallos intermitentes de conexión. El cliente permite un único reintento de conexión; después conserva el backoff y la señalización de error. No reintenta denegaciones HTTP.
 - No se ha publicado en Vercel. DGT, llegadas EMT, red completa y los demás pendientes del roadmap no quedan certificados por estas pruebas.
+
+
+## Control conversacional E2
+
+El modo predeterminado del servidor EVE es `MOBILITY_BUDGET_MODE=interactive`:
+al alcanzar el umbral EVE pausa y muestra Approve/Stop en la interfaz oficial.
+Approve renueva la ventana; Stop cancela el turno y conserva la historia. No hace
+falta crear una campaña ni llamar a `input_tokens` para usar este flujo.
+Se conserva Better Auth, registro y propiedad de sesión en Core, el modelo directo
+fijo y telemetría numérica por intento/turno/sesión. Los 100.000/10.000 son umbrales
+renovables, no un presupuesto global irrevocable ni un coste monetario.
+
+`MOBILITY_BUDGET_MODE=campaign` es una opción explícita para experimentos
+con reservas preventivas: requiere esquema 0008+0009 y campaña autorizada; aprobar
+en EVE no renueva su presupuesto global. Un valor de modo desconocido falla cerrado.
+`pnpm budget:report` informa solo sobre ese ledger experimental, no sobre sesiones
+interactivas; para estas se usan las métricas numéricas del proveedor y ciclo EVE.
+
+El cierre de E2 no despliega ni migra el runtime habitual. Para una transición
+posterior: copia de seguridad, migraciones pendientes en orden, build de Core/Web
+y agente compatibles, y sesiones nuevas para no reutilizar cápsulas anteriores a
+la corrección. No hay llamada al modelo hasta enviar una conversación; estas
+pruebas y builds no ejecutan inferencias.
