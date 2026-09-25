@@ -1,6 +1,7 @@
 import {
   bikesInputSchema,
   departuresInputSchema,
+  emtArrivalsInputSchema,
   environmentInputSchema,
   historyInputSchema,
   incidentsInputSchema,
@@ -12,6 +13,7 @@ import {
 } from "@mobility/contracts";
 import { createMcpHandler } from "mcp-handler";
 import { authorize } from "../../src/auth";
+import { emtArrivals } from "../../src/emt-arrivals";
 import { historicalQuery } from "../../src/history";
 import { activate } from "../../src/ingestion";
 import { mcpResult } from "../../src/mcp-result";
@@ -68,11 +70,12 @@ const handler = createMcpHandler(
       {
         title: "Resolve a canonical Madrid place",
         description:
-          "Search imported Renfe and BiciMAD places. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
+          "Search imported Renfe, EMT bus stops and BiciMAD places by name or exact stop number. Use source=emt for bus stops. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
         inputSchema: resolvePlaceInputSchema,
         annotations,
       },
-      ({ query, limit }) => run(() => resolvePlace(query, limit)),
+      ({ query, limit, source }) =>
+        run(() => resolvePlace(query, limit, source)),
     );
     server.registerTool(
       "plan_journey",
@@ -84,6 +87,17 @@ const handler = createMcpHandler(
         annotations,
       },
       (input) => run(() => planJourney(input)),
+    );
+    server.registerTool(
+      "get_emt_arrivals",
+      {
+        title: "EMT bus arrivals at a stop",
+        description:
+          "Próximas llegadas de autobuses EMT. Resolve the stop first with resolve_place(source=emt). Cached estimates refreshed only on demand with bounded cooldown/backoff; inspect freshness and refresh.error. Destination from provider or unknown; not scheduled departures or routing. Stale estimates are not live countdowns.",
+        inputSchema: emtArrivalsInputSchema,
+        annotations,
+      },
+      ({ placeId, limit }) => run(() => emtArrivals(placeId, limit)),
     );
     server.registerTool(
       "get_departures",

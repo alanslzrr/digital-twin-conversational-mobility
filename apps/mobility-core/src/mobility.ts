@@ -68,6 +68,10 @@ export async function sourceHealth(source?: SourceId) {
     EXTRACT(EPOCH FROM now()-last_seen_at) AS heartbeat_age_seconds FROM ingestion_worker ORDER BY id`;
   const feeds =
     await database()`SELECT source_id,version,service_start,service_end FROM static_feed`;
+  const [emtCatalog] =
+    !source || source === "emt"
+      ? await database()`SELECT version,fetched_at,imported_at,manifest FROM emt_catalog`
+      : [];
   const sources = sourceCatalog
     .filter((entry) => !source || entry.id === source)
     .map((entry) => {
@@ -184,6 +188,19 @@ export async function sourceHealth(source?: SourceId) {
             ? "adapter_not_initialized"
             : "not_implemented",
         streams,
+        ...(entry.id === "emt"
+          ? {
+              stopCatalog: emtCatalog ?? null,
+              arrivals: {
+                strategy: "per_stop_on_demand",
+                enabled: ingestionEnabled(),
+                freshnessSeconds: 30,
+                globalCooldownSeconds: 5,
+                coverage:
+                  "Only requested stops; source freshness above describes notices, not all bus arrivals. No EMT routing or arrival replay.",
+              },
+            }
+          : {}),
         staticFeed: feeds.find((feed) => feed.source_id === entry.id) ?? null,
       };
     });
@@ -214,21 +231,40 @@ export async function sourceHealth(source?: SourceId) {
   };
 }
 
-export async function resolvePlace(query: string, limit: number) {
+export async function resolvePlace(
+  query: string,
+  limit: number,
+  source?: "renfe" | "emt" | "bicimad",
+) {
   // Parameterized LIKE with escaped metacharacters, accent-insensitive. Canonical only.
   const pattern = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
   const places =
     await database()`SELECT p.id,p.name,p.kind,ST_Y(p.location::geometry) AS latitude,ST_X(p.location::geometry) AS longitude,
-    jsonb_agg(jsonb_build_object('source',i.source_id,'externalId',i.external_id)) AS identifiers
+    jsonb_agg(jsonb_build_object('source',i.source_id,'namespace',i.namespace,'externalId',i.external_id,'sourceVersion',i.source_version)) AS identifiers
     FROM canonical_place p JOIN place_external_identifier i ON i.place_id=p.id
-    WHERE unaccent(lower(p.name)) LIKE unaccent(lower(${pattern}))
-    GROUP BY p.id ORDER BY (unaccent(lower(p.name))=unaccent(lower(${query}))) DESC,(p.kind='station') DESC,p.name LIMIT ${limit}`;
+    WHERE (unaccent(lower(p.name)) LIKE unaccent(lower(${pattern})) OR i.external_id=${query})
+    AND (${source ?? null}::text IS NULL OR i.source_id=${source ?? null})
+    AND (i.source_id<>'emt' OR EXISTS(SELECT 1 FROM emt_catalog c WHERE c.version=i.source_version))
+    GROUP BY p.id ORDER BY bool_or(i.external_id=${query}) DESC,(unaccent(lower(p.name))=unaccent(lower(${query}))) DESC,(p.kind='station') DESC,p.name LIMIT ${limit}`;
   return {
     status: places.length ? "found" : "not_found",
-    places,
+    places: await Promise.all(
+      places.map(async (place) => ({
+        ...place,
+        id: place.id as string,
+        emtLines: (
+          place.identifiers as { source: string; externalId: string }[]
+        ).some((i) => i.source === "emt")
+          ? await database()`SELECT r.external_id AS "lineId",r.short_name AS label,s.direction,r.long_name AS headers
+          FROM emt_stop_line s JOIN transit_route r ON r.source_id='emt' AND r.external_id=s.line_id
+          JOIN place_external_identifier i ON i.source_id='emt' AND i.namespace='api.stop' AND i.external_id=s.stop_id
+          WHERE i.place_id=${place.id} ORDER BY r.short_name,s.direction`
+          : [],
+      })),
+    ),
     ambiguous: places.length > 1,
     coverage:
-      "Imported Renfe stations and BiciMAD stations only; no arbitrary-address geocoder.",
+      "Imported Renfe, EMT stops and BiciMAD places; source=emt and exact stop number narrow candidates. EMT catalog is not routing coverage. No arbitrary-address geocoder.",
   };
 }
 
@@ -421,7 +457,7 @@ export async function incidents(input: z.infer<typeof incidentsInputSchema>) {
                 : "active",
         })),
       warning:
-        "EMT published notices only; without an imported catalog, line existence is unverified, including upcoming and uncertain periods. Empty results do not establish normal service. Not bus arrival estimates or routing coverage.",
+        "EMT published notices including upcoming and uncertain periods; lineIdentity reports whether the imported catalog recognizes the label. Empty results do not establish normal service. Not bus arrival estimates or routing coverage.",
     };
   }
   const state = await snapshot("renfe-alerts");
