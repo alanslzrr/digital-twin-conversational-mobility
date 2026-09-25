@@ -70,3 +70,34 @@ en chat, consulta de horarios con calendario/excepciones/frecuencias y salud por
 versión. Después, incorporar operadores a OTP y finalmente información RT.
 Este preparador no implementa esas capacidades ni una actualización coordinada
 del grafo. No añade polling ni una nueva campaña de aceptación.
+
+## Persistencia local (integración MCP pendiente)
+
+La migración `0014_crtm_static.sql` y `scripts/import-crtm.mjs` permiten cargar los
+exports existentes en una transacción por red. No descargan fuentes ni actualizan
+OTP. La sustitución conserva UUID por `(dataset_id, external_id)`, incluso cuando
+una parada desaparece y reaparece; no fusiona redes por nombre. Las secuencias
+repetidas, calendarios, excepciones y ventanas de frecuencia se almacenan sin
+convertirlas en llegadas en tiempo real.
+
+Tras aplicar las migraciones mediante el procedimiento local con respaldo:
+
+```sh
+node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/light-rail/<version>
+node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/interurban/<version>
+```
+
+El importador verifica hashes de los mismos bytes que consume PostgreSQL, conteos,
+red y referencias. Reintentar la misma versión no altera la fecha de incorporación.
+Un error revierte toda la sustitución. La importación conserva la vigencia del
+manifest: almacenar Metro no convierte sus horarios caducados en actuales.
+
+Regresión opt-in con exports preparados y PostgreSQL local:
+
+```sh
+node --env-file=.env.local scripts/test-crtm-import.mjs
+```
+
+Esta prueba crea y elimina un esquema temporal, sin modificar tablas habituales.
+La persistencia todavía no expone resolución o horarios mediante MCP ni establece
+correspondencias entre redes; tampoco actualiza automáticamente el runtime.
