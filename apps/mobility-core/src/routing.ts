@@ -8,6 +8,8 @@ import {
 import { journeyModePolicy } from "@mobility/domain";
 import { z } from "zod";
 import { database } from "./database";
+import { enrichRouting } from "./routing-evidence";
+import { coveredFeeds, routingRelease } from "./routing-release";
 
 const time = z.iso.datetime({ offset: true });
 class RoutingFailure extends Error {
@@ -80,8 +82,16 @@ const itinerarySchema = z.object({
     .array(
       z.object({
         mode: z.string(),
-        from: z.object({ name: z.string() }),
-        to: z.object({ name: z.string() }),
+        from: z.object({
+          name: z.string(),
+          stop: z.object({ gtfsId: z.string() }).nullable().optional(),
+        }),
+        to: z.object({
+          name: z.string(),
+          stop: z.object({ gtfsId: z.string() }).nullable().optional(),
+        }),
+        serviceDate: z.string().nullable().optional(),
+        distance: z.number().optional(),
         start: z.object({ scheduledTime: time }),
         end: z.object({ scheduledTime: time }),
         route: z
@@ -178,7 +188,12 @@ export async function otpQuery(
 
 export async function routingPlace(id: string) {
   const [place] =
-    await database()`SELECT p.id,p.name, ST_Y(p.location::geometry) AS latitude,ST_X(p.location::geometry) AS longitude, i.source_id,i.external_id FROM canonical_place p JOIN place_external_identifier i ON i.place_id=p.id WHERE p.id=${id} ORDER BY (i.source_id='renfe') DESC LIMIT 1`;
+    await database()`SELECT p.id,p.name,ST_Y(p.location::geometry) AS latitude,ST_X(p.location::geometry) AS longitude,i.source_id,i.external_id,
+    CASE WHEN i.source_id='renfe' THEN 'renfe' ELSE l.feed_id END AS feed_id,coalesce(l.stop_id,i.external_id) AS stop_id
+    FROM canonical_place p JOIN place_external_identifier i ON i.place_id=p.id
+    LEFT JOIN routing_place_link l ON l.place_id=p.id AND EXISTS(SELECT 1 FROM crtm_feed f WHERE f.dataset_id=l.feed_id AND f.version=l.static_version AND f.enabled)
+    WHERE p.id=${id} AND (i.source_id!='renfe' OR EXISTS(SELECT 1 FROM static_feed f WHERE f.source_id='renfe' AND f.version=i.source_version))
+    UNION ALL SELECT i.id,s.name,s.latitude,s.longitude,'crtm',s.external_id,s.dataset_id,s.external_id FROM crtm_stop_identity i JOIN crtm_stops s USING(dataset_id,external_id) JOIN crtm_feed f USING(dataset_id) WHERE i.id=${id} AND f.enabled LIMIT 1`;
   return place ?? null;
 }
 
@@ -197,6 +212,19 @@ export async function planJourney(request: JourneyRequest) {
       asOf,
     };
   try {
+    let release: Awaited<ReturnType<typeof routingRelease>>;
+    try {
+      release = await routingRelease();
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "";
+      throw new RoutingFailure(
+        reason === "routing_update_in_progress"
+          ? "routing_update_in_progress"
+          : reason === "graph_static_version_mismatch"
+            ? reason
+            : "graph_not_ready",
+      );
+    }
     let origin: Awaited<ReturnType<typeof routingPlace>>;
     let destination: Awaited<ReturnType<typeof routingPlace>>;
     let feed: { version: string; manifest: { coverage: unknown } } | undefined;
@@ -210,7 +238,7 @@ export async function planJourney(request: JourneyRequest) {
         return { status: "unavailable", reason: "unknown_place", asOf };
       const [row] =
         await database()`SELECT version,manifest FROM static_feed WHERE source_id='renfe' AND service_start<=(${date}::timestamptz AT TIME ZONE 'Europe/Madrid')::date AND service_end>=(${date}::timestamptz AT TIME ZONE 'Europe/Madrid')::date`;
-      if (!row)
+      if (!row && !release)
         return {
           status: "unavailable",
           reason: "outside_static_service_period",
@@ -221,15 +249,28 @@ export async function planJourney(request: JourneyRequest) {
           version: z.string().min(1),
           manifest: z.object({ coverage: z.unknown() }),
         })
-        .parse(row);
+        .parse(
+          row ?? {
+            version: release?.staticVersion,
+            manifest: { coverage: release?.coverage },
+          },
+        );
     } catch {
       throw new RoutingFailure("routing_backend_unavailable");
     }
+    const networks = release ? coveredFeeds(release, date) : ["renfe"];
+    if (policy.allowTransit && !networks.length)
+      throw new RoutingFailure("outside_static_service_period");
     const location = (place: NonNullable<typeof origin>) => ({
       label: place.name,
       location:
-        place.source_id === "renfe"
-          ? { stopLocation: { stopLocationId: `renfe:${place.external_id}` } }
+        (place.feed_id ?? place.source_id) &&
+        networks.includes(place.feed_id ?? place.source_id)
+          ? {
+              stopLocation: {
+                stopLocationId: `${place.feed_id ?? place.source_id}:${place.stop_id ?? place.external_id}`,
+              },
+            }
           : {
               coordinate: {
                 latitude: place.latitude,
@@ -240,9 +281,9 @@ export async function planJourney(request: JourneyRequest) {
     await assertGraphVersion(feed.version);
     const raw = await otpQuery(
       `query Journey($origin:PlanLabeledLocationInput!,$destination:PlanLabeledLocationInput!,$date:PlanDateTimeInput,$preferences:PlanPreferencesInput,$modes:PlanModesInput){
-      planConnection(origin:$origin,destination:$destination,dateTime:$date,preferences:$preferences,modes:$modes,first:5){
+      planConnection(origin:$origin,destination:$destination,dateTime:$date,preferences:$preferences,modes:$modes,first:10){
         routingErrors{code} edges{node{duration start end walkTime numberOfTransfers
-          legs{mode from{name}to{name}start{scheduledTime}end{scheduledTime}route{shortName gtfsId}trip{gtfsId}}}}
+          legs{mode distance serviceDate from{name stop{gtfsId}}to{name stop{gtfsId}}start{scheduledTime}end{scheduledTime}route{shortName gtfsId}trip{gtfsId}}}}
       }}`,
       {
         origin: location(origin),
@@ -260,8 +301,10 @@ export async function planJourney(request: JourneyRequest) {
         modes: otpJourneyModes(policy),
       },
     );
+    if (release && (await routingRelease())?.releaseId !== release.releaseId)
+      throw new RoutingFailure("routing_update_in_progress");
     const result = planSchema.parse(raw).data.planConnection;
-    const itineraries = result.edges
+    const scheduled = result.edges
       .map((edge) => edge.node)
       .filter(
         (route) =>
@@ -275,8 +318,58 @@ export async function planJourney(request: JourneyRequest) {
               route.legs.every(
                 (leg) => leg.mode === "WALK" || leg.trip !== null,
               )),
-      )
-      .slice(0, 3);
+      );
+    const overlay = release
+      ? await enrichRouting(scheduled, feed.version, asOf, date)
+      : { itineraries: scheduled, filtered: [], provenance: [] };
+    const itineraries = await Promise.all(
+      overlay.itineraries.slice(0, 3).map(async (route) => {
+        if (!release) return route;
+        const legs = await Promise.all(
+          route.legs.map(async (leg) => {
+            const [network, ...rest] = leg.trip?.gtfsId.split(":") ?? [];
+            const tripId = rest.join(":");
+            const [frequency] =
+              network && network !== "renfe" && leg.trip
+                ? await database()`SELECT exact_times,headway_seconds FROM crtm_frequencies WHERE dataset_id=${network} AND trip_id=${tripId} ORDER BY exact_times LIMIT 1`
+                : [];
+            return {
+              ...leg,
+              staticVersion: network ? release.feeds[network]?.version : null,
+              basis:
+                frequency?.exact_times === 0
+                  ? "frequency_planning_estimate"
+                  : "scheduled",
+              headwaySeconds: frequency?.headway_seconds ?? null,
+            };
+          }),
+        );
+        const transit = legs
+          .map((leg, index) => ({ leg, index }))
+          .filter(({ leg }) => leg.trip);
+        const correspondences = transit.slice(1).map(({ leg, index }, i) => {
+          const previous = transit[i];
+          return {
+            from: previous?.leg.to.stop?.gtfsId,
+            to: leg.from.stop?.gtfsId,
+            evidence: "GTFS stops and OTP street walking path",
+            walkingSeconds: legs
+              .slice((previous?.index ?? 0) + 1, index)
+              .reduce(
+                (total, l) =>
+                  total +
+                  (Date.parse(l.end.scheduledTime) -
+                    Date.parse(l.start.scheduledTime)) /
+                    1000,
+                0,
+              ),
+            identitiesMerged: false,
+            accessibilityGuaranteed: false,
+          };
+        });
+        return { ...route, legs, correspondences };
+      }),
+    );
     if (!itineraries.length) {
       if (
         result.routingErrors.some(
@@ -297,14 +390,32 @@ export async function planJourney(request: JourneyRequest) {
       status: itineraries.length ? "available" : "no_route",
       provider: "otp-local-2.10.0",
       asOf,
-      basis: "scheduled",
-      realtimeApplied: false,
+      basis: overlay.itineraries.some(
+        (route) => "realtimeApplied" in route && route.realtimeApplied,
+      )
+        ? "scheduled_with_partial_realtime"
+        : "scheduled",
+      realtimeApplied: overlay.itineraries.some(
+        (route) => "realtimeApplied" in route && route.realtimeApplied,
+      ),
+      realtime: {
+        provenance: overlay.provenance,
+        filtered: overlay.filtered,
+        coverage:
+          "Matched Renfe trips only; EMT arrival predictions have no verified GTFS trip identity",
+      },
+      releaseId: release?.releaseId ?? null,
+      networks,
       staticVersion: feed.version,
-      coverage: feed.manifest.coverage,
+      coverage: release?.coverage ?? feed.manifest.coverage,
       accessibilityGuaranteed: false,
       warnings: [
-        "Horarios previstos; consultar incidencias y estimaciones por separado.",
-        "Sin Metro ni autobuses EMT en este grafo.",
+        release
+          ? "Base de horarios previstos; solo se aplican estimaciones e incidencias vigentes con identidad verificada. Frecuencias no equivalen a salidas exactas."
+          : "Horarios previstos; consultar incidencias y estimaciones por separado.",
+        release
+          ? "Metro excluido: horarios caducados. Accesibilidad no garantizada. Correspondencias conservan los identificadores de cada operador."
+          : "Sin Metro ni autobuses EMT en este grafo.",
       ],
       itineraries,
       errors: result.routingErrors,
@@ -324,6 +435,7 @@ export async function planJourney(request: JourneyRequest) {
 }
 
 export async function scheduledDepartures(stopId: string, limit: number) {
+  await routingRelease();
   const [feed] =
     await database()`SELECT version FROM static_feed WHERE source_id='renfe' AND service_start <= (now() AT TIME ZONE 'Europe/Madrid')::date AND service_end >= (now() AT TIME ZONE 'Europe/Madrid')::date`;
   if (!feed) throw new Error("static_feed_missing_or_expired");
