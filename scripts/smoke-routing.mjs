@@ -141,8 +141,13 @@ function validateRoute(result, input, requireAvailable) {
       "available",
       "Positive route case must have itineraries",
     );
-  assert.equal(result.basis, "scheduled");
-  assert.equal(result.realtimeApplied, false);
+  assert.ok(
+    ["scheduled", "scheduled_with_partial_realtime"].includes(result.basis),
+  );
+  assert.equal(
+    result.realtimeApplied,
+    result.basis === "scheduled_with_partial_realtime",
+  );
   assert.equal(result.accessibilityGuaranteed, false);
   assert.equal(result.staticVersion, evidence.graphManifest.staticVersion);
   assert.ok(result.itineraries.length <= 3);
@@ -237,6 +242,71 @@ try {
       assert.equal(result.status, "unavailable");
       assert.equal(result.reason, reason);
     });
+  if (evidence.graphManifest.feeds?.emt) {
+    for (const [network, from, to] of [
+      ["emt", "4514", "273"],
+      ["light-rail", "par_10_1", "par_10_9"],
+      ["interurban", "par_8_10614", "par_8_17472"],
+    ]) {
+      const resolveStop = async (query) => {
+        const result = await tool("resolve_place", {
+          source: network === "emt" ? "emt" : "crtm",
+          ...(network !== "emt" ? { network } : {}),
+          query,
+          limit: 10,
+        });
+        const place = result.places.find((p) =>
+          p.identifiers.some((i) => i.externalId === query),
+        );
+        assert.ok(place, `Missing ${network} stop ${query}`);
+        return place;
+      };
+      const a = await resolveStop(from),
+        b = await resolveStop(to);
+      const input = { ...base, originId: a.id, destinationId: b.id };
+      await check(`multioperator-${network}`, input, (result) => {
+        validateRoute(result, input, true);
+        assert.ok(
+          result.itineraries.some((route) =>
+            route.legs.some((leg) =>
+              leg.trip?.gtfsId.startsWith(`${network}:`),
+            ),
+          ),
+          `Expected ${network} transit evidence`,
+        );
+      });
+      if (network === "interurban") {
+        const combined = {
+          ...base,
+          originId: a.id,
+          destinationId: sol.id,
+          preferences: {
+            ...base.preferences,
+            maxWalkingMinutes: 30,
+            maxTransfers: 3,
+          },
+        };
+        await check("multioperator-transfer", combined, (result) => {
+          validateRoute(result, combined, true);
+          assert.ok(
+            result.itineraries.some(
+              (route) =>
+                new Set(
+                  route.legs.flatMap((leg) =>
+                    leg.trip ? [leg.trip.gtfsId.split(":")[0]] : [],
+                  ),
+                ).size > 1,
+            ),
+          );
+          assert.ok(
+            result.itineraries.some(
+              (route) => route.correspondences?.length > 0,
+            ),
+          );
+        });
+      }
+    }
+  }
   evidence.status = "pass";
 } catch {
   evidence.status = "fail";

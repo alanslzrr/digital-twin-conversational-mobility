@@ -191,8 +191,8 @@ export async function routingPlace(id: string) {
     await database()`SELECT p.id,p.name,ST_Y(p.location::geometry) AS latitude,ST_X(p.location::geometry) AS longitude,i.source_id,i.external_id,
     CASE WHEN i.source_id='renfe' THEN 'renfe' ELSE l.feed_id END AS feed_id,coalesce(l.stop_id,i.external_id) AS stop_id
     FROM canonical_place p JOIN place_external_identifier i ON i.place_id=p.id
-    LEFT JOIN routing_place_link l ON l.place_id=p.id AND EXISTS(SELECT 1 FROM crtm_feed f WHERE f.dataset_id=l.feed_id AND f.version=l.static_version AND f.enabled)
-    WHERE p.id=${id} AND (i.source_id!='renfe' OR EXISTS(SELECT 1 FROM static_feed f WHERE f.source_id='renfe' AND f.version=i.source_version))
+    LEFT JOIN routing_place_link l ON l.place_id=p.id AND EXISTS(SELECT 1 FROM crtm_feed f WHERE f.dataset_id=l.feed_id AND f.version=l.static_version AND f.enabled) AND EXISTS(SELECT 1 FROM crtm_stops s WHERE s.dataset_id=l.feed_id AND s.external_id=l.stop_id AND ST_DWithin(p.location,ST_SetSRID(ST_MakePoint(s.longitude,s.latitude),4326)::geography,100))
+    WHERE p.id=${id} AND (i.source_id!='renfe' OR EXISTS(SELECT 1 FROM static_feed f WHERE f.source_id='renfe' AND f.version=i.source_version)) AND (i.source_id!='emt' OR EXISTS(SELECT 1 FROM emt_catalog ec WHERE ec.version=i.source_version))
     UNION ALL SELECT i.id,s.name,s.latitude,s.longitude,'crtm',s.external_id,s.dataset_id,s.external_id FROM crtm_stop_identity i JOIN crtm_stops s USING(dataset_id,external_id) JOIN crtm_feed f USING(dataset_id) WHERE i.id=${id} AND f.enabled LIMIT 1`;
   return place ?? null;
 }
