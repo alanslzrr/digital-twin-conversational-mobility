@@ -104,7 +104,7 @@ const handler = createMcpHandler(
       {
         title: "Published Renfe incidents",
         description:
-          "Active alerts published for the imported Madrid Renfe routes, optionally by line. No alerts does not mean no disruptions.",
+          "Published notices from Renfe Madrid (default) or EMT buses (source=emt), optionally by line. EMT includes upcoming/unknown periods; inspect temporalStatus and freshness. No alerts does not mean no disruptions.",
         inputSchema: incidentsInputSchema,
         annotations,
       },
