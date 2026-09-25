@@ -206,3 +206,37 @@ En una **sesión nueva**, el evaluador puede pedir «Próximas llegadas EMT de l
 - `0013` es aditiva. Para rollback de código a PR #18, parar procesos y reconstruir la revisión anterior; las tablas EMT pueden permanecer. Para restauración íntegra de base, usar el backup privado previo con todos los escritores detenidos. No borrar manualmente identificadores de paradas.
 
 Pendientes no bloqueantes: Renfe volvió a actualizar durante el arranque E7, pero la causa del episodio TLS sigue sin identificar; la eficiencia de descubrimiento se observa en uso normal. No subir límites ni reabrir E2.
+
+
+## E7 — Catálogos y horarios CRTM
+
+La entrega CRTM añade `resolve_place(source=crtm, network=...)` y
+`get_crtm_timetable`, sin modificar OTP ni añadir polling. Reutilizar los exports
+existentes. Antes de actualizar el runtime:
+
+1. Parar el supervisor `start:local` con SIGTERM/Ctrl-C y verificar que termina
+   Core, Web/agente y worker; mantener Postgres/Redis/OTP.
+2. Respaldar con `pg_dump -Fc` en `data/backups/` (permisos privados); verificar el
+   índice con `pg_restore --list`. Esta verificación no sustituye probar un restore.
+3. Aplicar **todas** las migraciones pendientes con `pnpm db:migrate` (incluye 0014).
+4. Importar cada directorio versionado existente con
+   `node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/<red>/<sha>`.
+   Importar Metro conserva catálogo/correspondencias, no vuelve vigentes sus horarios.
+5. Ejecutar `pnpm check` y `pnpm build:agent`; iniciar `pnpm start:local`.
+6. Comprobar health de Core/Web y `/eve/v1/health` a través de Web; después
+   `pnpm smoke:mobility --crtm-only`. Usar una sesión EVE nueva para las instrucciones
+   y herramientas actualizadas. No hace falta inferencia o campaña general.
+
+El smoke CRTM comprueba catálogos, horarios Metro Ligero/interurbanos, rechazo de
+Metro fuera de vigencia, correspondencias y salud. Guarda evidencia en
+`data/evaluation/crtm-smoke.json`. No llama a proveedores, modelos ni OTP; la
+consulta MCP renueva la ventana de actividad existente, por lo que el worker
+habitual puede actualizar sus otras fuentes.
+
+Consulta manual: primero resolver una parada, después pasar su UUID a
+`get_crtm_timetable` con día de servicio y hora GTFS. Ver [semántica y límites](sources/crtm.md).
+Para actualizar datos se prepara/importa una nueva versión explícitamente. El
+importador preserva UUIDs y sustituye cada red en una transacción; no sincroniza el
+grafo. Para rollback de código, parar los procesos y reconstruir la revisión previa;
+0014 es aditiva y puede permanecer. Para restaurar todo el estado, usar el respaldo
+previo con todos los escritores parados. No borrar manualmente identidades CRTM.

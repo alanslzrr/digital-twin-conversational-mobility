@@ -1,7 +1,8 @@
-# CRTM: preparación de catálogos y horarios estáticos
+# CRTM: catálogos y consulta de horarios estáticos
 
-Estado: **preparación local**, no capacidad disponible en chat ni routing. No se
-han aplicado migraciones, alterado el worker o cambiado el runtime habitual.
+Estado de código: persistencia y consulta MCP implementadas. La puesta en marcha
+requiere aplicar 0014, importar exports y reconstruir Core/Web/agente; véase
+[operación local](../local-runtime.md). No se incorpora routing ni RT CRTM.
 EMT y R0 permanecen entregados; E2 permanece cerrado.
 
 ## Fuentes oficiales comprobadas el 25/09/2026
@@ -14,8 +15,7 @@ EMT y R0 permanecen entregados; E2 permanece cerrado.
 
 Las paradas incluyen estaciones y accesos cuando los contiene el GTFS; no son
 recuentos de andenes. El intervalo del manifiesto es la envolvente de calendarios
-y excepciones positivas, **no garantiza servicio todos los días**. Una futura
-consulta debe aplicar día de semana y excepciones por servicio.
+y excepciones positivas, **no garantiza servicio todos los días**. La consulta aplica día de semana y excepciones por servicio.
 
 Descarga oficial: `https://www.arcgis.com/sharing/rest/content/items/{item}/data`.
 Metadatos: el mismo item sin `/data`, con `?f=json`. El registro de código contiene
@@ -49,7 +49,7 @@ idéntica conserva la evidencia original de recuperación; no afirma que los dat
 hayan cambiado. Un export incompatible existente se rechaza, no se sobrescribe.
 Los archivos generados no se versionan en Git.
 
-## Semántica que debe preservar la siguiente entrega
+## Semántica conservada
 
 - Identidad compuesta por conjunto y ID oficial; no fusionar por nombre o cercanía.
   Hay tabuladores internos en algunos `trip_id` interurbanos: CSV los conserva.
@@ -63,15 +63,40 @@ Los archivos generados no se versionan en Git.
 - El horario Metro caducado no debe responder consultas actuales. Catálogo,
   calendario y tiempo real son capacidades distintas.
 
-## Pendiente inmediato
+## Consultas MCP y límites
 
-Persistencia transaccional e idempotente, UUIDs estables por namespace, resolución
-en chat, consulta de horarios con calendario/excepciones/frecuencias y salud por
-versión. Después, incorporar operadores a OTP y finalmente información RT.
-Este preparador no implementa esas capacidades ni una actualización coordinada
-del grafo. No añade polling ni una nueva campaña de aceptación.
+`resolve_place(source=crtm, network=metro|light-rail|interurban, query=...)` busca
+nombres o IDs/códigos exactos sin perder ceros iniciales. No selecciona accesos como
+paradas de embarque. Sin source conserva candidatos de ambos catálogos (hasta el
+límite por catálogo) y declara ambigüedad, sin elegir red por coincidencia de nombre.
+Los UUID CRTM se usan en `get_crtm_timetable`; todavía no están en el grafo OTP.
 
-## Persistencia local (integración MCP pendiente)
+La consulta de horarios recibe UUID, `serviceDate`, `afterTime` y `limit`. Sin fecha
+usa hoy en Madrid; sin hora usa ahora si es hoy, o 00:00:00 para otro día. Consulta
+solo ese día de servicio, no días adyacentes; las horas >24 siguen perteneciendo al
+día solicitado. La conversión GTFS usa mediodía local menos doce horas transcurridas
+para respetar cambios de horario. No es replay de lo conocido en una fecha.
+
+Las excepciones prevalecen sobre el calendario, incluidos servicios definidos solo
+por excepciones. Una estación consulta sus andenes de la misma red. Las visitas
+repetidas mantienen secuencia. Destino: stop_headsign, después trip_headsign, o
+**desconocido**. Se omiten puntos sin hora, sin interpolar; timepoint=0 es aproximado.
+Las ventanas de frecuencia desplazan la plantilla según la secuencia de parada y
+mantienen exact_times, intervalo y extremo final exclusivo; no se fabrican llegadas.
+Los códigos pickup_type 2/3 exigen acuerdos con el operador; 1 no permite embarcar.
+
+Las correspondencias conservan UUID por red: estación padre publicada con el mismo
+ID y coordenadas a un máximo de 100 m. Devuelven versión y vigencia de la otra red,
+no fusionan lugares ni prometen tiempo de transbordo/accesibilidad. La cobertura es
+parcial: estas fuentes identifican al publicador CRTM, no a cada empresa; no hay
+correspondencias EMT/Renfe inventadas. Metro caducado conserva catálogo y enlaces,
+pero rechaza horarios actuales. `get_source_health(source=crtm)` diferencia redes
+importadas y envolventes vigentes/caducadas; nunca declara RT por tener catálogo.
+
+Pendiente: horarios Metro vigentes, relaciones con EMT/Renfe respaldadas por fuentes,
+geocodificación y operadores en OTP, RT, actualización coordinada y replay.
+
+## Persistencia y operación local
 
 La migración `0014_crtm_static.sql` y `scripts/import-crtm.mjs` permiten cargar los
 exports existentes en una transacción por red. No descargan fuentes ni actualizan
@@ -99,5 +124,8 @@ node --env-file=.env.local scripts/test-crtm-import.mjs
 ```
 
 Esta prueba crea y elimina un esquema temporal, sin modificar tablas habituales.
-La persistencia todavía no expone resolución o horarios mediante MCP ni establece
-correspondencias entre redes; tampoco actualiza automáticamente el runtime.
+Regresiones de consulta: `RUN_CRTM_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/crtm.integration.test.ts`.
+Comprobación MCP del runtime: `pnpm smoke:mobility --crtm-only`. No llama al modelo
+ni a proveedores ni OTP; como las otras herramientas, puede renovar la ventana de
+actividad local. Los datos y la compilación se actualizan explícitamente, no mediante
+un nuevo scheduler.
