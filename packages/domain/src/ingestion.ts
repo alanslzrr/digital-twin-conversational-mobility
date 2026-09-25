@@ -1,6 +1,7 @@
 import type { SourceId } from "@mobility/contracts";
 
 export const jobPolicies = {
+  "emt-alerts": { source: "emt", interval: 120, maxAge: 600 },
   "renfe-trips": { source: "renfe", interval: 20, maxAge: 40 },
   "renfe-alerts": { source: "renfe", interval: 30, maxAge: 90 },
   bicimad: { source: "bicimad", interval: 20, maxAge: 60 },
