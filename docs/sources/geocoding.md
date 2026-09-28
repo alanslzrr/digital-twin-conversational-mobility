@@ -54,3 +54,7 @@ EVE requieren builds compatibles y sesión nueva. Regresiones sin red:
 `RUN_GEOCODE_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/geocoding*.test.ts`.
 La prueba real del proveedor solo se ejecuta tras su elección/autorización y usando
 un lugar público; no enviar conversaciones o direcciones personales como fixtures.
+
+## Estado local — 27/09/2026
+
+Nominatim público fue elegido y autorizado explícitamente, activado en configuración privada y comprobado por MCP con el Museo del Prado. Catálogo primero, consentimiento, atribución y caché positiva/negativa verificados; seis pruebas específicas. No se hicieron llamadas al modelo. Los valores por defecto del repositorio siguen desactivados para otras instalaciones.
