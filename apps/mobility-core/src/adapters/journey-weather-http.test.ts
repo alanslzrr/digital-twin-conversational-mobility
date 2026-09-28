@@ -94,4 +94,21 @@ describe("bounded conditional acquisition", () => {
       weatherResponse("https://www.aemet.es/", AbortSignal.timeout(30)),
     ).rejects.toThrow();
   });
+  it("preserves Retry-After when the provider envelope carries the error inside HTTP 200", async () => {
+    vi.stubEnv("AEMET_API_KEY", "offline-fixture");
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ estado: 429 }, { headers: { "Retry-After": "90" } }),
+        ),
+    );
+    await expect(
+      fetchWeatherProduct("forecast:28079", signal(), {
+        payload: null,
+        lastModified: null,
+      }),
+    ).rejects.toMatchObject({ status: 429, retryAfter: 90 });
+  });
 });
