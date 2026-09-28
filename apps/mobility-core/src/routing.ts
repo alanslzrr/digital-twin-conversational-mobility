@@ -8,6 +8,7 @@ import {
 import { journeyModePolicy } from "@mobility/domain";
 import { z } from "zod";
 import { database } from "./database";
+import { journeyWeather } from "./journey-weather";
 import { enrichRouting, routingEvidence } from "./routing-evidence";
 import { coveredFeeds, routingRelease } from "./routing-release";
 
@@ -449,6 +450,19 @@ export async function planJourney(request: JourneyRequest) {
     return {
       status: itineraries.length ? "available" : "no_route",
       provider: "otp-local-2.10.0",
+      weatherContext: itineraries.length
+        ? await journeyWeather(
+            itineraries,
+            {
+              latitude: Number(origin.latitude),
+              longitude: Number(origin.longitude),
+            },
+            {
+              latitude: Number(destination.latitude),
+              longitude: Number(destination.longitude),
+            },
+          )
+        : null,
       asOf,
       basis: itineraries.some(
         (route) => "realtimeApplied" in route && route.realtimeApplied,

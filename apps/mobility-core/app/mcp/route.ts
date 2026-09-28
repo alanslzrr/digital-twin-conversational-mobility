@@ -204,9 +204,9 @@ const handler = createMcpHandler(
     server.registerTool(
       "get_environment",
       {
-        title: "Measured Madrid environment",
+        title: "Madrid environment and municipal weather",
         description:
-          "kind=air: municipal pollutant measurements. kind=weather: AEMET Madrid-Retiro observations. Units, observation time and freshness; not forecasts, weather alerts or a health assessment.",
+          "kind=air: municipal pollutant measurements. kind=weather defaults to Retiro observations. weatherProduct=hourly_forecast|warnings with resolved placeId and optional fromTime/toTime reuses shared AEMET municipal/CAP cache. plan_journey already includes weatherContext; do not call again for each route. Coverage and original periods apply; not a health assessment.",
         inputSchema: environmentInputSchema,
         annotations,
       },
