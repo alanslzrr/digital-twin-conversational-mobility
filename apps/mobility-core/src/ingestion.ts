@@ -20,6 +20,7 @@ import { parseParking } from "./adapters/parking";
 import { parseRenfe, spanishText } from "./adapters/renfe";
 import { database } from "./database";
 import { publishDgt } from "./dgt-publication";
+import { weatherWorkerTick } from "./weather-cache";
 
 const compress = promisify(gzip);
 export const ingestionEnabled = () => localIngestionEnabled(process.env);
@@ -364,9 +365,18 @@ export async function tick(lane?: "0" | "1") {
     }
     return results;
   };
-  const results = lane
-    ? await run()
-    : (await Promise.all([run(), run()])).flat();
+  // One due weather resource per existing lane tick, never a separate scheduler.
+  let weatherUpdated = false;
+  try {
+    weatherUpdated = await weatherWorkerTick();
+  } catch {
+    /* Weather storage cannot stop other sources. */
+  }
+  const results = weatherUpdated
+    ? [{ job: "journey-weather", status: "processed" }]
+    : lane
+      ? await run()
+      : (await Promise.all([run(), run()])).flat();
   if (lane)
     await sql`UPDATE ingestion_worker SET last_seen_at=now() WHERE id=${lane}`;
   // Retention is maintained by the full/manual tick, or once per minute by lane 0.
