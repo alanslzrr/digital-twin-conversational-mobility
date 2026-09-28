@@ -61,6 +61,7 @@ export type RoutingResult =
     };
 
 export { gtfsClock, gtfsInstant, gtfsServiceEpoch, madridDate } from "./crtm";
+export { dgtTemporalStatus } from "./road-incidents";
 export {
   applyRoutingEvidence,
   matchingEmtRoutingAlerts,
