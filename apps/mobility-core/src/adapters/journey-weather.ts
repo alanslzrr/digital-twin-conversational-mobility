@@ -12,6 +12,15 @@ export class WeatherHttpError extends Error {
     super(`upstream_http_${status}`);
   }
 }
+function retryAfterSeconds(response: Response) {
+  const raw = response.headers.get("retry-after");
+  const delay = raw
+    ? Number.isFinite(Number(raw))
+      ? Number(raw)
+      : Math.max(0, (Date.parse(raw) - Date.now()) / 1000)
+    : 0;
+  return Number.isFinite(delay) ? Math.min(604800, Math.max(0, delay)) : 0;
+}
 export async function weatherResponse(
   url: string,
   signal: AbortSignal,
@@ -25,17 +34,8 @@ export async function weatherResponse(
   });
   if (response.status === 304) return { response, bytes: Buffer.alloc(0) };
   if (!response.ok) {
-    const raw = response.headers.get("retry-after");
-    const delay = raw
-      ? Number.isFinite(Number(raw))
-        ? Number(raw)
-        : Math.max(0, (Date.parse(raw) - Date.now()) / 1000)
-      : 0;
     await response.body?.cancel();
-    throw new WeatherHttpError(
-      response.status,
-      Number.isFinite(delay) ? Math.min(604800, Math.max(0, delay)) : 0,
-    );
+    throw new WeatherHttpError(response.status, retryAfterSeconds(response));
   }
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -98,19 +98,17 @@ export async function fetchWeatherProduct(
   const key = process.env.AEMET_API_KEY;
   if (!key) throw Error("aemet_credentials_missing");
   const municipality = resource.slice(9);
-  const envelope = JSON.parse(
-    text(
-      (
-        await weatherResponse(
-          `https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/${municipality}`,
-          signal,
-          { api_key: key },
-        )
-      ).bytes,
-    ),
+  const envelopeResponse = await weatherResponse(
+    `https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/${municipality}`,
+    signal,
+    { api_key: key },
   );
+  const envelope = JSON.parse(text(envelopeResponse.bytes));
   if (Number(envelope.estado) !== 200)
-    throw new WeatherHttpError(Number(envelope.estado) || 503);
+    throw new WeatherHttpError(
+      Number(envelope.estado) || 503,
+      retryAfterSeconds(envelopeResponse.response),
+    );
   const data = await weatherResponse(weatherResource(envelope.datos), signal);
   return {
     notModified: false as const,
