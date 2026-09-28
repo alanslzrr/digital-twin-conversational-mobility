@@ -18,6 +18,8 @@ Actualizado el **28/09/2026**, tras geocodificación controlada y routing multio
 
 **R2.1 — Historial de conversaciones implementado y comprobado localmente.** Mis conversaciones lista solo sesiones propias vigentes, con fecha de creación, paginación de veinte y reapertura nativa de EVE. No duplica mensajes ni cambia retención/E2. [Evidencia, integración y límites](acceptance/2026-09-28-conversation-history.md). Es independiente de las ampliaciones de fuentes R1; no implica cierre de R1/R2. El alcance vigente es el de este roadmap; las actas anteriores son evidencia histórica, no requisitos adicionales.
 
+**Siguiente bloque R1: contexto meteorológico del itinerario.** Predicción horaria municipal y avisos oficiales de Madrid, evaluados automáticamente al planificar con datos compartidos en Core; no una descarga por ruta o usuario. [Investigación y propuesta](research/2026-09-28-journey-weather.md), [instrucciones de implementación y entrega](plans/2026-09-28-journey-weather.md). Alcance acordado; implementación pendiente. Multiestación y predicción diaria se abordan después, sin bloquear esta entrega.
+
 R0, E2 y E8 siguen cerrados. Pruebas proporcionales a cada cambio; la auditoría CRTM no se repite ni se añade otra campaña como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
 
 ### Corrección puntual posterior a E8
@@ -65,7 +67,8 @@ Orden por dependencias, no por número de endpoints:
 - [ ] Accesibilidad estática trazable; ascensores/escaleras RT como GAP externo hasta disponer de fuente oficial. No garantizar accesibilidad operativa desde atributos estáticos.
 - [x] DGT DATEX 3.7: acceso público real, IDs/versiones, carretera/sentido y puntos/extremos, correcciones e histórico existente. Retiradas no se equiparan a cancelaciones confirmadas; fin temporal contradictorio queda explícito. Sin geometrías ni desvíos inventados. [Fuente y límites](sources/dgt.md).
 - [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
-- [ ] Conciliar el brief completo: AEMET multiestación/predicciones/avisos, precios de parking y routing bici/coche/intermodalidad. Implementar o diferir **con aprobación explícita**; no eliminar del alcance silenciosamente.
+- [ ] **Contexto meteorológico del itinerario (siguiente bloque):** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Alcance y entrega](plans/2026-09-28-journey-weather.md).
+- [ ] Ampliaciones posteriores del brief: AEMET multiestación y predicción diaria —separadas del bloque anterior por acuerdo del usuario—, precios de parking y routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
 
 **Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
 
