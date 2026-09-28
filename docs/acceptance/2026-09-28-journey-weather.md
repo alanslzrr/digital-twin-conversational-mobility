@@ -1,6 +1,6 @@
 # Contexto meteorológico del itinerario — entrega local
 
-28/09/2026. Alcance del [plan aprobado](../plans/2026-09-28-journey-weather.md), sin ampliar R1 ni reabrir E2/R2.1.
+[PR #29](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/29). 28/09/2026. Alcance del [plan aprobado](../plans/2026-09-28-journey-weather.md), sin ampliar R1 ni reabrir E2/R2.1.
 
 ## Implementado y comprobado
 
@@ -11,7 +11,7 @@
 
 ## Evidencias
 
-- `pnpm check`: lint/fronteras, typecheck, **334 pruebas offline** y builds Core/Web aprobados. `pnpm build:agent` aprobado, sin inferencias.
+- `pnpm check`: lint/fronteras, typecheck, **335 pruebas offline** y builds Core/Web aprobados. `pnpm build:agent` aprobado, sin inferencias.
 - `RUN_WEATHER_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/weather-cache.integration.test.ts`: **9 pruebas aprobadas** en esquema temporal eliminado después. Cinco lectores, reutilización, 304, atomicidad/backoff, caducidad/actividad, leases, geometría y cancelación incluso con pool ocupado.
 - `pnpm smoke:mobility --weather-only`: MCP autenticado, tres rutas Atocha–Chamartín, consulta explícita de ambos productos y repetición desde caché. Resultado privado: `data/evaluation/journey-weather-smoke.json`. El smoke admite indisponibilidad meteorológica explícita; no confundirlo con disponibilidad del proveedor.
 - OpenData autenticado y CAP reales normalizados/almacenados. Se observaron timeout y 429; el worker recuperó una predicción sin intervención sobre el backoff. Los CAP examinados eran `Minor` **para el 30/09**, no permiten afirmar «sin avisos» para el 28/09.
