@@ -83,3 +83,4 @@ export function temporalCoverage(
           : "partial_or_unavailable",
   };
 }
+export { weatherFreshness } from "./weather";
