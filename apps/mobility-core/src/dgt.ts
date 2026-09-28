@@ -23,6 +23,7 @@ export async function dgtIncidents(
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase();
   const matches = (i: DgtIncident) =>
+    !needle ||
     [
       i.road,
       i.location.start?.province,
