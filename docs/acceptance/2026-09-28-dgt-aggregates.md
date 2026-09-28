@@ -9,7 +9,7 @@ Nominatim público ya estaba autorizado y operativo desde el 27/09; roadmap corr
 ## Evidencia ejecutada
 
 - Descarga HTTPS oficial sin credenciales: publicación `2026-09-28T17:11:05.393+02:00`, 1.192 registros. Parser completo ejecutado sobre esa descarga; fixture público reducido para regresiones offline.
-- `pnpm check`: lint, fronteras, typecheck, 303 pruebas offline y builds Core/Web aprobados. Las suites PostgreSQL opt-in no se cuentan como ejecutadas por ese comando.
+- `pnpm check`: lint, fronteras, typecheck, 305 pruebas offline y builds Core/Web aprobados. Las suites PostgreSQL opt-in no se cuentan como ejecutadas por ese comando.
 - `RUN_INGESTION_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/ingestion.integration.test.ts`: 16 pruebas aprobadas en esquema temporal eliminado al terminar. DGT prueba corrección, reintento idéntico, retirada, reaparición, publicación antigua y error XML sin borrar estado válido; consulta histórica incluida.
 - `pnpm build:agent` completado.
 - `pnpm smoke -- --production`: Core/Web/EVE, autenticación, handshake y 16 herramientas MCP correctos; sesión sin autenticación rechazada antes de cualquier llamada al modelo.
