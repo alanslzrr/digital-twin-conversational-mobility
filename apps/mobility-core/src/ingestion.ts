@@ -13,11 +13,13 @@ import type postgres from "postgres";
 import { fetchWeather } from "./adapters/aemet";
 import { parseBicimad } from "./adapters/bicimad";
 import { fetchText, sourceErrorCode, timestamp } from "./adapters/common";
+import { dgtUrl, parseDgt } from "./adapters/dgt";
 import { fetchEmtIncidents } from "./adapters/emt";
 import { parseAir, parseTraffic } from "./adapters/madrid";
 import { parseParking } from "./adapters/parking";
 import { parseRenfe, spanishText } from "./adapters/renfe";
 import { database } from "./database";
+import { publishDgt } from "./dgt-publication";
 
 const compress = promisify(gzip);
 export const ingestionEnabled = () => localIngestionEnabled(process.env);
@@ -37,6 +39,11 @@ async function acquire(id: JobId) {
 
 async function load(id: JobId) {
   const sql = database();
+  if (id === "dgt-incidents") {
+    const raw = await fetchText(dgtUrl, "application/xml");
+    const { observedAt, ...payload } = parseDgt(raw);
+    return { raw, observedAt, interval: 60, payload };
+  }
   if (id === "emt-alerts") {
     const { raw, observedAt, alerts } = await fetchEmtIncidents();
     return { raw, observedAt, interval: 120, payload: { alerts } };
@@ -227,6 +234,8 @@ export async function ingest(id: JobId) {
       const observed = new Date(result.observedAt);
       const ingested = new Date();
       const reference = `sha256:${hash}`;
+      if (!historicalOnly && "incidents" in result.payload)
+        await publishDgt(tx, result.payload.incidents, observed);
       if (!historicalOnly && "stations" in result.payload) {
         const identifiers =
           await tx`SELECT external_id,place_id FROM place_external_identifier WHERE source_id='bicimad' AND namespace='gbfs.station'`;
@@ -247,11 +256,15 @@ export async function ingest(id: JobId) {
         if (places.length)
           await tx`INSERT INTO place_external_identifier ${tx(places.map((p) => ({ source_id: "bicimad", namespace: "gbfs.station", external_id: p.external_id, place_id: p.id })))} ON CONFLICT DO NOTHING`;
       }
-      await tx`INSERT INTO raw_batch(source_id,object_key,sha256,fetched_at,expires_at,parser_version,content_type) VALUES (${policy.source},${filename},${hash},${ingested},${new Date(ingested.getTime() + 86400000)},'local-v2',${id === "madrid-traffic" || id === "madrid-parking" ? "application/xml" : "application/json"}) ON CONFLICT (object_key) DO UPDATE SET expires_at=excluded.expires_at`;
+      const parserVersion =
+        id === "dgt-incidents"
+          ? "dgt-3.7-v1"
+          : id === "renfe-alerts"
+            ? "local-v3-selectors"
+            : "local-v2";
+      await tx`INSERT INTO raw_batch(source_id,object_key,sha256,fetched_at,expires_at,parser_version,content_type) VALUES (${policy.source},${filename},${hash},${ingested},${new Date(ingested.getTime() + 86400000)},${parserVersion},${id === "dgt-incidents" || id === "madrid-traffic" || id === "madrid-parking" ? "application/xml" : "application/json"}) ON CONFLICT (object_key) DO UPDATE SET expires_at=excluded.expires_at`;
       if (!historicalOnly)
         await tx`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES (${id},${policy.source},${observed},${ingested},'provisional',${reference},${tx.json(payload)}) ON CONFLICT (job_id) DO UPDATE SET observed_at=excluded.observed_at,ingested_at=excluded.ingested_at,quality=excluded.quality,raw_reference=excluded.raw_reference,payload=excluded.payload`;
-      const parserVersion =
-        id === "renfe-alerts" ? "local-v3-selectors" : "local-v2";
       const contentHash = createHash("sha256")
         .update(JSON.stringify({ parserVersion, payload }))
         .digest("hex");
