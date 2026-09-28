@@ -1,6 +1,6 @@
 # Roadmap local: estado auditado y criterios de cierre
 
-Actualizado el **25/09/2026**, tras geocodificación controlada y routing multioperador con releases reversibles. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
+Actualizado el **28/09/2026**, tras geocodificación controlada y routing multioperador con releases reversibles. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
 
 **Estado actual: R0 integrado en `main` y runtime local actualizado.** E1 corregido, E2 cerrado y E3–E6 entregados mediante [PR #16](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/16). E8 aplicó 0008–0012 desde el esquema habitual 0007, reimportó destinos y recompiló/reinició Core, Web, agente y worker. No equivale a cobertura completa ni servicio operativo.
 
@@ -10,11 +10,11 @@ Actualizado el **25/09/2026**, tras geocodificación controlada y routing multio
 
 **E7/R1: EMT y CRTM estático entregados e instalados localmente.** EMT incluye catálogo y próximas llegadas bajo demanda; ver [evidencia y límites](acceptance/2026-09-25-emt.md). CRTM incluye catálogos, horarios estáticos de Metro Ligero/interurbanos y correspondencias publicadas, mediante [PR #22](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/22) y [PR #23](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/23): migración 0014 aplicada, exports importados y Core/Web/agente actualizados. [Semántica y límites CRTM](sources/crtm.md).
 
-**Geocodificación implementada en PR #25**: catálogos primero, caché, consentimiento, ambigüedad, procedencia y límites globales. Migración 0015 instalada. **El proveedor externo permanece desactivado hasta su elección informada**; no se presenta como servicio externo disponible.
+**Geocodificación implementada en PR #25**: catálogos primero, caché, consentimiento, ambigüedad, procedencia y límites globales. Migración 0015 instalada. **Nominatim público autorizado y activo desde el 27/09/2026**: consulta real del Museo del Prado por MCP, catálogo primero, consentimiento, atribución y caché positiva/negativa comprobados. No enviar direcciones personales/confidenciales.
 
 **Routing ampliado instalado localmente (PR #26)**: Renfe, EMT, Metro Ligero e interurbanos; actualización explícita de GTFS/OSM/catálogos/grafo mediante releases verificados, activación en mantenimiento y rollback comprobado. RT Renfe se aplica solo con identidad/fecha/versión/frescura válidas; avisos EMT se adjuntan por línea y vigencia sin inventar desvíos. Metro conserva catálogo pero horarios caducados quedan fuera del grafo. [Operación y límites](routing-releases.md), [evidencia de instalación y regresiones](acceptance/2026-09-25-routing-releases.md).
 
-**Siguiente bloque funcional: DGT y herramientas agregadas**, sin olvidar la elección del geocoder y los pendientes de cobertura/RT/replay descritos abajo.
+**Bloque actual: DGT y herramientas agregadas** implementados sobre Core, PostgreSQL y el worker existentes. Acceso XML oficial público verificado, sin cuenta; [semántica y límites](sources/dgt.md). Pendientes posteriores: cobertura/RT, replay y ampliaciones del brief descritas abajo.
 
 R0, E2 y E8 siguen cerrados. Pruebas proporcionales a cada cambio; la auditoría CRTM no se repite ni se añade otra campaña como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
 
@@ -29,8 +29,8 @@ El reporte manual detectó que el agente omitió el histórico disponible y dupl
 | 1. OTP local | Grafo real Renfe/OSM versionado; benchmark Atocha/Chamartín/Sol; rutas previstas; fix TRANSIT probado por MCP local | **Parcial.** F01 integrado. Ampliar cobertura de pares/accesibilidad y medir RAM máxima de build son trabajos adicionales, no bloqueos de R0. Routing EMT/ML/interurbanos y overlay RT Renfe instalados. Metro vigente y RT de nuevas redes siguen limitados por fuentes e identidad. |
 | 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Parcial.** Alias/destinos E4 integrados y reimportados; faltan replay y reconstrucción histórica completa. RT en routing y actualización explícita reversible implementados; no actualización diaria automática. Cancelaciones/NO_DATA/SKIPPED y modos históricos event/knowledge están probados localmente. |
 | 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **E3 integrado.** Carriles independientes, heartbeat, fallos por etapa y recuperación sin replay probados con proveedores simulados/DB aislada. Runtime actualizado; cadencia configurada no equivale a SLO medido. |
-| 4. Dominio/MCP/EVE | Doce herramientas reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado, E3–E6 integrados mediante E8; geocoder general y herramientas de línea/red/snapshot faltantes. |
-| 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro, avisos y catálogo/llegadas EMT; catálogos y consulta estática CRTM | **Parcial.** Horarios Metro vigentes, correspondencias adicionales, routing multioperador y DGT; ampliar fuentes conforme al brief o documentar exclusiones aprobadas. |
+| 4. Dominio/MCP/EVE | Dieciséis herramientas reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado, E3–E6 integrados mediante E8; geocoder y agregados incorporados; cobertura y ausencia de datos explícitas. |
+| 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro, avisos y catálogo/llegadas EMT; catálogos y consulta estática CRTM | **Parcial.** Faltan horarios Metro vigentes y correspondencias adicionales; routing multioperador y DGT incorporados. Ampliar fuentes conforme al brief o documentar exclusiones aprobadas. |
 
 ## R0 — Estabilizar y aceptar la vertical existente
 
@@ -56,13 +56,13 @@ Orden por dependencias, no por número de endpoints:
 - [x] Integración estática CRTM entregada: catálogos con identidades por red, persistencia, resolución MCP, consulta de horarios con calendarios/excepciones/frecuencias y correspondencias publicadas sin fusionar UUIDs. Migración 0014 y exports instalados; runtime actualizado. [Fuentes, consultas y límites](sources/crtm.md).
 - [ ] Completar cobertura CRTM: conseguir horarios Metro vigentes (feed disponible terminado el 27/05/2026) y correspondencias EMT/Renfe respaldadas por evidencia. El routing multioperador está instalado; no resuelve horarios Metro caducados ni equivale a correspondencias completas.
 - [x] Llegadas EMT por parada bajo demanda: caché persistente, lease/backoff, destino del proveedor y antigüedad; no polling global. Comprobación conversacional con evaluadores durante uso normal, sin campaña nueva como requisito.
-- [ ] Geocoder externo: implementación local-first/caché/ambigüedad/procedencia/límites entregada en PR #25; falta elección informada del proveedor, activación y consulta real de lugar público. No enviar domicilios personales a Nominatim público. [Contrato](sources/geocoding.md).
+- [x] Geocoder externo: implementación local-first/caché/ambigüedad/procedencia/límites entregada en PR #25; Nominatim público autorizado/activado y consulta real de lugar público comprobada el 27/09/2026. No enviar domicilios personales a Nominatim público. [Contrato](sources/geocoding.md).
 - [x] Routing GTFS Renfe/EMT/Metro Ligero/interurbanos instalado; Metro excluido por caducidad. Resolución MCP con IDs separados, correspondencias de itinerario y frecuencias explícitas. No implica RT de todas las redes.
 - [x] Actualización explícita coordinada y reversible GTFS/catálogos/OSM/grafo mediante releases inmutables, journal y mantenimiento. Rollback/re-activación reales comprobados; no se añade scheduler.
 - [x] Overlay Core de RT/alertas Renfe y avisos de línea EMT sobre itinerarios, con snapshots existentes y degradación explícita. OTP sin segundo polling. Queda ampliar RT CRTM y demostrar identidad de viaje entre llegadas EMT y GTFS; no se asignan por línea sola.
 - [ ] Accesibilidad estática trazable; ascensores/escaleras RT como GAP externo hasta disponer de fuente oficial. No garantizar accesibilidad operativa desde atributos estáticos.
-- [ ] DGT: verificar acceso/versión DATEX, adaptar eventos/geometrías, deduplicar y probar cancelación/expiración; no sustituir por tráfico municipal.
-- [ ] Implementar `get_line_status`, `get_network_status` y `get_mobility_snapshot` con cobertura parcial/frescura explícitas; sin tools vacías ni inferencias de «red normal» por ausencia de alertas.
+- [x] DGT DATEX 3.7: acceso público real, IDs/versiones, carretera/sentido y puntos/extremos, correcciones e histórico existente. Retiradas no se equiparan a cancelaciones confirmadas; fin temporal contradictorio queda explícito. Sin geometrías ni desvíos inventados. [Fuente y límites](sources/dgt.md).
+- [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
 - [ ] Replay/histórico reproducible y versionado; no confundir el índice actual de muestras con reconstrucción del gemelo.
 - [ ] Conciliar el brief completo: AEMET multiestación/predicciones/avisos, precios de parking y routing bici/coche/intermodalidad. Implementar o diferir **con aprobación explícita**; no eliminar del alcance silenciosamente.
 

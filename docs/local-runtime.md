@@ -244,4 +244,15 @@ previo con todos los escritores parados. No borrar manualmente identidades CRTM.
 
 ## Actualización de routing multioperador
 
-La instalación usa releases inmutables con `data/otp` como symlink. Para actualizar GTFS/OSM/catálogos/grafo, activar, revertir o recuperar una transición interrumpida, seguir [routing-releases.md](routing-releases.md). No ejecutar el preparador/build legacy sobre el release activo. El [acta local](acceptance/2026-09-25-routing-releases.md) registra migraciones 0015–0016, backup y rollback comprobado. El geocoder externo sigue desactivado hasta elegir proveedor.
+La instalación usa releases inmutables con `data/otp` como symlink. Para actualizar GTFS/OSM/catálogos/grafo, activar, revertir o recuperar una transición interrumpida, seguir [routing-releases.md](routing-releases.md). No ejecutar el preparador/build legacy sobre el release activo. El [acta local](acceptance/2026-09-25-routing-releases.md) registra migraciones 0015–0016, backup y rollback comprobado. Nominatim público está autorizado y activo en esta instalación desde el 27/09/2026; otras instalaciones permanecen desactivadas por defecto.
+
+
+## DGT y resúmenes almacenados (0017)
+
+Aplicar todas las migraciones pendientes con respaldo y escritores detenidos, como en el procedimiento anterior. `0017` añade `dgt-incidents` al worker existente y conserva retiradas; no necesita credenciales ni otro proceso. Recompilar Core/Web/agente juntos para exponer los tres agregados en la conexión MCP existente. No cambia interfaz, modelo ni OTP.
+
+`get_incidents` con `source=dgt` activa la ventana y solicita el job solo si está vencido; un error usa el backoff habitual. `get_source_health` muestra su estado. Los agregados `get_line_status`, `get_network_status`, `get_mobility_snapshot` leen almacenamiento sin refrescar ni extender la ventana; no usar un dashboard que los llame como sustituto de la activación de uso normal.
+
+Para detener DGT sin tocar otros jobs: con acceso administrativo local, `UPDATE source_catalog SET enabled=false WHERE id='dgt'`. Para volver a habilitarlo: `enabled=true`; no borrar identidades ni forzar una ráfaga de próximos vencimientos. Parar/reanudar todos los servicios sigue el runbook existente. Para volver íntegramente a código anterior a 0017, detener escritores y restaurar el respaldo previo según el procedimiento de recuperación; no basta deshabilitar el job, porque el código antiguo de salud tampoco conoce ese ID. No eliminar el histórico manualmente.
+
+[Contrato, consultas, retención y límites DGT](sources/dgt.md). No confundir sensores municipales, publicación DGT y tráfico real observado.
