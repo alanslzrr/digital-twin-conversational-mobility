@@ -7,6 +7,9 @@ import {
   historyInputSchema,
   incidentsInputSchema,
   journeyRequestSchema,
+  lineStatusInputSchema,
+  mobilitySnapshotInputSchema,
+  networkStatusInputSchema,
   parkingInputSchema,
   resolveAddressInputSchema,
   resolvePlaceInputSchema,
@@ -14,6 +17,11 @@ import {
   sourceHealthInputSchema,
 } from "@mobility/contracts";
 import { createMcpHandler } from "mcp-handler";
+import {
+  lineStatus,
+  mobilitySnapshot,
+  networkStatus,
+} from "../../src/aggregates";
 import { authorize } from "../../src/auth";
 import { crtmTimetable } from "../../src/crtm";
 import { emtArrivals } from "../../src/emt-arrivals";
@@ -41,9 +49,9 @@ const annotations = {
   idempotentHint: true,
   openWorldHint: false,
 };
-async function run(action: () => Promise<object>) {
+async function run(action: () => Promise<object>, activateWindow = true) {
   try {
-    await activate();
+    if (activateWindow) await activate();
     return mcpResult(await action());
   } catch {
     return {
@@ -58,6 +66,40 @@ async function run(action: () => Promise<object>) {
 
 const handler = createMcpHandler(
   (server) => {
+    server.registerTool(
+      "get_line_status",
+      {
+        title: "Stored line status and coverage",
+        description:
+          "Recognize a Renfe/EMT line or a CRTM line within a required network. Return retained notices and static coverage, not a normal-service guarantee. No provider refresh.",
+        inputSchema: lineStatusInputSchema,
+        annotations,
+      },
+      (input) => run(() => lineStatus(input), false),
+    );
+    server.registerTool(
+      "get_network_status",
+      {
+        title: "Stored network evidence",
+        description:
+          "Summarize Renfe, EMT, CRTM and DGT stored source coverage and evidence counts, per-stream freshness and missing capabilities. No fanout or provider refresh; data health is not normal network operation.",
+        inputSchema: networkStatusInputSchema,
+        annotations,
+      },
+      ({ source }) => run(() => networkStatus(source), false),
+    );
+    server.registerTool(
+      "get_mobility_snapshot",
+      {
+        title: "Stored mobility overview",
+        description:
+          "Combine retained mobility evidence counts, source coverage, entity freshness and absences. Optional source filter. Per-component observation times, not one live instant or replay; no provider refresh.",
+        inputSchema: mobilitySnapshotInputSchema,
+        annotations,
+      },
+      ({ source }) => run(() => mobilitySnapshot(source), false),
+    );
+
     server.registerTool(
       "get_source_health",
       {
@@ -140,9 +182,9 @@ const handler = createMcpHandler(
     server.registerTool(
       "get_incidents",
       {
-        title: "Published Renfe incidents",
+        title: "Published transport and road incidents",
         description:
-          "Published notices from Renfe Madrid (default) or EMT buses (source=emt), optionally by line. EMT includes upcoming/unknown periods; inspect temporalStatus and freshness. No alerts does not mean no disruptions.",
+          "Published Renfe/EMT notices by line, or DGT road incidents (source=dgt; query=road, province or municipality). DGT preserves identity, version, endpoints and publisher validity; includeWithdrawn shows removals, not confirmed cancellations. Inspect freshness and temporal conflicts. Empty results do not mean normal service.",
         inputSchema: incidentsInputSchema,
         annotations,
       },
