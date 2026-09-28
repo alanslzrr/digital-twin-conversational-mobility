@@ -1,7 +1,9 @@
+import { conversationListAction } from "@mobility/contracts";
 import { localIngestionEnabled } from "@mobility/domain";
 import { z } from "zod";
 import { getAuth } from "./better-auth";
 import { budgetAction, evaluateBudget } from "./conversation-budget";
+import { listConversations } from "./conversations";
 import { database } from "./database";
 
 const principal = z.string().uuid();
@@ -12,6 +14,7 @@ const session = z
   .regex(/^[A-Za-z0-9_-]+$/);
 export const evaluationAction = z
   .discriminatedUnion("action", [
+    conversationListAction,
     z
       .object({
         action: z.literal("identify"),
@@ -55,6 +58,7 @@ export async function evaluateAccess(
     input.action === "budget_finish"
   )
     throw new Error("Invalid budget action");
+  if (input.action === "list_sessions") return listConversations(input);
   const sql = database();
   if (input.action === "identify") {
     const session = await getAuth().api.getSession({ headers });
