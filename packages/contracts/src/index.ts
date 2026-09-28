@@ -105,7 +105,20 @@ export const emtArrivalsInputSchema = z.object({
   limit: z.number().int().min(1).max(20).default(5),
 });
 export const incidentsInputSchema = z.object({
-  source: z.enum(["renfe", "emt"]).default("renfe"),
+  source: z.enum(["renfe", "emt", "dgt"]).default("renfe"),
+  query: z
+    .string()
+    .trim()
+    .min(2)
+    .max(120)
+    .optional()
+    .describe("DGT road, province or municipality; not a transit line."),
+  includeWithdrawn: z
+    .boolean()
+    .optional()
+    .describe(
+      "DGT withdrawals in the retained 24h window; not confirmed cancellations.",
+    ),
   line: z.string().trim().max(20).optional(),
   limit: z.number().int().min(1).max(30).default(10),
 });
@@ -130,6 +143,7 @@ export const parkingInputSchema = roadInputSchema;
 export const historyInputSchema = z
   .object({
     source: z.enum([
+      "dgt",
       "aemet",
       "emt",
       "renfe",
@@ -194,4 +208,17 @@ export const resolveAddressInputSchema = z.object({
     .describe(
       "Only true when the user requests looking up this public address/place externally after privacy disclosure. Never personal/confidential data. Local catalogs are always searched first.",
     ),
+});
+
+export const lineStatusInputSchema = z.object({
+  source: z.enum(["renfe", "emt", "crtm"]),
+  network: z.enum(["metro", "light-rail", "interurban", "emt"]).optional(),
+  line: z.string().trim().min(1).max(40),
+  limit: z.number().int().min(1).max(20).default(5),
+});
+export const networkStatusInputSchema = z.object({
+  source: z.enum(["renfe", "emt", "crtm", "dgt"]).optional(),
+});
+export const mobilitySnapshotInputSchema = z.object({
+  source: sourceIdSchema.optional(),
 });

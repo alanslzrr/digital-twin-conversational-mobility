@@ -32,6 +32,8 @@ import type { parseRenfe } from "./adapters/renfe";
 import { airStationIdentity } from "./catalogs/air-stations";
 import { crtmHealth, resolveCrtm } from "./crtm";
 import { database } from "./database";
+import { dgtIncidents } from "./dgt";
+import { summarizePayload } from "./evidence-summary";
 import { ingest, ingestionEnabled } from "./ingestion";
 import { routingPlace, scheduledDepartures } from "./routing";
 
@@ -127,6 +129,9 @@ export async function sourceHealth(source?: SourceId) {
               : null;
           return {
             id,
+            summary: provenance
+              ? summarizePayload(id, payload, Date.now(), provenance)
+              : null,
             status: job.error_code
               ? "degraded"
               : provenance
@@ -427,7 +432,18 @@ export async function departures(placeId: string, limit: number) {
   }
 }
 
-export async function incidents(input: z.infer<typeof incidentsInputSchema>) {
+export async function incidents(
+  input: z.infer<typeof incidentsInputSchema>,
+  refresh = true,
+) {
+  if (input.source === "dgt") {
+    if (input.line)
+      return {
+        status: "unavailable",
+        reason: "dgt_requires_road_query_not_transit_line",
+      };
+    return dgtIncidents(input, refresh);
+  }
   const routes =
     await database()`SELECT external_id,short_name FROM transit_route WHERE source_id=${input.source}`;
   const lineIdentity = input.line
@@ -450,7 +466,7 @@ export async function incidents(input: z.infer<typeof incidentsInputSchema>) {
     };
 
   if (input.source === "emt") {
-    const state = await snapshot("emt-alerts");
+    const state = await snapshot("emt-alerts", refresh);
     if (!state)
       return { status: "unavailable", reason: "no_observation", lineIdentity };
     const alerts = state.payload.alerts as ReturnType<
@@ -488,7 +504,7 @@ export async function incidents(input: z.infer<typeof incidentsInputSchema>) {
         "EMT published notices including upcoming and uncertain periods; lineIdentity reports whether the imported catalog recognizes the label. Empty results do not establish normal service. Not bus arrival estimates or routing coverage.",
     };
   }
-  const state = await snapshot("renfe-alerts");
+  const state = await snapshot("renfe-alerts", refresh);
   if (!state)
     return { status: "unavailable", reason: "no_observation", lineIdentity };
   const ids = new Set(
