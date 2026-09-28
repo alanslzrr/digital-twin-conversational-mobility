@@ -128,6 +128,12 @@ export const bikesInputSchema = z.object({
   limit: z.number().int().min(1).max(20).default(5),
 });
 export const environmentInputSchema = z.object({
+  weatherProduct: z
+    .enum(["observation", "hourly_forecast", "warnings"])
+    .optional(),
+  placeId: z.string().uuid().optional(),
+  fromTime: z.iso.datetime({ offset: true }).optional(),
+  toTime: z.iso.datetime({ offset: true }).optional(),
   kind: z.enum(["air", "weather"]).default("air"),
   stationId: z.string().max(30).optional(),
   pollutant: z
@@ -229,3 +235,11 @@ export {
   conversationListAction,
   conversationPage,
 } from "./conversations";
+export type {
+  MadridWarnings,
+  MunicipalForecast,
+  WeatherAlert,
+  WeatherEvidence,
+  WeatherPeriod,
+  WeatherProduct,
+} from "./journey-weather";
