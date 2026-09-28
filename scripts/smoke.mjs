@@ -56,7 +56,7 @@ await rpc(1, "initialize", {
 headers["MCP-Protocol-Version"] = "2025-11-25";
 const list = await rpc(2, "tools/list", {});
 assert.deepEqual(
-  list.tools.map((tool) => tool.name),
+  list.tools.map((tool) => tool.name).sort(),
   [
     "get_source_health",
     "resolve_place",
@@ -66,12 +66,15 @@ assert.deepEqual(
     "get_crtm_timetable",
     "get_departures",
     "get_incidents",
+    "get_line_status",
+    "get_network_status",
+    "get_mobility_snapshot",
     "get_bike_availability",
     "get_environment",
     "get_road_state",
     "get_historical_state",
     "get_parking",
-  ],
+  ].sort(),
 );
 const result = await rpc(3, "tools/call", {
   name: "get_source_health",
