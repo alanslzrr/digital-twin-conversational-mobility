@@ -66,6 +66,7 @@ describe.skipIf(process.env.RUN_INGESTION_DB_TESTS !== "1")(
         "0007_emt_alerts.sql",
         "0010_ingestion_continuity.sql",
         "0012_history_revisions.sql",
+        "0017_dgt_incidents.sql",
       ]) {
         if (name === "0012_history_revisions.sql")
           await sql`INSERT INTO mobility_history(job_id,observed_at,ingested_at,quality,raw_reference,payload)
@@ -104,11 +105,77 @@ describe.skipIf(process.env.RUN_INGESTION_DB_TESTS !== "1")(
         observedAt: observation,
         alerts: [],
       });
-      await sql`TRUNCATE mobility_snapshot,mobility_history,raw_batch`;
+      await sql`TRUNCATE mobility_snapshot,mobility_history,raw_batch,dgt_incident`;
       await sql`UPDATE ingestion_job SET next_due_at=now()+interval '1 day',lease_token=NULL,lease_until=NULL,failures=0,error_code=NULL,attempts=0,recovered_leases=0,last_attempt_at=NULL`;
       await sql`UPDATE source_catalog SET enabled=true`;
       await sql`UPDATE ingestion_activity SET active_until=now()+interval '30 minutes'`;
       await sql`UPDATE ingestion_worker SET last_seen_at=NULL,last_pruned_at=now()`;
+    });
+    it("publishes DGT corrections and withdrawals without duplicating retries or regressing current state", async () => {
+      const original = await readFile(
+        new URL("./adapters/fixtures/dgt-public-excerpt.xml", import.meta.url),
+        "utf8",
+      );
+      const base = Date.now() - 60000;
+      const publication = (xml: string, time: number) =>
+        xml.replace(
+          /<com:publicationTime>[^<]+/,
+          `<com:publicationTime>${new Date(time).toISOString()}`,
+        );
+      let body = publication(original, base);
+      const fetchMock = vi.fn(async () => new Response(body));
+      vi.stubGlobal("fetch", fetchMock);
+      const run = async () => {
+        await sql`UPDATE ingestion_job SET next_due_at=now()-interval '1 second' WHERE id='dgt-incidents'`;
+        return ingest("dgt-incidents");
+      };
+      try {
+        expect(await run()).toMatchObject({ status: "healthy" });
+        expect(await run()).toMatchObject({ status: "healthy" });
+        expect(await sql`SELECT * FROM mobility_history`).toHaveLength(1);
+        expect(
+          await sql`SELECT * FROM dgt_incident WHERE withdrawn_at IS NULL`,
+        ).toHaveLength(2);
+        body = body
+          .replace('version="2"', 'version="3"')
+          .replace("N-400", "N-401");
+        await run();
+        expect(await sql`SELECT * FROM mobility_history`).toHaveLength(2);
+        expect(
+          (
+            await sql`SELECT payload FROM dgt_incident WHERE id='2816645:18811074'`
+          )[0]?.payload.road,
+        ).toBe("N-401");
+        body = publication(
+          original.replace(/<sit:situation\b[\s\S]*?<\/sit:situation>/g, ""),
+          base + 1000,
+        );
+        await run();
+        expect(
+          await sql`SELECT * FROM dgt_incident WHERE withdrawn_at IS NOT NULL`,
+        ).toHaveLength(2);
+        const at = new Date().toISOString();
+        expect(await history("dgt", at, "knowledge")).toMatchObject({
+          status: "available",
+        });
+        body = publication(original, base - 1000);
+        expect(await run()).toMatchObject({ status: "historical_only" });
+        expect(
+          await sql`SELECT * FROM dgt_incident WHERE withdrawn_at IS NOT NULL`,
+        ).toHaveLength(2);
+        body = publication(original, base + 2000);
+        await run();
+        expect(
+          await sql`SELECT * FROM dgt_incident WHERE withdrawn_at IS NULL`,
+        ).toHaveLength(2);
+        body = "<broken>";
+        expect(await run()).toMatchObject({ status: "error" });
+        expect(
+          await sql`SELECT * FROM dgt_incident WHERE withdrawn_at IS NULL`,
+        ).toHaveLength(2);
+      } finally {
+        vi.unstubAllGlobals();
+      }
     });
     it("allows another lane to complete while a provider remains pending", async () => {
       let release!: () => void;
