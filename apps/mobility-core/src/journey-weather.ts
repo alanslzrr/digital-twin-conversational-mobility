@@ -107,7 +107,7 @@ export async function journeyWeather(
  LEFT JOIN weather_municipality m ON ST_Covers(m.boundary,ST_SetSRID(ST_MakePoint(coalesce(s.longitude,c.longitude),coalesce(s.latitude,c.latitude)),4326))`,
       signal,
     );
-    const mapped = sites.map((s) => {
+    const mapped = sites.slice(0, 72).map((s) => {
       const matches = located.filter((r) => r.key === s.key);
       return {
         ...s,
@@ -327,7 +327,10 @@ export async function journeyWeather(
             ),
           ),
         ],
-        unknownPoints: mapped.filter((s) => !s.location).length,
+        unknownPoints:
+          sites.length -
+          mapped.length +
+          mapped.filter((s) => !s.location).length,
         pointsTruncated: sites.length > 72,
         scope:
           "Origin, destination and located leg endpoints/transfers only; municipal-capital forecast and coarse CAP polygons, not continuous route weather. Waiting outdoors is not inferred.",
