@@ -4,6 +4,8 @@ Fecha: **25/09/2026**. Estado: **ejecución iniciada por autorización del usuar
 
 Referencias: [auditoría F01–F09 y casos T01–T13](../audits/2026-09-25-evaluation.md), [roadmap R0–R3](../roadmap.md), [operación local](../local-runtime.md) y [evaluadores](../evaluation.md).
 
+**Vigencia (28/09/2026):** este documento conserva la secuencia original de trabajo. El estado y alcance actuales se consultan en el [roadmap](../roadmap.md), que prevalece sobre los pendientes históricos de este plan; no reabrir entregas ya cerradas. El siguiente bloque es [R2.1 — Historial de conversaciones](2026-09-28-conversation-history.md), basado en las sesiones y el chat oficial de EVE.
+
 ## Objetivo y límites
 
 Convertir los hallazgos en entregas pequeñas y verificables: **estabilizar la vertical → completar el alcance acordado → certificar la evaluación local de hasta cinco personas**. R0 no cierra el roadmap completo; Vercel no forma parte del camino crítico.
@@ -119,7 +121,7 @@ Primero observabilidad; después ajustes del scheduler sustentados por medicione
 
 ## E5 — Hacer explícitos tiempo, revisiones y calidad
 
-### E5a / F06 — Histórico y replay
+### E5a / F06 — Histórico y semántica temporal
 
 **Propuesta a cerrar en contrato antes de migrar:** admitir dos modos explícitos, tiempo del evento y conocimiento del sistema. Mantener el comportamiento anterior como modo de evento por compatibilidad, pero etiquetarlo siempre; la pregunta «qué sabíamos entonces» debe usar modo de conocimiento.
 
@@ -128,9 +130,9 @@ Primero observabilidad; después ajustes del scheduler sustentados por medicione
 - Añadir instante solicitado y seleccionado, desfase, frescura respecto del instante solicitado, modo y límites de retención. Admitir EMT cuando su persistencia cumpla ese contrato.
 - Conservar revisiones con el mismo `observedAt` pero contenido distinto; deduplicar reintentos idénticos por identidad/contenido. No deduplicar únicamente por hash si la misma observación puede reaparecer en otro instante válido.
 - Versionar parser, feed y referencia raw; migración aditiva y transición de lecturas/escrituras probada. No reconstruir revisiones que ya se perdieron ni inventar el tiempo de conocimiento original.
-- Probar ingesta tardía, corrección, igualdad de timestamps, feeds desordenados, fuera de retención, sin dato, cambio de feed y replay determinista. El índice histórico no se renombra «reconstrucción completa» sin implementar esta última.
+- Probar ingesta tardía, corrección, igualdad de timestamps, feeds desordenados, fuera de retención, sin dato y cambio de feed. Mantener explícitos la cobertura y los límites de las publicaciones retenidas.
 
-**Zonas:** contratos, `mobility.ts`, `ingestion.ts`, migraciones nuevas y tests de replay. Rama sugerida: `alanslzrr/history-time-semantics`.
+**Zonas:** contratos, `mobility.ts`, `ingestion.ts`, migraciones nuevas y tests de semántica temporal. Rama sugerida: `alanslzrr/history-time-semantics`.
 
 ### E5b / F07 — Procedencia por entidad y cobertura
 
@@ -164,7 +166,7 @@ Cada fila es un paquete divisible en PRs pequeños. La investigación de proveed
 | A4. DGT y ampliación ambiental/parking | Tras A1: acceso y versión DATEX oficiales, geometrías, deduplicación, cancelación/expiración; AEMET multiestación/predicciones/avisos; precios de parking con fuente y vigencia. | Cada capacidad tiene parser/contrato/fixture y validación viva; no sustituir DGT por sensores municipales ni observaciones por previsiones. |
 | A5. Geocodificación | Fallback tras catálogo, caché y proveedor oficial/público compatible con licencia y límites, elegido tras comparar opciones vigentes. | Direcciones/candidatos ambiguos, fuera de zona, error/cuota; no elegir silenciosamente; sin permitir URLs arbitrarias/SSRF. No se presupone nuevo servicio self-hosted. |
 | A6. Routing enriquecido y accesibilidad | E1/E3/E5 + A2; incorporar EMT al grafo donde la fuente lo permita; RT/alertas desde el pipeline único con correspondencia feed/grafo. | Cancelaciones, NO_DATA/SKIPPED, retrasos, RT antiguo/ausente y cambio de feed; degradación explícita a previsto. Accesibilidad estática no garantiza ascensores operativos. RT no disponible sigue siendo GAP. |
-| A7. Agregados y replay | E5 y fuentes implementadas: `get_line_status`, `get_network_status`, `get_mobility_snapshot`; reconstrucción acotada/versionada. | Cada componente conserva tiempo/calidad/cobertura; no inferir «red normal» por falta de avisos ni snapshot simultáneo con datos desalineados; tools registradas solo con implementación y tests. |
+| A7. Consultas agregadas | E5 y fuentes implementadas: `get_line_status`, `get_network_status`, `get_mobility_snapshot`. | Cada componente conserva tiempo/calidad/cobertura; no inferir «red normal» por falta de avisos ni snapshot simultáneo con datos desalineados; tools registradas solo con implementación y tests. |
 
 **Decisiones de alcance pendientes, no exclusiones implícitas:** routing bici/coche/intermodalidad; precios de parking; amplitud ambiental; RT de Metro/interurbanos/ascensores y cobertura fuera del extracto OSM. Para cada requisito del brief: implementar o solicitar aplazamiento/exclusión explícita con impacto. Si permanece bloqueado, no cerrar esa capacidad ni afirmar cierre del alcance original completo.
 
