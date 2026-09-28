@@ -1,6 +1,6 @@
 # R2.1 — Historial de conversaciones
 
-Fecha: **28/09/2026**. **Implementación y funcionamiento local comprobados**; integración/CI trazables en la PR de esta entrega. No cierra el resto de R1/R2.
+Fecha: **28/09/2026**. **Implementación y funcionamiento local comprobados**; integración/CI trazables en la [PR #28](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/28). No cierra el resto de R1/R2.
 
 ## Alcance entregado
 
