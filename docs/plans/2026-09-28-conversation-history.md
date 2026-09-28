@@ -1,8 +1,8 @@
 # R2.1 — Historial de conversaciones
 
-Fecha: **28/09/2026**. Estado: **plan aprobado; implementación pendiente**.
+Fecha: **28/09/2026**. Estado: **implementado y comprobado localmente**. [Evidencia e integración](../acceptance/2026-09-28-conversation-history.md).
 
-Este es el siguiente bloque del [roadmap local](../roadmap.md). Pertenece a la experiencia de evaluación R2; no depende de terminar las ampliaciones de fuentes R1. Esta planificación no ejecuta cambios de aplicación, integración ni instalación.
+Este documento conserva las instrucciones aprobadas de R2.1 del [roadmap local](../roadmap.md). Pertenece a la experiencia de evaluación R2; no depende de terminar las ampliaciones de fuentes R1. Las instrucciones siguientes describen el alcance ejecutado; el estado y los resultados están en la evidencia de entrega.
 
 ## Objetivo y alcance cerrado
 

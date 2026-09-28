@@ -14,9 +14,9 @@ Actualizado el **28/09/2026**, tras geocodificación controlada y routing multio
 
 **Routing ampliado instalado localmente (PR #26)**: Renfe, EMT, Metro Ligero e interurbanos; actualización explícita de GTFS/OSM/catálogos/grafo mediante releases verificados, activación en mantenimiento y rollback comprobado. RT Renfe se aplica solo con identidad/fecha/versión/frescura válidas; avisos EMT se adjuntan por línea y vigencia sin inventar desvíos. Metro conserva catálogo pero horarios caducados quedan fuera del grafo. [Operación y límites](routing-releases.md), [evidencia de instalación y regresiones](acceptance/2026-09-25-routing-releases.md).
 
-**DGT y herramientas agregadas entregados** sobre Core, PostgreSQL y el worker existentes. Acceso XML oficial público verificado, sin cuenta; [semántica y límites](sources/dgt.md). Pendientes posteriores: historial de conversaciones, cobertura/RT y ampliaciones del brief descritas abajo.
+**DGT y herramientas agregadas entregados** sobre Core, PostgreSQL y el worker existentes. Acceso XML oficial público verificado, sin cuenta; [semántica y límites](sources/dgt.md). Pendientes posteriores: cobertura/RT y ampliaciones del brief descritas abajo.
 
-**Siguiente bloque: R2.1 — Historial de conversaciones por evaluador.** EVE ya recupera conversaciones mediante `/s/{sessionId}`; falta una lista para encontrarlas y reabrirlas. Es una mejora de uso para la evaluación, independiente de las ampliaciones de fuentes R1: puede ejecutarse ahora. Seguir exclusivamente las [instrucciones del bloque](plans/2026-09-28-conversation-history.md), reutilizando las sesiones y el chat oficial existentes. El alcance vigente es el de este roadmap; las actas y auditorías anteriores son evidencia histórica, no requisitos adicionales.
+**R2.1 — Historial de conversaciones implementado y comprobado localmente.** Mis conversaciones lista solo sesiones propias vigentes, con fecha de creación, paginación de veinte y reapertura nativa de EVE. No duplica mensajes ni cambia retención/E2. [Evidencia, integración y límites](acceptance/2026-09-28-conversation-history.md). Es independiente de las ampliaciones de fuentes R1; no implica cierre de R1/R2. El alcance vigente es el de este roadmap; las actas anteriores son evidencia histórica, no requisitos adicionales.
 
 R0, E2 y E8 siguen cerrados. Pruebas proporcionales a cada cambio; la auditoría CRTM no se repite ni se añade otra campaña como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
 
@@ -71,7 +71,7 @@ Orden por dependencias, no por número de endpoints:
 
 ## R2 — Cierre de evaluación local (≤5 personas)
 
-- [ ] **R2.1 — Historial de conversaciones (siguiente bloque):** listado acotado de chats propios, fecha de creación, reapertura con EVE y nuevo chat; Better Auth y aislamiento existentes. Conservar la caducidad actual de acceso (siete días por defecto) y mostrar errores de sesión no disponible sin renovar permisos. Sin otra biblioteca, copia de mensajes ni cambios en E2. [Alcance, instrucciones y criterio de cierre](plans/2026-09-28-conversation-history.md).
+- [x] **R2.1 — Historial de conversaciones (implementado y verificado localmente):** listado acotado de chats propios, fecha de creación, reapertura con EVE y nuevo chat; Better Auth y aislamiento existentes. Conservar la caducidad actual de acceso (siete días por defecto) y mostrar errores de sesión no disponible sin renovar permisos. Sin otra biblioteca, copia de mensajes ni cambios en E2. [Alcance, instrucciones y criterio de cierre](plans/2026-09-28-conversation-history.md).
 - [ ] R0/R1 satisfechos para el alcance explícitamente acordado.
 - [ ] Cinco cuentas concurrentes: sesiones aisladas, CSRF, scopes, cuotas atómicas, revocación, logout y ausencia de secretos en navegador/modelo/logs.
 - [ ] Comprobar el uso con evaluadores reutilizando las consultas existentes y los casos afectados por cada entrega. No se exige otra campaña general para avanzar.
