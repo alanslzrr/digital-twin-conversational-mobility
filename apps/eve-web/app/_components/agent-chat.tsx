@@ -22,6 +22,7 @@ import {
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { conversationUnavailable } from "@/src/conversation-recovery";
 import { AgentMessage } from "./agent-message";
 
 const AGENT_NAME = "Madrid Mobility";
@@ -69,7 +70,10 @@ export function AgentChat({
     isBusy || isResuming ? undefined : getLatestTurnFailure(agent.events);
   const errorMessage = cancellationError ?? agent.error?.message ?? turnFailure;
   const hasConversationContent =
-    sessionless || !isEmpty || errorMessage !== undefined;
+    sessionId !== undefined ||
+    sessionless ||
+    !isEmpty ||
+    errorMessage !== undefined;
   const showConversationLayout = isResuming || hasConversationContent;
   const activeSessionId = sessionId ?? agent.session?.sessionId;
 
@@ -109,6 +113,11 @@ export function AgentChat({
     await agent.send(parts, options);
   };
 
+  const unavailable = conversationUnavailable({
+    sessionId,
+    status: agent.status,
+    messageCount: agent.data.messages.length,
+  });
   const composer = (
     <PromptInput onSubmit={handleSubmit} maxFiles={0}>
       <PromptInputTextarea
@@ -165,7 +174,23 @@ export function AgentChat({
               ),
             )}
             {showPendingThinking ? <PendingThinking /> : null}
-            {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
+            {unavailable ? (
+              <div role="alert" className="flex flex-col gap-3">
+                <p>Esta conversación no está disponible</p>
+                <p>Vuelve a Mis conversaciones o abre un nuevo chat.</p>
+                <Button asChild variant="outline">
+                  <a href="/s">Nuevo chat</a>
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => window.location.reload()}
+                >
+                  Reintentar
+                </Button>
+              </div>
+            ) : errorMessage ? (
+              <ErrorMessage message={errorMessage} />
+            ) : null}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
@@ -186,7 +211,7 @@ export function AgentChat({
             </h1>
           </div>
         )}
-        <div className="w-full">{composer}</div>
+        <div className="w-full">{unavailable ? null : composer}</div>
       </div>
     </main>
   );
@@ -249,7 +274,7 @@ function ChatHeader({
   return (
     <header className="pointer-events-none fixed top-0 right-0 left-0 z-20 h-14">
       <div className="relative mx-auto flex h-full w-full max-w-3xl items-center justify-center bg-background px-24">
-        <span className="truncate text-muted-foreground text-sm">
+        <span className="hidden truncate text-muted-foreground text-sm md:block">
           {AGENT_NAME}
         </span>
         {canStartNewChat ? (
