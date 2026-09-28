@@ -7,7 +7,10 @@ import postgres from "postgres";
 
 const options = new Map(
   process.argv.slice(2).map((arg) => {
-    assert.match(arg, /^--(?:port=\d+|read-only|emt-only|crtm-only)$/);
+    assert.match(
+      arg,
+      /^--(?:port=\d+|read-only|emt-only|crtm-only|weather-only)$/,
+    );
     const [key, value] = arg.slice(2).split("=");
     return [key, value ?? true];
   }),
@@ -17,6 +20,7 @@ assert.ok(Number.isInteger(port) && port >= 1024 && port <= 65535);
 const readOnly = options.has("read-only");
 const emtOnly = options.has("emt-only");
 const crtmOnly = options.has("crtm-only");
+const weatherOnly = options.has("weather-only");
 assert.ok(
   !(readOnly && emtOnly),
   "EMT smoke explicitly exercises on-demand refresh",
@@ -27,7 +31,7 @@ const core = parseEnv(readFileSync("apps/mobility-core/.env.local", "utf8"));
 if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
   throw new Error("Local database required");
 const sql =
-  readOnly || emtOnly || crtmOnly
+  readOnly || emtOnly || crtmOnly || weatherOnly
     ? null
     : postgres(root.DATABASE_URL, { max: 1 });
 const headers = {
@@ -60,6 +64,82 @@ async function tool(name, args) {
   const data = await rpc("tools/call", { name, arguments: args });
   assert.notEqual(data.isError, true, `${name}: ${data.content?.[0]?.text}`);
   return JSON.parse(data.content[0].text);
+}
+// Weather delivery smoke: existing MCP and OTP, no model call or global ingest tick.
+if (weatherOnly) {
+  await rpc("initialize", {
+    protocolVersion: "2025-11-25",
+    capabilities: {},
+    clientInfo: { name: "journey-weather-smoke", version: "1.0" },
+  });
+  headers["MCP-Protocol-Version"] = "2025-11-25";
+  const origin = (
+    await tool("resolve_place", { query: "Atocha", source: "renfe", limit: 10 })
+  ).places.find((p) => p.kind === "station");
+  const destination = (
+    await tool("resolve_place", {
+      query: "Chamartín",
+      source: "renfe",
+      limit: 10,
+    })
+  ).places.find((p) => p.kind === "station");
+  assert.ok(origin && destination);
+  const args = {
+    originId: origin.id,
+    destinationId: destination.id,
+    departureTime: "now",
+    modes: ["TRANSIT", "WALK"],
+    preferences: {},
+  };
+  const route = await tool("plan_journey", args);
+  assert.equal(route.status, "available");
+  assert.equal(route.weatherContext?.status, "evaluated");
+  const forecast = await tool("get_environment", {
+    kind: "weather",
+    weatherProduct: "hourly_forecast",
+    placeId: origin.id,
+  });
+  assert.equal(forecast.status, "evaluated");
+  const repeated = await tool("get_environment", {
+    kind: "weather",
+    weatherProduct: "hourly_forecast",
+    placeId: origin.id,
+  });
+  assert.deepEqual(
+    repeated.evidence,
+    forecast.evidence,
+    "immediate repeat reuses stored product",
+  );
+  const warnings = await tool("get_environment", {
+    kind: "weather",
+    weatherProduct: "warnings",
+    placeId: origin.id,
+  });
+  assert.equal(warnings.status, "evaluated");
+  mkdirSync("data/evaluation", { recursive: true });
+  const report = {
+    at: new Date().toISOString(),
+    routeStatus: route.status,
+    itineraries: route.itineraries.length,
+    weather: route.weatherContext,
+    forecast,
+    warnings,
+    repeatCache: true,
+  };
+  writeFileSync(
+    "data/evaluation/journey-weather-smoke.json",
+    JSON.stringify(report, null, 2),
+  );
+  console.log(
+    JSON.stringify({
+      routeStatus: route.status,
+      itineraries: route.itineraries.length,
+      weather: route.weatherContext.status,
+      evidence: route.weatherContext.evidence,
+      repeatCache: true,
+    }),
+  );
+  process.exit(0);
 }
 // Static CRTM regression: no provider requests, model calls or OTP queries.
 if (crtmOnly) {

@@ -91,6 +91,7 @@ it("F01: TRANSIT alone returns a scheduled route instead of an OTP contract erro
     basis: "scheduled",
     realtimeApplied: false,
     itineraries: [itinerary],
+    weatherContext: { status: "unavailable" },
   });
 });
 
