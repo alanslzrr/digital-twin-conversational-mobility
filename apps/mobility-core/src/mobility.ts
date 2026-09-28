@@ -35,6 +35,7 @@ import { database } from "./database";
 import { dgtIncidents } from "./dgt";
 import { summarizePayload } from "./evidence-summary";
 import { ingest, ingestionEnabled } from "./ingestion";
+import { journeyWeather } from "./journey-weather";
 import { routingPlace, scheduledDepartures } from "./routing";
 
 const iso = (value: Date | string) => new Date(value).toISOString();
@@ -593,6 +594,54 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number) {
 export async function environment(
   input: z.infer<typeof environmentInputSchema>,
 ) {
+  if (input.weatherProduct && input.weatherProduct !== "observation") {
+    if (
+      input.kind !== "weather" ||
+      !input.placeId ||
+      input.stationId ||
+      input.pollutant
+    )
+      return {
+        status: "unavailable",
+        reason: "weather_product_requires_weather_kind_and_place",
+      };
+    const start = input.fromTime ?? new Date().toISOString(),
+      end = input.toTime ?? new Date(Date.parse(start) + 3600000).toISOString();
+    if (
+      Date.parse(end) <= Date.parse(start) ||
+      Date.parse(end) - Date.parse(start) > 86400000
+    )
+      return {
+        status: "unavailable",
+        reason: "weather_period_requires_up_to_24_hours",
+      };
+    const place = await routingPlace(input.placeId);
+    if (!place) return { status: "unavailable", reason: "unknown_place" };
+    const point = {
+      latitude: Number(place.latitude),
+      longitude: Number(place.longitude),
+    };
+    return journeyWeather(
+      [
+        {
+          start,
+          end,
+          legs: [
+            {
+              mode: "CONTEXT",
+              from: {},
+              to: {},
+              start: { scheduledTime: start },
+              end: { scheduledTime: end },
+            },
+          ],
+        },
+      ],
+      point,
+      point,
+      input.weatherProduct,
+    );
+  }
   if (input.kind === "weather") {
     if (input.pollutant)
       return { status: "unavailable", reason: "pollutant_requires_air_kind" };
