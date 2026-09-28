@@ -9,7 +9,7 @@ export default async function SessionPage({
   const { sessionId } = await params;
   return (
     <EvaluationAccess>
-      <AgentChat sessionId={sessionId} />
+      <AgentChat key={sessionId} sessionId={sessionId} />
     </EvaluationAccess>
   );
 }
