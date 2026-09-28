@@ -133,6 +133,81 @@ try {
   console.log(
     "Anonymous access, closed registration, CSRF and cross-user session controls verified.",
   );
+  // R2.1: metadata-only history on the existing isolated evaluator fixtures.
+  const historyBefore =
+    await sql`SELECT * FROM evaluation_usage WHERE evaluator_id=${users[0].id} ORDER BY window_kind`;
+  const windowBefore = await sql`SELECT active_until FROM ingestion_activity`;
+  const sessionBefore =
+    await sql`SELECT * FROM evaluation_session WHERE session_id=${sessionId}`;
+  await sql`INSERT INTO evaluation_session(session_id,evaluator_id,created_at)
+    SELECT ${`history-${users[0].id}-`}||n::text,${users[0].id},now()-interval '1 minute' FROM generate_series(1,25) n`;
+  const path = "/api/evaluation/conversations";
+  const first = await call(path, "GET", undefined, users[0].cookie);
+  assert.equal(first.status, 200);
+  assert.equal(first.headers.get("cache-control"), "no-store");
+  const firstPage = await first.json();
+  assert.equal(firstPage.sessions.length, 20);
+  assert.ok(firstPage.nextCursor);
+  const secondPage = await (
+    await call(
+      `${path}?cursor=${encodeURIComponent(JSON.stringify(firstPage.nextCursor))}`,
+      "GET",
+      undefined,
+      users[0].cookie,
+    )
+  ).json();
+  assert.equal(secondPage.sessions.length, 6);
+  assert.equal(secondPage.nextCursor, null);
+  assert.equal(
+    new Set(
+      [...firstPage.sessions, ...secondPage.sessions].map(
+        (item) => item.sessionId,
+      ),
+    ).size,
+    26,
+  );
+  assert.deepEqual(Object.keys(firstPage.sessions[0]).sort(), [
+    "createdAt",
+    "expiresAt",
+    "sessionId",
+  ]);
+  assert.deepEqual(
+    await (await call(path, "GET", undefined, users[1].cookie)).json(),
+    { sessions: [], nextCursor: null },
+  );
+  assert.equal((await call(path)).status, 401);
+  assert.equal(
+    (
+      await call(
+        `${path}?principalId=${users[0].id}`,
+        "GET",
+        undefined,
+        users[1].cookie,
+      )
+    ).status,
+    400,
+  );
+  assert.equal(
+    (await call(`${path}?cursor=invalid`, "GET", undefined, users[0].cookie))
+      .status,
+    400,
+  );
+  assert.deepEqual(
+    await sql`SELECT * FROM evaluation_usage WHERE evaluator_id=${users[0].id} ORDER BY window_kind`,
+    historyBefore,
+  );
+  assert.deepEqual(
+    await sql`SELECT active_until FROM ingestion_activity`,
+    windowBefore,
+  );
+  assert.deepEqual(
+    await sql`SELECT * FROM evaluation_session WHERE session_id=${sessionId}`,
+    sessionBefore,
+  );
+  await sql`DELETE FROM evaluation_session WHERE evaluator_id=${users[0].id} AND session_id<>${sessionId}`;
+  console.log(
+    "Conversation history: authentication, ownership, 20+6 pagination and read-only effects verified.",
+  );
   const quota = await Promise.all(
     Array.from({ length: 18 }, () =>
       access({ action: "authorize", principalId: users[1].id, consume: true }),
