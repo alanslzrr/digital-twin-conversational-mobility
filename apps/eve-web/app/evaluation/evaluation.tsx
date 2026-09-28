@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,13 @@ import {
   evaluationLoginError,
 } from "@/src/evaluation-login";
 
+import { Conversations } from "./conversations";
+
 type Identity = { principalId: string; label: string };
 
 /** Authentication only: the conversation itself is EVE's official Web Chat. */
 export function EvaluationAccess({ children }: { children: ReactNode }) {
+  const identityRequest = useRef<AbortController | undefined>(undefined);
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,18 +29,39 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    const controller = new AbortController();
-    fetch("/api/evaluation", { signal: controller.signal, cache: "no-store" })
-      .then(async (response) => {
-        if (response.ok) setIdentity(await response.json());
-        else if (response.status !== 401)
-          setError(evaluationLoginError(response.status));
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
+    const check = () => {
+      identityRequest.current?.abort();
+      const current = new AbortController();
+      identityRequest.current = current;
+      fetch("/api/evaluation", { signal: current.signal, cache: "no-store" })
+        .then(async (response) => {
+          const identity = response.ok ? await response.json() : null;
+          if (current.signal.aborted) return;
+          setIdentity(identity);
+          if (!response.ok && response.status !== 401)
+            setError(evaluationLoginError(response.status));
+        })
+        .catch(() => {
+          if (!current.signal.aborted) {
+            setIdentity(null);
+            setError("No se pudo comprobar el acceso.");
+          }
+        })
+        .finally(() => {
+          if (!current.signal.aborted) setLoading(false);
+        });
+    };
+    const visible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    check();
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", visible);
+    return () => {
+      identityRequest.current?.abort();
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", visible);
+    };
   }, []);
 
   if (loading)
@@ -49,8 +73,12 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
   if (identity)
     return (
       <>
-        {children}
-        <div className="fixed top-3 left-4 z-30 flex items-center gap-2">
+        <div key={`chat:${identity.principalId}`}>{children}</div>
+        <div
+          key={`access:${identity.principalId}`}
+          className="fixed top-3 left-2 z-30 flex items-center gap-1"
+        >
+          <Conversations />
           <Button
             variant="ghost"
             size="sm"
@@ -62,6 +90,8 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
                   body: "{}",
                 });
                 if (!result.ok) throw new Error();
+                identityRequest.current?.abort();
+                setIdentity(null);
                 // Unmount the runtime and clear the current session URL on logout.
                 window.location.replace("/evaluation");
               } catch {
@@ -87,6 +117,7 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
         onSubmit={async (event) => {
           event.preventDefault();
           if (canonicalUrl) return;
+          identityRequest.current?.abort();
           const data = new FormData(event.currentTarget);
           setLoading(true);
           setError("");
@@ -110,7 +141,9 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
                   ? evaluationLoginError(access.status)
                   : "Esta cuenta no está habilitada para la evaluación.",
               );
-            setIdentity(await access.json());
+            const nextIdentity = await access.json();
+            identityRequest.current?.abort();
+            setIdentity(nextIdentity);
           } catch (failure) {
             setError(
               failure instanceof Error
