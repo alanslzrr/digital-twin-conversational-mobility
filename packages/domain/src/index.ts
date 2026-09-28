@@ -61,6 +61,15 @@ export type RoutingResult =
     };
 
 export { gtfsClock, gtfsInstant, gtfsServiceEpoch, madridDate } from "./crtm";
+export {
+  polygonContains,
+  selectForecast,
+  selectWarnings,
+  type WeatherPoint,
+  weatherCovers,
+  weatherOverlaps,
+  weatherRelevance,
+} from "./journey-weather";
 export { dgtTemporalStatus } from "./road-incidents";
 export {
   applyRoutingEvidence,
