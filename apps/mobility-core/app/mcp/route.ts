@@ -140,7 +140,7 @@ const handler = createMcpHandler(
       {
         title: "Plan a scheduled journey",
         description:
-          "OTP local routes from canonical place IDs. Active release includes Renfe, EMT, Metro Ligero and interurban schedules plus walking. Metro expired schedules are excluded; no bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled baseline with matched fresh Renfe RT and alerts applied through Core; inspect per-leg status. Frequency-based times are planning estimates, not exact departures. Walking limit applies to the sum of walking legs. Preserve requested wheelchair preference; accessibilityContext separates boarding, vehicle and alighting, not a whole-route guarantee.",
+          "OTP local routes from canonical place IDs. Active release includes Renfe, EMT, Metro Ligero and interurban schedules plus walking. Current Metro de Madrid schedules/routes are outside this evaluation scope; its catalog remains available; no bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled baseline with matched fresh Renfe RT and alerts applied through Core; inspect per-leg status. Frequency-based times are planning estimates, not exact departures. Walking limit applies to the sum of walking legs. Preserve requested wheelchair preference; accessibilityContext separates boarding, vehicle and alighting, not a whole-route guarantee.",
         inputSchema: journeyRequestSchema,
         annotations,
       },
@@ -162,7 +162,7 @@ const handler = createMcpHandler(
       {
         title: "CRTM static service-day timetable",
         description:
-          "Horarios Metro, Metro Ligero e interurbanos CRTM. Resolve source=crtm first. One Madrid service day, calendars/exceptions applied, >24h times preserved. Date/time default to server today/now. Frequency windows are not individual arrivals. Expired coverage is unavailable; no RT, routing or knowledge replay. Report provenance, validity, destinations and unknowns. Accessibility separates the actual boarding point and trip vehicle; static declarations are not current equipment status.",
+          "Horarios Metro, Metro Ligero e interurbanos CRTM. Resolve source=crtm first. One Madrid service day, calendars/exceptions applied, >24h times preserved. Date/time default to server today/now. Frequency windows are not individual arrivals. Expired coverage is unavailable for current dates; historical service dates remain subject to the existing validity checks. This tool offers no RT, route calculation or knowledge replay. Use plan_journey for supported networks; current Metro de Madrid schedules/routes are outside this evaluation scope. Report provenance, validity, destinations and unknowns. Accessibility separates the actual boarding point and trip vehicle; static declarations are not current equipment status.",
         inputSchema: crtmTimetableInputSchema,
         annotations,
       },
@@ -228,7 +228,7 @@ const handler = createMcpHandler(
       {
         title: "Historical observation index",
         description:
-          "Historical state / histórico BiciMAD, Renfe, EMT, weather, air, traffic and parking within retained 24 hours. Supply at (ISO offset) OR minutesAgo (server clock). Use knowledge for what the system knew then; event may include later corrections. Partial index with at most five sample entities, not a full reconstruction.",
+          "Historical state / histórico BiciMAD, Renfe, EMT, DGT, weather, air, traffic and parking within retained 24 hours. Supply at (ISO offset) OR minutesAgo (server clock). Use knowledge for what the system knew then; event may include later corrections. Partial index with at most five sample entities, not a full reconstruction.",
         inputSchema: historyInputSchema,
         annotations,
       },
