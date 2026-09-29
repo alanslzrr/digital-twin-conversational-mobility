@@ -83,4 +83,5 @@ export function temporalCoverage(
           : "partial_or_unavailable",
   };
 }
+export { accessibilityServiceEnvelope } from "./accessibility";
 export { weatherFreshness } from "./weather";
