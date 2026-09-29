@@ -229,6 +229,11 @@ export const mobilitySnapshotInputSchema = z.object({
   source: sourceIdSchema.optional(),
 });
 
+export type {
+  AccessibilityDeclaration,
+  AccessibilityRef,
+  AccessibilityStatus,
+} from "./accessibility";
 export {
   type ConversationPage,
   conversationCursor,
