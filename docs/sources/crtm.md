@@ -1,9 +1,10 @@
 # CRTM: catálogos y consulta de horarios estáticos
 
-Estado de código: persistencia y consulta MCP implementadas. La puesta en marcha
-requiere aplicar 0014, importar exports y reconstruir Core/Web/agente; véase
-[operación local](../local-runtime.md). No se incorpora routing ni RT CRTM.
-EMT y R0 permanecen entregados; E2 permanece cerrado.
+Estado vigente: persistencia, catálogos y consulta MCP instalados mediante 0014.
+Routing Metro Ligero/interurbanos/EMT incorporado posteriormente por PR #26;
+véanse [releases y límites](../routing-releases.md) y [operación local](../local-runtime.md).
+Metro conserva catálogo, pero no horarios actuales ni presencia en el grafo por
+caducidad. No hay RT CRTM. EMT y R0 permanecen entregados; E2 permanece cerrado.
 
 ## Fuentes oficiales comprobadas el 25/09/2026
 
@@ -19,7 +20,14 @@ y excepciones positivas, **no garantiza servicio todos los días**. La consulta 
 
 Descarga oficial: `https://www.arcgis.com/sharing/rest/content/items/{item}/data`.
 Metadatos: el mismo item sin `/data`, con `?f=json`. El registro de código contiene
-los tres identificadores permitidos. Portal: <https://datos.crtm.es/>.
+los identificadores permitidos, incluido EMT incorporado posteriormente.
+Portal: <https://datos.crtm.es/>.
+
+**Recomprobación del 29/09/2026:** el ZIP Metro sigue siendo idéntico al instalado.
+Las capas GIS aportan evidencia para correspondencias adicionales, no horarios
+vigentes. [Investigación](../research/2026-09-29-metro-crtm-coverage.md) y
+[plan retirado](../plans/2026-09-29-metro-crtm-coverage.md). La recomendación de
+alcance se revisa en la [investigación de alternativas](../research/2026-09-29-metro-alternatives.md).
 
 **Powered by CRTM** — [Consorcio Regional de Transportes de Madrid](https://www.crtm.es/).
 Rige la [licencia específica CRTM](https://www.crtm.es/licencia-de-uso), no se
@@ -69,13 +77,16 @@ Los archivos generados no se versionan en Git.
 nombres o IDs/códigos exactos sin perder ceros iniciales. No selecciona accesos como
 paradas de embarque. Sin source conserva candidatos de ambos catálogos (hasta el
 límite por catálogo) y declara ambigüedad, sin elegir red por coincidencia de nombre.
-Los UUID CRTM se usan en `get_crtm_timetable`; todavía no están en el grafo OTP.
+Los UUID CRTM se usan en `get_crtm_timetable` y en `plan_journey` dentro de la
+cobertura y versiones de la release activa. El catálogo Metro caducado no habilita
+trayectos Metro actuales.
 
 La consulta de horarios recibe UUID, `serviceDate`, `afterTime` y `limit`. Sin fecha
 usa hoy en Madrid; sin hora usa ahora si es hoy, o 00:00:00 para otro día. Consulta
 solo ese día de servicio, no días adyacentes; las horas >24 siguen perteneciendo al
 día solicitado. La conversión GTFS usa mediodía local menos doce horas transcurridas
-para respetar cambios de horario. No es replay de lo conocido en una fecha.
+para respetar cambios de horario. Consulta servicio planificado para esa fecha,
+no lo que el sistema conocía entonces.
 
 Las excepciones prevalecen sobre el calendario, incluidos servicios definidos solo
 por excepciones. Una estación consulta sus andenes de la misma red. Las visitas
@@ -94,8 +105,11 @@ correspondencias EMT/Renfe inventadas. Metro caducado conserva catálogo y enlac
 pero rechaza horarios actuales. `get_source_health(source=crtm)` diferencia redes
 importadas y envolventes vigentes/caducadas; nunca declara RT por tener catálogo.
 
-Pendiente: horarios Metro vigentes, relaciones con EMT/Renfe respaldadas por fuentes,
-geocodificación y operadores en OTP, RT, actualización coordinada y replay.
+Fuera del alcance de cierre por acuerdo del 29/09/2026: horarios/routing actuales
+de Metro de Madrid y relaciones adicionales CRTM↔EMT/Renfe. Catálogo Metro y
+correspondencias existentes se conservan. RT de las otras redes CRTM mantiene su
+estado en el [roadmap](../roadmap.md). Geocodificación, routing multioperador dentro
+de la cobertura vigente y actualización coordinada ya están entregados.
 
 ## Persistencia y operación local
 
