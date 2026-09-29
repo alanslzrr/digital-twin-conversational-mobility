@@ -29,7 +29,7 @@ type Place = {
   manifest: { sourceUrl: string; termsUrl: string; attribution: string };
 };
 const coverage =
-  "Static CRTM catalogs/timetables only; no RT, routing or guaranteed accessible transfers. Operating companies are not identified by these feeds. Correspondences cover published CRTM station identities, not EMT/Renfe mappings.";
+  "This query returns static CRTM catalogs/timetables, not RT or routes. plan_journey supports Renfe, EMT, Metro Ligero, interurban networks and walking within active release coverage. Metro de Madrid retains its catalog but current Metro schedules/routes are outside this evaluation scope. Existing correspondences are partial, with no guaranteed accessibility or transfer times. Operating companies are not identified by these feeds. Correspondences cover published CRTM station identities; additional CRTM-to-EMT/Renfe mappings are outside the agreed scope.";
 function provenance(p: Place) {
   return {
     source: "crtm",
