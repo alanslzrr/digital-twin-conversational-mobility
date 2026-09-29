@@ -9,7 +9,7 @@ const options = new Map(
   process.argv.slice(2).map((arg) => {
     assert.match(
       arg,
-      /^--(?:port=\d+|read-only|emt-only|crtm-only|weather-only)$/,
+      /^--(?:port=\d+|read-only|emt-only|crtm-only|weather-only|accessibility-only)$/,
     );
     const [key, value] = arg.slice(2).split("=");
     return [key, value ?? true];
@@ -21,6 +21,7 @@ const readOnly = options.has("read-only");
 const emtOnly = options.has("emt-only");
 const crtmOnly = options.has("crtm-only");
 const weatherOnly = options.has("weather-only");
+const accessibilityOnly = options.has("accessibility-only");
 assert.ok(
   !(readOnly && emtOnly),
   "EMT smoke explicitly exercises on-demand refresh",
@@ -31,7 +32,7 @@ const core = parseEnv(readFileSync("apps/mobility-core/.env.local", "utf8"));
 if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
   throw new Error("Local database required");
 const sql =
-  readOnly || emtOnly || crtmOnly || weatherOnly
+  readOnly || emtOnly || crtmOnly || weatherOnly || accessibilityOnly
     ? null
     : postgres(root.DATABASE_URL, { max: 1 });
 const headers = {
@@ -64,6 +65,121 @@ async function tool(name, args) {
   const data = await rpc("tools/call", { name, arguments: args });
   assert.notEqual(data.isError, true, `${name}: ${data.content?.[0]?.text}`);
   return JSON.parse(data.content[0].text);
+}
+// Static accessibility smoke: public station identities, no model call or graph changes.
+if (accessibilityOnly) {
+  await rpc("initialize", {
+    protocolVersion: "2025-11-25",
+    capabilities: {},
+    clientInfo: { name: "accessibility-smoke", version: "1.0" },
+  });
+  headers["MCP-Protocol-Version"] = "2025-11-25";
+  const origin = (
+    await tool("resolve_place", { query: "18000", source: "renfe", limit: 5 })
+  ).places[0];
+  const destination = (
+    await tool("resolve_place", { query: "17000", source: "renfe", limit: 5 })
+  ).places[0];
+  assert.ok(origin && destination);
+  assert.equal(origin.accessibility.status, "declared_accessible");
+  const departures = await tool("get_departures", {
+    placeId: origin.id,
+    limit: 2,
+  });
+  assert.equal(departures.status, "available");
+  for (const d of departures.departures) {
+    assert.equal(d.accessibility.boarding.externalId, "18000");
+    assert.equal(
+      d.accessibility.vehicle.externalId,
+      d.tripId.replace(/^renfe:/, ""),
+    );
+  }
+  const crtm = (
+    await tool("resolve_place", {
+      query: "par_10_10",
+      source: "crtm",
+      network: "light-rail",
+      limit: 5,
+    })
+  ).places[0];
+  assert.ok(crtm);
+  assert.equal(crtm.accessibility.normalizedCode, 2);
+  assert.ok(
+    crtm.accessibility.qualityNotes.some(
+      (n) => n.code === "mlo_gtfs_discrepancy",
+    ),
+  );
+  const timetable = await tool("get_crtm_timetable", {
+    placeId: crtm.id,
+    limit: 2,
+  });
+  assert.equal(timetable.status, "available");
+  for (const d of timetable.departures) {
+    assert.equal(d.accessibility.boarding.externalId, d.stopId);
+    assert.equal(d.accessibility.vehicle.externalId, d.tripId);
+  }
+  const emt = (
+    await tool("resolve_place", { query: "72", source: "emt", limit: 5 })
+  ).places[0];
+  assert.ok(emt);
+  assert.equal(emt.accessibility.status, "unknown");
+  const routes = [];
+  for (const wheelchair of [false, true]) {
+    const result = await tool("plan_journey", {
+      originId: origin.id,
+      destinationId: destination.id,
+      departureTime: "now",
+      modes: ["TRANSIT"],
+      preferences: { wheelchair },
+    });
+    assert.ok(["available", "no_route"].includes(result.status));
+    assert.equal(result.accessibilityGuaranteed, false);
+    assert.equal(result.accessibilityContext.accessibilityGuaranteed, false);
+    assert.ok("weatherContext" in result);
+    assert.ok(
+      result.accessibilityContext.unverified.includes(
+        "internal_connections_and_transfers",
+      ),
+    );
+    routes.push({
+      wheelchair,
+      status: result.status,
+      itineraries: result.itineraries.length,
+      accessibility: result.accessibilityContext,
+      weatherStatus: result.weatherContext?.status ?? null,
+    });
+  }
+  mkdirSync("data/evaluation", { recursive: true });
+  writeFileSync(
+    "data/evaluation/static-accessibility-smoke.json",
+    JSON.stringify(
+      {
+        at: new Date().toISOString(),
+        origin,
+        destination,
+        departures,
+        crtm,
+        timetable,
+        emt,
+        routes,
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(
+    JSON.stringify({
+      renfe: origin.accessibility.status,
+      crtm: crtm.accessibility.status,
+      emt: emt.accessibility.status,
+      routes: routes.map((r) => ({
+        wheelchair: r.wheelchair,
+        status: r.status,
+        itineraries: r.itineraries,
+      })),
+    }),
+  );
+  process.exit(0);
 }
 // Weather delivery smoke: existing MCP and OTP, no model call or global ingest tick.
 if (weatherOnly) {
