@@ -23,6 +23,11 @@ import {
   temporalCoverage,
 } from "@mobility/provenance";
 import type { z } from "zod";
+import {
+  accessibilityFrom,
+  placeAccessibility,
+  readAccessibility,
+} from "./accessibility";
 import type { parseWeather } from "./adapters/aemet";
 import type { parseBicimad } from "./adapters/bicimad";
 import type { parseEmtIncidents } from "./adapters/emt";
@@ -277,10 +282,14 @@ export async function resolvePlace(
     AND (i.source_id<>'emt' OR EXISTS(SELECT 1 FROM emt_catalog c WHERE c.version=i.source_version))
     GROUP BY p.id ORDER BY bool_or(i.external_id=${query}) DESC,(unaccent(lower(p.name))=unaccent(lower(${query}))) DESC,(p.kind='station') DESC,p.name LIMIT ${limit}`;
   const crtm = !source ? await resolveCrtm(query, limit) : { places: [] };
+  const accessiblePlaces = await placeAccessibility(
+    places.map((p) => ({ id: p.id, identifiers: p.identifiers })),
+  );
   const found = await Promise.all(
     places.map(async (place) => ({
       ...place,
       id: place.id as string,
+      accessibility: accessiblePlaces.get(place.id),
       emtLines: (
         place.identifiers as { source: string; externalId: string }[]
       ).some((i) => i.source === "emt")
@@ -326,6 +335,22 @@ export async function departures(placeId: string, limit: number) {
       WHERE t.source_id='renfe' AND f.version=${scheduled.staticVersion} AND t.external_id IN ${sql(tripIds)}`
       : [];
     const destinations = new Map(tripRows.map((row) => [row.external_id, row]));
+    const boardingRef = {
+      feed: "renfe",
+      version: scheduled.staticVersion as string,
+      entity: "stop" as const,
+      externalId: place.external_id as string,
+    };
+    const vehicleRef = (id: string) => ({
+      feed: "renfe",
+      version: scheduled.staticVersion as string,
+      entity: "trip" as const,
+      externalId: id,
+    });
+    const accessibility = await readAccessibility([
+      boardingRef,
+      ...tripIds.map(vehicleRef),
+    ]);
     return {
       status: "available",
       station: scheduled.name,
@@ -375,6 +400,13 @@ export async function departures(placeId: string, limit: number) {
         );
         return {
           tripId: s.trip.gtfsId,
+          accessibility: {
+            boarding: accessibilityFrom(accessibility, boardingRef),
+            vehicle: accessibilityFrom(
+              accessibility,
+              vehicleRef(s.trip.gtfsId.slice("renfe:".length)),
+            ),
+          },
           realtimeStatus,
           realtimeProvenance:
             update && state

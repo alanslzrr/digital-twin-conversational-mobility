@@ -5,6 +5,7 @@ import {
   madridDate,
 } from "@mobility/domain";
 import type postgres from "postgres";
+import { accessibilityFrom, readAccessibility } from "./accessibility";
 import { database } from "./database";
 
 type Network = "metro" | "light-rail" | "interurban" | "emt";
@@ -89,6 +90,13 @@ export async function resolveCrtm(
       AND (unaccent(lower(s.name)) LIKE unaccent(lower(${pattern})) OR s.external_id=${query} OR s.stop_code=${query})
       ORDER BY (s.external_id=${query} OR coalesce(s.stop_code=${query},false)) DESC,
       (unaccent(lower(s.name))=unaccent(lower(${query}))) DESC,(s.location_type=1) DESC,s.name,s.dataset_id,s.external_id LIMIT ${limit}`;
+      const stopRef = (p: Place) => ({
+        feed: p.dataset_id,
+        version: p.version,
+        entity: "stop" as const,
+        externalId: p.external_id,
+      });
+      const accessibility = await readAccessibility(places.map(stopRef), sql);
       return {
         status: places.length ? "found" : "not_found",
         ambiguous: places.length > 1,
@@ -111,6 +119,7 @@ export async function resolveCrtm(
             ],
             provenance: provenance(p),
             wheelchairBoardingCode: p.wheelchair,
+            accessibility: accessibilityFrom(accessibility, stopRef(p)),
             correspondences: await correspondences(sql, p),
           })),
         ),
@@ -190,6 +199,24 @@ export async function crtmTimetable(input: {
       OR (start_seconds IS NOT NULL AND stop_offset>=0 AND end_seconds+stop_offset>${after})
       ORDER BY CASE WHEN start_seconds IS NULL THEN departure_seconds ELSE greatest(start_seconds+stop_offset,${after}) END,
         trip_id,sequence,start_seconds LIMIT ${input.limit + 1}`;
+      const stopRef = (id: string) => ({
+        feed: p.dataset_id,
+        version: p.version,
+        entity: "stop" as const,
+        externalId: id,
+      });
+      const tripRef = (id: string) => ({
+        feed: p.dataset_id,
+        version: p.version,
+        entity: "trip" as const,
+        externalId: id,
+      });
+      const accessibility = await readAccessibility(
+        rows
+          .slice(0, input.limit)
+          .flatMap((r) => [stopRef(r.stop_id), tripRef(r.trip_id)]),
+        sql,
+      );
       return {
         ...context,
         status: "available",
@@ -213,6 +240,10 @@ export async function crtmTimetable(input: {
               : "unknown",
           pickupType: r.pickup_type,
           wheelchairAccessibleCode: r.trip_wheelchair,
+          accessibility: {
+            boarding: accessibilityFrom(accessibility, stopRef(r.stop_id)),
+            vehicle: accessibilityFrom(accessibility, tripRef(r.trip_id)),
+          },
           ...(r.start_seconds === null
             ? {
                 kind: "scheduled",
