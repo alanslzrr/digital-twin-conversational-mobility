@@ -60,6 +60,12 @@ export type RoutingResult =
       }>;
     };
 
+export {
+  type AccessibilityRecord,
+  accessibilityKey,
+  interpretAccessibility,
+  unknownAccessibility,
+} from "./accessibility";
 export { gtfsClock, gtfsInstant, gtfsServiceEpoch, madridDate } from "./crtm";
 export {
   polygonContains,
