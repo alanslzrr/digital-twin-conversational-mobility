@@ -1,6 +1,6 @@
 # Roadmap local: estado auditado y criterios de cierre
 
-Actualizado el **29/09/2026**, tras la entrega de meteorología contextual (PR #29) y la definición del bloque de accesibilidad estática. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
+Actualizado el **29/09/2026**, tras la entrega de meteorología contextual (PR #29) y la implementación e instalación de accesibilidad estática. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
 
 **Estado actual: R0 integrado en `main` y runtime local actualizado.** E1 corregido, E2 cerrado y E3–E6 entregados mediante [PR #16](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/16). E8 aplicó 0008–0012 desde el esquema habitual 0007, reimportó destinos y recompiló/reinició Core, Web, agente y worker. No equivale a cobertura completa ni servicio operativo.
 
@@ -20,7 +20,7 @@ Actualizado el **29/09/2026**, tras la entrega de meteorología contextual (PR #
 
 **Contexto meteorológico del itinerario implementado y comprobado localmente:** predicción horaria municipal y CAP Madrid compartidos en Core, enriquecimiento de `plan_journey`, consultas explícitas y degradación independiente. Migración 0018 y 179 municipios IGN. [Entrega, operación y límites](acceptance/2026-09-28-journey-weather.md). Multiestación y predicción diaria siguen pendientes; no se cierra R1 completo.
 
-**Siguiente bloque definido: accesibilidad estática declarada para silla de ruedas.** Reutilizar atributos GTFS en resolución, salidas/horarios e itinerarios; separar parada, vehículo y recorrido no verificado. [Investigación y límites de los datos](research/2026-09-29-static-accessibility.md), [instrucciones cerradas para el agente](plans/2026-09-29-static-accessibility.md). Implementación pendiente; sin nuevo proveedor ni cambios de configuración/grafo OTP.
+**Accesibilidad estática declarada para silla de ruedas implementada e instalada localmente.** Resolución, salidas/horarios e itinerarios separan parada, vehículo y recorrido no verificado. [Evidencia y límites](acceptance/2026-09-29-static-accessibility.md), [investigación](research/2026-09-29-static-accessibility.md) y [plan ejecutado](plans/2026-09-29-static-accessibility.md). Sin nuevo proveedor ni cambios de configuración/grafo OTP; no cierra R1 completo.
 
 R0, E2 y E8 siguen cerrados. Pruebas proporcionales a cada cambio; la auditoría CRTM no se repite ni se añade otra campaña como barrera. El modo normal sigue siendo interactivo, los experimentos opcionales y Vercel queda para después.
 
@@ -66,7 +66,8 @@ Orden por dependencias, no por número de endpoints:
 - [x] Routing GTFS Renfe/EMT/Metro Ligero/interurbanos instalado; Metro excluido por caducidad. Resolución MCP con IDs separados, correspondencias de itinerario y frecuencias explícitas. No implica RT de todas las redes.
 - [x] Actualización explícita coordinada y reversible GTFS/catálogos/OSM/grafo mediante releases inmutables, journal y mantenimiento. Rollback/re-activación reales comprobados; no se añade scheduler.
 - [x] Overlay Core de RT/alertas Renfe y avisos de línea EMT sobre itinerarios, con snapshots existentes y degradación explícita. OTP sin segundo polling. Queda ampliar RT CRTM y demostrar identidad de viaje entre llegadas EMT y GTFS; no se asignan por línea sola.
-- [ ] Accesibilidad estática trazable: siguiente bloque, [plan acotado de atributos GTFS para silla de ruedas](plans/2026-09-29-static-accessibility.md). Ascensores/escaleras RT como GAP externo hasta disponer de fuente oficial; no garantizar accesibilidad operativa desde atributos estáticos ni reinterpretar discrepancias del feed.
+- [x] Accesibilidad estática trazable en las cuatro herramientas existentes ([acta](acceptance/2026-09-29-static-accessibility.md)). EMT sin atributos permanece desconocido; ML2/ML3 conserva códigos y discrepancia acotada a su versión.
+- [ ] Accesibilidad operativa: ascensores/escaleras RT como GAP externo hasta disponer de fuente oficial; caminatas y conexiones interiores no verificadas. No garantizar recorridos completos desde atributos estáticos.
 - [x] DGT DATEX 3.7: acceso público real, IDs/versiones, carretera/sentido y puntos/extremos, correcciones e histórico existente. Retiradas no se equiparan a cancelaciones confirmadas; fin temporal contradictorio queda explícito. Sin geometrías ni desvíos inventados. [Fuente y límites](sources/dgt.md).
 - [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
 - [x] **Contexto meteorológico del itinerario:** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Entrega y límites](acceptance/2026-09-28-journey-weather.md).
