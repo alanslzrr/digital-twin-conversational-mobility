@@ -20,7 +20,7 @@ flowchart LR
   Core --> OTP[OTP Docker local / horarios previstos]
 ```
 
-Implementado: Renfe trip updates/alertas, BiciMAD oficial, aire, tráfico, parking municipal y observaciones AEMET Madrid-Retiro; contratos/normalización, IDs canónicos, snapshots y herramienta por capacidad real. El modelo nunca conoce URLs de fuentes o sus claves. Consultar [runtime local](local-runtime.md) para cadencias, acceso, retención y límites concretos.
+Implementado: Renfe trip updates/alertas, catálogo y llegadas EMT bajo demanda, catálogos/horarios estáticos CRTM, incidencias DGT, agregados almacenados, BiciMAD oficial, aire, tráfico, parking municipal, observaciones AEMET Madrid-Retiro y contexto meteorológico del itinerario (predicción municipal horaria y avisos CAP); contratos/normalización, IDs canónicos, snapshots y herramienta por capacidad real. El modelo recibe procedencia y atribución, nunca credenciales de proveedores. Consultar [runtime local](local-runtime.md) para cadencias, acceso, retención y límites concretos.
 
 ## Ingestión adaptativa implementada
 
@@ -32,13 +32,13 @@ El worker ejecuta dos carriles concurrentes, HTTP acotado y ticks repetibles. Re
 
 PostGIS: lugares y namespaces externos, catálogo estático importado, versiones/calendarios, salud, actividad, leases, snapshots e histórico. El raw gzip es local/durable en esta máquina, deduplicado por SHA256, con retención objetivo de 24 h purgada durante ticks activos. No se sustituye observación por hora de descarga. Una observación fresca puede seguir siendo provisional.
 
-OTP consume el mismo GTFS normalizado que el importador. Se comprueba la versión del manifiesto de grafo contra la base. En esta fase el itinerario usa horarios previstos; RT Renfe se consulta aparte para estimaciones y alertas. No se añade un segundo polling dentro de OTP que ignore la ventana de actividad.
+OTP consume el mismo GTFS normalizado que el importador. Se comprueba la versión del manifiesto de grafo contra la base. El grafo incluye Renfe, EMT, Metro Ligero, interurbanos y caminatas dentro de sus versiones disponibles. Core aplica RT/alertas Renfe y avisos EMT sobre la base prevista, con identidad, vigencia y frescura verificadas; no toda la ruta es tiempo real. No se añade un segundo polling dentro de OTP que ignore la ventana de actividad.
 
 ## Acceso y huecos
 
 - El MCP implementa JWT de servicio con scopes de lectura, gestión de evaluación y worker separados. OAuth/rotación/asimetría son trabajo posterior.
 - El canal EVE está envuelto por un guard de identidad, origen, propiedad y cuotas. No se depende del middleware Next: las rutas EVE pueden resolverse antes. Better Auth vive en Core; Web reenvía cookies por un proxy autenticado de mismo origen. PostgreSQL impone hasta cinco evaluadores y ACL por sesión.
-- Datos estáticos CRTM no equivalen a tiempo real Metro/interurbanos. Accesibilidad estática no garantiza ascensores operativos.
+- Metro de Madrid conserva catálogo y consultas históricas admitidas, pero no horarios actuales ni trayectos Metro en esta evaluación. Metro actual y nuevas correspondencias CRTM↔EMT/Renfe quedan excluidos del cierre por acuerdo; se conservan las asociaciones existentes y el routing de las otras redes. Datos estáticos CRTM no equivalen a tiempo real. Correspondencias parciales y accesibilidad estática no garantizan tiempos de transbordo, recorridos completos ni ascensores operativos.
 - El estado `not_initialized` no es un error del proveedor y el catálogo no prueba acceso, licencia o disponibilidad.
 
 ## Referencias verificadas al preparar el entorno
