@@ -2,7 +2,7 @@
 
 Base de desarrollo para un gemelo digital de movilidad de Madrid y su interfaz conversacional. Evaluación prevista: hasta cinco usuarios.
 
-**Estado: vertical local funcional con cobertura parcial.** Renfe, BiciMAD, aire, tráfico, aparcamientos y observaciones AEMET Madrid-Retiro reales; OTP local calcula rutas previstas de Cercanías y a pie. EMT, DGT y la red Metro/EMT completa siguen pendientes. No se inventan datos para cubrir esos huecos.
+**Estado: vertical local funcional con cobertura parcial.** Renfe, EMT, CRTM estático, DGT, BiciMAD, aire, tráfico, aparcamientos y AEMET integrados. El sistema planifica con Renfe, EMT, Metro Ligero, interurbanos y caminatas dentro de los datos disponibles; Core aplica RT/alertas Renfe y avisos EMT con límites explícitos. Metro de Madrid conserva catálogo, pero no ofrece horarios actuales ni trayectos en Metro en esta evaluación. Las correspondencias existentes son parciales y no garantizan accesibilidad ni tiempos de transbordo. Metro actual y nuevas correspondencias CRTM↔EMT/Renfe quedan fuera del cierre por acuerdo; los demás pendientes siguen en el [roadmap](docs/roadmap.md).
 
 ## Arquitectura
 
@@ -79,15 +79,15 @@ Sigue [la preparación completa de datos, OTP y worker](docs/local-runtime.md). 
 | Monorepo pnpm / TypeScript / Turborepo | Configurado, dependencias fijadas y lockfile |
 | Next.js + integración EVE | GPT-6 Luna directo; turno real MCP verificado |
 | Herramientas generales EVE | Desactivadas: sin bash, web fetch o búsqueda |
-| Mobility MCP | Autenticado; diez tools implementadas, cobertura explícita |
+| Mobility MCP | Autenticado; dieciséis herramientas implementadas, cobertura explícita |
 | Contratos y frescura | Schemas y tests; observado ≠ ingerido |
 | PostgreSQL/PostGIS + Redis local | Compose con credenciales y puertos loopback |
 | Migraciones | Checksum, transacción y bloqueo; idempotentes |
 | CI | Tipos, lint, tests, build, EVE, PostGIS y smoke MCP sin secretos cloud |
-| Fuentes reales y normalizadores | Renfe, BiciMAD, aire, tráfico y aparcamientos |
+| Fuentes reales y normalizadores | Renfe, EMT, CRTM estático, DGT, BiciMAD, AEMET, aire, tráfico y aparcamientos |
 | Ingesta adaptativa local | Worker + Postgres, ventana/leases/backoff; no necesita Queues |
 | Neon, Upstash y Blob cloud | Aprovisionados; conectividad verificada; sin deployments |
-| OTP local | Grafo Madrid y rutas previstas verificadas; Sandbox diferido |
+| OTP local | Releases multioperador; base prevista con RT/alertas Renfe y avisos EMT aplicados por Core; Metro actual excluido |
 | Autenticación de evaluadores | Better Auth, cinco slots, ACL de sesión y cuotas |
 
 Redis local queda disponible, pero esta vertical usa Postgres para estado/leases y no lo necesita. No se finge compatibilidad REST con Upstash.
