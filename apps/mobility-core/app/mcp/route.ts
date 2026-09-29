@@ -116,7 +116,7 @@ const handler = createMcpHandler(
       {
         title: "Resolve a canonical Madrid place",
         description:
-          "Search imported Renfe, EMT, BiciMAD and CRTM places by name or exact stop number. Use source=emt for buses or source=crtm with network=metro/light-rail/interurban. CRTM includes static validity and evidence-backed station correspondences; its IDs support timetable and routing with active graph coverage. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding.",
+          "Search imported Renfe, EMT, BiciMAD and CRTM places by name or exact stop number. Use source=emt for buses or source=crtm with network=metro/light-rail/interurban. CRTM includes static validity and evidence-backed station correspondences; its IDs support timetable and routing with active graph coverage. Return candidates; ask the user if ambiguous. No arbitrary-address geocoding. Static wheelchair stop declarations include inheritance, provenance and unknowns; not current equipment operation.",
         inputSchema: resolvePlaceInputSchema,
         annotations,
       },
@@ -140,7 +140,7 @@ const handler = createMcpHandler(
       {
         title: "Plan a scheduled journey",
         description:
-          "OTP local routes from canonical place IDs. Active release includes Renfe, EMT, Metro Ligero and interurban schedules plus walking. Metro expired schedules are excluded; no bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled baseline with matched fresh Renfe RT and alerts applied through Core; inspect per-leg status. Frequency-based times are planning estimates, not exact departures. Walking limit applies to the sum of walking legs.",
+          "OTP local routes from canonical place IDs. Active release includes Renfe, EMT, Metro Ligero and interurban schedules plus walking. Metro expired schedules are excluded; no bicycle or car routing. TRANSIT requires transit and permits walking access/egress/transfers; WALK allows walking-only routes; TRANSIT+WALK allows either. Scheduled baseline with matched fresh Renfe RT and alerts applied through Core; inspect per-leg status. Frequency-based times are planning estimates, not exact departures. Walking limit applies to the sum of walking legs. Preserve requested wheelchair preference; accessibilityContext separates boarding, vehicle and alighting, not a whole-route guarantee.",
         inputSchema: journeyRequestSchema,
         annotations,
       },
@@ -162,7 +162,7 @@ const handler = createMcpHandler(
       {
         title: "CRTM static service-day timetable",
         description:
-          "Horarios Metro, Metro Ligero e interurbanos CRTM. Resolve source=crtm first. One Madrid service day, calendars/exceptions applied, >24h times preserved. Date/time default to server today/now. Frequency windows are not individual arrivals. Expired coverage is unavailable; no RT, routing or knowledge replay. Report provenance, validity, destinations and unknowns.",
+          "Horarios Metro, Metro Ligero e interurbanos CRTM. Resolve source=crtm first. One Madrid service day, calendars/exceptions applied, >24h times preserved. Date/time default to server today/now. Frequency windows are not individual arrivals. Expired coverage is unavailable; no RT, routing or knowledge replay. Report provenance, validity, destinations and unknowns. Accessibility separates the actual boarding point and trip vehicle; static declarations are not current equipment status.",
         inputSchema: crtmTimetableInputSchema,
         annotations,
       },
@@ -173,7 +173,7 @@ const handler = createMcpHandler(
       {
         title: "Renfe departures",
         description:
-          "Scheduled Renfe departures with matched fresh RT arrival/departure estimates or cancellations where available. Never treat arrivals as departures.",
+          "Scheduled Renfe departures with matched fresh RT arrival/departure estimates or cancellations where available. Never treat arrivals as departures. Static accessibility separates boarding and the identified trip vehicle; do not infer from the line.",
         inputSchema: departuresInputSchema,
         annotations,
       },
