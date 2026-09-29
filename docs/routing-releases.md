@@ -12,7 +12,7 @@ python3 scripts/prepare-routing-release.py --refresh
 node scripts/build-routing-release.mjs <release-id>
 ```
 
-No scheduler is added. Refresh is explicit; a failed download/build leaves the current release usable. An expired feed is excluded from the graph but its catalog remains available. Calendar envelopes are preliminary eligibility only: OTP applies GTFS calendars, exceptions and frequencies. Keep Metro excluded until a current official timetable is available.
+No scheduler is added. Refresh is explicit; a failed download/build leaves the current release usable. An expired feed is excluded from the graph but its catalog remains available. Calendar envelopes are preliminary eligibility only: OTP applies GTFS calendars, exceptions and frequencies. Current Metro de Madrid schedules/routes and additional CRTM-to-EMT/Renfe correspondences are outside the agreed evaluation scope; retain the Metro catalog and existing correspondences. This exclusion does not remove historical timetable queries admitted by the existing contract or routing on other supported networks.
 
 The current build includes Renfe, EMT, Metro Ligero and interurban networks. EMT official GTFS: CRTM ArcGIS item `868df0e58fca47e79b942902dffd7da0`, [CRTM license](https://www.crtm.es/licencia-de-uso). Its prepared version has service envelope 24/07/2026–31/12/2026 and 72,510 frequency rows. Non-exact frequencies produce planning estimates, not precise scheduled departures. Source versions and per-feed coverage are in the release manifest. Graph build warnings remain in the build report/log; no network-wide accuracy or accessibility guarantee is implied.
 
