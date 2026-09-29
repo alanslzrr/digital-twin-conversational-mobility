@@ -7,6 +7,7 @@ import {
 } from "@mobility/contracts";
 import { journeyModePolicy } from "@mobility/domain";
 import { z } from "zod";
+import { journeyAccessibility } from "./accessibility";
 import { database } from "./database";
 import { journeyWeather } from "./journey-weather";
 import { enrichRouting, routingEvidence } from "./routing-evidence";
@@ -450,6 +451,14 @@ export async function planJourney(request: JourneyRequest) {
     return {
       status: itineraries.length ? "available" : "no_route",
       provider: "otp-local-2.10.0",
+      accessibilityContext: await journeyAccessibility(
+        itineraries,
+        release
+          ? Object.fromEntries(
+              Object.entries(release.feeds).map(([id, f]) => [id, f.version]),
+            )
+          : { renfe: feed.version },
+      ),
       weatherContext: itineraries.length
         ? await journeyWeather(
             itineraries,
