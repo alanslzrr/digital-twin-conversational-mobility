@@ -325,6 +325,8 @@ if (crtmOnly) {
   });
   const health = await tool("get_source_health", { source: "crtm" });
   assert.equal(health.sources[0].capability, "static_catalog_and_timetable");
+  assert.match(health.sources[0].routingCoverage, /plan_journey/);
+  assert.equal(health.sources[0].routingIncluded, undefined);
   const catalogNetworks = health.sources[0].staticCatalogs.map(
     (catalog) => catalog.network,
   );
