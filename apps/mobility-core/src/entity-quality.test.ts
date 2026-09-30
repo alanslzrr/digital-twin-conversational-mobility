@@ -140,3 +140,44 @@ it("does not report live readiness from a fresh header with only stale entities"
   payload = { stations: [{ observedAt: old }] };
   expect(await sourceHealth("bicimad")).toMatchObject({ liveDataReady: false });
 });
+it("rejects ambiguous observation selectors and future intervals", async () => {
+  expect(
+    await environment({
+      kind: "weather",
+      stationId: "3195",
+      placeId: "00000000-0000-4000-8000-000000000001",
+      limit: 5,
+    }),
+  ).toMatchObject({ reason: "ambiguous_observation_selector" });
+  expect(
+    await environment({
+      kind: "weather",
+      fromTime: "2026-09-26T12:00:00Z",
+      limit: 5,
+    }),
+  ).toMatchObject({ reason: "future_observations_unavailable" });
+  expect(
+    await environment({ kind: "weather", stationId: "unknown", limit: 5 }),
+  ).toMatchObject({ reason: "unknown_weather_station" });
+});
+it("returns explicit Retiro station-time freshness from shared weather snapshot", async () => {
+  payload = {
+    readings: [
+      {
+        stationId: "3195",
+        name: "Retiro",
+        latitude: 40.4,
+        longitude: -3.7,
+        observedAt: old,
+        measurements: [],
+      },
+    ],
+  };
+  expect(await environment({ kind: "weather", limit: 5 })).toMatchObject({
+    selection: { reason: "compatibility_default_retiro" },
+    readings: [
+      { freshness: { status: "stale" }, provenance: { observedAt: old } },
+    ],
+    coverage: { knownStations: 25, retainedStations: 1, complete: false },
+  });
+});
