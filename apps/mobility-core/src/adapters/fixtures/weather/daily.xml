@@ -1,0 +1,103 @@
+<!-- Fuente: AEMET https://www.aemet.es/xml/municipios/localidad_28079.xml; retrieved 2026-09-30; reduced to scoped fields, values unchanged. -->
+<root id="28079">
+  <elaborado>2026-09-30T17:05:08</elaborado>
+  <nombre>Madrid</nombre>
+  <prediccion>
+    <dia fecha="2026-09-30">
+      <prob_precipitacion periodo="00-24" />
+      <prob_precipitacion periodo="00-12" />
+      <prob_precipitacion periodo="12-24">5</prob_precipitacion>
+      <prob_precipitacion periodo="00-06" />
+      <prob_precipitacion periodo="06-12">50</prob_precipitacion>
+      <prob_precipitacion periodo="12-18">5</prob_precipitacion>
+      <prob_precipitacion periodo="18-24">0</prob_precipitacion>
+      <estado_cielo periodo="00-24" descripcion="" />
+      <estado_cielo periodo="00-12" descripcion="" />
+      <estado_cielo periodo="12-24" descripcion="Nubes altas">17</estado_cielo>
+      <estado_cielo periodo="00-06" descripcion="" />
+      <estado_cielo periodo="06-12" descripcion="Nuboso con lluvia escasa">44</estado_cielo>
+      <estado_cielo periodo="12-18" descripcion="Nubes altas">17</estado_cielo>
+      <estado_cielo periodo="18-24" descripcion="Muy nuboso">15</estado_cielo>
+      <temperatura>
+        <maxima>25</maxima>
+        <minima>18</minima>
+        <dato hora="06">20</dato>
+        <dato hora="12">23</dato>
+        <dato hora="18">22</dato>
+        <dato hora="24">19</dato>
+      </temperatura>
+    </dia>
+    <dia fecha="2026-10-01">
+      <prob_precipitacion periodo="00-24">85</prob_precipitacion>
+      <prob_precipitacion periodo="00-12">10</prob_precipitacion>
+      <prob_precipitacion periodo="12-24">80</prob_precipitacion>
+      <prob_precipitacion periodo="00-06">5</prob_precipitacion>
+      <prob_precipitacion periodo="06-12">5</prob_precipitacion>
+      <prob_precipitacion periodo="12-18">30</prob_precipitacion>
+      <prob_precipitacion periodo="18-24">70</prob_precipitacion>
+      <estado_cielo periodo="00-24" descripcion="Muy nuboso con lluvia escasa">45</estado_cielo>
+      <estado_cielo periodo="00-12" descripcion="Muy nuboso">15</estado_cielo>
+      <estado_cielo periodo="12-24" descripcion="Muy nuboso con lluvia escasa">45</estado_cielo>
+      <estado_cielo periodo="00-06" descripcion="Muy nuboso">15n</estado_cielo>
+      <estado_cielo periodo="06-12" descripcion="Muy nuboso">15</estado_cielo>
+      <estado_cielo periodo="12-18" descripcion="Muy nuboso">15</estado_cielo>
+      <estado_cielo periodo="18-24" descripcion="Muy nuboso con lluvia escasa">45</estado_cielo>
+      <temperatura>
+        <maxima>28</maxima>
+        <minima>15</minima>
+        <dato hora="06">17</dato>
+        <dato hora="12">24</dato>
+        <dato hora="18">20</dato>
+        <dato hora="24">16</dato>
+      </temperatura>
+    </dia>
+    <dia fecha="2026-10-02">
+      <prob_precipitacion periodo="00-24">100</prob_precipitacion>
+      <prob_precipitacion periodo="00-12">90</prob_precipitacion>
+      <prob_precipitacion periodo="12-24">100</prob_precipitacion>
+      <estado_cielo periodo="00-24" descripcion="Nuboso con lluvia">24</estado_cielo>
+      <estado_cielo periodo="00-12" descripcion="Muy nuboso con tormenta">53</estado_cielo>
+      <estado_cielo periodo="12-24" descripcion="Nuboso con lluvia">24</estado_cielo>
+      <temperatura>
+        <maxima>24</maxima>
+        <minima>15</minima>
+      </temperatura>
+    </dia>
+    <dia fecha="2026-10-03">
+      <prob_precipitacion periodo="00-24">100</prob_precipitacion>
+      <prob_precipitacion periodo="00-12">90</prob_precipitacion>
+      <prob_precipitacion periodo="12-24">100</prob_precipitacion>
+      <estado_cielo periodo="00-24" descripcion="Muy nuboso con lluvia">25</estado_cielo>
+      <estado_cielo periodo="00-12" descripcion="Muy nuboso con lluvia">25</estado_cielo>
+      <estado_cielo periodo="12-24" descripcion="Muy nuboso con lluvia">25</estado_cielo>
+      <temperatura>
+        <maxima>22</maxima>
+        <minima>15</minima>
+      </temperatura>
+    </dia>
+    <dia fecha="2026-10-04">
+      <prob_precipitacion>100</prob_precipitacion>
+      <estado_cielo descripcion="Muy nuboso con lluvia">25</estado_cielo>
+      <temperatura>
+        <maxima>22</maxima>
+        <minima>15</minima>
+      </temperatura>
+    </dia>
+    <dia fecha="2026-10-05">
+      <prob_precipitacion>80</prob_precipitacion>
+      <estado_cielo descripcion="Intervalos nubosos con lluvia">23</estado_cielo>
+      <temperatura>
+        <maxima>23</maxima>
+        <minima>15</minima>
+      </temperatura>
+    </dia>
+    <dia fecha="2026-10-06">
+      <prob_precipitacion>80</prob_precipitacion>
+      <estado_cielo descripcion="Intervalos nubosos con lluvia">23</estado_cielo>
+      <temperatura>
+        <maxima>23</maxima>
+        <minima>15</minima>
+      </temperatura>
+    </dia>
+  </prediccion>
+</root>
