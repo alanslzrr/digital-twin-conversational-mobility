@@ -1,11 +1,18 @@
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ sql: vi.fn(), products: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  sql: vi.fn(),
+  products: vi.fn(),
+  read: vi.fn(),
+}));
 vi.mock("./database", () => ({
   weatherDatabase: () => Object.assign(mocks.sql, { json: (x: unknown) => x }),
 }));
-vi.mock("./weather-cache", () => ({ weatherProducts: mocks.products }));
+vi.mock("./weather-cache", () => ({
+  weatherProducts: mocks.products,
+  readWeatherProducts: mocks.read,
+}));
 
 import { parseHourlyForecast } from "./adapters/aemet-forecast";
 import { journeyWeather } from "./journey-weather";
@@ -42,7 +49,7 @@ beforeEach(() => {
       source_version: "official-fixture",
     })),
   );
-  mocks.products.mockReset().mockResolvedValue([
+  const rows = [
     {
       resource: "forecast:28079",
       payload: forecast,
@@ -54,7 +61,9 @@ beforeEach(() => {
       valid_to: forecast.validTo,
       error_code: null,
     },
-  ]);
+  ];
+  mocks.products.mockReset().mockResolvedValue(rows);
+  mocks.read.mockReset().mockResolvedValue(rows);
   vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-09-28T18:10:00Z"));
 });
 afterEach(() => vi.restoreAllMocks());
@@ -87,6 +96,7 @@ it("aggregates two municipalities and preserves unmapped transfer points", async
     "warnings:28",
     "forecast:28079",
     "forecast:28005",
+    "daily:28005",
   ]);
   expect(r.coverage?.unknownPoints).toBe(2);
 });
@@ -119,4 +129,22 @@ it("one abort signal bounds the entire cold enrichment, not each alternative", a
   expect(performance.now() - start).toBeLessThan(3000);
   expect(r.status).toBe("unavailable");
   expect(mocks.products).toHaveBeenCalledTimes(1);
+});
+
+it("evidence order is stable and relevance changes with freshness", async () => {
+  const fresh = await journeyWeather([route], point, point);
+  const rows = await mocks.read();
+  const stale = rows.map((r: Record<string, unknown>) => ({
+    ...r,
+    error_code: "upstream_timeout",
+  }));
+  mocks.read.mockResolvedValue(stale);
+  mocks.products.mockResolvedValue(stale);
+  const old = await journeyWeather([route], point, point);
+  expect(old.alternatives[0]?.relevanceKey).not.toBe(
+    fresh.alternatives[0]?.relevanceKey,
+  );
+  expect(old.evidence.map((e) => e.key)).toEqual(
+    [...old.evidence.map((e) => e.key)].sort(),
+  );
 });
