@@ -215,7 +215,8 @@ export async function sourceHealth(source?: SourceId) {
           ? {
               staticCatalogs: crtmFeeds,
               realtime: false,
-              routingIncluded: false,
+              routingCoverage:
+                "Query plan_journey for active release coverage; a static catalog alone does not establish routing availability.",
             }
           : {}),
         ...(entry.id === "emt"
