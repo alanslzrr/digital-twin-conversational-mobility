@@ -206,7 +206,7 @@ const handler = createMcpHandler(
       {
         title: "Madrid environment and municipal weather",
         description:
-          "kind=air: municipal pollutant measurements. kind=weather defaults to Retiro observations. weatherProduct=hourly_forecast|daily_forecast|warnings with resolved placeId and optional fromTime/toTime reuses shared AEMET municipal/CAP cache. plan_journey already includes weatherContext; do not call again for each route. Daily: precipitation probability, sky, dated min/max, at most seven local dates (exclusive end); no time needed for a whole-day question. Daily periods are not hourly estimates and extrema are not departure temperature. Coverage and original periods apply; not a health assessment.",
+          "kind=air: municipal pollutant measurements. kind=weather weatherProduct=observation: exact stationId OR resolved placeId selects nearest fresh station within 20 km, otherwise explicitly stale; no selector explicitly defaults to Retiro. Unknown and known without readings differ; future dates and combined selectors rejected. Show station, distance, observed time and measurement intervals, not street-level current rain. weatherProduct=hourly_forecast|daily_forecast|warnings with resolved placeId and optional fromTime/toTime reuses shared AEMET municipal/CAP cache. plan_journey already includes weatherContext; do not call again for each route. Daily: precipitation probability, sky, dated min/max, at most seven local dates (exclusive end); no time needed for a whole-day question. Daily periods are not hourly estimates and extrema are not departure temperature. Coverage and original periods apply; not a health assessment.",
         inputSchema: environmentInputSchema,
         annotations,
       },
