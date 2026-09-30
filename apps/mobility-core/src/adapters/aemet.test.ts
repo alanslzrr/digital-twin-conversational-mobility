@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { parseWeather, weatherResource } from "./aemet";
+import excerpt from "./fixtures/aemet-regional-excerpt.json";
 
 const now = Date.parse("2026-09-23T19:00:00Z");
 const row = {
@@ -66,4 +67,87 @@ describe("AEMET observations", () => {
     ])
       expect(() => weatherResource(url)).toThrow();
   });
+});
+
+describe("regional extraction", () => {
+  it("filters before normalization including out-of-polygon Navacerrada", async () => {
+    const { regionalWeatherExtract } = await import("./aemet");
+    const regional = regionalWeatherExtract([
+      row,
+      { ...row, idema: "2462", alt: 1892.6 },
+      { ...row, idema: "foreign", hr: 999 },
+      { idema: "3121F" },
+    ]);
+    expect(regional.scope).toBe("aemet_madrid_initial_25_stations");
+    expect(regional.records).toHaveLength(3);
+    const parsed = parseWeather(regional.records, now);
+    expect(parsed.readings).toHaveLength(2);
+    expect(
+      parsed.readings.find((r) => r.stationId === "2462")?.altitudeMeters,
+    ).toBe(1892.6);
+  });
+  it("retains each station time without filling missing measurements", () => {
+    const result = parseWeather(
+      [
+        row,
+        {
+          ...row,
+          idema: "3100B",
+          fint: "2026-09-23T12:00:00Z",
+          ta: null,
+          hr: null,
+        },
+      ],
+      now,
+    );
+    expect(
+      result.readings.find((r) => r.stationId === "3100B")?.observedAt,
+    ).toBe("2026-09-23T12:00:00.000Z");
+    expect(
+      result.readings
+        .find((r) => r.stationId === "3100B")
+        ?.measurements.some((m) => m.name === "temperature"),
+    ).toBe(false);
+  });
+});
+
+it("acquires one envelope and one nationwide file and retains only regional records", async () => {
+  const { fetchWeather } = await import("./aemet");
+  vi.stubEnv("AEMET_API_KEY", "test-only");
+  const recent = { ...row, fint: new Date(Date.now() - 60000).toISOString() };
+  const fetcher = vi
+    .fn()
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          estado: 200,
+          datos: "https://opendata.aemet.es/opendata/sh/test",
+        }),
+      ),
+    )
+    .mockResolvedValueOnce(
+      new Response(JSON.stringify([recent, { ...recent, idema: "foreign" }])),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  try {
+    const result = await fetchWeather();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls[0]?.[0]).toBe(
+      "https://opendata.aemet.es/opendata/api/observacion/convencional/todas",
+    );
+    expect(JSON.parse(result.raw).records).toHaveLength(1);
+    expect(result.raw).not.toContain("foreign");
+    expect(result.raw).not.toContain("test-only");
+  } finally {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  }
+});
+
+it("normalizes the recorded official regional excerpt with separate station times", () => {
+  const result = parseWeather(excerpt, Date.parse("2026-10-01T00:00:00Z"));
+  expect(result.readings).toHaveLength(4);
+  expect(
+    result.readings.find((r) => r.stationId === "2462")?.altitudeMeters,
+  ).toBe(1892.6);
 });
