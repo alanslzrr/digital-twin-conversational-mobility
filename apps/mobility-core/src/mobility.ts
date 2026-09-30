@@ -8,6 +8,8 @@ import type {
 import {
   alertPeriodStatus,
   type DestinationEvidence,
+  dailyDefaultEnd,
+  dailyIntervalValid,
   ingestionWorkerState,
   type JobId,
   jobPolicies,
@@ -639,14 +641,23 @@ export async function environment(
         reason: "weather_product_requires_weather_kind_and_place",
       };
     const start = input.fromTime ?? new Date().toISOString(),
-      end = input.toTime ?? new Date(Date.parse(start) + 3600000).toISOString();
+      end =
+        input.toTime ??
+        (input.weatherProduct === "daily_forecast"
+          ? dailyDefaultEnd(start)
+          : new Date(Date.parse(start) + 3600000).toISOString());
     if (
       Date.parse(end) <= Date.parse(start) ||
-      Date.parse(end) - Date.parse(start) > 86400000
+      (input.weatherProduct === "daily_forecast"
+        ? !dailyIntervalValid(start, end)
+        : Date.parse(end) - Date.parse(start) > 86400000)
     )
       return {
         status: "unavailable",
-        reason: "weather_period_requires_up_to_24_hours",
+        reason:
+          input.weatherProduct === "daily_forecast"
+            ? "weather_period_requires_up_to_7_local_dates"
+            : "weather_period_requires_up_to_24_hours",
       };
     const place = await routingPlace(input.placeId);
     if (!place) return { status: "unavailable", reason: "unknown_place" };
