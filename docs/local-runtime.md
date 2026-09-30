@@ -50,7 +50,7 @@ Para desarrollo: `pnpm dev` y `pnpm worker` en terminales distintas, con PostGIS
 | Aire municipal | 10 min | 2 h por medición |
 | Tráfico municipal | 5 min | 15 min |
 | Aparcamientos participantes | 1 min | 5 min por categoría |
-| AEMET Madrid-Retiro | 10 min | 2 h por observación |
+| AEMET 25 estaciones iniciales Madrid | 10 min | 2 h por estación |
 
 Los umbrales son políticas de evaluación, no garantías de los proveedores. Los datos siguen siendo provisionales. Una lectura de cero se conserva; una lectura ausente nunca se sustituye por cero.
 
@@ -65,7 +65,7 @@ Los umbrales son políticas de evaluación, no garantías de los proveedores. Lo
 - `resolve_place`: estaciones Renfe y CRTM, paradas EMT y BiciMAD importadas, búsqueda sin acentos; candidatos ambiguos requieren aclaración. Para direcciones públicas, `resolve_address` consulta catálogos/caché y Nominatim autorizado con consentimiento y atribución.
 - BiciMAD usa GBFS **oficial EMT**, no el feed comunitario con nombre similar. Se conservan `last_reported`, flags de servicio y TTL.
 - Aire: lecturas válidas (`V`) con magnitud/unidad; hora civil Europe/Madrid, H24 es fin del día. Horas DST ambiguas/no existentes se omiten. No interpreta riesgo sanitario.
-- AEMET: observaciones de Madrid-Retiro (`3195`), distintas de la predicción municipal horaria y avisos CAP Madrid ya disponibles en `get_environment` y como contexto de `plan_journey`. Las observaciones no ofrecen cobertura regional. `fint` está en UTC según su metadata, incluso cuando no trae offset; no usar la conversión horaria municipal. Lluvia acumulada 60 min, viento medio 10 min; temperatura/humedad/presión instantáneas (`periodMinutes=0`).
+- AEMET: observaciones de un catálogo inicial versionado de 25 estaciones madrileñas (incluye Navacerrada, Venturada y Barajas RS), distintas de la predicción municipal horaria y avisos CAP Madrid ya disponibles en `get_environment` y como contexto de `plan_journey`. Cobertura regional parcial: `stationId` exacto o `placeId` con selección de la estación fresca más próxima hasta 20 km, antigua si no hay fresca, sin sustitución silenciosa por Retiro. Sin selector se conserva Retiro (`3195`) explícitamente. Una única adquisición conjunta filtra el extracto regional antes de persistir; reintentos no rejuvenecen lecturas ni retroceden estaciones. 20 km es un límite del producto, no representatividad garantizada. `fint` está en UTC según su metadata, incluso cuando no trae offset; no usar la conversión horaria municipal. Lluvia acumulada 60 min, viento medio 10 min; temperatura/humedad/presión instantáneas (`periodMinutes=0`).
 - Tráfico: sensores municipales, no incidencias DGT ni predicción de viaje.
 - Aparcamientos: SOAP municipal de participantes; algunos publican solo catálogo, otros lecturas antiguas. Frescura individual; disponibilidad vacía significa ausencia de datos.
 

@@ -18,7 +18,7 @@ Actualizado el **30/09/2026**, tras la entrega de predicción diaria municipal. 
 
 **R2.1 — Historial de conversaciones implementado y comprobado localmente.** Mis conversaciones lista solo sesiones propias vigentes, con fecha de creación, paginación de veinte y reapertura nativa de EVE. No duplica mensajes ni cambia retención/E2. [Evidencia, integración y límites](acceptance/2026-09-28-conversation-history.md). Es independiente de las ampliaciones de fuentes R1; no implica cierre de R1/R2. El alcance vigente es el de este roadmap; las actas anteriores son evidencia histórica, no requisitos adicionales.
 
-**Contexto meteorológico del itinerario implementado y comprobado localmente:** predicción horaria municipal y CAP Madrid compartidos en Core, enriquecimiento de `plan_journey`, consultas explícitas y degradación independiente. Migración 0018 y 179 municipios IGN. [Entrega, operación y límites](acceptance/2026-09-28-journey-weather.md). La predicción diaria amplía este bloque según el acta siguiente; multiestación sigue pendiente y no se cierra R1 completo.
+**Contexto meteorológico del itinerario implementado y comprobado localmente:** predicción horaria municipal y CAP Madrid compartidos en Core, enriquecimiento de `plan_journey`, consultas explícitas y degradación independiente. Migración 0018 y 179 municipios IGN. [Entrega, operación y límites](acceptance/2026-09-28-journey-weather.md). La predicción diaria amplía este bloque según el acta siguiente; las observaciones multiestación se amplían en la entrega siguiente y no se cierra R1 completo.
 
 **Predicción diaria municipal AEMET implementada y comprobada localmente.** [Investigación y contraste XML/JSON](research/2026-09-30-daily-weather.md) e [instrucciones específicas para el agente](plans/2026-09-30-daily-weather.md). Fuente diaria: XML oficial, conservando vacíos frente a ceros y caché separada del producto horario. Migración `0020`, consulta explícita y selección horaria/diaria en itinerarios, sin ampliar CAP ni convertir extremos diarios en temperatura instantánea. [Entrega y límites](acceptance/2026-09-30-daily-weather.md). Multiestación sigue como ampliación posterior, sin reabrir entregas cerradas.
 
@@ -40,7 +40,7 @@ El reporte manual detectó que el agente omitió el histórico disponible y dupl
 | 2. Renfe real | GTFS importado; trip updates/avisos; timestamps, calidad y matching | **Implementado en el alcance local.** Alias/destinos E4 integrados y reimportados. RT en routing y actualización explícita reversible implementados; no actualización diaria automática. Cancelaciones/NO_DATA/SKIPPED y modos históricos event/knowledge están probados localmente. |
 | 3. Ingestión local adaptativa | Worker, ventana 30 min, leases, backoff, dos carriles, read-through, deduplicación y retención | **E3 integrado.** Carriles independientes, heartbeat, fallos por etapa y recuperación sin repetir ciclos perdidos probados con proveedores simulados/DB aislada. Runtime actualizado; cadencia configurada no equivale a SLO medido. |
 | 4. Dominio/MCP/EVE | Dieciséis herramientas reales, Better Auth/ACL/cuotas, Web Chat oficial y gpt-6-luna directo | **Parcial.** E2 cerrado, E3–E6 integrados mediante E8; geocoder y agregados incorporados; cobertura y ausencia de datos explícitas. |
-| 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET Retiro, avisos y catálogo/llegadas EMT; catálogos y consulta estática CRTM | **Parcial.** Routing multioperador y DGT incorporados. Metro actual y la ampliación de correspondencias quedan excluidos por acuerdo; las demás ampliaciones R1 mantienen su estado. |
+| 5. Ampliación | BiciMAD, aire, tráfico, parking, AEMET observaciones multiestación, avisos y catálogo/llegadas EMT; catálogos y consulta estática CRTM | **Parcial.** Routing multioperador y DGT incorporados. Metro actual y la ampliación de correspondencias quedan excluidos por acuerdo; las demás ampliaciones R1 mantienen su estado. |
 
 ## R0 — Estabilizar y aceptar la vertical existente
 
@@ -76,7 +76,7 @@ Orden por dependencias, no por número de endpoints:
 - [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
 - [x] **Contexto meteorológico del itinerario:** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Entrega y límites](acceptance/2026-09-28-journey-weather.md).
 - [x] Predicción diaria municipal: XML oficial, probabilidad/cielo/extremos por fecha, caché separada y selección contextual sin interpolación. [Evidencia](acceptance/2026-09-30-daily-weather.md).
-- [ ] Ampliaciones posteriores del brief: AEMET multiestación, precios de parking y routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
+- [ ] Ampliaciones posteriores del brief: precios de parking y routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
 
 **Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
 
@@ -100,3 +100,5 @@ Orden por dependencias, no por número de endpoints:
 - [ ] Verificar privacidad, retención/borrado, rotación, licencias y controles de acceso del despliegue.
 
 **Vercel no es requisito de R0–R2 ni una solución a los fallos funcionales actuales.**
+
+**Observaciones AEMET multiestación por ubicación entregadas localmente:** catálogo inicial de 25 estaciones, selección hasta 20 km y frescura independiente. Cobertura parcial, sin alterar predicciones ni OTP. [Validación y límites](acceptance/2026-09-30-weather-observations.md).
