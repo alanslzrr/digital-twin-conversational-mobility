@@ -56,6 +56,7 @@ export function summarizePayload(
         const selected = Object.fromEntries(
           keys.filter((key) => key in row).map((key) => [key, row[key]]),
         );
+        const entityProvenance = row.provenance as Provenance | undefined;
         const observation =
           typeof row.observedAt === "string"
             ? row.observedAt
@@ -66,7 +67,7 @@ export function summarizePayload(
           kind,
           ...selected,
           ...entityObservation(
-            provenance,
+            entityProvenance ?? provenance,
             observation,
             jobPolicies[job].maxAge,
             new Date(now),
@@ -94,6 +95,9 @@ export function summarizePayload(
     );
   return {
     totals,
+    ...(job === "aemet"
+      ? { coverage: payload.coverage, catalogVersion: payload.catalogVersion }
+      : {}),
     samples,
     sampleScope:
       "At most two retained entities per stream, not representative or necessarily fresh; parking freshness belongs to each availability category.",
