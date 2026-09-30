@@ -47,9 +47,40 @@ export type MadridWarnings = {
   validTo: string;
   records: WeatherAlert[];
 };
-export type WeatherProduct = MunicipalForecast | MadridWarnings;
+export type DailyForecast = {
+  product: "daily_forecast";
+  municipality: string;
+  name: string;
+  issuedAt: null;
+  issuedAtRaw: string;
+  issueTimeZone: "unspecified";
+  ageBasis: string;
+  ageBasisInterpretation: "earliest_utc_or_madrid";
+  validFrom: string;
+  validTo: string;
+  periods: DailyWeatherPeriod[];
+  extremes: {
+    date: string;
+    minimum: number | null;
+    maximum: number | null;
+    unit: "°C";
+  }[];
+  invalidFields: number;
+};
+export type DailyWeatherPeriod = WeatherPeriod & {
+  date: string;
+  originalPeriod: string | null;
+  description?: string;
+  resolutionHours: 6 | 12 | 24;
+};
+export type WeatherProduct = MunicipalForecast | MadridWarnings | DailyForecast;
 export type WeatherEvidence = {
   key: string;
+  issuedAtRaw?: string;
+  issueTimeZone?: "unspecified";
+  ageBasis?: string;
+  invalidFields?: number;
+  ageBasisInterpretation?: "earliest_utc_or_madrid";
   version: string | null;
   issuedAt: string | null;
   validFrom: string | null;

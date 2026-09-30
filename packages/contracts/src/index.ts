@@ -129,7 +129,7 @@ export const bikesInputSchema = z.object({
 });
 export const environmentInputSchema = z.object({
   weatherProduct: z
-    .enum(["observation", "hourly_forecast", "warnings"])
+    .enum(["observation", "hourly_forecast", "daily_forecast", "warnings"])
     .optional(),
   placeId: z.string().uuid().optional(),
   fromTime: z.iso.datetime({ offset: true }).optional(),
@@ -241,6 +241,8 @@ export {
   conversationPage,
 } from "./conversations";
 export type {
+  DailyForecast,
+  DailyWeatherPeriod,
   MadridWarnings,
   MunicipalForecast,
   WeatherAlert,
