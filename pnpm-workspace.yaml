@@ -8,7 +8,7 @@ onlyBuiltDependencies:
   - sharp
 
 # Vercel CLI 59.25.4 pins older transitive releases. Keep patches scoped so
-# runtime libraries (including EVE's undici 8) and other majors are unchanged.
+# unrelated dependency versions and majors remain unchanged.
 overrides:
   '@tootallnate/once@2.0.0': 2.0.1
   'ajv@8.6.3': 8.20.0
@@ -23,3 +23,5 @@ overrides:
   # 5.x has no release fixing all reported advisories; CLI uses fetch/Agent.
   'undici@5.28.4': 6.28.1
   'undici@5.29.0': 6.28.1
+  # EVE pins 8.9.0; patch WebSocket DoS and BalancedPool TLS validation.
+  'undici@8.9.0': 8.10.2
