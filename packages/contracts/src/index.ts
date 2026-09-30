@@ -250,3 +250,4 @@ export type {
   WeatherPeriod,
   WeatherProduct,
 } from "./journey-weather";
+export type { WeatherReading, WeatherStation } from "./weather-observations";
