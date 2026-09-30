@@ -322,7 +322,23 @@ describe.skipIf(process.env.RUN_INGESTION_DB_TESTS !== "1")(
         fixture.weather.mockResolvedValueOnce({
           ...weather,
           raw,
-          readings: [{ value: raw }],
+          readings: [
+            {
+              stationId: "3195",
+              name: "Retiro",
+              latitude: 40.4,
+              longitude: -3.7,
+              observedAt: observation,
+              measurements: [
+                {
+                  name: "temperature",
+                  value: raw === "A" ? 1 : 2,
+                  unit: "°C",
+                  periodMinutes: 0,
+                },
+              ],
+            },
+          ],
         });
         await sql`UPDATE ingestion_job SET next_due_at=now() WHERE id='aemet'`;
         await ingest("aemet");
@@ -337,7 +353,18 @@ describe.skipIf(process.env.RUN_INGESTION_DB_TESTS !== "1")(
       for (const value of [1, 2]) {
         fixture.weather.mockResolvedValueOnce({
           ...weather,
-          readings: [{ value }],
+          readings: [
+            {
+              stationId: "3195",
+              name: "Retiro",
+              latitude: 40.4,
+              longitude: -3.7,
+              observedAt: observation,
+              measurements: [
+                { name: "temperature", value, unit: "°C", periodMinutes: 0 },
+              ],
+            },
+          ],
         });
         await sql`UPDATE ingestion_job SET next_due_at=now() WHERE id='aemet'`;
         await ingest("aemet");
@@ -352,6 +379,53 @@ describe.skipIf(process.env.RUN_INGESTION_DB_TESTS !== "1")(
         await ingest("aemet");
       }
       expect(await sql`SELECT * FROM mobility_history`).toHaveLength(1);
+    });
+    it("merges independent station updates and deduplicates identical retries", async () => {
+      const make = (stationId: string, observedAt: string) => ({
+        stationId,
+        name: stationId,
+        latitude: 40,
+        longitude: -3,
+        observedAt,
+        measurements: [
+          { name: "precipitation", value: 0, unit: "mm", periodMinutes: 60 },
+        ],
+      });
+      const old = new Date(Date.now() - 3600000).toISOString();
+      const first = {
+        ...weather,
+        readings: [make("3195", observation), make("3100B", old)],
+      };
+      for (const value of [
+        first,
+        first,
+        {
+          ...weather,
+          raw: "regional-second",
+          observedAt: old,
+          readings: [
+            make("3195", old),
+            make("3100B", new Date(Date.parse(old) + 600000).toISOString()),
+          ],
+        },
+      ]) {
+        fixture.weather.mockResolvedValueOnce(value);
+        await sql`UPDATE ingestion_job SET next_due_at=now() WHERE id='aemet'`;
+        expect(await ingest("aemet")).toMatchObject({ status: "healthy" });
+      }
+      const [snapshot] =
+        await sql`SELECT payload FROM mobility_snapshot WHERE job_id='aemet'`;
+      expect(
+        snapshot?.payload.readings.find(
+          (r: { stationId: string }) => r.stationId === "3195",
+        ).observedAt,
+      ).toBe(observation);
+      expect(
+        snapshot?.payload.readings.find(
+          (r: { stationId: string }) => r.stationId === "3100B",
+        ).observedAt,
+      ).not.toBe(old);
+      expect(await sql`SELECT * FROM mobility_history`).toHaveLength(2);
     });
     it("retains late older data without rolling back the current snapshot", async () => {
       await sql`UPDATE ingestion_job SET next_due_at=now() WHERE id='aemet'`;
