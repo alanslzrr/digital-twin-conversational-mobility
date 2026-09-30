@@ -3,6 +3,7 @@ import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import { gzip } from "node:zlib";
+import type { WeatherReading } from "@mobility/contracts";
 import {
   type JobId,
   jobPolicies,
@@ -18,9 +19,15 @@ import { fetchEmtIncidents } from "./adapters/emt";
 import { parseAir, parseTraffic } from "./adapters/madrid";
 import { parseParking } from "./adapters/parking";
 import { parseRenfe, spanishText } from "./adapters/renfe";
+import { weatherStationCatalogVersion } from "./catalogs/weather-stations";
 import { database } from "./database";
 import { publishDgt } from "./dgt-publication";
 import { weatherWorkerTick } from "./weather-cache";
+import {
+  mergeWeatherReadings,
+  stableWeatherJson,
+  weatherObservationCoverage,
+} from "./weather-observations";
 
 const compress = promisify(gzip);
 export const ingestionEnabled = () => localIngestionEnabled(process.env);
@@ -218,23 +225,62 @@ export async function ingest(id: JobId) {
     await writeFile(resolve(rawRoot(), filename), await compress(result.raw), {
       mode: 0o600,
     });
-    const payload = JSON.parse(
-      JSON.stringify(result.payload),
-    ) as postgres.JSONValue;
+    const payload = JSON.parse(JSON.stringify(result.payload)) as Record<
+      string,
+      postgres.JSONValue
+    >;
     stage = "publication";
     return await sql.begin(async (tx) => {
       const [owned] =
         await tx`SELECT id FROM ingestion_job WHERE id=${id} AND lease_token=${lease.token} AND lease_until>now() FOR UPDATE`;
       if (!owned) return { job: id, status: "lease_lost" };
       const [previous] =
-        await tx`SELECT observed_at FROM mobility_snapshot WHERE job_id=${id}`;
+        await tx`SELECT observed_at,ingested_at,raw_reference,payload FROM mobility_snapshot WHERE job_id=${id}`;
       const historicalOnly =
+        (id !== "aemet" ||
+          !("readings" in result.payload) ||
+          !result.payload.readings.length) &&
         previous &&
         new Date(previous.observed_at).getTime() >
           Date.parse(result.observedAt);
-      const observed = new Date(result.observedAt);
+      let observed = new Date(result.observedAt);
       const ingested = new Date();
       const reference = `sha256:${hash}`;
+      if (id === "aemet" && !historicalOnly) {
+        const readings = mergeWeatherReadings(
+          (previous?.payload.readings ?? []) as WeatherReading[],
+          ("readings" in result.payload
+            ? result.payload.readings
+            : []) as WeatherReading[],
+          {
+            source: "aemet",
+            observedAt: result.observedAt,
+            ingestedAt: ingested.toISOString(),
+            quality: "provisional",
+            rawReference: reference,
+          },
+          previous
+            ? {
+                source: "aemet",
+                observedAt: new Date(previous.observed_at).toISOString(),
+                ingestedAt: new Date(previous.ingested_at).toISOString(),
+                quality: "provisional",
+                rawReference: previous.raw_reference,
+              }
+            : undefined,
+        );
+        payload.readings = readings as unknown as postgres.JSONValue;
+        payload.coverage = weatherObservationCoverage(
+          readings,
+        ) as unknown as postgres.JSONValue;
+        payload.catalogVersion = weatherStationCatalogVersion;
+        observed = new Date(
+          readings.reduce(
+            (latest, r) => (r.observedAt > latest ? r.observedAt : latest),
+            result.observedAt,
+          ),
+        );
+      }
       if (!historicalOnly && "incidents" in result.payload)
         await publishDgt(tx, result.payload.incidents, observed);
       if (!historicalOnly && "stations" in result.payload) {
@@ -258,16 +304,22 @@ export async function ingest(id: JobId) {
           await tx`INSERT INTO place_external_identifier ${tx(places.map((p) => ({ source_id: "bicimad", namespace: "gbfs.station", external_id: p.external_id, place_id: p.id })))} ON CONFLICT DO NOTHING`;
       }
       const parserVersion =
-        id === "dgt-incidents"
-          ? "dgt-3.7-v1"
-          : id === "renfe-alerts"
-            ? "local-v3-selectors"
-            : "local-v2";
+        id === "aemet"
+          ? "aemet-regional-v1"
+          : id === "dgt-incidents"
+            ? "dgt-3.7-v1"
+            : id === "renfe-alerts"
+              ? "local-v3-selectors"
+              : "local-v2";
       await tx`INSERT INTO raw_batch(source_id,object_key,sha256,fetched_at,expires_at,parser_version,content_type) VALUES (${policy.source},${filename},${hash},${ingested},${new Date(ingested.getTime() + 86400000)},${parserVersion},${id === "dgt-incidents" || id === "madrid-traffic" || id === "madrid-parking" ? "application/xml" : "application/json"}) ON CONFLICT (object_key) DO UPDATE SET expires_at=excluded.expires_at`;
       if (!historicalOnly)
         await tx`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES (${id},${policy.source},${observed},${ingested},'provisional',${reference},${tx.json(payload)}) ON CONFLICT (job_id) DO UPDATE SET observed_at=excluded.observed_at,ingested_at=excluded.ingested_at,quality=excluded.quality,raw_reference=excluded.raw_reference,payload=excluded.payload`;
       const contentHash = createHash("sha256")
-        .update(JSON.stringify({ parserVersion, payload }))
+        .update(
+          id === "aemet"
+            ? stableWeatherJson({ parserVersion, payload })
+            : JSON.stringify({ parserVersion, payload }),
+        )
         .digest("hex");
       const [lastRevision] =
         await tx`SELECT content_hash,parser_version FROM mobility_history
