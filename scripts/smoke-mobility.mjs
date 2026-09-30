@@ -325,7 +325,12 @@ if (crtmOnly) {
   });
   const health = await tool("get_source_health", { source: "crtm" });
   assert.equal(health.sources[0].capability, "static_catalog_and_timetable");
-  assert.equal(health.sources[0].staticCatalogs.length, 3);
+  const catalogNetworks = health.sources[0].staticCatalogs.map(
+    (catalog) => catalog.network,
+  );
+  assert.equal(new Set(catalogNetworks).size, catalogNetworks.length);
+  for (const network of ["metro", "light-rail", "interurban"])
+    assert.ok(catalogNetworks.includes(network), `Missing ${network} catalog`);
   mkdirSync("data/evaluation", { recursive: true });
   writeFileSync(
     "data/evaluation/crtm-smoke.json",
