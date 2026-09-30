@@ -273,17 +273,27 @@ export async function journeyWeather(
                 alerts: [],
                 truncated: false,
               };
+        // A shorter product cannot explain absence when another relevant
+        // forecast overlaps the query but is unusable (for example, expired).
+        const forecasts = rows.flatMap(({ payload }) =>
+          payload &&
+          payload.product !== "warnings" &&
+          payload.municipality === municipality &&
+          product !== "warnings" &&
+          (product !== "hourly_forecast" || payload.product === "forecast") &&
+          (product !== "daily_forecast" || payload.product === "daily_forecast")
+            ? [payload]
+            : [],
+        );
         return {
           point: s.key,
           status:
             prediction?.coverage ??
-            (rows.some(
-              (r) =>
-                r.payload &&
-                r.payload.product !== "warnings" &&
-                r.payload.municipality === municipality &&
-                (Date.parse(s.end) <= Date.parse(r.payload.validFrom) ||
-                  Date.parse(s.start) >= Date.parse(r.payload.validTo)),
+            (forecasts.length > 0 &&
+            forecasts.every(
+              (forecast) =>
+                Date.parse(s.end) <= Date.parse(forecast.validFrom) ||
+                Date.parse(s.start) >= Date.parse(forecast.validTo),
             )
               ? "outside_horizon"
               : "forecast_unavailable"),
