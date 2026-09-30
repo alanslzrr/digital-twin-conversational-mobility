@@ -1,6 +1,6 @@
 # Roadmap local: estado auditado y criterios de cierre
 
-Actualizado el **29/09/2026**, tras la entrega de meteorología contextual (PR #29) y la implementación e instalación de accesibilidad estática. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
+Actualizado el **30/09/2026**, tras la entrega de predicción diaria municipal. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
 
 **Estado actual: R0 integrado en `main` y runtime local actualizado.** E1 corregido, E2 cerrado y E3–E6 entregados mediante [PR #16](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/16). E8 aplicó 0008–0012 desde el esquema habitual 0007, reimportó destinos y recompiló/reinició Core, Web, agente y worker. No equivale a cobertura completa ni servicio operativo.
 
@@ -18,7 +18,9 @@ Actualizado el **29/09/2026**, tras la entrega de meteorología contextual (PR #
 
 **R2.1 — Historial de conversaciones implementado y comprobado localmente.** Mis conversaciones lista solo sesiones propias vigentes, con fecha de creación, paginación de veinte y reapertura nativa de EVE. No duplica mensajes ni cambia retención/E2. [Evidencia, integración y límites](acceptance/2026-09-28-conversation-history.md). Es independiente de las ampliaciones de fuentes R1; no implica cierre de R1/R2. El alcance vigente es el de este roadmap; las actas anteriores son evidencia histórica, no requisitos adicionales.
 
-**Contexto meteorológico del itinerario implementado y comprobado localmente:** predicción horaria municipal y CAP Madrid compartidos en Core, enriquecimiento de `plan_journey`, consultas explícitas y degradación independiente. Migración 0018 y 179 municipios IGN. [Entrega, operación y límites](acceptance/2026-09-28-journey-weather.md). Multiestación y predicción diaria siguen pendientes; no se cierra R1 completo.
+**Contexto meteorológico del itinerario implementado y comprobado localmente:** predicción horaria municipal y CAP Madrid compartidos en Core, enriquecimiento de `plan_journey`, consultas explícitas y degradación independiente. Migración 0018 y 179 municipios IGN. [Entrega, operación y límites](acceptance/2026-09-28-journey-weather.md). La predicción diaria amplía este bloque según el acta siguiente; multiestación sigue pendiente y no se cierra R1 completo.
+
+**Predicción diaria municipal AEMET implementada y comprobada localmente.** [Investigación y contraste XML/JSON](research/2026-09-30-daily-weather.md) e [instrucciones específicas para el agente](plans/2026-09-30-daily-weather.md). Fuente diaria: XML oficial, conservando vacíos frente a ceros y caché separada del producto horario. Migración `0020`, consulta explícita y selección horaria/diaria en itinerarios, sin ampliar CAP ni convertir extremos diarios en temperatura instantánea. [Entrega y límites](acceptance/2026-09-30-daily-weather.md). Multiestación sigue como ampliación posterior, sin reabrir entregas cerradas.
 
 **Accesibilidad estática declarada para silla de ruedas implementada e instalada localmente.** Resolución, salidas/horarios e itinerarios separan parada, vehículo y recorrido no verificado. [Evidencia y límites](acceptance/2026-09-29-static-accessibility.md), [investigación](research/2026-09-29-static-accessibility.md) y [plan ejecutado](plans/2026-09-29-static-accessibility.md). Sin nuevo proveedor ni cambios de configuración/grafo OTP; no cierra R1 completo.
 
@@ -73,7 +75,8 @@ Orden por dependencias, no por número de endpoints:
 - [x] DGT DATEX 3.7: acceso público real, IDs/versiones, carretera/sentido y puntos/extremos, correcciones e histórico existente. Retiradas no se equiparan a cancelaciones confirmadas; fin temporal contradictorio queda explícito. Sin geometrías ni desvíos inventados. [Fuente y límites](sources/dgt.md).
 - [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
 - [x] **Contexto meteorológico del itinerario:** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Entrega y límites](acceptance/2026-09-28-journey-weather.md).
-- [ ] Ampliaciones posteriores del brief: AEMET multiestación y predicción diaria —separadas del bloque anterior por acuerdo del usuario—, precios de parking y routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
+- [x] Predicción diaria municipal: XML oficial, probabilidad/cielo/extremos por fecha, caché separada y selección contextual sin interpolación. [Evidencia](acceptance/2026-09-30-daily-weather.md).
+- [ ] Ampliaciones posteriores del brief: AEMET multiestación, precios de parking y routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
 
 **Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
 
