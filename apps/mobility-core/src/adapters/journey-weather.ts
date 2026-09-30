@@ -1,6 +1,7 @@
 import type { WeatherProduct } from "@mobility/contracts";
 import { weatherResource } from "./aemet";
 import { capFiles, parseWarnings, warningIndex } from "./aemet-cap";
+import { parseDailyForecast } from "./aemet-daily";
 import { parseHourlyForecast } from "./aemet-forecast";
 export const warningIndexUrl =
   "https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/rss/CAP_AFAP7228_ATOM.xml";
@@ -91,6 +92,29 @@ export async function fetchWeatherProduct(
       notModified: false as const,
       payload,
       lastModified: index.response.headers.get("last-modified"),
+    };
+  }
+  if (/^daily:28\d{3}$/.test(resource)) {
+    const municipality = resource.slice(6);
+    const daily = await weatherResponse(
+      `https://www.aemet.es/xml/municipios/localidad_${municipality}.xml`,
+      signal,
+      previous.payload?.product === "daily_forecast" && previous.lastModified
+        ? { "If-Modified-Since": previous.lastModified }
+        : {},
+    );
+    if (daily.response.status === 304) {
+      if (previous.payload?.product !== "daily_forecast")
+        throw Error("weather_304_without_state");
+      return { notModified: true as const };
+    }
+    const payload = parseDailyForecast(text(daily.bytes), municipality);
+    if (JSON.stringify(payload) === JSON.stringify(previous.payload))
+      return { notModified: true as const };
+    return {
+      notModified: false as const,
+      payload,
+      lastModified: daily.response.headers.get("last-modified"),
     };
   }
   if (!/^forecast:28\d{3}$/.test(resource))
