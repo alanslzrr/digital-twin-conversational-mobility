@@ -8,6 +8,7 @@ import {
 } from "./adapters/journey-weather";
 import { weatherDatabase } from "./database";
 import { weatherQuery } from "./weather-query";
+import type { ForecastRow } from "./weather-selection";
 export const weatherInterval = (resource: string) =>
   resource === "warnings:28" ? 300 : 1800;
 // Same gate + owner-token pattern as EMT arrivals, shared by read-through and existing worker lanes.
@@ -39,6 +40,7 @@ export async function refreshWeather(resource: string, signal: AbortSignal) {
     signal.throwIfAborted();
     const interval = weatherInterval(resource);
     const p = result.notModified ? null : result.payload;
+    const issuedAt = p?.product === "daily_forecast" ? p.ageBasis : p?.issuedAt;
     const version = p
       ? createHash("sha256").update(JSON.stringify(p)).digest("hex")
       : null;
@@ -49,14 +51,14 @@ export async function refreshWeather(resource: string, signal: AbortSignal) {
         UPDATE weather_product SET
           payload=CASE WHEN ${result.notModified} THEN payload ELSE ${sql.json(p)} END,
           version=CASE WHEN ${result.notModified} THEN version ELSE ${version} END,
-          issued_at=CASE WHEN ${result.notModified} THEN issued_at ELSE ${p?.issuedAt ?? null}::timestamptz END,
+          issued_at=CASE WHEN ${result.notModified} THEN issued_at ELSE ${issuedAt ?? null}::timestamptz END,
           valid_from=CASE WHEN ${result.notModified} THEN valid_from ELSE ${p?.validFrom ?? null}::timestamptz END,
           valid_to=CASE WHEN ${result.notModified} THEN valid_to ELSE ${p?.validTo ?? null}::timestamptz END,
           fetched_at=CASE WHEN ${result.notModified} THEN fetched_at ELSE now() END,
           last_modified=CASE WHEN ${result.notModified} THEN last_modified ELSE ${result.notModified ? null : result.lastModified} END,
           checked_at=now(),next_due_at=now()+${interval}*interval '1 second',error_code=NULL,failures=0,lease_token=NULL,lease_until=NULL
         WHERE resource=${resource} AND lease_token=${token} AND lease_until>now() AND EXISTS(SELECT 1 FROM owner)
-        AND (CASE WHEN ${result.notModified} THEN payload IS NOT NULL ELSE issued_at IS NULL OR issued_at<=${p?.issuedAt ?? null}::timestamptz END)
+        AND (CASE WHEN ${result.notModified} THEN payload IS NOT NULL ELSE issued_at IS NULL OR issued_at<=${issuedAt ?? null}::timestamptz END)
         RETURNING resource
       ), released AS (
         UPDATE weather_gate SET lease_token=NULL,lease_until=NULL,next_due_at=now()+interval '10 seconds'
@@ -100,7 +102,7 @@ export async function weatherProducts(
   signal: AbortSignal,
 ) {
   const sql = weatherDatabase();
-  const wanted = [...new Set(resources)].slice(0, 13);
+  const wanted = [...new Set(resources)].slice(0, 25);
   if (!wanted.length) return [];
   await weatherQuery(
     sql`INSERT INTO weather_product(resource,demanded_until)
@@ -110,7 +112,9 @@ export async function weatherProducts(
   );
   const read = () =>
     weatherQuery(
-      sql`SELECT * FROM weather_product WHERE resource=ANY(${wanted})`,
+      sql<
+        ForecastRow[]
+      >`SELECT * FROM weather_product WHERE resource=ANY(${wanted})`,
       signal,
     );
   let rows = await read();
@@ -122,4 +126,17 @@ export async function weatherProducts(
     await refreshWeather(missing.resource, signal);
   if (rows.some((r) => !r.payload) && !signal.aborted) rows = await read();
   return rows;
+}
+
+export async function readWeatherProducts(
+  resources: string[],
+  signal: AbortSignal,
+) {
+  if (!resources.length) return [];
+  return weatherQuery(
+    weatherDatabase()<
+      ForecastRow[]
+    >`SELECT * FROM weather_product WHERE resource=ANY(${[...new Set(resources)].slice(0, 25)})`,
+    signal,
+  );
 }
