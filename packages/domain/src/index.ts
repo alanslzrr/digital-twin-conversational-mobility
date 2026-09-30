@@ -99,3 +99,7 @@ export {
   resolveLine,
   tripDestination,
 } from "./transit-identity";
+export {
+  selectObservedStation,
+  weatherStationDistance,
+} from "./weather-observations";
