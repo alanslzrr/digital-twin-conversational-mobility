@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  weatherStationCatalogVersion,
+  weatherStations,
+} from "../catalogs/weather-stations";
 import { fetchText, id, numeric, timestamp } from "./common";
 
 const observation = z.object({
@@ -7,6 +11,7 @@ const observation = z.object({
   lat: numeric.pipe(z.number().min(-90).max(90)),
   lon: numeric.pipe(z.number().min(-180).max(180)),
   fint: z.string(),
+  alt: numeric.nullish(),
   ta: numeric.nullish(),
   hr: numeric.pipe(z.number().min(0).max(100)).nullish(),
   prec: numeric.pipe(z.number().nonnegative()).nullish(),
@@ -71,6 +76,7 @@ export function parseWeather(value: unknown, now = Date.now()) {
         name: row.ubi,
         latitude: row.lat,
         longitude: row.lon,
+        altitudeMeters: row.alt ?? null,
         observedAt,
         measurements,
       },
@@ -109,12 +115,32 @@ export function weatherResource(value: string) {
   return url.href;
 }
 
+export function regionalWeatherExtract(value: unknown) {
+  const ids = new Set(weatherStations.map((s) => s.id));
+  const records = z
+    .array(z.unknown())
+    .max(50000)
+    .parse(value)
+    .filter(
+      (row) =>
+        row &&
+        typeof row === "object" &&
+        "idema" in row &&
+        typeof row.idema === "string" &&
+        ids.has(row.idema),
+    );
+  return {
+    scope: "aemet_madrid_initial_25_stations",
+    catalogVersion: weatherStationCatalogVersion,
+    records,
+  };
+}
 export async function fetchWeather() {
   const key = process.env.AEMET_API_KEY;
   if (!key) throw new Error("aemet_credentials_missing");
   const envelope = JSON.parse(
     await fetchText(
-      "https://opendata.aemet.es/opendata/api/observacion/convencional/datos/estacion/3195",
+      "https://opendata.aemet.es/opendata/api/observacion/convencional/todas",
       "application/json",
       { headers: { api_key: key } },
     ),
@@ -125,9 +151,8 @@ export async function fetchWeather() {
   if (response.estado !== 200 || !response.datos)
     throw new Error("aemet_data_unavailable");
   // Only observation data is persisted; no credentials, envelope or resource URLs.
-  const raw = await fetchText(weatherResource(response.datos));
-  const parsed = parseWeather(JSON.parse(raw));
-  if (parsed.readings.some((r) => r.stationId !== "3195"))
-    throw new Error("unexpected_weather_station");
-  return { raw, ...parsed };
+  const data = await fetchText(weatherResource(response.datos));
+  const extract = regionalWeatherExtract(JSON.parse(data));
+  const parsed = parseWeather(extract.records);
+  return { raw: JSON.stringify(extract), ...parsed };
 }
