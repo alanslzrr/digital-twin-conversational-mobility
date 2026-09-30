@@ -68,6 +68,12 @@ export {
 } from "./accessibility";
 export { gtfsClock, gtfsInstant, gtfsServiceEpoch, madridDate } from "./crtm";
 export {
+  dailyDefaultEnd,
+  dailyIntervalValid,
+  dailyIssueAgeBasis,
+  selectDailyForecast,
+} from "./daily-weather";
+export {
   polygonContains,
   selectForecast,
   selectWarnings,
