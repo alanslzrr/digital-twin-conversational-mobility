@@ -4,6 +4,7 @@ import type {
   incidentsInputSchema,
   roadInputSchema,
   SourceId,
+  WeatherReading,
 } from "@mobility/contracts";
 import {
   alertPeriodStatus,
@@ -30,13 +31,13 @@ import {
   placeAccessibility,
   readAccessibility,
 } from "./accessibility";
-import type { parseWeather } from "./adapters/aemet";
 import type { parseBicimad } from "./adapters/bicimad";
 import type { parseEmtIncidents } from "./adapters/emt";
 import type { parseAir, parseTraffic } from "./adapters/madrid";
 import type { parseParking } from "./adapters/parking";
 import type { parseRenfe } from "./adapters/renfe";
 import { airStationIdentity } from "./catalogs/air-stations";
+import { weatherStations } from "./catalogs/weather-stations";
 import { crtmHealth, resolveCrtm } from "./crtm";
 import { database } from "./database";
 import { dgtIncidents } from "./dgt";
@@ -44,6 +45,7 @@ import { summarizePayload } from "./evidence-summary";
 import { ingest, ingestionEnabled } from "./ingestion";
 import { journeyWeather } from "./journey-weather";
 import { routingPlace, scheduledDepartures } from "./routing";
+import { observationResult } from "./weather-observations";
 
 const iso = (value: Date | string) => new Date(value).toISOString();
 export async function snapshot(job: JobId, refresh = true) {
@@ -107,18 +109,26 @@ export async function sourceHealth(source?: SourceId) {
               ? (payload.stations ?? []).map(
                   (s: { observedAt?: string }) => s.observedAt ?? null,
                 )
-              : id === "madrid-air"
-                ? (payload.readings ?? []).map(
-                    (r: { observedAt?: string }) => r.observedAt ?? null,
+              : id === "aemet"
+                ? weatherStations.map(
+                    (s) =>
+                      (payload.readings ?? []).find(
+                        (r: { stationId: string; observedAt?: string }) =>
+                          r.stationId === s.id,
+                      )?.observedAt ?? null,
                   )
-                : id === "madrid-parking"
-                  ? (payload.parkings ?? []).flatMap(
-                      (p: { availability: { observedAt?: string }[] }) =>
-                        p.availability.length
-                          ? p.availability.map((a) => a.observedAt ?? null)
-                          : [null],
+                : id === "madrid-air"
+                  ? (payload.readings ?? []).map(
+                      (r: { observedAt?: string }) => r.observedAt ?? null,
                     )
-                  : null;
+                  : id === "madrid-parking"
+                    ? (payload.parkings ?? []).flatMap(
+                        (p: { availability: { observedAt?: string }[] }) =>
+                          p.availability.length
+                            ? p.availability.map((a) => a.observedAt ?? null)
+                            : [null],
+                      )
+                    : null;
           const entityCoverage =
             provenance && entityTimes
               ? {
@@ -130,9 +140,11 @@ export async function sourceHealth(source?: SourceId) {
                   unit:
                     id === "bicimad"
                       ? "station"
-                      : id === "madrid-air"
-                        ? "measurement"
-                        : "category_or_unobserved_parking",
+                      : id === "aemet"
+                        ? "known_weather_station"
+                        : id === "madrid-air"
+                          ? "measurement"
+                          : "category_or_unobserved_parking",
                 }
               : null;
           return {
@@ -689,25 +701,50 @@ export async function environment(
   if (input.kind === "weather") {
     if (input.pollutant)
       return { status: "unavailable", reason: "pollutant_requires_air_kind" };
+    if (input.placeId && input.stationId)
+      return {
+        status: "unavailable",
+        reason: "ambiguous_observation_selector",
+      };
+    if (
+      [input.fromTime, input.toTime].some(
+        (t) => t && Date.parse(t) > Date.now(),
+      )
+    )
+      return {
+        status: "unavailable",
+        reason: "future_observations_unavailable",
+      };
+    if (
+      input.fromTime &&
+      input.toTime &&
+      Date.parse(input.fromTime) >= Date.parse(input.toTime)
+    )
+      return { status: "unavailable", reason: "invalid_observation_interval" };
+    if (
+      input.stationId &&
+      !weatherStations.some((s) => s.id === input.stationId)
+    )
+      return { status: "unavailable", reason: "unknown_weather_station" };
+    const place = input.placeId ? await routingPlace(input.placeId) : null;
+    if (input.placeId && !place)
+      return { status: "unavailable", reason: "unknown_place" };
     const state = await snapshot("aemet");
-    if (!state)
-      return { status: "unavailable", reason: "no_weather_observation" };
-    const readings = state.payload.readings as ReturnType<
-      typeof parseWeather
-    >["readings"];
-    return {
-      provenance: state.provenance,
-      provenanceScope: "collection_only",
-      readings: readings
-        .filter((r) => !input.stationId || r.stationId === input.stationId)
-        .slice(0, input.limit)
-        .map((r) => ({
-          ...r,
-          ...entityObservation(state.provenance, r.observedAt, 7200),
-        })),
-      coverage:
-        "AEMET Madrid-Retiro (3195) only. Observations, not forecasts or alerts. periodMinutes=0 means an instantaneous measurement.",
-    };
+    return observationResult(
+      (state?.payload.readings ?? []) as WeatherReading[],
+      state?.provenance ?? null,
+      {
+        stationId: input.stationId,
+        point: place
+          ? {
+              latitude: Number(place.latitude),
+              longitude: Number(place.longitude),
+            }
+          : undefined,
+        fromTime: input.fromTime,
+        toTime: input.toTime,
+      },
+    );
   }
   const state = await snapshot("madrid-air");
   if (!state) return { status: "unavailable", reason: "no_observation" };
