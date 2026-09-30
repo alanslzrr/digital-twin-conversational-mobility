@@ -24,6 +24,7 @@ vi.mock("./adapters/journey-weather", async (original) => ({
 import { WeatherHttpError } from "./adapters/journey-weather";
 import { journeyWeather } from "./journey-weather";
 import {
+  readWeatherProducts,
   refreshWeather,
   weatherProducts,
   weatherWorkerTick,
@@ -65,6 +66,7 @@ describe.skipIf(process.env.RUN_WEATHER_DB_TESTS !== "1")(
         "0014_crtm_static.sql",
         "0016_routing_releases.sql",
         "0018_journey_weather.sql",
+        "0020_daily_weather.sql",
       ])
         await sql.unsafe(
           await readFile(
@@ -96,6 +98,126 @@ describe.skipIf(process.env.RUN_WEATHER_DB_TESTS !== "1")(
         await admin.unsafe(`DROP SCHEMA ${schema} CASCADE`);
         await admin.end();
       }
+    });
+    it("retains 25 resource demands with one acquisition and reads without renewing demand", async () => {
+      const resources = [
+        "warnings:28",
+        ...Array.from({ length: 12 }, (_, i) => [
+          `forecast:${28001 + i}`,
+          `daily:${28001 + i}`,
+        ]).flat(),
+      ];
+      await weatherProducts(resources, signal());
+      expect(
+        (await sql`SELECT count(*)::int n FROM weather_product`)[0]?.n,
+      ).toBe(25);
+      expect(fixture.fetch).toHaveBeenCalledTimes(1);
+      await sql`UPDATE weather_product SET demanded_until=now()-interval '1 second'`;
+      expect(await readWeatherProducts(resources, signal())).toHaveLength(25);
+      expect(
+        (
+          await sql`SELECT count(*)::int n FROM weather_product WHERE demanded_until>now()`
+        )[0]?.n,
+      ).toBe(0);
+    });
+    it("shares daily state across five readers, retains age on 304 and accepts equal-issue corrections", async () => {
+      const daily = {
+        product: "daily_forecast",
+        municipality: "28079",
+        name: "Madrid",
+        issuedAt: null,
+        issuedAtRaw: "2026-09-30T17:05:08",
+        ageBasis: "2026-09-30T15:05:08.000Z",
+        issueTimeZone: "unspecified",
+        ageBasisInterpretation: "earliest_utc_or_madrid",
+        validFrom: "2026-09-30T00:00:00Z",
+        validTo: "2026-10-07T00:00:00Z",
+        periods: [],
+        extremes: [],
+        invalidFields: 0,
+      };
+      fixture.fetch.mockResolvedValue({
+        notModified: false,
+        payload: daily,
+        lastModified: "Wed, 30 Sep 2026 17:06:35 GMT",
+      });
+      await Promise.all(
+        Array.from({ length: 5 }, () =>
+          weatherProducts(["daily:28079"], signal()),
+        ),
+      );
+      expect(fixture.fetch).toHaveBeenCalledTimes(1);
+      const [before] =
+        await sql`SELECT * FROM weather_product WHERE resource='daily:28079'`;
+      await sql`UPDATE weather_gate SET next_due_at=now()`;
+      await sql`UPDATE weather_product SET next_due_at=now()`;
+      fixture.fetch.mockResolvedValue({ notModified: true });
+      await refreshWeather("daily:28079", signal());
+      const [after] =
+        await sql`SELECT * FROM weather_product WHERE resource='daily:28079'`;
+      for (const k of ["payload", "version", "issued_at", "fetched_at"])
+        expect(after?.[k]).toEqual(before?.[k]);
+      expect(after?.issued_at.toISOString()).toBe(daily.ageBasis);
+      await sql`UPDATE weather_gate SET next_due_at=now()`;
+      await sql`UPDATE weather_product SET next_due_at=now()`;
+      fixture.fetch.mockResolvedValue({
+        notModified: false,
+        payload: { ...daily, name: "Corrected" },
+        lastModified: null,
+      });
+      await refreshWeather("daily:28079", signal());
+      expect(
+        (await sql`SELECT version FROM weather_product`)[0]?.version,
+      ).not.toBe(before?.version);
+      await weatherProducts(["forecast:28079"], signal());
+      expect(
+        (await sql`SELECT count(*)::int n FROM weather_product`)[0]?.n,
+      ).toBe(2);
+    });
+    it("known missing hourly horizon demands daily without repeated hourly acquisition", async () => {
+      await sql`INSERT INTO weather_municipality(code,name,boundary,source_version) VALUES('28099','Fixture',ST_Multi(ST_MakeEnvelope(-5,39,-4,40,4326)),'fixture') ON CONFLICT DO NOTHING`;
+      const hourly = {
+        product: "forecast",
+        municipality: "28099",
+        name: "Fixture",
+        issuedAt: new Date().toISOString(),
+        validFrom: "2026-09-30T00:00:00Z",
+        validTo: "2026-10-01T00:00:00Z",
+        periods: [],
+        timeZone: "Europe/Madrid",
+        omittedAmbiguousPeriods: 0,
+      };
+      await sql`INSERT INTO weather_product(resource,payload,issued_at,checked_at,demanded_until,next_due_at) VALUES('forecast:28099',${sql.json(hourly)},now(),now(),now()-interval '1 second',now()+interval '30 minutes')`;
+      const r = {
+        start: "2026-10-03T10:00:00Z",
+        end: "2026-10-03T11:00:00Z",
+        legs: [],
+      };
+      await journeyWeather(
+        [r],
+        { latitude: 39.5, longitude: -4.5 },
+        { latitude: 39.5, longitude: -4.5 },
+      );
+      await journeyWeather(
+        [r],
+        { latitude: 39.5, longitude: -4.5 },
+        { latitude: 39.5, longitude: -4.5 },
+      );
+      expect(
+        (
+          await sql`SELECT demanded_until>now() active FROM weather_product WHERE resource='forecast:28099'`
+        )[0]?.active,
+      ).toBe(false);
+      expect(
+        (
+          await sql`SELECT demanded_until>now() active FROM weather_product WHERE resource='daily:28099'`
+        )[0]?.active,
+      ).toBe(true);
+      expect(
+        fixture.fetch.mock.calls.some(
+          ([resource]) => resource === "forecast:28099",
+        ),
+      ).toBe(false);
     });
     it("five simultaneous consumers share one update, repeated alternatives reuse it", async () => {
       await Promise.all(

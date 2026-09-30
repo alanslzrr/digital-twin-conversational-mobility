@@ -200,6 +200,34 @@ if (weatherOnly) {
     })
   ).places.find((p) => p.kind === "station");
   assert.ok(origin && destination);
+  const weatherDb = postgres(root.DATABASE_URL, { max: 1 });
+  const dailyFrom = new Date(Date.now() + 3 * 86400000).toISOString();
+  const dailyArgs = {
+    kind: "weather",
+    weatherProduct: "daily_forecast",
+    placeId: origin.id,
+    fromTime: dailyFrom,
+    toTime: new Date(Date.parse(dailyFrom) + 3600000).toISOString(),
+  };
+  const daily = await tool("get_environment", dailyArgs);
+  assert.equal(daily.status, "evaluated");
+  assert.ok(
+    daily.periods?.some((p) => p.product === "daily_forecast"),
+    "positive daily case requires real normalized data, not unavailable",
+  );
+  assert.ok(
+    daily.alternatives[0].points.some(
+      (p) =>
+        p.product === "daily_forecast" && p.prediction?.coverage === "covered",
+    ),
+  );
+  const [beforeRepeat] =
+    await weatherDb`SELECT attempts FROM weather_product WHERE resource='daily:28079'`;
+  const dailyRepeated = await tool("get_environment", dailyArgs);
+  const [afterRepeat] =
+    await weatherDb`SELECT attempts FROM weather_product WHERE resource='daily:28079'`;
+  assert.equal(String(afterRepeat.attempts), String(beforeRepeat.attempts));
+  assert.deepEqual(dailyRepeated.evidence, daily.evidence);
   const args = {
     originId: origin.id,
     destinationId: destination.id,
@@ -210,6 +238,28 @@ if (weatherOnly) {
   const route = await tool("plan_journey", args);
   assert.equal(route.status, "available");
   assert.equal(route.weatherContext?.status, "evaluated");
+  const futureArgs = { ...args, departureTime: dailyFrom };
+  const futureRoute = await tool("plan_journey", futureArgs);
+  assert.equal(futureRoute.status, "available");
+  assert.ok(
+    futureRoute.weatherContext?.alternatives.some((a) =>
+      a.points.some(
+        (p) =>
+          p.product === "daily_forecast" &&
+          p.prediction?.coverage === "covered",
+      ),
+    ),
+    "future route must use real daily coverage",
+  );
+  // Bound an actual weather-only database failure without changing stored data
+  // or the graph. Transaction release restores access even if assertions fail.
+  await weatherDb.begin(async (tx) => {
+    await tx`LOCK TABLE weather_product IN ACCESS EXCLUSIVE MODE`;
+    const degraded = await tool("plan_journey", futureArgs);
+    assert.equal(degraded.status, "available");
+    assert.equal(degraded.weatherContext.status, "unavailable");
+  });
+  await weatherDb.end();
   const forecast = await tool("get_environment", {
     kind: "weather",
     weatherProduct: "hourly_forecast",
@@ -240,6 +290,10 @@ if (weatherOnly) {
     weather: route.weatherContext,
     forecast,
     warnings,
+    daily,
+    futureRouteWeather: futureRoute.weatherContext,
+    dailyRepeatAcquisitions: 0,
+    weatherFailurePreservedRoute: true,
     repeatCache: true,
   };
   writeFileSync(
