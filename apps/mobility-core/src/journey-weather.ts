@@ -4,15 +4,12 @@ import type {
   WeatherPeriod,
   WeatherProduct,
 } from "@mobility/contracts";
-import {
-  selectForecast,
-  selectWarnings,
-  weatherRelevance,
-} from "@mobility/domain";
+import { selectWarnings, weatherRelevance } from "@mobility/domain";
 import { weatherFreshness } from "@mobility/provenance";
 import { weatherDatabase } from "./database";
-import { weatherProducts } from "./weather-cache";
+import { readWeatherProducts, weatherProducts } from "./weather-cache";
 import { weatherQuery } from "./weather-query";
+import { chooseWeather } from "./weather-selection";
 
 type Point = { latitude: number; longitude: number };
 type Site = {
@@ -41,32 +38,33 @@ export async function journeyWeather(
   routes: Itinerary[],
   origin: Point,
   destination: Point,
-  product?: "hourly_forecast" | "warnings",
+  product?: "hourly_forecast" | "daily_forecast" | "warnings",
 ) {
   const signal = AbortSignal.timeout(2000);
   try {
     const sites: Site[] = [];
     for (const [alternative, r] of routes.entries()) {
-      sites.push(
-        {
-          key: `${alternative}:origin`,
-          ...origin,
-          stop_id: null,
-          start: r.start,
-          end: new Date(Date.parse(r.start) + 1000).toISOString(),
-          walk: false,
-          alternative,
-        },
-        {
-          key: `${alternative}:destination`,
-          ...destination,
-          stop_id: null,
-          start: r.end,
-          end: new Date(Date.parse(r.end) + 1000).toISOString(),
-          walk: false,
-          alternative,
-        },
-      );
+      if (product === undefined)
+        sites.push(
+          {
+            key: `${alternative}:origin`,
+            ...origin,
+            stop_id: null,
+            start: r.start,
+            end: new Date(Date.parse(r.start) + 1000).toISOString(),
+            walk: false,
+            alternative,
+          },
+          {
+            key: `${alternative}:destination`,
+            ...destination,
+            stop_id: null,
+            start: r.end,
+            end: new Date(Date.parse(r.end) + 1000).toISOString(),
+            walk: false,
+            alternative,
+          },
+        );
       for (const [i, l] of r.legs.entries())
         for (const side of ["from", "to"] as const) {
           const coords =
@@ -120,21 +118,93 @@ export async function journeyWeather(
       ),
     ].slice(0, 12);
     signal.throwIfAborted();
-    const rows = municipalities.length
-      ? await weatherProducts(
-          [
-            ...(product === "hourly_forecast" ? [] : ["warnings:28"]),
-            ...(product === "warnings"
-              ? []
-              : municipalities.map((m) => `forecast:${m}`)),
-          ],
-          signal,
+    const cached = await readWeatherProducts(
+      municipalities
+        .flatMap((m) =>
+          product === "warnings"
+            ? []
+            : product === "hourly_forecast"
+              ? [`forecast:${m}`]
+              : product === "daily_forecast"
+                ? [`daily:${m}`]
+                : [`forecast:${m}`, `daily:${m}`],
         )
+        .concat(
+          municipalities.length && (!product || product === "warnings")
+            ? ["warnings:28"]
+            : [],
+        ),
+      signal,
+    );
+    const needed = new Set<string>();
+    if (municipalities.length && (!product || product === "warnings"))
+      needed.add("warnings:28");
+    for (const site of mapped) {
+      const municipality = String(site.location?.code ?? "");
+      if (!municipalities.includes(municipality) || product === "warnings")
+        continue;
+      if (product) {
+        needed.add(
+          `${product === "daily_forecast" ? "daily" : "forecast"}:${municipality}`,
+        );
+        continue;
+      }
+      const hourlyRow = cached.find(
+        (r) => r.resource === `forecast:${municipality}`,
+      );
+      const hourly = hourlyRow?.payload;
+      const choice = chooseWeather(
+        cached,
+        municipality,
+        site.start,
+        site.end,
+        [],
+      );
+      if (
+        choice?.product === "forecast" &&
+        choice.freshness === "recently_checked" &&
+        choice.prediction.coverage === "covered"
+      ) {
+        needed.add(`forecast:${municipality}`);
+      } else {
+        const outside =
+          hourly?.product === "forecast" &&
+          (Date.parse(site.start) < Date.parse(hourly.validFrom) ||
+            Date.parse(site.end) > Date.parse(hourly.validTo));
+        // A known missing horizon suppresses demand until the normal review is
+        // due; a route never forces a download of an existing payload.
+        if (
+          !outside ||
+          (hourlyRow && new Date(hourlyRow.next_due_at).getTime() <= Date.now())
+        )
+          needed.add(`forecast:${municipality}`);
+        needed.add(`daily:${municipality}`);
+      }
+    }
+    // One shared signal and one acquisition for all alternatives/products. Cached
+    // products not demanded remain eligible for comparison without refreshing them.
+    const refreshed = needed.size
+      ? await weatherProducts([...needed], signal)
       : [];
+    const rows = [
+      ...new Map(
+        [...cached, ...refreshed].map((row) => [row.resource, row]),
+      ).values(),
+    ].sort((a, b) => a.resource.localeCompare(b.resource));
     const evidence: WeatherEvidence[] = rows.map((row) => ({
       key: row.resource,
       version: row.version,
-      issuedAt: iso(row.issued_at),
+      issuedAt:
+        row.payload?.product === "daily_forecast" ? null : iso(row.issued_at),
+      ...(row.payload?.product === "daily_forecast"
+        ? {
+            issuedAtRaw: row.payload.issuedAtRaw,
+            invalidFields: row.payload.invalidFields,
+            issueTimeZone: row.payload.issueTimeZone,
+            ageBasis: row.payload.ageBasis,
+            ageBasisInterpretation: row.payload.ageBasisInterpretation,
+          }
+        : {}),
       validFrom: iso(row.valid_from),
       validTo: iso(row.valid_to),
       fetchedAt: iso(row.fetched_at),
@@ -156,7 +226,13 @@ export async function journeyWeather(
     const warning = payload("warnings:28");
     const periodPool = new Map<
       string,
-      { id: string; municipality: string; value: WeatherPeriod }
+      {
+        id: string;
+        municipality: string;
+        product: string | null;
+        version: string | null;
+        value: WeatherPeriod;
+      }
     >();
     const alertPool = new Map<
       string,
@@ -167,17 +243,16 @@ export async function journeyWeather(
       const summaries = relevant.map((s) => {
         if (!s.location || !municipalities.includes(String(s.location.code)))
           return { point: s.key, status: "location_unavailable" as const };
-        const municipality = String(s.location.code),
-          forecast = payload(`forecast:${municipality}`);
-        const prediction =
-          forecast?.product === "forecast"
-            ? selectForecast(
-                forecast,
-                s.start,
-                s.end,
-                s.walk ? [{ start: s.start, end: s.end }] : [],
-              )
-            : null;
+        const municipality = String(s.location.code);
+        const choice = chooseWeather(
+          rows,
+          municipality,
+          s.start,
+          s.end,
+          s.walk ? [{ start: s.start, end: s.end }] : [],
+          product,
+        );
+        const prediction = choice?.prediction ?? null;
         const warnings =
           warning?.product === "warnings"
             ? selectWarnings(
@@ -200,7 +275,18 @@ export async function journeyWeather(
               };
         return {
           point: s.key,
-          status: prediction?.coverage ?? "forecast_unavailable",
+          status:
+            prediction?.coverage ??
+            (rows.some(
+              (r) =>
+                r.payload &&
+                r.payload.product !== "warnings" &&
+                r.payload.municipality === municipality &&
+                (Date.parse(s.end) <= Date.parse(r.payload.validFrom) ||
+                  Date.parse(s.start) >= Date.parse(r.payload.validTo)),
+            )
+              ? "outside_horizon"
+              : "forecast_unavailable"),
           municipality,
           name: s.location.name,
           validFrom: s.start,
@@ -208,10 +294,13 @@ export async function journeyWeather(
           knownWalkingInterval: s.walk,
           evidenceKeys: evidence
             .filter(
-              (e) =>
-                e.key === `forecast:${municipality}` || e.key === "warnings:28",
+              (e) => e.key === choice?.resource || e.key === "warnings:28",
             )
             .map((e) => e.key),
+          product: choice?.product ?? null,
+          freshness: choice?.freshness ?? "unavailable",
+          dailyReason: choice?.reason ?? null,
+          version: choice?.version ?? null,
           prediction,
           warnings,
         };
@@ -242,6 +331,14 @@ export async function journeyWeather(
                   municipality: s.municipality,
                   warnings: s.warnings,
                   precipitationOnFoot: s.prediction?.precipitationOnFoot ?? [],
+                  context: [
+                    s.product,
+                    s.freshness,
+                    s.prediction?.coverage,
+                    s.prediction && "resolutions" in s.prediction
+                      ? s.prediction.resolutions
+                      : [1],
+                  ],
                 },
               ]
             : [],
@@ -252,12 +349,19 @@ export async function journeyWeather(
         points: unique.map((s) => {
           if (!s.municipality || !s.warnings) return s;
           const periodRef = (p: WeatherPeriod) => {
-            const key = JSON.stringify([s.municipality, p]);
+            const key = JSON.stringify([
+              s.municipality,
+              s.product,
+              s.version,
+              p,
+            ]);
             let item = periodPool.get(key);
             if (!item && periodPool.size < 96) {
               item = {
                 id: `p${periodPool.size}`,
                 municipality: s.municipality,
+                product: s.product,
+                version: s.version,
                 value: p,
               };
               periodPool.set(key, item);
@@ -289,6 +393,13 @@ export async function journeyWeather(
             prediction: prediction
               ? {
                   coverage: prediction.coverage,
+                  ...("extremes" in prediction
+                    ? {
+                        extremes: prediction.extremes,
+                        resolutions: prediction.resolutions,
+                        skyCoverage: prediction.skyCoverage,
+                      }
+                    : { resolutions: [1] }),
                   periodRefs,
                   precipitationOnFootRefs: walkingRefs,
                   truncated:
@@ -336,6 +447,7 @@ export async function journeyWeather(
           "Origin, destination and located leg endpoints/transfers only; municipal-capital forecast and coarse CAP polygons, not continuous route weather. Waiting outdoors is not inferred.",
       },
       limitations: [
+        "Daily extrema refer to the published UTC date, not departure temperature. Daily periods retain 6/12/24-hour resolution; issue time without a zone is not an exact confirmed instant.",
         "Past evidence is not live. A fresh check does not extend original validity. Probability/accumulation intervals are not probabilities for a few walking minutes. Weather does not imply transport disruption.",
       ],
     };

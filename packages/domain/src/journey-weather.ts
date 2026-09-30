@@ -154,6 +154,7 @@ export function selectWarnings(
 export function weatherRelevance(
   areas: {
     municipality: string;
+    context?: unknown;
     warnings: ReturnType<typeof selectWarnings>;
     precipitationOnFoot: WeatherPeriod[];
   }[],
@@ -162,6 +163,7 @@ export function weatherRelevance(
     areas
       .map((a) => ({
         municipality: a.municipality,
+        context: a.context,
         zones: [...a.warnings.zones].sort(),
         status: a.warnings.status,
         warnings: a.warnings.alerts
