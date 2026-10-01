@@ -237,3 +237,30 @@ it("repeated prices read the versioned file, never fetching a tariff provider", 
     fetchSpy.mockRestore();
   }
 });
+
+it("does not warn for implicit or explicit today after the tariff check date", () => {
+  vi.setSystemTime(new Date("2026-10-01T22:30:00Z"));
+  for (const selector of [
+    { parkingId: "84", durationMinutes: 120 },
+    { parkingId: "84", durationMinutes: 120, date: "2026-10-02" },
+  ]) {
+    expect(
+      parkingResult(null, input(selector)).parkings[0]?.price,
+    ).toMatchObject({
+      tariff: { checkedAt: "2026-10-01" },
+      cost: { amount: 6.15 },
+      temporalContext: {
+        requestedDate: "2026-10-02",
+        basis: "last_published_tariff",
+      },
+    });
+  }
+  expect(
+    parkingResult(
+      null,
+      input({ parkingId: "84", durationMinutes: 120, date: "2026-10-03" }),
+    ).parkings[0]?.price,
+  ).toMatchObject({
+    temporalContext: { basis: "projection_at_last_published_prices" },
+  });
+});
