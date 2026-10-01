@@ -82,6 +82,11 @@ export {
   weatherOverlaps,
   weatherRelevance,
 } from "./journey-weather";
+export {
+  parkingCost,
+  parkingFreeScenario,
+  parkingPriceContext,
+} from "./parking-prices";
 export { dgtTemporalStatus } from "./road-incidents";
 export {
   applyRoutingEvidence,
