@@ -1,6 +1,6 @@
 # Roadmap local: estado auditado y criterios de cierre
 
-Actualizado el **30/09/2026**, tras la entrega de predicción diaria municipal. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
+Actualizado el **01/10/2026**, tras la exclusión de ampliaciones de routing aprobada por el usuario. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
 
 **Estado actual: R0 integrado en `main` y runtime local actualizado.** E1 corregido, E2 cerrado y E3–E6 entregados mediante [PR #16](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/16). E8 aplicó 0008–0012 desde el esquema habitual 0007, reimportó destinos y recompiló/reinició Core, Web, agente y worker. No equivale a cobertura completa ni servicio operativo.
 
@@ -77,9 +77,9 @@ Orden por dependencias, no por número de endpoints:
 - [x] **Contexto meteorológico del itinerario:** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Entrega y límites](acceptance/2026-09-28-journey-weather.md).
 - [x] Predicción diaria municipal: XML oficial, probabilidad/cielo/extremos por fecha, caché separada y selección contextual sin interpolación. [Evidencia](acceptance/2026-09-30-daily-weather.md).
 - [x] Tarifas verificadas y coste orientativo de parking: 15 aparcamientos EMT, tarifas generales/especiales y campaña Pitis; duración opcional, máximo y gratuidad condicionada separados de ocupación. Catálogo versionado y cálculo backend, sin adquisiciones tarifarias por consulta. [Entrega y límites](acceptance/2026-10-01-parking-prices.md).
-- [ ] Ampliaciones posteriores del brief: routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
+- **Fuera del alcance de esta evaluación, por decisión del usuario el 01/10/2026:** routing en bicicleta propia y directo en coche, itinerarios completos con BiciMAD, coche + aparcamiento + transporte público y otras combinaciones nuevas que incorporen bicicleta o coche. No son funcionalidades entregadas ni tareas aplazadas; no constituyen pendientes de cierre. Se conservan las rutas actuales de transporte público y caminatas, incluidos transbordos entre operadores, las consultas de disponibilidad BiciMAD y las consultas de ocupación y tarifas de aparcamiento. RT adicional y accesibilidad operativa mantienen sus pendientes actuales.
 
-**Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
+**Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Las ampliaciones de routing excluidas por decisión del usuario no se exigen para cerrar R1/R2; esta decisión no completa los demás requisitos ni declara R1/R2 cerrados. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
 
 ## R2 — Cierre de evaluación local (≤5 personas)
 
