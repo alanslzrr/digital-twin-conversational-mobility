@@ -76,7 +76,8 @@ Orden por dependencias, no por número de endpoints:
 - [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
 - [x] **Contexto meteorológico del itinerario:** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Entrega y límites](acceptance/2026-09-28-journey-weather.md).
 - [x] Predicción diaria municipal: XML oficial, probabilidad/cielo/extremos por fecha, caché separada y selección contextual sin interpolación. [Evidencia](acceptance/2026-09-30-daily-weather.md).
-- [ ] Ampliaciones posteriores del brief: precios de parking y routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
+- [x] Tarifas verificadas y coste orientativo de parking: 15 aparcamientos EMT, tarifas generales/especiales y campaña Pitis; duración opcional, máximo y gratuidad condicionada separados de ocupación. Catálogo versionado y cálculo backend, sin adquisiciones tarifarias por consulta. [Entrega y límites](acceptance/2026-10-01-parking-prices.md).
+- [ ] Ampliaciones posteriores del brief: routing bici/coche/intermodalidad. No se eliminan del alcance; cualquier exclusión posterior requiere aprobación explícita.
 
 **Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
 
