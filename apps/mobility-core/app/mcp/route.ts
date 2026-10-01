@@ -237,9 +237,9 @@ const handler = createMcpHandler(
     server.registerTool(
       "get_parking",
       {
-        title: "Observed parking availability",
+        title: "Parking availability and documented prices",
         description:
-          "Find participating Madrid public car parks by name or street. Per-category timestamps and freshness; missing availability is not zero spaces.",
+          "Find Madrid car parks by query (name/street) OR exact parkingId. Optional durationMinutes 1–1440 for cars and date YYYY-MM-DD. Returns independent observed availability and verified EMT tariffs, approximate published/calculated costs or a maximum when bands are incomplete; explicit conditional park-and-ride scenarios. Missing price is not zero; latest published prices may be projected without confirming future validity.",
         inputSchema: parkingInputSchema,
         annotations,
       },
