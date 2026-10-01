@@ -145,7 +145,21 @@ export const roadInputSchema = z.object({
   query: z.string().trim().min(2).max(120),
   limit: z.number().int().min(1).max(20).default(10),
 });
-export const parkingInputSchema = roadInputSchema;
+export const parkingInputSchema = z
+  .object({
+    query: z.string().trim().min(2).max(120).optional(),
+    parkingId: z
+      .string()
+      .regex(/^\d{1,10}$/)
+      .optional(),
+    durationMinutes: z.number().int().min(1).max(1440).optional(),
+    vehicleType: z.literal("car").optional(),
+    date: z.iso.date().optional(),
+    limit: z.number().int().min(1).max(20).default(10),
+  })
+  .refine((input) => Boolean(input.query) !== Boolean(input.parkingId), {
+    message: "Supply query OR parkingId, not both",
+  });
 export const historyInputSchema = z
   .object({
     source: z.enum([
@@ -250,4 +264,5 @@ export type {
   WeatherPeriod,
   WeatherProduct,
 } from "./journey-weather";
+export { type ParkingTariff, parkingTariffSchema } from "./parking-prices";
 export type { WeatherReading, WeatherStation } from "./weather-observations";
