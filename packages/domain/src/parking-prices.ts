@@ -1,4 +1,5 @@
 import type { ParkingTariff } from "@mobility/contracts";
+import { madridDate } from "./crtm";
 
 export function parkingCost(tariff: ParkingTariff, durationMinutes?: number) {
   if (durationMinutes === undefined)
@@ -58,11 +59,15 @@ export function parkingCost(tariff: ParkingTariff, durationMinutes?: number) {
   };
 }
 
-export function parkingPriceContext(tariff: ParkingTariff, date: string) {
+export function parkingPriceContext(
+  tariff: ParkingTariff,
+  date: string,
+  now = new Date(),
+) {
   const year = Number(date.slice(0, 4));
   const projection =
     year !== tariff.referenceYear ||
-    date > tariff.checkedAt ||
+    date > madridDate(now) ||
     Boolean(tariff.effectiveFrom && date < tariff.effectiveFrom);
   return {
     requestedDate: date,

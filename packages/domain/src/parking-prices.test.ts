@@ -138,3 +138,20 @@ describe("deterministic parking orientation", () => {
     });
   });
 });
+
+it("uses the current Madrid date, not tariff review time, to classify future requests", () => {
+  const now = new Date("2026-10-01T22:30:00Z"); // 02/10 in Madrid, still 01/10 UTC.
+  expect(parkingPriceContext(tariff, "2026-10-02", now)).toMatchObject({
+    basis: "last_published_tariff",
+  });
+  expect(parkingPriceContext(tariff, "2026-10-02", now)).not.toHaveProperty(
+    "note",
+  );
+  expect(parkingPriceContext(tariff, "2026-10-03", now).basis).toBe(
+    "projection_at_last_published_prices",
+  );
+  expect(
+    parkingPriceContext(tariff, "2027-01-01", new Date("2027-01-01T12:00:00Z"))
+      .basis,
+  ).toBe("projection_at_last_published_prices");
+});
