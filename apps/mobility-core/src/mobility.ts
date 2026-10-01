@@ -2,6 +2,7 @@ import type {
   bikesInputSchema,
   environmentInputSchema,
   incidentsInputSchema,
+  parkingInputSchema,
   roadInputSchema,
   SourceId,
   WeatherReading,
@@ -34,7 +35,6 @@ import {
 import type { parseBicimad } from "./adapters/bicimad";
 import type { parseEmtIncidents } from "./adapters/emt";
 import type { parseAir, parseTraffic } from "./adapters/madrid";
-import type { parseParking } from "./adapters/parking";
 import type { parseRenfe } from "./adapters/renfe";
 import { airStationIdentity } from "./catalogs/air-stations";
 import { weatherStations } from "./catalogs/weather-stations";
@@ -44,6 +44,7 @@ import { dgtIncidents } from "./dgt";
 import { summarizePayload } from "./evidence-summary";
 import { ingest, ingestionEnabled } from "./ingestion";
 import { journeyWeather } from "./journey-weather";
+import { parkingResult } from "./parking-prices";
 import { routingPlace, scheduledDepartures } from "./routing";
 import { observationResult } from "./weather-observations";
 
@@ -792,37 +793,8 @@ export async function roads(input: z.infer<typeof roadInputSchema>) {
 
 export { history } from "./history";
 
-export async function parking(input: z.infer<typeof roadInputSchema>) {
-  const state = await snapshot("madrid-parking");
-  if (!state) return { status: "unavailable", reason: "no_observation" };
-  const records = state.payload.parkings as ReturnType<
-    typeof parseParking
-  >["parkings"];
-  return {
-    provenance: state.provenance,
-    provenanceScope: "collection_only",
-    parkings: records
-      .filter((p) =>
-        folded(`${p.name} ${p.address}`).includes(folded(input.query)),
-      )
-      .slice(0, input.limit)
-      .map((p) => ({
-        ...p,
-        ...entityObservation(
-          state.provenance,
-          p.availability.map((a) => a.observedAt).sort()[0],
-          300,
-        ),
-        temporalBasis: "oldest_available_category",
-        availabilityStatus: p.availability.length
-          ? "observed"
-          : "no_observation",
-        availability: p.availability.map((a) => ({
-          ...a,
-          ...entityObservation(state.provenance, a.observedAt, 300),
-        })),
-      })),
-    warning:
-      "Participating municipal feed only. Empty availability means no reading, not zero free spaces. Check freshness for each category.",
-  };
+export async function parking(input: z.infer<typeof parkingInputSchema>) {
+  // Occupancy/provider failure must not hide the independently documented tariff.
+  const state = await snapshot("madrid-parking").catch(() => null);
+  return parkingResult(state, input);
 }
