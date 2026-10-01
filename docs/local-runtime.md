@@ -256,3 +256,9 @@ Aplicar todas las migraciones pendientes con respaldo y escritores detenidos, co
 Para detener DGT sin tocar otros jobs: con acceso administrativo local, `UPDATE source_catalog SET enabled=false WHERE id='dgt'`. Para volver a habilitarlo: `enabled=true`; no borrar identidades ni forzar una ráfaga de próximos vencimientos. Parar/reanudar todos los servicios sigue el runbook existente. Para volver íntegramente a código anterior a 0017, detener escritores y restaurar el respaldo previo según el procedimiento de recuperación; no basta deshabilitar el job, porque el código antiguo de salud tampoco conoce ese ID. No eliminar el histórico manualmente.
 
 [Contrato, consultas, retención y límites DGT](sources/dgt.md). No confundir sensores municipales, publicación DGT y tráfico real observado.
+
+### Precios de aparcamiento
+
+`get_parking` acepta `query` o `parkingId`, duración opcional `durationMinutes` (1–1440, turismo) y `date` (YYYY-MM-DD). Los 15 IDs contrastados y seis perfiles están en `apps/mobility-core/src/catalogs/parking-prices.ts`; no hay descargas tarifarias ni migraciones. Para actualizar precios, contrastar directorio y tarifa especial/general EMT, editar esa versión, ejecutar pruebas/check y recompilar Core/agente siguiendo el ciclo local habitual. No copiar precios SOAP ni extender la general a otro operador.
+
+La ocupación mantiene sus tiempos propios. `price.cost.status=maximum_only` ofrece un máximo, no un coste calculado; `freeScenario` es condicionado y separado del precio ordinario. Fechas futuras usan proyección a precios conocidos sin caducidad artificial. Pitis tiene campaña pública independiente: conservar fuente/fecha y revisar explícitamente al cambiar la publicación. [Cobertura, pruebas y límites](acceptance/2026-10-01-parking-prices.md).
