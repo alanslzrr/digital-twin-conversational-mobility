@@ -1,6 +1,19 @@
 # Metro/CRTM: comprobación acotada de fuentes
 
+[Índice de la wiki](../index.md) · [Archivo de research](index.md) · [Estado vigente](../roadmap.md)
+
+> **Investigación histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Comprobado el **29/09/2026**, sobre `main` en `b8892d8`. Investigación pública y comparación con archivos locales; sin importaciones, llamadas al modelo ni cambios del runtime/OTP.
+
+## Índice interno
+
+- [Conclusión](#conclusión)
+- [1. Metro: archivo descargado, no solo metadatos](#1-metro-archivo-descargado-no-solo-metadatos)
+- [2. Correspondencias: evidencia disponible y límites](#2-correspondencias-evidencia-disponible-y-límites)
+- [3. Implicaciones técnicas mínimas](#3-implicaciones-técnicas-mínimas)
+- [Evidencia local y alcance de la comprobación](#evidencia-local-y-alcance-de-la-comprobación)
+
 
 ## Conclusión
 

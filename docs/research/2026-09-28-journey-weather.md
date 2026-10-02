@@ -1,8 +1,24 @@
 # Meteorología como contexto del desplazamiento
 
+[Índice de la wiki](../index.md) · [Archivo de research](index.md) · [Estado vigente](../roadmap.md)
+
+> **Investigación histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **28/09/2026**. **Investigación y propuesta; no implementación ni modificación del alcance aprobado.**
 
 **Continuidad:** tras esta investigación, el usuario acordó el enfoque y solicitó las [instrucciones del siguiente bloque](../plans/2026-09-28-journey-weather.md). Ese plan concreta la entrega; las comprobaciones y los límites de esta investigación siguen siendo los descritos aquí.
+
+## Índice interno
+
+- [Recomendación](#recomendación)
+- [Evidencia investigada](#evidencia-investigada)
+- [Flujo funcional propuesto](#flujo-funcional-propuesto)
+- [Persistencia y actualización mínimas](#persistencia-y-actualización-mínimas)
+- [Qué significa un cambio sustancial](#qué-significa-un-cambio-sustancial)
+- [Cobertura espacial y temporal sin falsa precisión](#cobertura-espacial-y-temporal-sin-falsa-precisión)
+- [Orden de una implementación posterior](#orden-de-una-implementación-posterior)
+- [Nota operativa y límites de esta investigación](#nota-operativa-y-límites-de-esta-investigación)
+
 
 ## Recomendación
 
