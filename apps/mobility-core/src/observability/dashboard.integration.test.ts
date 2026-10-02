@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { readdir, readFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -10,7 +10,9 @@ vi.mock("../database", () => ({ database: () => fixture.sql }));
 
 import { readEntities } from "../dashboard/entities";
 import { executeManual, readExecution } from "../dashboard/executions";
+import { readOverview } from "../dashboard/overview";
 import { readSources, readTrace } from "../dashboard/readers";
+import { readEntitySeries } from "../dashboard/series";
 import { boundedTransaction, observabilityPool } from "./database";
 import { pruneObservability } from "./retention";
 import { storeTelemetry } from "./telemetry";
@@ -20,6 +22,8 @@ const owner = randomUUID(),
   other = randomUUID();
 let admin: ReturnType<typeof postgres>, sql: ReturnType<typeof postgres>;
 let originalUrl: string | undefined;
+let measuring = false;
+const measured: { query: string; parameters: unknown[] }[] = [];
 const payload = () => ({
   schemaVersion: 1,
   id: randomUUID(),
@@ -95,6 +99,10 @@ describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
       sql = postgres(originalUrl, {
         max: 4,
         connection: { search_path: `${schema},public` },
+        debug: (_connection, query, parameters) => {
+          if (measuring && /^(SELECT|WITH)\b/i.test(query.trim()))
+            measured.push({ query, parameters });
+        },
         onnotice: () => {},
       });
       fixture.sql = sql;
@@ -307,6 +315,250 @@ describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
         status: 404,
       });
       await sql`UPDATE dashboard_tool_execution SET expires_at=now()-interval '1 second' WHERE id=${first.id}`;
+    });
+    it("keeps full-selection totals independent of pagination and bounds derived insights", async () => {
+      const first = await readEntities({ category: "bikes", limit: 1 }, owner);
+      const full = await readEntities({ category: "bikes", limit: 100 }, owner);
+      const recent = await readEntities(
+        { category: "bikes", freshness: "recent" },
+        owner,
+      );
+      expect(recent.entities).toHaveLength(2);
+      expect(first.totals?.total).toBe(2);
+      expect(full.totals).toMatchObject({ total: 2 });
+      const tariffs = await readEntities(
+        {
+          category: "places",
+          section: "reference",
+          product: "reference:tariffs",
+        },
+        owner,
+      );
+      expect(tariffs.entities.length).toBeGreaterThan(0);
+      expect(tariffs.entities.every((e) => e.kind === "catalog")).toBe(true);
+      const overview = await readOverview(new URLSearchParams());
+      expect(overview.metrics).toHaveLength(4);
+      expect(overview.products).toHaveLength(13);
+      expect(overview.activity.bins).toHaveLength(24);
+      const series = await readEntitySeries("bikes", "a", {});
+      expect(series.points).toHaveLength(0);
+      expect(series.coverage).toBe("partial");
+    });
+    it("filters tool families before paging and paginates chronological turns without partial-zero usage", async () => {
+      await sql`INSERT INTO evaluation_session(session_id,evaluator_id) VALUES('dense',${owner})`;
+      const start = Date.now() - 3600000;
+      const entries = Array.from({ length: 60 }, (_, i) =>
+        event({
+          turnId: `t${i.toString().padStart(2, "0")}`,
+          occurredAt: new Date(start + i * 1000).toISOString(),
+          usage:
+            i === 0
+              ? {
+                  inputTokens: null,
+                  outputTokens: 3,
+                  cachedInputTokens: null,
+                  reasoningTokens: null,
+                }
+              : null,
+        }),
+      );
+      for (let i = 0; i < entries.length; i += 32)
+        await storeTelemetry(
+          batch(entries.slice(i, i + 32), [], owner, "dense"),
+        );
+      await storeTelemetry(
+        batch(
+          [
+            event({
+              kind: "tool_requested",
+              attemptId: null,
+              callId: "qualified",
+              tool: "mobility__get_network_status",
+              usage: null,
+            }),
+            event({
+              kind: "tool_result",
+              attemptId: null,
+              callId: "qualified",
+              tool: "mobility__get_network_status",
+              usage: null,
+            }),
+          ],
+          [],
+          owner,
+          "dense",
+        ),
+      );
+      const summary = await readTrace(
+        owner,
+        "dense",
+        "summary",
+        new URLSearchParams(),
+      );
+      expect(summary).toMatchObject({
+        totalTurns: 61,
+        counts: { tools: 1, missing: 60 },
+        usage: { inputTokens: null, outputTokens: 3, totalTokens: null },
+      });
+      expect("turns" in summary && summary.turns[0]?.turnId).toBe("t00");
+      expect("turns" in summary && summary.turns).toHaveLength(50);
+      const cursor =
+        "nextTurnCursor" in summary ? summary.nextTurnCursor : null;
+      expect(cursor).toBeTruthy();
+      const next = await readTrace(
+        owner,
+        "dense",
+        "summary",
+        new URLSearchParams({ turnCursor: cursor ?? "" }),
+      );
+      expect("turns" in next && next.turns).toHaveLength(11);
+      const tools = await readTrace(
+        owner,
+        "dense",
+        "events",
+        new URLSearchParams({ family: "tools", limit: "1", call: "qualified" }),
+      );
+      expect(tools).toMatchObject({
+        events: [
+          {
+            callId: "qualified",
+            toolIdentity: {
+              runtimeName: "mobility__get_network_status",
+              canonicalName: "get_network_status",
+            },
+          },
+        ],
+      });
+    });
+    it("reduces more than 240 observations and uses the latest retained correction without interpolation", async () => {
+      const now = Date.now(),
+        latest = new Date(now - 10000).toISOString();
+      const observations = Array.from({ length: 300 }, (_, i) => ({
+        job_id: "bicimad",
+        observed_at: new Date(now - 310000 + i * 1000).toISOString(),
+        ingested_at: new Date(now - 9000).toISOString(),
+        quality: "provisional",
+        raw_reference: "synthetic-series",
+        payload: {
+          stations: [
+            {
+              id: "dense-series",
+              observedAt: new Date(now - 310000 + i * 1000).toISOString(),
+              bikes: i,
+            },
+          ],
+        },
+      }));
+      await sql`INSERT INTO mobility_history ${sql(observations)}`;
+      await sql`INSERT INTO mobility_history(job_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES('bicimad',${latest},now(),'provisional','synthetic-late-correction',${sql.json({ stations: [{ id: "dense-series", observedAt: latest, bikes: 999 }] })})`;
+      const series = await readEntitySeries("bikes", "dense-series", {
+        window: "1h",
+      });
+      expect(series.reduced).toBe(true);
+      expect(series.points.length).toBeLessThanOrEqual(240);
+      expect(series.points.at(-1)).toMatchObject({
+        observedAt: latest,
+        value: 999,
+      });
+      expect(
+        series.points.every(
+          (p) => Date.parse(p.ingestedAt) > Date.parse(p.observedAt),
+        ),
+      ).toBe(true);
+      expect(series).toMatchObject({
+        mode: "event",
+        coverage: "partial",
+        unit: "bicicletas",
+      });
+    });
+    it("records actual stored-reader query plans with explicit row and time bounds", async () => {
+      measuring = true;
+      try {
+        await readEntities({ category: "bikes", limit: 1 }, owner);
+        await readOverview(new URLSearchParams());
+        await readEntitySeries("bikes", "dense-series", { window: "1h" });
+        await readTrace(owner, "dense", "summary", new URLSearchParams());
+      } finally {
+        measuring = false;
+      }
+      const plans: {
+        root: string;
+        planningMs: number;
+        executionMs: number;
+        rows: number;
+      }[] = [];
+      for (const query of measured) {
+        const result = await sql.unsafe(
+          `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${query.query}`,
+          query.parameters as [],
+        );
+        const plan = result[0]?.["QUERY PLAN"]?.[0];
+        expect(plan).toBeTruthy();
+        expect(Number(plan["Execution Time"])).toBeLessThan(3000);
+        plans.push({
+          root: String(plan.Plan["Node Type"]),
+          planningMs: Number(plan["Planning Time"]),
+          executionMs: Number(plan["Execution Time"]),
+          rows: Number(plan.Plan["Actual Rows"]),
+        });
+      }
+      await mkdir("tmp/dashboard-qa", { recursive: true });
+      await writeFile(
+        "tmp/dashboard-qa/sql-plans.json",
+        JSON.stringify(
+          {
+            environment:
+              "isolated PostgreSQL, synthetic fixtures, not production performance",
+            queryCount: plans.length,
+            plans,
+          },
+          null,
+          2,
+        ),
+      );
+      expect(plans.length).toBeGreaterThan(10);
+    });
+    it("reads meteorological history by station and magnitude without mixing units", async () => {
+      const at = new Date(Date.now() - 60000).toISOString();
+      await sql`INSERT INTO mobility_history(job_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES('aemet',${at},now(),'provisional','synthetic-weather-series',${sql.json(
+        {
+          readings: [
+            {
+              stationId: "qa-weather",
+              observedAt: at,
+              measurements: [
+                {
+                  name: "temperature",
+                  value: 18,
+                  unit: "°C",
+                  periodMinutes: 0,
+                },
+                {
+                  name: "precipitation",
+                  value: 2,
+                  unit: "mm",
+                  periodMinutes: 60,
+                },
+              ],
+            },
+          ],
+        },
+      )})`;
+      const temperature = await readEntitySeries("environment", "qa-weather", {
+        product: "aemet",
+        magnitude: "temperature",
+        window: "1h",
+      });
+      expect(temperature.points.map((p) => p.value)).toEqual([18]);
+      expect(temperature.unit).toBe("°C");
+      const rain = await readEntitySeries("environment", "qa-weather", {
+        product: "aemet",
+        magnitude: "precipitation",
+        window: "1h",
+      });
+      expect(rain.points.map((p) => p.value)).toEqual([2]);
+      expect(rain.unit).toBe("mm");
+      expect(rain.warning).toContain("agregada");
     });
     it("reads source aggregate and removes expired content and quota safely", async () => {
       expect(await readSources()).toBeTruthy();
