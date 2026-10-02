@@ -1,6 +1,6 @@
 # Roadmap local: estado auditado y criterios de cierre
 
-Actualizado el **01/10/2026**, tras la exclusión de ampliaciones de routing aprobada por el usuario. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
+Actualizado el **02/10/2026**, tras el registro de fuentes y la aprobación de exclusiones RT/accesibilidad para cerrar R1. La auditoría original de R0 partió de `f9ef91e`; no describe por sí sola las ampliaciones E7 ya entregadas.
 
 **Estado actual: R0 integrado en `main` y runtime local actualizado.** E1 corregido, E2 cerrado y E3–E6 entregados mediante [PR #16](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/16). E8 aplicó 0008–0012 desde el esquema habitual 0007, reimportó destinos y recompiló/reinició Core, Web, agente y worker. No equivale a cobertura completa ni servicio operativo.
 
@@ -8,13 +8,15 @@ Actualizado el **01/10/2026**, tras la exclusión de ampliaciones de routing apr
 
 ## Continuidad vigente
 
+**R1 cerrado el 02/10/2026 para el alcance aprobado**, con [registro por producto](sources/README.md) y exclusiones explícitas. R2 sigue abierto. Los límites de cada entrega conservados abajo no son nuevas obligaciones de ampliación.
+
 **E7/R1: EMT y CRTM estático entregados e instalados localmente.** EMT incluye catálogo y próximas llegadas bajo demanda; ver [evidencia y límites](acceptance/2026-09-25-emt.md). CRTM incluye catálogos, horarios estáticos de Metro Ligero/interurbanos y correspondencias publicadas, mediante [PR #22](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/22) y [PR #23](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/23): migración 0014 aplicada, exports importados y Core/Web/agente actualizados. [Semántica y límites CRTM](sources/crtm.md).
 
 **Geocodificación implementada en PR #25**: catálogos primero, caché, consentimiento, ambigüedad, procedencia y límites globales. Migración 0015 instalada. **Nominatim público autorizado y activo desde el 27/09/2026**: consulta real del Museo del Prado por MCP, catálogo primero, consentimiento, atribución y caché positiva/negativa comprobados. No enviar direcciones personales/confidenciales.
 
 **Routing ampliado instalado localmente (PR #26)**: Renfe, EMT, Metro Ligero e interurbanos; actualización explícita de GTFS/OSM/catálogos/grafo mediante releases verificados, activación en mantenimiento y rollback comprobado. RT Renfe se aplica solo con identidad/fecha/versión/frescura válidas; avisos EMT se adjuntan por línea y vigencia sin inventar desvíos. Metro conserva catálogo pero horarios caducados quedan fuera del grafo. [Operación y límites](routing-releases.md), [evidencia de instalación y regresiones](acceptance/2026-09-25-routing-releases.md).
 
-**DGT y herramientas agregadas entregados** sobre Core, PostgreSQL y el worker existentes. Acceso XML oficial público verificado, sin cuenta; [semántica y límites](sources/dgt.md). Pendientes posteriores: cobertura/RT y ampliaciones del brief descritas abajo.
+**DGT y herramientas agregadas entregados** sobre Core, PostgreSQL y el worker existentes. Acceso XML oficial público verificado, sin cuenta; [semántica y límites](sources/dgt.md). Cobertura y exclusiones de cierre: véase R1 y el [índice de fuentes](sources/README.md).
 
 **R2.1 — Historial de conversaciones implementado y comprobado localmente.** Mis conversaciones lista solo sesiones propias vigentes, con fecha de creación, paginación de veinte y reapertura nativa de EVE. No duplica mensajes ni cambia retención/E2. [Evidencia, integración y límites](acceptance/2026-09-28-conversation-history.md). Es independiente de las ampliaciones de fuentes R1; no implica cierre de R1/R2. El alcance vigente es el de este roadmap; las actas anteriores son evidencia histórica, no requisitos adicionales.
 
@@ -57,11 +59,11 @@ Prioridad: corregir antes de ampliar fuentes. IDs remiten a la auditoría.
 
 **R0 local completado en el alcance acordado:** funcionalidad existente y regresiones verificadas sin exigir otra campaña de aceptación, consumo o benchmark. E8 ya integró y actualizó el runtime habitual; E7 amplía cobertura. No equivale a servicio operativo ni marca los pasos 1–5 como completos.
 
-## R1 — Completar el alcance acordado del dominio
+## R1 — Alcance acordado del dominio cerrado
 
 Orden por dependencias, no por número de endpoints:
 
-- [ ] Registro de fuentes: contrato, cobertura espacial/temporal, licencias/atribución, credenciales/caducidad, límites y GAPs con evidencia. Activar una fuente no equivale a revisar su licencia.
+- [x] [Registro de fuentes por producto](sources/README.md): uso, cobertura, acceso/actualización, condiciones/atribución y evidencia existente. Documenta límites, credenciales sin valores y fechas automáticas que no acreditan revisión. Activar una fuente no equivale a revisar su licencia.
 - [x] Catálogo EMT: paradas con UUID estable y namespace propio, líneas internas/etiquetas y sentidos versionados. GTFS EMT incorporado al grafo; correspondencia API↔GTFS parcial por ID publicado y coordenadas, sin fusionar UUIDs.
 - [x] Integración estática CRTM entregada: catálogos con identidades por red, persistencia, resolución MCP, consulta de horarios con calendarios/excepciones/frecuencias y correspondencias publicadas sin fusionar UUIDs. Migración 0014 y exports instalados; runtime actualizado. [Fuentes, consultas y límites](sources/crtm.md).
 - **Fuera del alcance de cierre, por acuerdo:** horarios/routing actuales de Metro de Madrid y nuevas correspondencias CRTM↔EMT/Renfe. Conservar catálogos y asociaciones ya entregados; no tratar esta exclusión como implementación completada, espera de proveedor ni obligación de buscar otro feed. [Decisión e instrucciones](plans/2026-09-29-scope-closure.md).
@@ -69,22 +71,22 @@ Orden por dependencias, no por número de endpoints:
 - [x] Geocoder externo: implementación local-first/caché/ambigüedad/procedencia/límites entregada en PR #25; Nominatim público autorizado/activado y consulta real de lugar público comprobada el 27/09/2026. No enviar domicilios personales a Nominatim público. [Contrato](sources/geocoding.md).
 - [x] Routing GTFS Renfe/EMT/Metro Ligero/interurbanos instalado; Metro excluido por caducidad. Resolución MCP con IDs separados, correspondencias de itinerario y frecuencias explícitas. No implica RT de todas las redes.
 - [x] Actualización explícita coordinada y reversible GTFS/catálogos/OSM/grafo mediante releases inmutables, journal y mantenimiento. Rollback/re-activación reales comprobados; no se añade scheduler.
-- [x] Overlay Core de RT/alertas Renfe y avisos de línea EMT sobre itinerarios, con snapshots existentes y degradación explícita. OTP sin segundo polling. Queda ampliar RT de las redes CRTM incluidas en la evaluación y demostrar identidad de viaje entre llegadas EMT y GTFS; no se asignan por línea sola.
+- [x] Overlay Core de RT/alertas Renfe y avisos de línea EMT sobre itinerarios, con snapshots existentes y degradación explícita. OTP sin segundo polling. Fuera del cierre por aprobación del 02/10/2026: RT adicional CRTM y nueva vinculación de llegadas EMT con viajes GTFS para modificar itinerarios. Se conservan las llegadas por parada; no se asignan a viajes por línea sola. No se afirma imposibilidad técnica ni se excluyen otras integraciones por analogía.
 - [x] Accesibilidad estática trazable en las cuatro herramientas existentes ([acta](acceptance/2026-09-29-static-accessibility.md)). EMT sin atributos permanece desconocido; ML2/ML3 conserva códigos y discrepancia acotada a su versión.
-- [ ] Accesibilidad operativa: ascensores/escaleras RT como GAP externo hasta disponer de fuente oficial; caminatas y conexiones interiores no verificadas. No garantizar recorridos completos desde atributos estáticos.
+- **Fuera del cierre por aprobación del 02/10/2026:** integración del estado operativo de ascensores/escaleras y verificación completa de recorridos accesibles. Se mantienen accesibilidad estática y avisos de accesibilidad ya recibidos por Renfe u otras fuentes existentes. No garantizar recorridos completos desde atributos estáticos; no son capacidades implementadas ni imposibles técnicamente.
 - [x] DGT DATEX 3.7: acceso público real, IDs/versiones, carretera/sentido y puntos/extremos, correcciones e histórico existente. Retiradas no se equiparan a cancelaciones confirmadas; fin temporal contradictorio queda explícito. Sin geometrías ni desvíos inventados. [Fuente y límites](sources/dgt.md).
 - [x] `get_line_status`, `get_network_status` y `get_mobility_snapshot`: lecturas almacenadas, identidad/cobertura parcial, fechas/frescura por componente y muestras acotadas. No consultas masivas ni activación de ventana; ausencia de avisos no significa «red normal».
 - [x] **Contexto meteorológico del itinerario:** predicción horaria municipal y avisos CAP de Madrid, caché compartida, actualización acotada y enriquecimiento de `plan_journey`; sin seguimiento de viajes ni cambios automáticos de rutas. [Entrega y límites](acceptance/2026-09-28-journey-weather.md).
 - [x] Predicción diaria municipal: XML oficial, probabilidad/cielo/extremos por fecha, caché separada y selección contextual sin interpolación. [Evidencia](acceptance/2026-09-30-daily-weather.md).
 - [x] Tarifas verificadas y coste orientativo de parking: 15 aparcamientos EMT, tarifas generales/especiales y campaña Pitis; duración opcional, máximo y gratuidad condicionada separados de ocupación. Catálogo versionado y cálculo backend, sin adquisiciones tarifarias por consulta. [Entrega y límites](acceptance/2026-10-01-parking-prices.md).
-- **Fuera del alcance de esta evaluación, por decisión del usuario el 01/10/2026:** routing en bicicleta propia y directo en coche, itinerarios completos con BiciMAD, coche + aparcamiento + transporte público y otras combinaciones nuevas que incorporen bicicleta o coche. No son funcionalidades entregadas ni tareas aplazadas; no constituyen pendientes de cierre. Se conservan las rutas actuales de transporte público y caminatas, incluidos transbordos entre operadores, las consultas de disponibilidad BiciMAD y las consultas de ocupación y tarifas de aparcamiento. RT adicional y accesibilidad operativa mantienen sus pendientes actuales.
+- **Fuera del alcance de esta evaluación, por decisión del usuario el 01/10/2026:** routing en bicicleta propia y directo en coche, itinerarios completos con BiciMAD, coche + aparcamiento + transporte público y otras combinaciones nuevas que incorporen bicicleta o coche. No son funcionalidades entregadas ni tareas aplazadas; no constituyen pendientes de cierre. Se conservan las rutas actuales de transporte público y caminatas, incluidos transbordos entre operadores, las consultas de disponibilidad BiciMAD y las consultas de ocupación y tarifas de aparcamiento. Las exclusiones RT/accesibilidad aprobadas el 02/10/2026 se delimitan arriba, sin eliminar avisos existentes.
 
-**Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. Las ampliaciones de routing excluidas por decisión del usuario no se exigen para cerrar R1/R2; esta decisión no completa los demás requisitos ni declara R1/R2 cerrados. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
+**Puerta R1:** matriz requisito → fuente/contrato → implementación → prueba → evidencia; cada capacidad implementada o exclusión/GAP formalmente aceptado. **R1 cerrado para esta evaluación:** capacidades entregadas y exclusiones expresamente aprobadas, con registro de fuentes y evidencia enlazada. No implica cobertura exhaustiva, replay completo ni servicio operativo. R2 permanece abierto e independiente; no se reabren R0/E2/E8 ni se exige otra campaña. Una limitación de acceso externo bloquea esa capacidad, no se reporta como completada.
 
 ## R2 — Cierre de evaluación local (≤5 personas)
 
 - [x] **R2.1 — Historial de conversaciones (implementado y verificado localmente):** listado acotado de chats propios, fecha de creación, reapertura con EVE y nuevo chat; Better Auth y aislamiento existentes. Conservar la caducidad actual de acceso (siete días por defecto) y mostrar errores de sesión no disponible sin renovar permisos. Sin otra biblioteca, copia de mensajes ni cambios en E2. [Alcance, instrucciones y criterio de cierre](plans/2026-09-28-conversation-history.md).
-- [ ] R0/R1 satisfechos para el alcance explícitamente acordado.
+- [x] R0/R1 satisfechos para el alcance explícitamente acordado; R2 no queda cerrado por ello.
 - [ ] Cinco cuentas concurrentes: sesiones aisladas, CSRF, scopes, cuotas atómicas, revocación, logout y ausencia de secretos en navegador/modelo/logs.
 - [ ] Comprobar el uso con evaluadores reutilizando las consultas existentes y los casos afectados por cada entrega. No se exige otra campaña general para avanzar.
 - [ ] Observar métricas de uso normal, separando caché, red externa, routing y modelo, para comprobar la reducción real de búsquedas tras PR #18. Ensayos específicos de consumo/latencia son opcionales y requieren aprobación; E2 sigue cerrado.
