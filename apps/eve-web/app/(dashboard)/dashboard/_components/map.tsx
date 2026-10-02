@@ -61,10 +61,16 @@ export default function MobilityMap({
         center.every(Number.isFinite) &&
         Math.abs(center[0] ?? 100) <= 90 &&
         Math.abs(center[1] ?? 200) <= 180;
-      const m = L.map(host.current, { preferCanvas: true }).setView(
+      const m = L.map(host.current, {
+        preferCanvas: true,
+        zoomControl: false,
+      }).setView(
         valid ? [center[0] as number, center[1] as number] : [40.4168, -3.7038],
         zoom >= 5 && zoom <= 19 ? zoom : 12,
       );
+      L.control
+        .zoom({ zoomInTitle: "Acercar mapa", zoomOutTitle: "Alejar mapa" })
+        .addTo(m);
       map.current = m;
       layer.current = L.layerGroup().addTo(m);
       setReady(true);
@@ -84,6 +90,7 @@ export default function MobilityMap({
       const move = () => {
         clearTimeout(timer);
         timer = setTimeout(() => {
+          if (window.location.pathname !== "/dashboard/mobility") return;
           const view = new URLSearchParams(window.location.search),
             center = m.getCenter();
           view.set("map", "1");
@@ -92,7 +99,11 @@ export default function MobilityMap({
             `${center.lat.toFixed(6)},${center.lng.toFixed(6)}`,
           );
           view.set("zoom", String(m.getZoom()));
-          window.history.replaceState(null, "", `/dashboard/mobility?${view}`);
+          window.history.replaceState(
+            window.history.state,
+            "",
+            `/dashboard/mobility?${view}`,
+          );
           const b = m.getBounds();
           setBbox(
             [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(","),
@@ -197,8 +208,9 @@ export default function MobilityMap({
           utilizable · referencia. El color no sustituye las fechas de la ficha.
         </p>
         <span>
-          Fondo externo best-effort · puntos con coordenadas publicadas · tabla
-          accesible equivalente
+          Fondo cartográfico externo, disponible según el servicio · puntos con
+          coordenadas publicadas · los mismos datos se pueden consultar en la
+          tabla
         </span>
         {tileError ? (
           <span role="status">

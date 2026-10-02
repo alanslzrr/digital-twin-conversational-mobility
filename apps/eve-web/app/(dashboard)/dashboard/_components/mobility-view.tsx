@@ -131,7 +131,11 @@ export function Mobility({
       if (map) next.set("map", "1");
       for (const key of ["center", "zoom"])
         if (existing.has(key)) next.set(key, existing.get(key) ?? "");
-      window.history.replaceState(null, "", `/dashboard/mobility?${next}`);
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `/dashboard/mobility?${next}`,
+      );
     }
   }, [id, queryString, map]);
   const entities = page?.entities ?? [];
@@ -442,7 +446,7 @@ export function Mobility({
                 >
                   <td className="p-3">
                     <Link
-                      className="font-medium underline-offset-4 hover:underline"
+                      className="inline-flex min-h-11 items-center font-medium underline-offset-4 hover:underline"
                       href={`/dashboard/mobility/${category}/${encodeURIComponent(e.id)}?${detailParameters(e.evidence.productId)}`}
                     >
                       {e.name}

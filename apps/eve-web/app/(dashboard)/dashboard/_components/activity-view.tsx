@@ -78,7 +78,7 @@ export function Events({ id }: { id?: string }) {
   useEffect(() => {
     if (!id)
       window.history.replaceState(
-        null,
+        window.history.state,
         "",
         `/dashboard/activity?${publicSelection}`,
       );
@@ -93,7 +93,7 @@ export function Events({ id }: { id?: string }) {
     <>
       <PageTitle
         title={id ? "Detalle de actividad" : "Actividad del sistema"}
-        description="Feed operativo saneado, sin sesiones, argumentos ni contenidos privados. Captura desde la instrumentación; no se importa stdout histórico."
+        description="Eventos registrados del sistema, sin datos personales ni contenidos privados de conversaciones. Solo incluye lo registrado desde el inicio de esta captura."
       />
       {!id ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -259,7 +259,10 @@ export function Events({ id }: { id?: string }) {
             {events.map((e) => (
               <tr key={String(e.id)} className="border-b last:border-0">
                 <td className="p-3 text-xs">
-                  <Link href={`/dashboard/activity/${e.id}?${qs}`}>
+                  <Link
+                    href={`/dashboard/activity/${e.id}?${qs}`}
+                    className="inline-flex min-h-11 items-center"
+                  >
                     <Instant value={e.occurredAt} />
                   </Link>
                 </td>
