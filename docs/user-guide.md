@@ -8,6 +8,7 @@
 - [Consultas útiles](#consultas-útiles)
 - [Interpretar resultados](#interpretar-resultados)
 - [Historial y continuidad](#historial-y-continuidad)
+- [Panel privado](#panel-privado)
 
 ## Entrar y conversar
 
@@ -72,3 +73,28 @@ El acceso a una conversación caduca por defecto a los siete días de registrarl
 El **historial de conversaciones** guarda la conversación. El **histórico de movilidad** permite consultar publicaciones retenidas. Son funciones distintas; [diagrama y permisos](architecture.md#dos-históricos-distintos).
 
 **Fuentes:** [interfaz oficial y adaptaciones](../apps/eve-web/vendor/eve/README.md), [contratos MCP](reference/mcp.md), [acta del historial](acceptance/2026-09-28-conversation-history.md), [cierre E2](acceptance/2026-09-25-e2-closure.md).
+
+## Panel privado
+
+Después de [actualizar el runtime](local-runtime.md#actualizar-el-panel), entra con la cuenta de evaluador existente y pulsa **Panel** desde EVE. **Telemetría** abre tus conversaciones; **Volver al chat** conserva la interfaz oficial. El menú se convierte en un diálogo en pantallas pequeñas.
+
+| Vista | Uso |
+| --- | --- |
+| Resumen | Estado almacenado de servicios, actividad y fuentes; no es un sondeo en vivo de proveedores. |
+| Movilidad | Elegir categoría, fuente, frescura y búsqueda; aplicar filtros, paginar y abrir detalles. El mapa es opcional. |
+| Herramientas | Ver contratos/efectos, inspeccionar lo almacenado o confirmar una ejecución manual. |
+| Fuentes e ingestión | Calendarios, versiones, leases, fallos, gates y próximos vencimientos almacenados. |
+| Eventos | Filtrar eventos operativos saneados por fuente, gravedad, tipo y periodo de hasta siete días. |
+| Conversaciones | Índice propio, resumen por turno, intentos, herramientas, tokens y payloads saneados bajo demanda. |
+
+Hay tres mecanismos separados:
+
+1. **Refresco** vuelve a leer datos almacenados. Pausar, ocultar el panel o perder conexión interrumpe el polling y las peticiones. La acción Actualizar respeta la misma cadencia mínima.
+2. **Actividad visible** renueva cada 60 segundos la ventana existente del worker. No habilita ingestión desactivada ni consulta herramientas.
+3. **Ejecución manual** necesita confirmación. Usa el mismo ejecutor MCP y puede activar actividad, completar caché, adquirir datos o consultar routing según el catálogo. Si se pierde la respuesta, recuperar el mismo identificador consulta su estado; no ejecuta otra vez. Una ejecución desconocida no se interpreta como completada.
+
+La inspección almacenada no adquiere recursos. Las herramientas sin resultado materializado lo indican. Observación, ingestión, comprobación, emisión y vigencia son tiempos distintos; las colecciones no prestan su timestamp a las entidades sin observación. **Antiguo**, **No disponible** y **Comprobado recientemente** no se presentan como live.
+
+El mapa usa OpenStreetMap y solicita teselas externas sin identidad, búsqueda ni filtros en la URL. OpenStreetMap recibe la dirección IP y las solicitudes de la zona visible. Solo se carga al activar Mapa; no realiza barridos ni descarga offline. La atribución permanece visible. Si las teselas fallan, la tabla sigue disponible; sus puntos son datos almacenados, no posiciones en tiempo real.
+
+Las conversaciones anteriores a esta captura pueden aparecer **sin instrumentar**. Un intento registra la entrada efectiva enviada al proveedor después de los ajustes de presupuesto, no toda la transcripción de EVE. Se excluyen reasoning cifrado, cabeceras y secretos. Las omisiones, truncamientos y uso desconocido permanecen visibles. El detalle técnico no reconstruye contenido perdido. Consulta [límites y retención](reference/system.md#panel-y-telemetría).

@@ -126,3 +126,33 @@ La meteorología observada filtra una descarga conjunta a las 25 estaciones del 
 Scopes: lectura `mobility.read`, administración de evaluación `mobility.evaluation.manage` y gestión de ingestión `mobility.ingestion.manage`. [Autorización](../../apps/mobility-core/src/auth.ts) y [rutas Core](../../apps/mobility-core/app/api) mantienen esa separación.
 
 **Evidencia y referencias:** [archivo de actas](../acceptance/index.md), [recursos](../resources/index.md), [operación local](../local-runtime.md).
+
+## Panel y telemetría
+
+Implementación: [contratos](../../packages/contracts/src/dashboard.ts), [proyección segura](../../packages/contracts/src/safe-data.ts), [BFF Web](../../apps/eve-web/data/queries/dashboard/index.ts), [dispatch Core](../../apps/mobility-core/app/internal/dashboard/[...path]/route.ts), [captura efectiva](../../apps/eve-web/src/budgeted-fetch.ts), [sink](../../apps/mobility-core/src/observability/telemetry.ts). [Acta](../acceptance/2026-10-02-core-dashboard.md).
+
+Las rutas Web `/dashboard`, `/dashboard/mobility`, `/dashboard/tools`, `/dashboard/sources`, `/dashboard/activity` y `/dashboard/conversations` usan Better Auth. Web no importa SQL ni adaptadores. El BFF tiene dispatch cerrado, origen Core fijo, no redirecciones y respuestas no-store. Core revalida evaluador activo y ownership en índices, resúmenes, eventos, payloads y ejecuciones. Datos y operación son comunes a los evaluadores; contenido conversacional y ejecución manual son propios.
+
+JWT de servicio: scopes `mobility.dashboard.read`, `mobility.dashboard.execute`, `mobility.dashboard.activity` y `mobility.telemetry.write`. El sink interno no admite escritura del navegador. La propiedad se registra en el control de presupuesto existente antes de enviar el buffer temprano; la telemetría nunca crea ownership.
+
+| Control | Límite |
+| --- | --- |
+| Refresco resumen / resto | 3 s / 15 s mínimos por clave; no oculto, offline o pausado |
+| Eventos y conversaciones propias activas | Eventos operativos 15 s; resumen/timeline activo 3 s, conversación terminada congelada |
+| Actividad visible | 60 s; cupo independiente 2/min |
+| Lecturas / ejecución | 120/min por evaluador; ejecución 6/min y 60/día |
+| Manual | Entrada 8 KiB; resultado saneado 256 KiB; deadline 60 s; lease 70 s; una activa por propietario |
+| Tabla / mapa | 50 predeterminado, 100 máximo / 1.000 puntos máximo por bbox |
+| Timeline / índice | 50 eventos predeterminado, 100 máximo / 20 conversaciones |
+| Payload model input/output | 512 KiB / 64 KiB |
+| Payload herramienta input/output | 8 KiB / 32 KiB en captura EVE; no confundir con inspector manual |
+| Batch | 32 eventos y 1 MiB máximo |
+| Captura | 16 MiB y 10.000 eventos por sesión; 256 MiB por propietario |
+| Retención | Hasta siete días; accesos expirados/revocados quedan inaccesibles inmediatamente |
+| Sink best-effort | 200 ms HTTP; pool dedicado 2 conexiones; checkout 100 ms; watchdog transacción 150 ms, sentencia 100 ms, lock 25 ms |
+
+Migración aditiva [0021](../../infra/postgres/migrations/0021_dashboard_observability.sql): `conversation_observability`, `conversation_trace_event`, `conversation_trace_payload`, `observability_quota`, `operational_event`, `dashboard_tool_execution` y `dashboard_rate_window`. Cuotas y reservas se actualizan bajo locks propios de observabilidad, no bajo locks de presupuesto. Los payloads se sanean y se deduplican dentro de la misma sesión/tipo; los terminales aceptan ausencia del evento inicial, sin inflar uso por duplicados. Los fallos de captura no repiten inferencias ni deshacen publicaciones.
+
+La purga física acotada se integra en mantenimiento por actividad del worker existente, sin Cron permanente. El filtro temporal de lectura aplica aunque el worker esté parado. Las referencias y contadores se liberan por lotes de hasta 1.000. Esta retención no cambia la de transcripciones EVE ni el historial de movilidad.
+
+Dependencias Web añadidas: SWR 2.4.1, Leaflet 1.9.4 y tipos; render del mapa diferido. [Adaptación Community Agent fijada](../../apps/eve-web/vendor/community-agent/README.md), MIT conservado. EVE sigue siendo la fuente de tokens visuales y componentes. La [guía](../user-guide.md#panel-privado) explica los tres mecanismos de actualización.
