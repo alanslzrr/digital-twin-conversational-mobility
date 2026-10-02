@@ -1,264 +1,142 @@
-# Movilidad local primero
+# Operación local
 
-La evaluación se ejecuta en el ordenador. No requiere Neon, Upstash, Blob, Queues ni Sandbox. La única API de pago del chat sigue siendo el proveedor directo configurado; las pruebas de movilidad no llaman al modelo.
+[Índice](index.md) · [Instalación inicial](installation.md) · [Cuentas](evaluation.md) · [Diagnóstico](troubleshooting.md)
 
-## Preparación reproducible
+Esta es la guía vigente para una instalación ya preparada. No requiere Neon, Upstash, Blob, Queues ni Sandbox cloud. Los registros de pruebas y transiciones antiguas se conservan en [el archivo de la guía anterior](acceptance/local-runtime-history.md).
 
-Requisitos: Node 24.21, pnpm 10.30, Python ≥3.11, Docker Compose. OTP tiene heap de 4 GiB, límite de contenedor de 6 GiB y 4 CPU. Reservar memoria suficiente en Docker además de PostGIS y cualquier otro contenedor.
+## En esta página
+
+- [Inicio y parada](#inicio-y-parada)
+- [Comprobaciones disponibles](#comprobaciones-disponibles)
+- [Actualizar código o configuración](#actualizar-código-o-configuración)
+- [Respaldo y recuperación](#respaldo-y-recuperación)
+- [Actualizar datos](#actualizar-datos)
+- [Credenciales y caducidades](#credenciales-y-caducidades)
+- [Control conversacional E2](#control-conversacional-e2)
+- [Actividad y retención](#actividad-y-retención)
+
+## Inicio y parada
+
+Desde la raíz, con Docker activo y builds existentes:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm setup:local --refresh-token
 pnpm infra:up
-pnpm db:migrate
-pnpm otp:prepare             # Descarga solo si no existe; --download refresca fuentes
-pnpm otp:build               # Construye grafo y registra su versión
-pnpm gtfs:import             # Importación transaccional local; IDs persistentes
-pnpm mobility:enable         # Solo acepta Postgres loopback; no modifica cloud
 pnpm otp:up
-pnpm check
-pnpm build:agent
-pnpm start:local             # Core + EVE oficial + worker; Ctrl-C termina sus procesos
-```
-
-Antes de reconstruir un grafo existente, detener OTP con `pnpm otp:down`; después volver a arrancarlo. Tras modificar código o variables, reconstruir/reiniciar las aplicaciones. No ejecutar dos supervisores sobre los mismos puertos.
-
-Para meteorología, añade `AEMET_API_KEY` únicamente a `apps/mobility-core/.env.local` **antes** de `pnpm mobility:enable`. Sin clave, esa fuente permanece deshabilitada. EMT usa `EMT_CLIENT_ID` y `EMT_PASSKEY` en ese mismo archivo; sus avisos y llegadas bajo demanda se habilitan al ejecutar `pnpm db:migrate && pnpm mobility:enable`. Consulta `get_incidents` con `source: "emt"`; Renfe sigue siendo el valor por defecto. No copiar estas variables al frontend.
-
-La cuenta del evaluador, su contraseña y la clave del modelo se preparan con los comandos ya existentes de `README.md`. No repetir `evaluator create` si el slot ya existe. No desactivar Better Auth para probar.
-
-Abrir **http://127.0.0.1:3000/evaluation**. La interfaz sigue siendo Web Chat oficial EVE. Todos los puertos de infraestructura y aplicaciones están limitados a loopback.
-
-Para desarrollo: `pnpm dev` y `pnpm worker` en terminales distintas, con PostGIS y OTP ya arrancados. `start:local` usa los builds productivos.
-
-## Ingestión y consulta
-
-- Cada interacción autorizada que consume cuota y cada consulta MCP abre/renueva una ventana de 30 minutos, monótonamente.
-- El worker no renueva la ventana. Fuera de ella devuelve `idle` sin consultar proveedores.
-- Cada job tiene `next_due_at`, lease de 90 s con propietario, timeout HTTP de 12 s y backoff limitado a 15 min.
-- E3 (tras migración `0010` y actualización conjunta de Core/worker): dos carriles independientes, un job vencido por petición y pausa de 5 s por carril, sin barrera entre ciclos. Los ticks duplicados y el read-through comparten los mismos leases; no son temporizadores exactos de tiempo real. No ejecutar el worker nuevo contra el Core anterior.
-- Salud muestra ventana, heartbeat por carril, inicio/fin y duración del último intento, etapa del error y recuperación de leases. Un heartbeat ausente más de 120 s significa detenido **o** inaccesible, no un error confirmado del proveedor. La frescura se informa por separado.
-- Si cae el worker, el próximo tick retoma los jobs vencidos. Las consultas pueden refrescar su fuente si está vencida y no tiene lease. Un refresh fallido no convierte el último dato en fresco.
-- `INGESTION_ENABLED=false` desactiva los fetches. `source_catalog.enabled=false` desactiva una fuente. En Vercel o con Postgres remoto, este worker falla cerrado aunque el flag sea `true`.
-- `pnpm ingest` abre una ventana explícita y ejecuta un único tick; `pnpm worker` permanece disponible sin mantener la ventana abierta.
-
-| Flujo | Cadencia mínima | Umbral de frescura |
-| --- | --- | --- |
-| Renfe trip updates | 20 s | 40 s |
-| Renfe alertas | 30 s | 90 s |
-| BiciMAD | máx(20 s, TTL) | 60 s por estación |
-| Aire municipal | 10 min | 2 h por medición |
-| Tráfico municipal | 5 min | 15 min |
-| Aparcamientos participantes | 1 min | 5 min por categoría |
-| AEMET 25 estaciones iniciales Madrid | 10 min | 2 h por estación |
-
-Los umbrales son políticas de evaluación, no garantías de los proveedores. Los datos siguen siendo provisionales. Una lectura de cero se conserva; una lectura ausente nunca se sustituye por cero.
-
-## Datos y cobertura
-
-- GTFS oficial Renfe recortado a las rutas Madrid `10T`, verificado con estaciones/servicios relacionados. Se normalizan espacios en cabeceras e IDs. El importador rechaza ausencia de tablas/referencias esenciales.
-- El componente Renfe importado contiene 95 estaciones y 118 variantes de ruta. Calendario Renfe: 23/09/2026–22/10/2026; la release conserva vigencias separadas para EMT, Metro Ligero e interurbanos. **No sirve indefinidamente**: actualizar GTFS, reconstruir OTP e importar la misma versión antes de su vencimiento.
-- OSM: extracto Geofabrik Madrid. Algunas líneas de Cercanías llegan fuera del extracto; no se garantiza acceso peatonal completo allí.
-- `plan_journey`: base **prevista** de Renfe, EMT, Metro Ligero, interurbanos y caminatas según la release activa; Core aplica RT/alertas Renfe y avisos EMT con identidad, vigencia y frescura verificadas. No incluye trayectos actuales de Metro de Madrid ni bici/coche. Metro conserva catálogo; sus horarios/routing actuales y nuevas correspondencias CRTM↔EMT/Renfe están excluidos del cierre por acuerdo. Las asociaciones existentes siguen disponibles, son parciales y no garantizan tiempos de conexión ni accesibilidad. Rechaza modos no implementados y fechas fuera del calendario; filtra tiempo total a pie y transbordos. La opción de silla de ruedas no garantiza ascensores operativos.
-- Contrato de modos tras F01: `TRANSIT` exige un tramo de transporte público y permite acceso/egreso/transbordos a pie dentro del límite; `WALK` permite rutas íntegramente peatonales; `TRANSIT+WALK` permite cualquiera de las dos. No se relajan minutos a pie ni transbordos para encontrar una alternativa. Errores de contrato, timeout, grafo y cobertura se distinguen de `no_route`.
-- `get_departures`: horarios OTP y estimaciones Renfe cuando coinciden viaje/parada y están frescas. Una estimación de llegada NO es una de salida. Un viaje sin RT conserva base `scheduled`, nunca "puntual".
-- `resolve_place`: estaciones Renfe y CRTM, paradas EMT y BiciMAD importadas, búsqueda sin acentos; candidatos ambiguos requieren aclaración. Para direcciones públicas, `resolve_address` consulta catálogos/caché y Nominatim autorizado con consentimiento y atribución.
-- BiciMAD usa GBFS **oficial EMT**, no el feed comunitario con nombre similar. Se conservan `last_reported`, flags de servicio y TTL.
-- Aire: lecturas válidas (`V`) con magnitud/unidad; hora civil Europe/Madrid, H24 es fin del día. Horas DST ambiguas/no existentes se omiten. No interpreta riesgo sanitario.
-- AEMET: observaciones de un catálogo inicial versionado de 25 estaciones madrileñas (incluye Navacerrada, Venturada y Barajas RS), distintas de la predicción municipal horaria y avisos CAP Madrid ya disponibles en `get_environment` y como contexto de `plan_journey`. Cobertura regional parcial: `stationId` exacto o `placeId` con selección de la estación fresca más próxima hasta 20 km, antigua si no hay fresca, sin sustitución silenciosa por Retiro. Sin selector se conserva Retiro (`3195`) explícitamente. Una única adquisición conjunta filtra el extracto regional antes de persistir; reintentos no rejuvenecen lecturas ni retroceden estaciones. 20 km es un límite del producto, no representatividad garantizada. `fint` está en UTC según su metadata, incluso cuando no trae offset; no usar la conversión horaria municipal. Lluvia acumulada 60 min, viento medio 10 min; temperatura/humedad/presión instantáneas (`periodMinutes=0`).
-- Tráfico: sensores municipales, no incidencias DGT ni predicción de viaje.
-- Aparcamientos: SOAP municipal de participantes; algunos publican solo catálogo, otros lecturas antiguas. Frescura individual; disponibilidad vacía significa ausencia de datos.
-
-## Persistencia
-
-PostGIS guarda lugares, mapping de IDs, catálogo GTFS, snapshots actuales, actividad, leases e histórico. Redis sigue disponible pero **no es necesario** para esta vertical; no se añade una segunda fuente de verdad.
-
-`data/` está ignorado por Git. Incluye GTFS/OSM/grafo, manifiestos con URLs/licencias/SHA256 y raw gzip deduplicado por contenido. Histórico/raw tienen retención objetivo de 24 h y se purgan en ticks activos; si el ordenador está apagado o no hay ventana activa, el borrado espera al siguiente tick. El último snapshot puede conservarse como dato antiguo, nunca como live. `get_historical_state` devuelve un índice y muestras acotadas, no una reconstrucción completa de red.
-
-La versión de base y el manifiesto del grafo deben coincidir. No reemplazar manualmente ficheros bajo un OTP vivo. El grafo genera advertencias de calidad de OSM/GTFS: revisar `data/otp/report/` antes de ampliar cobertura.
-
-## Verificación
-
-```sh
-pnpm smoke --production
-pnpm smoke:evaluation        # cuentas temporales 4/5; sin inferencia
-# Solo tras autorizar consumo de créditos:
-pnpm smoke:evaluation --live-mobility  # EVE real: lugares, ruta, meteorología y salud
-pnpm smoke:evaluation --live-weather   # Consulta meteorológica conversacional acotada
-pnpm smoke:mobility          # fuentes reales (+ AEMET si hay clave) + PostGIS + OTP + MCP; abre ventana
-pnpm smoke:routing           # aceptación MCP/OTP sin modelo; renueva ventana de actividad
-pnpm otp:benchmark --restart # reinicia SOLO OTP; 20 consultas / cuatro parejas
-```
-
-Para que estas pruebas controlen los ticks sin carreras con otro worker, usar `pnpm start:local --no-worker`; al terminar reiniciar con `pnpm start:local`. Los checks de movilidad también prueban rechazo de lugares desconocidos, modos no implementados y fechas fuera del feed.
-
-Una conversación puede requerir varias peticiones al proveedor: EVE descubre herramientas (`connection_search`), las ejecuta y después redacta. Un límite de tres peticiones no garantiza completar una consulta con varias herramientas. Los modos `--live*` requieren autorización de consumo y guardan solo un resumen de acciones/respuesta visible en `data/validation/`, nunca razonamiento interno ni credenciales.
-
-Los tests unitarios y CI no necesitan API keys ni descargan datos de movilidad. `smoke:mobility` es opt-in y requiere red hacia proveedores; AEMET solo se prueba cuando tiene clave. `smoke:routing` usa servicios locales y el benchmark OTP requiere autorización operativa separada. Ninguno forma parte de `pnpm check`.
-
-`smoke:routing` requiere Core/OTP/Postgres locales y token MCP vigente; no reinicia servicios ni llama directamente a proveedores externos. Admite `--port=3011` para un Core temporal y `--at=2026-09-25T08:08:58.823Z` para reproducir el instante de la auditoría mientras exista ese calendario. Guarda entradas, resultados, versiones y latencia bajo `data/validation/routing-*/result.json`; falla si una ruta positiva esperada no aparece. [Evidencia de E1 y matriz pendiente](acceptance/2026-09-25-routing.md).
-
-La conversación real del 23/09/2026 completó resolución Atocha/Chamartín, ruta prevista de 13 min, observación AEMET con hora/edad y ausencia de EMT. Fueron cinco peticiones en el intento completado; un intento anterior se detuvo al agotar el límite inicial de tres. Tras autorización ampliada: ocho peticiones totales. No se cambiaron modelo, autenticación ni interfaz.
-
-Muestra medida el 23/09/2026: construcción del grafo 40,4 s; reinicio hasta API disponible 5,4 s; 20 consultas de cuatro parejas, p50 47 ms y p95 66 ms; memoria residente posterior 1,261 GiB (no pico de construcción). Smoke MCP Atocha↔Chamartín: tres alternativas por dirección, primer itinerario 13 min, 192/140 ms. Son mediciones locales de una muestra, no un SLA.
-
-Informes locales: `data/otp/manifest.json`, `graph-manifest.json`, `local-validation.json`, `benchmark.json`. Una muestra pequeña no equivale a certificar toda la red ni su comportamiento en Vercel. Tampoco se ha medido todavía el pico de RAM durante construcción.
-
-## Fuentes primarias y atribución
-
-- [Renfe GTFS](https://data.renfe.com/dataset/horarios-cercanias), CC BY 4.0; GTFS-RT JSON oficial `gtfsrt.renfe.com`. Usar JSON evita añadir un decoder protobuf para la evaluación y no cambia el modelo de dominio.
-- [OSM / Geofabrik Madrid](https://download.geofabrik.de/europe/spain/madrid.html), © OpenStreetMap contributors, ODbL.
-- [BiciMAD GBFS oficial](https://datos.emtmadrid.es/dataset/gbfs-general-bikeshare-feed-specification-de-bicimad).
-- [Aire municipal](https://datos.madrid.es/dataset/212531-0-calidad-aire-tiempo-real), [tráfico municipal](https://datos.madrid.es/dataset/202087-0-trafico-intensidad), [aparcamientos](https://datos.madrid.es/dataset/50027-0-aparcamientosocupacionyservicios).
-- [AEMET OpenData](https://opendata.aemet.es/dist/), © AEMET: reutilización con atribución conforme a [su nota legal](https://www.aemet.es/es/nota_legal). Solo se persisten observaciones, nunca claves, respuestas de autenticación o URLs temporales.
-- [OTP 2.10.0](https://github.com/opentripplanner/OpenTripPlanner/releases/tag/v2.10.0), imagen multiarch fijada por digest en Compose.
-
-No hay deployments ni nuevas altas cloud. El 25/09/2026 EMT autenticó y devolvió incidencias con HTTP 200/código 00, tras aprobarse la aplicación. El adaptador guarda solo la respuesta de incidencias (nunca login/token), reutiliza el token en memoria, respeta backoff y la ventana de actividad. Job `emt-alerts`: 120 s, frescura máxima 600 s basada en `lastBuildDate`, no en la hora de consulta. Los períodos se interpretan en Europe/Madrid; períodos desconocidos no se presentan como activos. El MCP excluye avisos caducados y permite filtrar por línea. Los avisos no equivalen a llegadas: estas se consultan por parada bajo demanda. El routing EMT usa GTFS, sin asignar estimaciones a viajes sin identidad demostrada. DGT DATEX 3.7 está integrado con acceso oficial público, ingestión e histórico; no equivale a los sensores municipales ni inventa desvíos. Ver [fuente y límites DGT](sources/dgt.md).
-
-## Validación adicional 25/09/2026
-
-- `pnpm check`: lint, límites arquitectónicos, tipos, pruebas y builds locales.
-- `pnpm build:agent` requiere acceso al Docker local para que EVE detecte su sandbox; no se añade microsandbox ni se habilitan herramientas por defecto.
-- Smoke movilidad completo: rutas Atocha↔Chamartín (13 min previstas), Renfe, EMT con filtro por línea, BiciMAD, aire, AEMET, tráfico, parking, histórico, actividad y deduplicación.
-- OTP: 20 consultas / cuatro pares, p50 142 ms, p95 256 ms, memoria residente 1.338 GiB. No es certificación de red completa ni pico de construcción.
-- `pnpm smoke:evaluation --live-emt`: conversación real EVE → gpt-6-luna directo → MCP. Descubrió y consultó `get_incidents`, explicó la antigüedad del feed y distinguió avisos futuros de activos. Un primer intento falló por catálogo/instrucciones EVE desactualizados; se corrigieron y se repitió satisfactoriamente.
-- AEMET mostró fallos intermitentes de conexión. El cliente permite un único reintento de conexión; después conserva el backoff y la señalización de error. No reintenta denegaciones HTTP.
-- No se ha publicado en Vercel. DGT, llegadas EMT, red completa y los demás pendientes del roadmap no quedan certificados por estas pruebas.
-
-
-## Control conversacional E2
-
-El modo predeterminado del servidor EVE es `MOBILITY_BUDGET_MODE=interactive`:
-al alcanzar el umbral EVE pausa y muestra Approve/Stop en la interfaz oficial.
-Approve renueva la ventana; Stop cancela el turno y conserva la historia. No hace
-falta crear una campaña ni llamar a `input_tokens` para usar este flujo.
-Se conserva Better Auth, registro y propiedad de sesión en Core, el modelo directo
-fijo y telemetría numérica por intento/turno/sesión. Los 100.000/10.000 son umbrales
-renovables, no un presupuesto global irrevocable ni un coste monetario.
-
-`MOBILITY_BUDGET_MODE=campaign` es una opción explícita para experimentos
-con reservas preventivas: requiere esquema 0008+0009 y campaña autorizada; aprobar
-en EVE no renueva su presupuesto global. Un valor de modo desconocido falla cerrado.
-`pnpm budget:report` informa solo sobre ese ledger experimental, no sobre sesiones
-interactivas; para estas se usan las métricas numéricas del proveedor y ciclo EVE.
-
-El cierre de E2 no despliega ni migra el runtime habitual. Para una transición
-posterior: copia de seguridad, migraciones pendientes en orden, build de Core/Web
-y agente compatibles, y sesiones nuevas para no reutilizar cápsulas anteriores a
-la corrección. No hay llamada al modelo hasta enviar una conversación; estas
-pruebas y builds no ejecutan inferencias.
-
-## Actualización E4 aplicada mediante E8
-
-Antes de activar el código E4, aplicar `0011_trip_destination.sql` junto con las migraciones pendientes y regenerar/reimportar el export normalizado Renfe para obtener terminales. Con las fuentes locales ya disponibles, `python3 scripts/prepare-otp.py` sin `--download` conserva también la secuencia necesaria; comprobar la versión frente al grafo y después `pnpm gtfs:import`. Una exportación antigua sin `stopTimes` sigue siendo importable, pero no permite deducir terminales. No es necesario reconstruir OTP si la versión GTFS no cambia. [Evidencia E4 y límites](acceptance/2026-09-25-line-destinations.md).
-
-## Actualización E5 aplicada mediante E8
-
-`0012_history_revisions.sql` conserva el histórico existente y habilita revisiones. Para integrarla, parar Core/worker, respaldar la base y actualizar código y esquema juntos; no mezclar escritores antiguos con esta migración. Una reversión al escritor anterior requiere la copia previa de la base, no borrar revisiones para reconstruir su PK.
-
-`get_historical_state` acepta EMT y `mode=event` (predeterminado, puede incluir correcciones posteriores) o `mode=knowledge` (solo lo conocido entonces). Mantiene índice parcial/retención 24 h, muestra de cinco entidades y desfase explícito. La frescura por entidad no hereda la hora más reciente de la colección. [Semántica, pruebas y límites E5](acceptance/2026-09-25-history-quality.md).
-
-### Reutilizar el smoke sin ingestión
-
-`pnpm smoke:mobility --port=3011 --read-only` permite comprobar un Core local alternativo con `INGESTION_ENABLED=false`. No activa ventana ni ejecuta ticks de ingestión; falla si el servidor no confirma esa configuración. Consulta los datos existentes (que pueden ser antiguos), MCP y OTP; no llama al modelo. No sustituye las regresiones de recuperación/deduplicación. Véase [E6](acceptance/2026-09-25-functional-continuity.md).
-
-## E8 — Integración desde el esquema habitual 0007
-
-Aplicar **todas** las migraciones pendientes con `pnpm db:migrate`, no ejecutar solamente 0010–0012: esta transición incorpora 0008–0012 en orden, incluidas las tablas E2 aunque el modo normal siga siendo interactivo.
-
-1. Integrar la PR y sincronizar `main` sin descartar cambios locales.
-2. Parar el supervisor `start:local` (Ctrl-C en su terminal): termina Core, Web/agente y worker; mantener Postgres/OTP. Comprobar que sus procesos han terminado.
-3. Guardar un `pg_dump -Fc` local con permisos restringidos y verificar su índice con `pg_restore --list`; respaldar también export/manifiestos. El dump contiene datos privados de autenticación: nunca subirlo a Git ni publicarlo.
-4. Ejecutar `pnpm db:migrate`; comprobar la lista aplicada hasta 0012.
-5. Regenerar el export desde el GTFS local en un directorio temporal, comprobar que su staticVersion coincide con el grafo activo y copiar únicamente `renfe-madrid.json`; ejecutar `pnpm gtfs:import`. No reescribir archivos de OTP vivo. Si cambia la versión, parar OTP y seguir el procedimiento completo de actualización del grafo.
-6. `pnpm check && pnpm build:agent`, luego `pnpm start:local`. Usar sesiones nuevas para no reutilizar cápsulas anteriores a la corrección E2. El arranque no llama al modelo; la ingestión solo trabaja dentro de su ventana.
-7. Comprobar health de Web/Core/agente y heartbeat del worker. No se exige campaña conversacional ni benchmark.
-
-Rollback: parar nuevamente todos los escritores y restaurar copia de base + revisión de código/export compatibles. No arrancar el escritor antiguo contra 0012 ni borrar revisiones para reconstruir su PK. El arranque/parada normal sigue siendo `pnpm start:local` / Ctrl-C; para actualización bajo demanda usar el chat, y para una actualización manual acotada `pnpm ingest` (abre ventana y consulta proveedores).
-
-### Estado tras entrega E8 (25/09/2026)
-
-PR #16 integrada; base habitual migrada de 0007 a 0012, destinos reimportados con la misma versión de grafo y builds Core/Web/agente actualizados. [Registro de entrega](acceptance/2026-09-25-local-delivery.md).
-
-La instancia entregada está en segundo plano, supervisada por `scripts/start-local.mjs`; PID en `data/runtime/local.pid` y log privado en `data/runtime/e8-local.log`. Para pararla, comprobar primero `ps -p "$(cat data/runtime/local.pid)" -o command=` y que sea el supervisor de este repositorio, después `kill -TERM "$(cat data/runtime/local.pid)"`. No matar todos los procesos Node. Para arrancar de nuevo en primer plano: `pnpm start:local`; Ctrl-C para detener. Postgres/Redis/OTP se gestionan por separado con los comandos de infraestructura anteriores.
-
-## EMT: catálogo y llegadas bajo demanda (E7)
-
-Después de respaldar la base y parar Core/worker para actualizar código: `pnpm db:migrate` aplica también `0013`. Con las credenciales EMT solo en Core:
-
-```sh
-pnpm emt:import       # Dos endpoints: catálogo completo de paradas + líneas del día Madrid
-pnpm check
-pnpm build:agent
 pnpm start:local
-pnpm smoke:mobility --emt-only  # Una parada, caché repetida y resolución; sin modelo ni tick global
 ```
 
-`emt:import` es explícito, local y transaccional: fallo de descarga/validación no sustituye el catálogo. Repetir para actualizarlo (preferiblemente antes del uso diario); no hay actualización automática coordinada de catálogos/GTFS/OTP todavía. Guarda export normalizado versionado en `data/sources/emt/<sha256>.json`, fuera de Git. No incluye credenciales. No cambia el grafo.
+Abre [EVE local](http://127.0.0.1:3000/evaluation). `start:local` supervisa Core, Web, agente y worker. No arranques otro supervisor en los mismos puertos. Si ya están activos, utiliza esa instalación.
 
-En una **sesión nueva**, el evaluador puede pedir «Próximas llegadas EMT de la parada 72, con destino y antigüedad», y luego preguntar por una parada ambigua como Cibeles. `resolve_place` acepta `source=emt` y nombre o número exacto; entrega candidatos y sentidos. `get_emt_arrivals` requiere el UUID elegido, no el número. No se ha medido el comportamiento conversacional nuevo mediante inferencias automáticas.
+Para parar:
 
-- Frescura/caché: 30 s por parada, cooldown global de llegadas 5 s, un refresh simultáneo, lease 90 s y backoff 60–900 s. Son políticas locales, no cuotas ni garantías EMT. El worker no recorre paradas; se respeta la ventana y `INGESTION_ENABLED` existentes.
-- Un fallo conserva el último resultado y su antigüedad. Una cuenta atrás antigua no es live; un vacío no demuestra ausencia de servicio. La hora es la operación del proveedor, no una lectura individual de GPS.
-- El catálogo expone fecha de referencia/versión; si `currentDay=false`, actualizar antes de asumir vigencia de líneas/sentidos. Sentidos 1/2 se conservan sin deducir destino desde el nombre; el destino de llegada procede del proveedor.
-- Solo última observación por parada. Pasadas 24 h no se ofrece como estimación utilizable, aunque la última fila persista hasta reemplazo o retirada de la parada. No se añade replay/histórico de llegadas. `rawReference` es checksum del resultado, no archivo raw archivado.
-- Mantener atribución **Powered by EMT de Madrid**, fuente, fecha y [condiciones de uso](https://mobilitylabs.emtmadrid.es/sip/terms-of-use). Las credenciales dinámicas nunca se exportan.
-- `0013` es aditiva. Para rollback de código a PR #18, parar procesos y reconstruir la revisión anterior; las tablas EMT pueden permanecer. Para restauración íntegra de base, usar el backup privado previo con todos los escritores detenidos. No borrar manualmente identificadores de paradas.
+1. Pulsa **Ctrl-C en la terminal del supervisor**. Detiene sus procesos, no otros programas del ordenador.
+2. Si también quieres detener routing, ejecuta `pnpm otp:down`.
+3. Si quieres detener la infraestructura, ejecuta `pnpm infra:down`. Conserva volúmenes; no añadas `-v`.
 
-Pendientes no bloqueantes: Renfe volvió a actualizar durante el arranque E7, pero la causa del episodio TLS sigue sin identificar; la eficiencia de descubrimiento se observa en uso normal. No subir límites ni reabrir E2.
+Para desarrollar, `pnpm dev` y `pnpm worker` se ejecutan por separado, con PostGIS/OTP preparados. No mezcles este modo con el supervisor productivo.
 
+## Comprobaciones disponibles
 
-## E7 — Catálogos y horarios CRTM
+| Comando | Qué comprueba o cambia |
+| --- | --- |
+| `pnpm check` | Lint, fronteras, tipos, tests offline y builds; sin claves cloud ni inferencias |
+| `pnpm build:agent` | Compila EVE con Docker; sin inferencias |
+| `pnpm env:doctor` | Requisitos, existencia de archivos de entorno y logins opcionales; no imprime su contenido |
+| `pnpm smoke --production` | HTTP, autenticación MCP, health EVE y rechazo anónimo con servicios arrancados |
+| `pnpm smoke:evaluation` | Usa slots temporales 4/5 para login, CSRF, aislamiento, cuotas y revocación; no ejecutar si están ocupados |
+| `pnpm smoke:mobility` | Consulta fuentes reales y MCP/OTP; abre actividad y puede adquirir datos |
+| `pnpm smoke:routing` | Casos MCP/OTP locales; renueva actividad, sin modelo ni reinicio de servicios |
 
-La entrega CRTM añade `resolve_place(source=crtm, network=...)` y
-`get_crtm_timetable`, sin modificar OTP ni añadir polling. Reutilizar los exports
-existentes. Antes de actualizar el runtime:
+No son una nueva lista de obligaciones R2. Ejecuta el diagnóstico que responda al cambio o fallo concreto. Los modos `--live*` llaman al modelo y consumen créditos; los benchmarks OTP son operaciones separadas. Ninguno forma parte de `pnpm check`.
 
-1. Parar el supervisor `start:local` con SIGTERM/Ctrl-C y verificar que termina
-   Core, Web/agente y worker; mantener Postgres/Redis/OTP.
-2. Respaldar con `pg_dump -Fc` en `data/backups/` (permisos privados); verificar el
-   índice con `pg_restore --list`. Esta verificación no sustituye probar un restore.
-3. Aplicar **todas** las migraciones pendientes con `pnpm db:migrate` (incluye 0014).
-4. Importar cada directorio versionado existente con
-   `node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/<red>/<sha>`.
-   Importar Metro conserva catálogo/correspondencias, no vuelve vigentes sus horarios.
-5. Ejecutar `pnpm check` y `pnpm build:agent`; iniciar `pnpm start:local`.
-6. Comprobar health de Core/Web y `/eve/v1/health` a través de Web; después
-   `pnpm smoke:mobility --crtm-only`. Usar una sesión EVE nueva para las instrucciones
-   y herramientas actualizadas. No hace falta inferencia o campaña general.
+Healths: [Core](http://127.0.0.1:3001/api/health), [Web](http://127.0.0.1:3000/api/health), [EVE a través de Web](http://127.0.0.1:3000/eve/v1/health). Que un proceso responda no demuestra frescura de sus fuentes: consulta `get_source_health` para eso.
 
-El smoke CRTM comprueba catálogos, horarios Metro Ligero/interurbanos, rechazo de
-Metro fuera de vigencia, correspondencias y salud. Guarda evidencia en
-`data/evaluation/crtm-smoke.json`. No llama a proveedores, modelos ni OTP; la
-consulta MCP renueva la ventana de actividad existente, por lo que el worker
-habitual puede actualizar sus otras fuentes.
+Para un smoke que controle sus propios ticks, `pnpm start:local --no-worker` evita otro worker concurrente. Al terminar, para ese supervisor y vuelve a `pnpm start:local`. El modo `smoke:mobility --port=3011 --read-only` exige Core alternativo con ingestión desactivada; no debe tratarse como acceso de solo lectura a un Core cualquiera.
 
-Consulta manual: primero resolver una parada, después pasar su UUID a
-`get_crtm_timetable` con día de servicio y hora GTFS. Ver [semántica y límites](sources/crtm.md).
-Para actualizar datos se prepara/importa una nueva versión explícitamente. El
-importador preserva UUIDs y sustituye cada red en una transacción; no sincroniza el
-grafo. Para rollback de código, parar los procesos y reconstruir la revisión previa;
-0014 es aditiva y puede permanecer. Para restaurar todo el estado, usar el respaldo
-previo con todos los escritores parados. No borrar manualmente identidades CRTM.
+## Actualizar código o configuración
 
+Una modificación solo documental **no necesita recompilar ni reiniciar**.
 
-## Actualización de routing multioperador
+Para una actualización funcional:
 
-La instalación usa releases inmutables con `data/otp` como symlink. Para actualizar GTFS/OSM/catálogos/grafo, activar, revertir o recuperar una transición interrumpida, seguir [routing-releases.md](routing-releases.md). No ejecutar el preparador/build legacy sobre el release activo. El [acta local](acceptance/2026-09-25-routing-releases.md) registra migraciones 0015–0016, backup y rollback comprobado. Nominatim público está autorizado y activo en esta instalación desde el 27/09/2026; otras instalaciones permanecen desactivadas por defecto.
+1. Revisa la PR, la compatibilidad y el estado de Git. No descartes trabajo local para sincronizar.
+2. Para el supervisor de aplicaciones; mantén Postgres. Cambiar solo aplicaciones no obliga a reiniciar OTP.
+3. Haz un respaldo si se modifican esquema/datos. Guarda también la revisión de código y la release activa.
+4. Ejecuta `pnpm install --frozen-lockfile` si cambia el lockfile.
+5. Ejecuta `pnpm db:migrate` para aplicar **todas** las migraciones pendientes, no solo la última.
+6. Ejecuta `pnpm check` y `pnpm build:agent`.
+7. Arranca `pnpm start:local` y comprueba `pnpm smoke --production`.
+8. Usa una sesión EVE nueva si cambiaron instrucciones o contratos; un chat previo puede conservar su contexto anterior.
 
+No mezcles un worker nuevo con un Core anterior. Revertir código tras una migración requiere comprobar compatibilidad; un checkout anterior no deshace el esquema. [Historial de migraciones](reference/system.md#persistencia).
 
-## DGT y resúmenes almacenados (0017)
+## Respaldo y recuperación
 
-Aplicar todas las migraciones pendientes con respaldo y escritores detenidos, como en el procedimiento anterior. `0017` añade `dgt-incidents` al worker existente y conserva retiradas; no necesita credenciales ni otro proceso. Recompilar Core/Web/agente juntos para exponer los tres agregados en la conexión MCP existente. No cambia interfaz, modelo ni OTP.
+Los dumps contienen datos privados de autenticación y propiedad de conversaciones. Guárdalos en `data/backups/`, con permisos restringidos, nunca en una PR.
 
-`get_incidents` con `source=dgt` activa la ventana y solicita el job solo si está vencido; un error usa el backoff habitual. `get_source_health` muestra su estado. Los agregados `get_line_status`, `get_network_status`, `get_mobility_snapshot` leen almacenamiento sin refrescar ni extender la ventana; no usar un dashboard que los llame como sustituto de la activación de uso normal.
+Con escritores detenidos y Postgres activo:
 
-Para detener DGT sin tocar otros jobs: con acceso administrativo local, `UPDATE source_catalog SET enabled=false WHERE id='dgt'`. Para volver a habilitarlo: `enabled=true`; no borrar identidades ni forzar una ráfaga de próximos vencimientos. Parar/reanudar todos los servicios sigue el runbook existente. Para volver íntegramente a código anterior a 0017, detener escritores y restaurar el respaldo previo según el procedimiento de recuperación; no basta deshabilitar el job, porque el código antiguo de salud tampoco conoce ese ID. No eliminar el histórico manualmente.
+```sh
+umask 077
+mkdir -p data/backups
+backup="data/backups/local-$(date +%Y%m%d-%H%M%S).dump"
+docker compose --env-file .env.local -f infra/local/compose.yaml exec -T postgres   sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$backup"
+docker compose --env-file .env.local -f infra/local/compose.yaml exec -T postgres   pg_restore --list < "$backup" > /dev/null
+```
 
-[Contrato, consultas, retención y límites DGT](sources/dgt.md). No confundir sensores municipales, publicación DGT y tráfico real observado.
+Comprobar el índice demuestra que el archivo es legible, **no que se haya ensayado una restauración completa**. Conserva además los manifiestos, releases y configuración privada necesarios. Un dump de Core no incluye los mensajes almacenados por EVE/Workflow ni todo `data/`.
+
+Para recuperar una actualización de routing utiliza primero [rollback/recover](routing-releases.md#volver-atrás-o-recuperar-una-activación), que conserva cuentas y conversaciones.
+
+Una restauración íntegra de base sustituye datos actuales por la copia elegida. Solo si esa es la recuperación decidida: detén todos los escritores, conserva otra copia del estado actual, confirma el archivo y la revisión de código compatible. El comando siguiente es **destructivo sobre la base local**; define `backup` con la ruta del archivo verificado antes de ejecutarlo:
+
+```sh
+docker compose --env-file .env.local -f infra/local/compose.yaml exec -T postgres   sh -c 'pg_restore --exit-on-error --clean --if-exists --no-owner -U "$POSTGRES_USER" -d "$POSTGRES_DB"'   < "$backup"
+```
+
+No restaures una base de Core de otra versión sobre un grafo distinto: recupera también su release compatible antes de arrancar.
+
+## Actualizar datos
+
+| Producto | Procedimiento vigente |
+| --- | --- |
+| GTFS/OSM/catálogos/grafo | [Release coordinada](routing-releases.md), preparada fuera del activo y activada en mantenimiento |
+| EMT API catálogo | `pnpm emt:import` con credenciales Core y base local; conserva IDs estables; no actualiza el grafo |
+| Municipios IGN | [Importación explícita](installation.md#meteorología-y-geocodificación); no descarga por viaje |
+| Datos dinámicos | Worker/consultas dentro de ventana, caché y backoff; no reimportación manual por conversación |
+| Precios parking | Contrastar fuentes oficiales, editar catálogo versionado y probar/recompilar Core; no copiar precios antiguos del SOAP |
+
+<a id="emt-catálogo-y-llegadas-bajo-demanda-e7"></a>
+
+### EMT: catálogo y llegadas bajo demanda (E7)
+
+Las llegadas se consultan por parada, no mediante un barrido global. Caché persistente de 30 s, cooldown global de 5 s y lease/backoff acotan concurrencia. El destino procede del proveedor; una estimación antigua no se presenta como una cuenta atrás actual. Su referencia raw es checksum, no un archivo de autenticación. [Evidencia EMT](acceptance/2026-09-25-emt.md).
 
 ### Precios de aparcamiento
 
-`get_parking` acepta `query` o `parkingId`, duración opcional `durationMinutes` (1–1440, turismo) y `date` (YYYY-MM-DD). Los 15 IDs contrastados y seis perfiles están en `apps/mobility-core/src/catalogs/parking-prices.ts`; no hay descargas tarifarias ni migraciones. Para actualizar precios, contrastar directorio y tarifa especial/general EMT, editar esa versión, ejecutar pruebas/check y recompilar Core/agente siguiendo el ciclo local habitual. No copiar precios SOAP ni extender la general a otro operador.
+[El catálogo tarifario](../apps/mobility-core/src/catalogs/parking-prices.ts) relaciona 15 IDs EMT con fuentes y perfiles de cálculo. Duraciones de 1–1.440 minutos para turismo; máximos y gratuidad condicionada se separan del coste ordinario. Las fechas futuras admiten proyecciones identificadas. La ocupación tiene reloj y fuente propios. [Acta](acceptance/2026-10-01-parking-prices.md).
 
-La ocupación mantiene sus tiempos propios. `price.cost.status=maximum_only` ofrece un máximo, no un coste calculado; `freeScenario` es condicionado y separado del precio ordinario. Fechas futuras usan proyección a precios conocidos sin caducidad artificial. Pitis tiene campaña pública independiente: conservar fuente/fecha y revisar explícitamente al cambiar la publicación. [Cobertura, pruebas y límites](acceptance/2026-10-01-parking-prices.md).
+## Credenciales y caducidades
+
+- JWT de servicio local: siete días; renovar con `pnpm setup:local --refresh-token` y reiniciar aplicaciones para cargarlo. No cambia las claves del proveedor ni cuentas de evaluadores.
+- OpenAI: editar la clave privada raíz y ejecutar `pnpm configure:openai`; reconstruir/reiniciar Web conforme al ciclo anterior.
+- EMT/AEMET: editar solo el entorno privado de Core; reiniciar Core. Si una fuente estaba deshabilitada, volver a `pnpm mobility:enable` tras configurar la clave.
+- AEMET: nuevas claves con tres meses de vigencia según el aviso comprobado el 02/10/2026. [Renovación y alta](resources/accounts.md#aemet).
+- Cuenta evaluador: 30 días; propiedad del chat: siete días. Reset y revoke tienen efectos distintos. [Administración](evaluation.md).
+- GTFS: consultar `serviceStart/serviceEnd` por feed en la release, no asumir cobertura indefinida. Las fechas registradas en una entrega no se renuevan al reiniciar OTP.
+
+No imprimas tokens para diagnosticar ni desactives TLS. Un error de fuente se trata separado del login del usuario.
+
+## Control conversacional E2
+
+El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Approve/Stop. Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo `campaign` y su ledger son experimentales opt-in, no requisitos del chat ni del cierre. [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
+
+## Actividad y retención
+
+Las interacciones autorizadas que consumen cuota y las consultas MCP ordinarias renuevan 30 minutos. Los agregados `get_line_status`, `get_network_status` y `get_mobility_snapshot` **no** lo hacen. El worker no se autoactiva.
+
+Dos carriles procesan trabajos vencidos con lease de 90 s y backoff. El heartbeat informa del proceso; la frescura informa de los datos. Son señales distintas. [Cadencias y almacenamiento](reference/system.md).
+
+Raw e histórico de movilidad tienen retención objetivo de 24 horas, purgada durante ticks activos. El apagado no ejecuta la purga. Puede conservarse el último snapshot antiguo, identificado como tal. La caducidad de conversaciones no equivale a borrado físico EVE; no hay una tarea de purga de transcripciones implementada.
+
+**Implementación:** [supervisor](../scripts/start-local.mjs), [migrador](../scripts/migrate.mjs), [worker](../scripts/ingestion-worker.mjs), [operación de releases](routing-releases.md). **Evidencia histórica:** [entrega local](acceptance/2026-09-25-local-delivery.md) y [registro anterior](acceptance/local-runtime-history.md).
