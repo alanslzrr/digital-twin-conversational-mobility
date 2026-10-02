@@ -1,6 +1,19 @@
 # Ajuste de alcance aprobado: cerrar sin ampliación Metro
 
+[Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
+
+> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **29/09/2026**. Encargo para integrar y entregar; **no implementar otro proveedor**.
+
+## Índice interno
+
+- [Decisión y lecturas](#decisión-y-lecturas)
+- [1. Conservar exactamente las capacidades entregadas](#1-conservar-exactamente-las-capacidades-entregadas)
+- [2. Cambios concretos](#2-cambios-concretos)
+- [3. Límites y comprobaciones](#3-límites-y-comprobaciones)
+- [4. Entrega y criterio de terminado](#4-entrega-y-criterio-de-terminado)
+
 
 ## Decisión y lecturas
 

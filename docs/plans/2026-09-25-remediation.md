@@ -1,10 +1,30 @@
 # Plan de resolución de la auditoría local
 
+[Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
+
+> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **25/09/2026**. Estado: **ejecución iniciada por autorización del usuario; E0 mínimo y E1 implementados y validados localmente**. E2 cerrado con criterio revisado por el usuario; E3–E8 pendientes; R0–R2 no cerrados. [Evidencia de la primera entrega](../acceptance/2026-09-25-routing.md).
 
 Referencias: [auditoría F01–F09 y casos T01–T13](../audits/2026-09-25-evaluation.md), [roadmap R0–R3](../roadmap.md), [operación local](../local-runtime.md) y [evaluadores](../evaluation.md).
 
 **Vigencia (28/09/2026):** este documento conserva la secuencia original de trabajo. El estado y alcance actuales se consultan en el [roadmap](../roadmap.md), que prevalece sobre los pendientes históricos de este plan; no reabrir entregas ya cerradas. El siguiente bloque es [R2.1 — Historial de conversaciones](2026-09-28-conversation-history.md), basado en las sesiones y el chat oficial de EVE.
+
+## Índice interno
+
+- [Objetivo y límites](#objetivo-y-límites)
+- [Secuencia y dependencias](#secuencia-y-dependencias)
+- [E0 — Preparar una base de aceptación reproducible](#e0--preparar-una-base-de-aceptación-reproducible)
+- [E1 — Corregir routing antes de ampliar el grafo](#e1--corregir-routing-antes-de-ampliar-el-grafo)
+- [E2 — Control conversacional: cerrado con aceptación offline](#e2--control-conversacional-cerrado-con-aceptación-offline)
+- [E3 — Explicar huecos y demostrar recuperación](#e3--explicar-huecos-y-demostrar-recuperación)
+- [E4 — Resolver identidad y destinos en dominio](#e4--resolver-identidad-y-destinos-en-dominio)
+- [E5 — Hacer explícitos tiempo, revisiones y calidad](#e5--hacer-explícitos-tiempo-revisiones-y-calidad)
+- [E6 — Cerrar R0 con exactitud, no con HTTP 200](#e6--cerrar-r0-con-exactitud-no-con-http-200)
+- [E7 — Completar F09 por dependencias, no por cantidad de tools](#e7--completar-f09-por-dependencias-no-por-cantidad-de-tools)
+- [E8 — Certificar R2 para cinco evaluadores](#e8--certificar-r2-para-cinco-evaluadores)
+- [Cómo ejecutar y revisar cada entrega](#cómo-ejecutar-y-revisar-cada-entrega)
+
 
 ## Objetivo y límites
 
