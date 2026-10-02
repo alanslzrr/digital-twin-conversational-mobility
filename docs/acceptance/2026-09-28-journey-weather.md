@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
 
-> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Acta histórica · 28/09/2026.**
 
 [PR #29](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/29). 28/09/2026. Alcance del [plan aprobado](../plans/2026-09-28-journey-weather.md), sin ampliar R1 ni reabrir E2/R2.1.
 

@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
 
-> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Acta histórica · 25/09/2026.**
 
 Fecha: 25/09/2026. Implementado en `alanslzrr/conversation-budget`, pendiente de integración E8. E2 permanece cerrado. Se reutilizan las pruebas y ejemplos existentes; no se añade una campaña de aceptación, consumo o benchmark.
 

@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de research](index.md) · [Estado vigente](../roadmap.md)
 
-> **Investigación histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Investigación histórica · 29/09/2026.**
 
 Comprobado el **29/09/2026**, sobre `main` en `b8892d8`. Investigación pública y comparación con archivos locales; sin importaciones, llamadas al modelo ni cambios del runtime/OTP.
 

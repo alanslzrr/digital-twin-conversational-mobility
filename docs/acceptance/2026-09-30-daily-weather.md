@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
 
-> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Acta histórica · 30/09/2026.**
 
 30/09/2026. Ejecutado el [plan acotado](../plans/2026-09-30-daily-weather.md), conservando su [investigación](../research/2026-09-30-daily-weather.md).
 

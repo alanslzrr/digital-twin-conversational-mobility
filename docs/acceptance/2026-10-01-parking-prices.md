@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
 
-> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Acta histórica · 01/10/2026.**
 
 Entrega local, 01/10/2026. Amplía `get_parking`, sin herramientas nuevas, migraciones ni cambios en OTP/interfaz EVE.
 

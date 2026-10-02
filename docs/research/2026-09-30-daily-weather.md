@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de research](index.md) · [Estado vigente](../roadmap.md)
 
-> **Investigación histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Investigación histórica · 30/09/2026.**
 
 Investigación del **30/09/2026**, sobre `main` en `59613bf`. No implementa el producto ni modifica el runtime. Las [instrucciones de entrega](../plans/2026-09-30-daily-weather.md) fijan el alcance; este documento explica la evidencia y las decisiones.
 

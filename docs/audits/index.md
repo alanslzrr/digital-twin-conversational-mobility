@@ -2,9 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Evolución](../evolution.md) · [Alcance vigente](../roadmap.md) · [Recursos](../resources/index.md)
 
-Hallazgos que motivaron correcciones; no repetir la auditoría para usar el sistema.
-
-Los documentos conservan sus rutas y evidencia. R0/E2/R1 están cerrados; las obligaciones R2 retiradas no se reabren desde este archivo.
+Hallazgos, reproducciones y correcciones documentados durante el desarrollo.
 
 | Documento | Qué encontrarás |
 | --- | --- |

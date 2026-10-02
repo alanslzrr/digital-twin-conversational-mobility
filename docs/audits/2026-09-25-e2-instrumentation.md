@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de audits](index.md) · [Estado vigente](../roadmap.md)
 
-> **Auditoría histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Auditoría histórica · 25/09/2026.**
 
 **Estado vigente: E2 cerrado con criterio revisado por el usuario.** [Acta de cierre](../acceptance/2026-09-25-e2-closure.md). Pausa/aprobación/rechazo verificados offline; campaña real excluida del requisito. El flujo y tabla de ledger que siguen documentan el modo experimental `MOBILITY_BUDGET_MODE=campaign`, no el modo interactivo predeterminado.
 
