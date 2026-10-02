@@ -356,7 +356,12 @@ function SourcesContent({ id }: { id?: string }) {
           ) : null}
         </div>
       ) : null}
-      <section className="overflow-x-auto rounded-lg border bg-card p-5">
+      <section
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: enable keyboard scrolling of the horizontal table.
+        tabIndex={0}
+        aria-label="Latencias por componente y operación"
+        className="overflow-x-auto rounded-lg border bg-card p-5"
+      >
         <h2 className="text-base font-semibold">
           Duración de operaciones comparables
         </h2>

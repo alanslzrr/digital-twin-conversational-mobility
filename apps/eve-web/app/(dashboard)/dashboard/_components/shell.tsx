@@ -103,7 +103,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   };
   return (
     <div className="dashboard-shell min-h-dvh md:grid md:grid-cols-[220px_1fr]">
-      <aside className="hidden min-h-dvh flex-col border-r bg-card px-4 py-6 md:flex">
+      <aside
+        aria-label="Navegación y cuenta"
+        className="hidden min-h-dvh flex-col border-r bg-card px-4 py-6 md:flex"
+      >
         <p className="mb-7 px-3 text-sm font-semibold">Mobility Core</p>
         <Navigation />
         <Link
@@ -216,13 +219,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         </header>
-        <div className="flex flex-wrap gap-x-5 gap-y-1 border-b px-5 py-2 text-xs text-muted-foreground md:px-8">
+        <section
+          aria-label="Estado de actualización"
+          className="flex flex-wrap gap-x-5 gap-y-1 border-b px-5 py-2 text-xs text-muted-foreground md:px-8"
+        >
           <span>
             Actualización de pantalla:{" "}
             {ctx.paused ? "pausada" : ctx.visible ? "visible" : "suspendida"}
           </span>
           <span>
-            Ventana de ingestión:{" "}
+            Actualización desde las fuentes:{" "}
             {error
               ? "no se pudo comprobar"
               : !status?.ingestionEnabled
@@ -234,8 +240,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     })
                   : "inactiva"}
           </span>
-        </div>
-        <div className="px-5 pt-3 text-xs leading-5 text-muted-foreground md:px-8">
+        </section>
+        <section
+          aria-label="Cómo se actualiza la información"
+          className="px-5 pt-3 text-xs leading-5 text-muted-foreground md:px-8"
+        >
           <p>
             Actualizar pantalla relee los datos guardados. No solicita una
             lectura nueva a las fuentes.
@@ -246,7 +255,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               : "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."}
           </p>
           {refreshNotice ? <p role="status">{refreshNotice}</p> : null}
-        </div>
+        </section>
         <main className="mx-auto flex max-w-[1440px] flex-col gap-6 p-5 md:p-8">
           {children}
         </main>
