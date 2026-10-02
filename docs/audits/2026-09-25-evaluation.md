@@ -1,5 +1,19 @@
 # Auditoría de evaluación local — 25 de septiembre de 2026
 
+[Índice de la wiki](../index.md) · [Archivo de audits](index.md) · [Estado vigente](../roadmap.md)
+
+> **Auditoría histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
+## Índice interno
+
+- [Dictamen](#dictamen)
+- [Evidencia y método](#evidencia-y-método)
+- [Revisión de los 13 ejemplos](#revisión-de-los-13-ejemplos)
+- [Hallazgos y acciones](#hallazgos-y-acciones)
+- [Estado de los cinco pasos](#estado-de-los-cinco-pasos)
+- [Orden de cierre recomendado](#orden-de-cierre-recomendado)
+
+
 ## Dictamen
 
 **Estado: prototipo vertical local funcional, con aceptación pendiente. No está cerrado el roadmap ni certificado el alcance completo del gemelo.**
