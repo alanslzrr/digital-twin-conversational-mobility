@@ -13,7 +13,7 @@
 
 ## Servicios y versiones
 
-Valores del repositorio al 02/10/2026; no son una consulta al runtime.
+Configuración versionada al 02/10/2026.
 
 | Componente | Dirección/configuración | Responsabilidad |
 | --- | --- | --- |
@@ -62,9 +62,9 @@ Usa [los ejemplos raíz](../../.env.example), [Web](../../apps/eve-web/.env.exam
 | `OTP_URL` | Core | GraphQL local; no acceso directo desde el chat |
 | `GEOCODER_ENABLED`, `GEOCODER_URL`, `GEOCODER_USER_AGENT`, `GEOCODER_PUBLIC_POLICY_ACCEPTED` | Core, opt-in | [Nominatim público autorizado](../sources/geocoding.md) |
 | `MOBILITY_BUDGET_MODE` | Proceso EVE; normal `interactive` | `campaign` solo experimental opt-in; no requisito del chat |
-| `DATABASE_URL_UNPOOLED`, `UPSTASH_REDIS_REST_*`, `BLOB_READ_WRITE_TOKEN`, `OTP_SANDBOX_ENABLED` | Preparación cloud/Core | No necesarios en local; no significan despliegue activo |
+| `DATABASE_URL_UNPOOLED`, `UPSTASH_REDIS_REST_*`, `BLOB_READ_WRITE_TOKEN`, `OTP_SANDBOX_ENABLED` | Preparación cloud/Core | [Configuración cloud](../deployment.md) |
 
-`setup:local --refresh-token` renueva el JWT local, no la clave EMT/AEMET/OpenAI. El origen no se corrige desactivando CSRF. [Problemas frecuentes](../troubleshooting.md).
+`setup:local --refresh-token` renueva el JWT de servicio local. Las claves de proveedores se renuevan en sus respectivos paneles. Para errores de origen, comprueba que Web y Core comparten `EVALUATION_ORIGIN`. [Problemas frecuentes](../troubleshooting.md).
 
 ## Persistencia
 
@@ -87,7 +87,7 @@ Las migraciones 0001–0007 establecieron la base local; 0008–0009 añadieron 
 
 ## Cadencias y frescura
 
-Son políticas locales, **no promesas de frecuencia del proveedor**. La actividad, un error o una lease pueden retrasar un intento. Hora de observación, descarga y expiración se conservan separadas.
+La tabla indica intervalos mínimos de adquisición y umbrales de frescura definidos por la aplicación. El worker aplica la ventana de actividad, las leases y el backoff antes de adquirir datos. Las horas de observación, descarga y expiración se guardan por separado.
 
 | Producto dinámico | Adquisición/revisión mínima | Frescura de referencia |
 | --- | --- | --- |
@@ -104,13 +104,13 @@ Son políticas locales, **no promesas de frecuencia del proveedor**. La activida
 | Predicciones horaria/diaria | 30 min, demanda por municipio | Publicación, intervalo y horizonte propios |
 | Avisos CAP | 5 min con demanda | Vigencia y estado del aviso |
 
-La meteorología observada filtra una descarga conjunta a las 25 estaciones del catálogo. Los 20 km acotan la selección por ubicación, no garantizan que la estación represente cada calle. La diaria conserva sus intervalos y extremos; no se interpola para inventar temperatura horaria.
+La meteorología observada filtra una descarga conjunta a las 25 estaciones del catálogo. La selección busca estaciones en un radio de 20 km e incluye la distancia en el resultado. La predicción diaria conserva los intervalos y extremos que publica AEMET.
 
 [Políticas de ingestión](../../packages/domain/src/ingestion.ts), [caché meteorológica](../../apps/mobility-core/src/weather-cache.ts), [selección observada](../../packages/domain/src/weather-observations.ts) y [productos/fuentes](../sources/README.md).
 
 ## Comandos y permisos
 
-[El `package.json`](../../package.json) es el catálogo ejecutable; no existe un comando genérico que despliegue todo local y cloud a la vez.
+[El `package.json`](../../package.json) define los comandos disponibles.
 
 | Grupo | Scripts | Efecto |
 | --- | --- | --- |
@@ -120,7 +120,7 @@ La meteorología observada filtra una descarga conjunta a las 25 estaciones del 
 | Aplicaciones | `dev`, `build`, `build:agent`, `start:local` | Desarrollo, compilación o ejecución; build no hace inferencias |
 | Calidad | `check`, `smoke`, `smoke:evaluation` | Distinguir offline y servicios locales; smoke evaluación usa cuentas temporales |
 | Fuentes | `ingest`, `worker`, `smoke:mobility`, `smoke:routing` | Pueden activar adquisición; no forman parte del check offline |
-| Experimentos existentes | `budget:report`, `test:budget:db`, `otp:benchmark`, modos `--live*` | Opt-in; no obligaciones de cierre. Modelo/benchmarks requieren decisión específica |
+| Experimentos existentes | `budget:report`, `test:budget:db`, `otp:benchmark`, modos `--live*` | Ejecución explícita para medir consumo o rendimiento; los modos live utilizan el modelo |
 | Cloud | `configure:vercel`, `check-cloud.mjs` | Separados; no ejecutar durante operación local normal |
 
 Scopes: lectura `mobility.read`, administración de evaluación `mobility.evaluation.manage` y gestión de ingestión `mobility.ingestion.manage`. [Autorización](../../apps/mobility-core/src/auth.ts) y [rutas Core](../../apps/mobility-core/app/api) mantienen esa separación.
