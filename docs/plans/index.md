@@ -1,6 +1,14 @@
-# Planes originales
+# Planes de implementación
 
 [Índice de la wiki](../index.md) · [Evolución](../evolution.md) · [Alcance vigente](../roadmap.md) · [Recursos](../resources/index.md)
+
+## Encargo vigente
+
+| Documento | Estado y alcance |
+| --- | --- |
+| [Panel de Mobility Core y telemetría](2026-10-02-core-dashboard.md) | Spec preparado para una sola PR: panel privado, mapa, datos, operación y telemetría propia. Implementado; [evidencia aislada](../acceptance/2026-10-02-core-dashboard.md). Instalación habitual pendiente. |
+
+## Archivo de planes originales
 
 Planes que guiaron las entregas y propuestas retiradas, con el estado de cada una.
 

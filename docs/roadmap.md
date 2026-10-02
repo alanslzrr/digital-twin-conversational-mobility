@@ -13,6 +13,7 @@ Alcance vigente al **02/10/2026**.
 | R1 — Dominio acordado | **Cerrado.** Fuentes y funciones entregadas, con las exclusiones aprobadas que se enumeran abajo | [Registro de productos](sources/README.md) |
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
+| Panel de Core y telemetría propia | **Implementado y validado en entorno aislado; instalación habitual pendiente de autorización** | [Especificación](plans/2026-10-02-core-dashboard.md) |
 | Publicación Vercel | Alternativa de alojamiento | [Preparación cloud](deployment.md) |
 
 ## Capacidades conservadas
@@ -51,4 +52,8 @@ La retirada cancela esos requisitos de cierre. Las pruebas ejecutadas se recogen
 
 ## Cómo continuar
 
-El alcance funcional acordado está entregado. Para utilizarlo y mantener sus datos, sigue la [operación local](local-runtime.md). Las ampliaciones se decidirán como nuevos encargos.
+El alcance funcional anterior está entregado. Para utilizarlo y mantener sus datos, sigue la [operación local](local-runtime.md).
+
+El **02/10/2026** se acordó una ampliación independiente: [panel privado de Mobility Core y telemetría de conversaciones propias](plans/2026-10-02-core-dashboard.md), en una sola PR. Incluye datos con procedencia/frescura, mapa OpenStreetMap, herramientas consultables manualmente, salud/ingestión y eventos saneados. Reutiliza el acceso y estilo de EVE; todos los evaluadores ven datos/operación, y cada uno solo su contenido conversacional. El panel visible mantiene la ventana existente de ingestión; sus lecturas no disparan adquisiciones. La nueva telemetría se retiene hasta siete días. El spec identifica qué señales ya existen y qué captura hay que incorporar.
+
+Esta ampliación no reabre E2, R0/R1, R2.1 ni las obligaciones de cierre R2 retiradas. La implementación se recoge en el [acta del panel](acceptance/2026-10-02-core-dashboard.md). La actualización del runtime habitual requiere aplicar la migración 0021, renovar el token local y reiniciar Web/Core; no se ha ejecutado sobre los servicios habituales.
