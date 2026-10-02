@@ -266,5 +266,6 @@ export type {
   WeatherProduct,
 } from "./journey-weather";
 export { type ParkingTariff, parkingTariffSchema } from "./parking-prices";
+export * from "./safe-data";
 export * from "./telemetry";
 export type { WeatherReading, WeatherStation } from "./weather-observations";

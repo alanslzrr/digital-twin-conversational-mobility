@@ -54,6 +54,7 @@ export const dashboardCategory = z.enum([
 ]);
 export const dashboardFreshness = z.enum([
   "recent",
+  "recently_checked",
   "stale",
   "unavailable",
   "static",
@@ -231,4 +232,12 @@ export const dashboardActivity = z.strictObject({
   ...envelope,
   enabled: z.boolean(),
   activeUntil: timestamp.nullable(),
+});
+
+export const dashboardData = z.strictObject({
+  schemaVersion: z.literal(1),
+  readAt: timestamp,
+  data: z.json(),
+  truncated: z.boolean(),
+  nextCursor: z.string().max(4096).nullable(),
 });
