@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import { SignJWT } from "jose";
 import postgres from "postgres";
 import { authOptions } from "../apps/mobility-core/src/better-auth.ts";
+import { seedDashboardFixtures } from "./dashboard-qa-fixtures.mjs";
 
 const require = createRequire(
   new URL("../apps/mobility-core/package.json", import.meta.url),
@@ -43,7 +44,9 @@ async function close() {
 }
 process.on("SIGTERM", close);
 process.on("SIGINT", close);
-process.on("uncaughtException", async () => {
+process.on("uncaughtException", async (error) => {
+  if (error instanceof Error && error.message.startsWith("Smoke failed:"))
+    console.error(error.message);
   console.error("Isolated QA failed; disposing owned test schema");
   process.exitCode = 1;
   await close();
@@ -84,6 +87,7 @@ const token = await new SignJWT({
   .setAudience("mobility-core")
   .setExpirationTime("2h")
   .sign(new TextEncoder().encode(secret));
+writeFileSync("tmp/dashboard-qa/network-guard.txt", "", { mode: 0o600 });
 const common = {
   ...process.env,
   DATABASE_URL: db,
@@ -99,6 +103,11 @@ const common = {
   MOBILITY_MCP_URL: "http://127.0.0.1:3003/mcp",
   MOBILITY_MCP_TOKEN: token,
   OPENAI_API_KEY: "",
+  DASHBOARD_QA_NETWORK_GUARD_REPORT: new URL(
+    "../tmp/dashboard-qa/network-guard.txt",
+    import.meta.url,
+  ).pathname,
+  NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --import=${new URL("./dashboard-qa-network-guard.mjs", import.meta.url).pathname}`,
 };
 for (const [app, port] of [
   ["mobility-core", "3003"],
@@ -131,10 +140,18 @@ for (let i = 0; i < 100; i++) {
   } catch {}
   await new Promise((r) => setTimeout(r, 100));
 }
+await seedDashboardFixtures(sql);
 const report = [];
 const check = (name, ok) => {
   report.push({ name, ok });
-  if (!ok) throw Error(`Smoke failed: ${name}`);
+  if (!ok) {
+    writeFileSync(
+      "tmp/dashboard-qa/http-results.json",
+      JSON.stringify(report, null, 2),
+      { mode: 0o600 },
+    );
+    throw Error(`Smoke failed: ${name}`);
+  }
 };
 const owners = await sql`SELECT id,slot FROM evaluator ORDER BY slot`;
 await sql`INSERT INTO evaluation_session(session_id,evaluator_id) VALUES('qa-owned',${owners[0].id}),('qa-foreign',${owners[1].id})`;
@@ -210,6 +227,93 @@ if (!captured.ok) {
 }
 console.log(`Sink smoke status ${captured.status}`);
 check("terminal capture via authenticated internal sink", captured.ok);
+// Dense, explicitly synthetic lifecycle/usage/tool fixtures; never call a model.
+const denseEvents = Array.from({ length: 8 }, (_, i) => [
+  {
+    ...event,
+    eventKey: randomUUID(),
+    kind: "turn_completed",
+    turnId: `qa-turn-${i}`,
+    attemptId: null,
+    durationMs: 1200 + i * 300,
+    usage: null,
+    payloadIds: [],
+    sentCallIds: [],
+  },
+  {
+    ...event,
+    eventKey: randomUUID(),
+    turnId: `qa-turn-${i}`,
+    attemptId: randomUUID(),
+    purpose: i === 3 ? "compaction" : "step",
+    usage:
+      i === 4
+        ? null
+        : {
+            inputTokens: 10 + i * 7,
+            outputTokens: i * 3,
+            cachedInputTokens: i,
+            reasoningTokens: null,
+          },
+    payloadIds: [],
+    sentCallIds: i === 0 ? ["qa-call"] : [],
+  },
+]).flat();
+denseEvents.push(
+  {
+    ...event,
+    eventKey: randomUUID(),
+    kind: "tool_requested",
+    turnId: "qa-turn-0",
+    captureStatus: "missing",
+    attemptId: null,
+    callId: "qa-call",
+    tool: "mobility__get_network_status",
+    usage: null,
+    payloadIds: [],
+  },
+  {
+    ...event,
+    eventKey: randomUUID(),
+    kind: "tool_result",
+    turnId: "qa-turn-0",
+    captureStatus: "missing",
+    attemptId: null,
+    callId: "qa-call",
+    tool: "mobility__get_network_status",
+    usage: null,
+    payloadIds: [],
+  },
+  {
+    ...event,
+    eventKey: randomUUID(),
+    kind: "tool_requested",
+    turnId: "qa-turn-0",
+    captureStatus: "missing",
+    attemptId: null,
+    callId: "qa-discovery",
+    tool: "connection_search",
+    usage: null,
+    payloadIds: [],
+  },
+);
+const denseCapture = await fetch("http://127.0.0.1:3003/internal/telemetry", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    schemaVersion: 1,
+    batchId: randomUUID(),
+    principalId: owners[0].id,
+    sessionId: "qa-owned",
+    events: denseEvents,
+    payloads: [],
+  }),
+});
+check("synthetic qualified tool and lifecycle capture", denseCapture.ok);
+await denseCapture.body?.cancel();
 async function login(i) {
   const r = await fetch(`${origin}/api/auth/sign-in/email`, {
     method: "POST",
@@ -238,6 +342,12 @@ for (const path of [
   "tools",
   "entities?category=bikes",
   "sources",
+  "sources?window=24h",
+  "sources/aemet?window=1h",
+  "entities?category=places&section=reference&product=reference:tariffs",
+  "entities/bikes/qa-recent/history?window=6h&product=bicimad",
+  "events?window=24h",
+  "conversations/qa-owned/events?family=tools",
   "conversations",
   "conversations/qa-owned/summary",
   "conversations/qa-owned/events",
@@ -247,6 +357,19 @@ for (const path of [
   check(`BFF ${path}`, r.ok);
   await r.body?.cancel();
 }
+const overview = await (await getData("overview?window=24h")).json();
+check(
+  "derived M1 excludes stale and disabled station readings",
+  overview.metrics?.find((m) => m.id === "M1")?.value === 4,
+);
+check(
+  "derived M2 does not add heterogeneous parking categories",
+  overview.metrics?.find((m) => m.id === "M2")?.value === 3,
+);
+check(
+  "G2 derives bounded intervals in Core",
+  overview.activity?.bins?.length === 24,
+);
 for (const path of [
   "conversations/qa-owned/summary",
   "conversations/qa-owned/events",
@@ -301,6 +424,10 @@ check(
       body: "{}",
     })
   ).status === 403,
+);
+check(
+  "no provider/model requests during stored dashboard reads",
+  (await read("tmp/dashboard-qa/network-guard.txt", "utf8")).length === 0,
 );
 writeFileSync(
   "tmp/dashboard-qa/http-results.json",
