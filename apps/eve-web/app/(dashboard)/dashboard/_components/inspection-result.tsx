@@ -7,6 +7,24 @@ const obj = (v: unknown): Record<string, unknown> =>
   v && typeof v === "object" && !Array.isArray(v)
     ? (v as Record<string, unknown>)
     : {};
+const statusCopy: Record<string, string> = {
+  partial_coverage:
+    "La evidencia almacenada cubre solo una parte de la selección; no certifica funcionamiento normal.",
+  partial_or_unavailable:
+    "Evidencia parcial o no disponible para este componente.",
+  not_initialized: "Todavía no se ha guardado una lectura de este producto.",
+  available: "Hay evidencia guardada; comprueba su vigencia.",
+  unavailable: "No hay una lectura utilizable para esta selección.",
+  stale: "Lectura antigua; conserva su fecha original.",
+  fresh: "Lectura reciente según su política, no garantía de disponibilidad.",
+  unknown: "Estado no confirmado por la evidencia disponible.",
+  outside_24h_retention:
+    "El instante solicitado está fuera de las 24 horas de histórico retenido.",
+  no_retained_observation_at_instant:
+    "No hay observaciones retenidas para ese instante.",
+  not_materialized:
+    "Requiere ejecución explícita; no se calcula al releer almacenamiento.",
+};
 const array = (v: unknown) => (Array.isArray(v) ? v.map(obj) : []);
 export function InspectionResult({ value }: { value: unknown }) {
   const envelope = obj(value),
@@ -68,6 +86,12 @@ export function InspectionResult({ value }: { value: unknown }) {
             ? "Solo almacenamiento; sin adquisición a fuentes."
             : "Ejecución manual explícita."}
       </p>
+      {typeof root.status === "string" && statusCopy[root.status] ? (
+        <p className="text-sm">{statusCopy[root.status]}</p>
+      ) : null}
+      {typeof root.reason === "string" && statusCopy[root.reason] ? (
+        <p className="text-sm">{statusCopy[root.reason]}</p>
+      ) : null}
       {provenance.observedAt ? (
         <p className="text-sm">
           Observación publicada: <Instant value={provenance.observedAt} />.
@@ -108,6 +132,9 @@ export function InspectionResult({ value }: { value: unknown }) {
                         `Registro ${i + 1}`,
                     )}
                   </h4>
+                  {typeof r.status === "string" && statusCopy[r.status] ? (
+                    <p>{statusCopy[r.status]}</p>
+                  ) : null}
                   {typeof r.description === "string" ? (
                     <p className="leading-6 text-muted-foreground">
                       {r.description}
@@ -183,11 +210,28 @@ export function InspectionResult({ value }: { value: unknown }) {
                   ) : null}
                   {array(r.streams).map((stream) => (
                     <p key={String(stream.id)}>
-                      {productLabel(String(stream.id))}: {number(stream.count)}{" "}
+                      {productLabel(String(stream.id))}:{" "}
+                      {number(
+                        stream.count ??
+                          obj(stream.summary).count ??
+                          obj(stream.summary).total,
+                      )}{" "}
                       registros de colección; no certifican frescura individual.
+                      {statusCopy[String(stream.status)] ??
+                        "Estado no confirmado."}{" "}
                       Observación de colección:{" "}
-                      <Instant value={stream.observedAt} /> · Incorporación:{" "}
-                      <Instant value={stream.ingestedAt} />.
+                      <Instant
+                        value={
+                          stream.observedAt ?? obj(stream.provenance).observedAt
+                        }
+                      />{" "}
+                      · Incorporación:{" "}
+                      <Instant
+                        value={
+                          stream.ingestedAt ?? obj(stream.provenance).ingestedAt
+                        }
+                      />
+                      .
                     </p>
                   ))}
                   {array(r.availability).map((a) => (
