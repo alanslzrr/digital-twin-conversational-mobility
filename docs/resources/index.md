@@ -34,11 +34,23 @@ Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las
 
 ### Panel especificado el 02/10/2026
 
+La [auditoría de PR #45](../audits/2026-10-02-core-dashboard-review.md) contrasta la implementación posterior con estas decisiones. La tabla siguiente conserva el estado de la especificación inicial.
+
 | Referencia | Uso acordado | Estado local |
 | --- | --- | --- |
 | [Community Agent](https://github.com/vercel-labs/community-agent-template/tree/9c9efb50f79d3211ecf8ff15ba278eb5457a2a1b) y [MIT](https://github.com/vercel-labs/community-agent-template/blob/9c9efb50f79d3211ecf8ff15ba278eb5457a2a1b/LICENSE) | Adaptar shell/sidebar/actividad al estilo EVE; no backend, OAuth, Redis ni fallbacks demo | [Spec de una PR](../plans/2026-10-02-core-dashboard.md); sin implementar |
 | [SWR](https://swr.vercel.app/docs/advanced/understanding) | Refrescar consultas almacenadas de la vista activa, separado de heartbeat y ejecución manual | Dependencia por incorporar; política detallada en el spec |
 | [Leaflet 1.9.4](https://leafletjs.com/reference.html) y [política tiles OSM](https://operations.osmfoundation.org/policies/tiles/) | Mapa de entidades con raster externo autorizado, atribución y caché HTTP, sin proveedor nuevo de movilidad | Leaflet/tipos por incorporar; sin claves ni servidor cartográfico nuevo |
+
+### Revisión visual de PR #45
+
+| Referencia | Propósito y conclusión | Fecha y uso local |
+| --- | --- | --- |
+| [Demo Community Agent](https://community-agent.labs.vercel.dev/) | Composición de indicadores, tendencia y actividad; no reutilizar métricas de Slack ni cifras demo como datos de movilidad | Consultada 02/10/2026; [spec de refinamiento](../audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) |
+| [Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md) | Contrastar teclado, semántica, números, filtros y estados de carga; adaptar sin cambiar el chat oficial | Consultadas 02/10/2026; [auditoría visual](../audits/2026-10-02-core-dashboard-review.md#auditoría-visual) |
+| [better-ui](https://github.com/jakubkrehel/skills/tree/main/skills/better-ui) | Superficies, radios, alineación, iconos y feedback consistente; preservar componentes/tokens del proyecto | Repositorio consultado y skill local existente leída el 02/10/2026; [aplicación al panel](../audits/2026-10-02-core-dashboard-review.md#sistema-visual-e-interacción). No reinstalada ni añadida como dependencia de la app. |
+| [emil-design-eng](https://github.com/emilkowalski/skills) | Jerarquía, estados e interacción intencional; no animación ornamental o repetitiva durante polling | Repositorio consultado y skill local existente leída el 02/10/2026; [criterios de revisión](../audits/2026-10-02-core-dashboard-review.md#referencias-y-skills). No sustituye el estilo EVE. |
+| [Cuatro imágenes de inspiración del usuario](../audits/assets/core-dashboard/README.md) | KPI/gráfico coherente, lista/detalle operativo, selección clara y sidebar agrupada | Aportadas y archivadas sin editar el 02/10/2026. Datos de demo, no QA de Mobility Core; [interpretación y límites](../audits/2026-10-02-core-dashboard-review.md#referencias-y-skills). |
 
 ## Transporte y routing
 
