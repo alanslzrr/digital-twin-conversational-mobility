@@ -6,6 +6,7 @@ Resultados ejecutados y límites de cada entrega.
 
 | Documento | Qué encontrarás |
 | --- | --- |
+| [2026-10-02-core-dashboard](2026-10-02-core-dashboard.md) | Panel y telemetría: código completo, PostgreSQL/HTTP aislados y evidencia visual; instalación habitual pendiente. |
 | [2026-09-25-e2-closure](2026-09-25-e2-closure.md) | E2 — cierre del control conversacional |
 | [2026-09-25-emt](2026-09-25-emt.md) | E7 — Catálogo y próximas llegadas EMT |
 | [2026-09-25-functional-continuity](2026-09-25-functional-continuity.md) | E6 — Continuidad funcional de la vertical existente |
