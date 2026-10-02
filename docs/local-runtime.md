@@ -2,7 +2,7 @@
 
 [Índice](index.md) · [Instalación inicial](installation.md) · [Cuentas](evaluation.md) · [Diagnóstico](troubleshooting.md)
 
-Esta es la guía vigente para una instalación ya preparada. No requiere Neon, Upstash, Blob, Queues ni Sandbox cloud. Los registros de pruebas y transiciones antiguas se conservan en [el archivo de la guía anterior](acceptance/local-runtime-history.md).
+Procedimientos de arranque, actualización y recuperación de una instalación preparada. Para crearla desde cero, sigue la [instalación inicial](installation.md). El [registro operativo anterior](acceptance/local-runtime-history.md) recoge las pruebas y transiciones de las primeras entregas.
 
 ## En esta página
 
@@ -47,9 +47,9 @@ Para desarrollar, `pnpm dev` y `pnpm worker` se ejecutan por separado, con PostG
 | `pnpm smoke:mobility` | Consulta fuentes reales y MCP/OTP; abre actividad y puede adquirir datos |
 | `pnpm smoke:routing` | Casos MCP/OTP locales; renueva actividad, sin modelo ni reinicio de servicios |
 
-No son una nueva lista de obligaciones R2. Ejecuta el diagnóstico que responda al cambio o fallo concreto. Los modos `--live*` llaman al modelo y consumen créditos; los benchmarks OTP son operaciones separadas. Ninguno forma parte de `pnpm check`.
+Elige el diagnóstico según el componente modificado o el fallo observado. Los modos `--live*` llaman al modelo y consumen créditos; se ejecutan expresamente, al igual que los benchmarks OTP.
 
-Healths: [Core](http://127.0.0.1:3001/api/health), [Web](http://127.0.0.1:3000/api/health), [EVE a través de Web](http://127.0.0.1:3000/eve/v1/health). Que un proceso responda no demuestra frescura de sus fuentes: consulta `get_source_health` para eso.
+Healths: [Core](http://127.0.0.1:3001/api/health), [Web](http://127.0.0.1:3000/api/health), [EVE a través de Web](http://127.0.0.1:3000/eve/v1/health). Los endpoints de salud comprueban disponibilidad de procesos. `get_source_health` informa de la antigüedad y los errores de las fuentes.
 
 Para un smoke que controle sus propios ticks, `pnpm start:local --no-worker` evita otro worker concurrente. Al terminar, para ese supervisor y vuelve a `pnpm start:local`. El modo `smoke:mobility --port=3011 --read-only` exige Core alternativo con ingestión desactivada; no debe tratarse como acceso de solo lectura a un Core cualquiera.
 
@@ -84,11 +84,11 @@ docker compose --env-file .env.local -f infra/local/compose.yaml exec -T postgre
 docker compose --env-file .env.local -f infra/local/compose.yaml exec -T postgres   pg_restore --list < "$backup" > /dev/null
 ```
 
-Comprobar el índice demuestra que el archivo es legible, **no que se haya ensayado una restauración completa**. Conserva además los manifiestos, releases y configuración privada necesarios. Un dump de Core no incluye los mensajes almacenados por EVE/Workflow ni todo `data/`.
+`pg_restore --list` comprueba que el índice del dump es legible. Para verificar la recuperación completa, restaura la copia en una base aislada. Conserva también los manifiestos, releases y configuración privada: el dump incluye las tablas de Core; los mensajes EVE y archivos de `data/` tienen almacenamiento separado.
 
 Para recuperar una actualización de routing utiliza primero [rollback/recover](routing-releases.md#volver-atrás-o-recuperar-una-activación), que conserva cuentas y conversaciones.
 
-Una restauración íntegra de base sustituye datos actuales por la copia elegida. Solo si esa es la recuperación decidida: detén todos los escritores, conserva otra copia del estado actual, confirma el archivo y la revisión de código compatible. El comando siguiente es **destructivo sobre la base local**; define `backup` con la ruta del archivo verificado antes de ejecutarlo:
+Una restauración íntegra sustituye los datos actuales por la copia elegida. Antes de ejecutarla, detén los escritores, respalda el estado actual y comprueba que el archivo corresponde a la revisión de código que vas a usar. El comando siguiente es **destructivo sobre la base local**; define `backup` con la ruta del archivo verificado antes de ejecutarlo:
 
 ```sh
 docker compose --env-file .env.local -f infra/local/compose.yaml exec -T postgres   sh -c 'pg_restore --exit-on-error --clean --if-exists --no-owner -U "$POSTGRES_USER" -d "$POSTGRES_DB"'   < "$backup"
@@ -110,7 +110,7 @@ No restaures una base de Core de otra versión sobre un grafo distinto: recupera
 
 ### EMT: catálogo y llegadas bajo demanda (E7)
 
-Las llegadas se consultan por parada, no mediante un barrido global. Caché persistente de 30 s, cooldown global de 5 s y lease/backoff acotan concurrencia. El destino procede del proveedor; una estimación antigua no se presenta como una cuenta atrás actual. Su referencia raw es checksum, no un archivo de autenticación. [Evidencia EMT](acceptance/2026-09-25-emt.md).
+Las llegadas se consultan bajo demanda por parada. Una caché persistente de 30 s, un cooldown global de 5 s y los controles lease/backoff acotan la concurrencia. Cada resultado conserva destino, estimación y hora del proveedor. Su referencia raw contiene el checksum del resultado. [Evidencia EMT](acceptance/2026-09-25-emt.md).
 
 ### Precios de aparcamiento
 
@@ -129,7 +129,7 @@ No imprimas tokens para diagnosticar ni desactives TLS. Un error de fuente se tr
 
 ## Control conversacional E2
 
-El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Approve/Stop. Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo `campaign` y su ledger son experimentales opt-in, no requisitos del chat ni del cierre. [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
+El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Approve/Stop. Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo experimental `campaign` se activa expresamente y mantiene su propio registro de consumo. [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
 
 ## Actividad y retención
 
@@ -137,6 +137,6 @@ Las interacciones autorizadas que consumen cuota y las consultas MCP ordinarias 
 
 Dos carriles procesan trabajos vencidos con lease de 90 s y backoff. El heartbeat informa del proceso; la frescura informa de los datos. Son señales distintas. [Cadencias y almacenamiento](reference/system.md).
 
-Raw e histórico de movilidad tienen retención objetivo de 24 horas, purgada durante ticks activos. El apagado no ejecuta la purga. Puede conservarse el último snapshot antiguo, identificado como tal. La caducidad de conversaciones no equivale a borrado físico EVE; no hay una tarea de purga de transcripciones implementada.
+Raw e histórico de movilidad tienen retención objetivo de 24 horas, purgada durante ticks activos. El apagado no ejecuta la purga. Puede conservarse el último snapshot antiguo, identificado como tal. Las conversaciones caducadas permanecen en el almacenamiento EVE hasta su borrado; la aplicación carece de purga automática de transcripciones.
 
 **Implementación:** [supervisor](../scripts/start-local.mjs), [migrador](../scripts/migrate.mjs), [worker](../scripts/ingestion-worker.mjs), [operación de releases](routing-releases.md). **Evidencia histórica:** [entrega local](acceptance/2026-09-25-local-delivery.md) y [registro anterior](acceptance/local-runtime-history.md).
