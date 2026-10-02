@@ -6,6 +6,7 @@ Hallazgos, reproducciones y correcciones documentados durante el desarrollo. Los
 
 | Documento | Qué encontrarás |
 | --- | --- |
+| [Segunda auditoría de PR #45](../acceptance/2026-10-03-core-dashboard-second-audit.md) | Correcciones verificadas de contraste, teclado, navegación/cámara y códigos de medidas; agent-browser claro/oscuro y cuatro tamaños |
 | [Refinamiento de PR #45](../acceptance/2026-10-03-core-dashboard-refinement.md) | Implementación posterior de seis vistas, contratos, métricas y gráficos; pruebas locales, capturas y alcance no verificado |
 | [Spec-audit de PR #45](2026-10-02-core-dashboard-review.md) | Hallazgos reproducidos y encargo vigente: seis vistas, datos dinámicos separados de catálogos, métricas con propósito, referencias visuales y aceptación para una persona no técnica |
 | [2026-09-25-e2-instrumentation](2026-09-25-e2-instrumentation.md) | E2 — presupuesto conversacional: implementación y aceptación offline |
