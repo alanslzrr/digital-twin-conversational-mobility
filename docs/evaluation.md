@@ -1,5 +1,16 @@
 # Evaluadores y operación local
 
+[Índice](index.md) · [Guía de uso](user-guide.md) · [Operación](local-runtime.md) · [Referencia de acceso](resources/index.md#tecnología)
+
+Administración de las cuentas existentes; no es una nueva campaña de aceptación.
+
+## En esta página
+
+- [Acceso](#acceso)
+- [Interfaz oficial](#interfaz-oficial)
+- [Límites y retención](#límites-y-retención)
+- [Verificación](#verificación)
+
 ## Acceso
 
 Better Auth 1.7.5 reside en Mobility Core con tablas Postgres. Web conserva solo la clave del modelo y el JWT de servicio. El navegador usa `/api/auth/*` del mismo origen; el proxy reenvía la cookie al Core y no expone el JWT. El Core exige scope `mobility.evaluation.manage` y origen permitido. No hay registro público ni credenciales Google.
@@ -26,11 +37,13 @@ La UI procede del Web Chat de EVE 0.65.0, con Better Auth como puerta de acceso.
 - Propiedad de conversaciones EVE: siete días desde su registro, sin renovación automática. Reset revoca el acceso.
 - Generación: seis operaciones/minuto y 60/día por evaluador; crear una sesión aparcada también consume una operación. Contadores atómicos y limpieza oportunista de ventanas de más de ocho días.
 - Login: diez intentos/minuto compartidos por el proxy. No confiar en cabeceras IP arbitrarias del navegador.
-- **Expirar o revocar acceso NO borra físicamente las conversaciones de EVE/Workflow.** No hay tarea automática de purga de transcripciones. Antes de publicar se debe verificar la retención del backend Workflow y acordar el borrado operativo tras la evaluación. No introducir datos personales sensibles, domicilios ni historiales de viajes.
+- **Expirar o revocar acceso NO borra físicamente las conversaciones de EVE/Workflow.** No hay tarea automática de purga de transcripciones. Una eventual publicación exige decidir la retención de su backend; no hay una operación de borrado de mensajes documentada como si ya estuviera implementada. No introducir datos personales sensibles, domicilios ni historiales de viajes.
 - El proveedor directo usa `store:false`; esto no sustituye las políticas de retención de la cuenta del proveedor ni las del runtime EVE.
 
 ## Verificación
 
 `pnpm smoke:evaluation` crea y elimina dos cuentas temporales en slots 4 y 5; rechaza ejecutarse si están ocupados. Verifica signup cerrado, login/logout, CSRF, acceso anónimo, aislamiento entre propietarios, cuotas concurrentes y revocación. No llama al modelo salvo `--live` explícito.
 
-El modo live completó un turno real con `get_source_health`: las fuentes responden `not_initialized`, no datos inventados. No se validó ninguna ingesta ni ruta OTP.
+La primera prueba live del entorno inicial consultó `get_source_health` cuando las fuentes todavía estaban `not_initialized`. Es un resultado histórico, no el estado actual de la vertical. Las entregas posteriores se organizan en [el índice de actas](acceptance/index.md).
+
+El historial propio usa un índice de Core y la recuperación nativa EVE; la página siguiente no se obtiene por polling. [Flujo de permisos](architecture.md#dos-históricos-distintos), [implementación Core](../apps/mobility-core/src/conversations.ts), [guard de canal](../apps/eve-web/src/evaluation-guard.ts) y [acta R2.1](acceptance/2026-09-28-conversation-history.md).
