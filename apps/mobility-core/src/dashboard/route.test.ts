@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   status: vi.fn(),
   renew: vi.fn(),
   catalog: vi.fn(),
+  inspect: vi.fn(),
 }));
 vi.mock("../auth", () => ({ authorize: mocks.authorize }));
 vi.mock("./access", async (original) => ({
@@ -20,6 +21,7 @@ vi.mock("./queries", () => ({
   readDashboardStatus: mocks.status,
   renewDashboardActivity: mocks.renew,
 }));
+vi.mock("./inspector", () => ({ inspectStored: mocks.inspect }));
 vi.mock("../tool-registry", () => ({ mobilityToolCatalog: mocks.catalog }));
 
 import { GET, POST } from "../../app/internal/dashboard/[...path]/route";
@@ -111,4 +113,28 @@ it("has no generic proxy/fallback and rejects query arguments", async () => {
     (await GET(req("status?principalId=foreign"), context("status"))).status,
   ).toBe(400);
   expect(mocks.status).not.toHaveBeenCalled();
+});
+
+it("propagates oversized inspection as partial through the HTTP envelope", async () => {
+  mocks.inspect.mockResolvedValue({
+    schemaVersion: 1,
+    tool: "get_network_status",
+    executionMode: "stored_only",
+    evaluatedAt: new Date().toISOString(),
+    availability: "available",
+    result: { description: "x".repeat(300000) },
+    limitations: [],
+  });
+  const response = await POST(
+    new Request("http://localhost/internal/dashboard/inspect", {
+      method: "POST",
+      body: JSON.stringify({ tool: "get_network_status", input: {} }),
+    }),
+    context("inspect"),
+  );
+  expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({
+    truncated: true,
+    data: { availability: "partial", truncated: true },
+  });
 });

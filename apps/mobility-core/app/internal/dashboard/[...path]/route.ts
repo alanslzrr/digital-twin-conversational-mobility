@@ -2,7 +2,9 @@ import {
   dashboardActivityInput,
   dashboardCategory,
   dashboardData,
+  dashboardInspectResult,
   dashboardScopes,
+  dashboardSourceResponse,
   dashboardToolCatalog,
   safeProjection,
   sourceIdSchema,
@@ -20,6 +22,7 @@ import {
   readExecution,
 } from "../../../../src/dashboard/executions";
 import { inspectStored } from "../../../../src/dashboard/inspector";
+import { readOverview } from "../../../../src/dashboard/overview";
 import {
   readDashboardStatus,
   renewDashboardActivity,
@@ -31,6 +34,8 @@ import {
   readSources,
   readTrace,
 } from "../../../../src/dashboard/readers";
+import { readEntitySeries } from "../../../../src/dashboard/series";
+import { readSourceMetrics } from "../../../../src/dashboard/source-metrics";
 import { mobilityToolCatalog } from "../../../../src/tool-registry";
 export const runtime = "nodejs";
 export const maxDuration = 65;
@@ -44,7 +49,7 @@ async function dispatch(request: Request, context: Context) {
   const inspect = request.method === "POST" && resource === "inspect";
   const reading =
     request.method === "GET" &&
-    /^(status|overview|tools|entities|map|sources|events|conversations|entities\/[^/]+\/[^/]+|sources\/[^/]+|events\/\d+|executions\/[0-9a-f-]{36}|conversations\/[A-Za-z0-9_-]{1,160}\/(summary|events)|conversations\/[A-Za-z0-9_-]{1,160}\/payloads\/[0-9a-f-]{36})$/.test(
+    /^(status|overview|tools|entities|map|sources|events|conversations|entities\/[^/]+\/[^/]+(?:\/history)?|sources\/[^/]+|events\/\d+|executions\/[0-9a-f-]{36}|conversations\/[A-Za-z0-9_-]{1,160}\/(summary|events)|conversations\/[A-Za-z0-9_-]{1,160}\/payloads\/[0-9a-f-]{36})$/.test(
       resource,
     );
   if (!reading && !activity && !execute && !inspect)
@@ -70,23 +75,45 @@ async function dispatch(request: Request, context: Context) {
       z.uuid().parse(path.at(-1));
     const params = new URL(request.url).searchParams;
     const allowed =
-      resource === "entities" || resource === "map"
-        ? [
-            "category",
-            "source",
-            "freshness",
-            "search",
-            "cursor",
-            "limit",
-            "bbox",
-          ]
-        : resource === "events" || resource.startsWith("events/")
-          ? ["from", "to", "source", "type", "severity", "cursor", "limit"]
-          : resource === "conversations"
-            ? ["cursor"]
-            : resource.endsWith("/events")
-              ? ["turn", "kind", "cursor", "limit"]
-              : [];
+      resource === "sources" || resource.startsWith("sources/")
+        ? ["window", "operation", "resources", "cursor"]
+        : resource.endsWith("/history")
+          ? ["window", "magnitude", "product"]
+          : resource === "overview"
+            ? ["window", "parkingCategory"]
+            : resource === "entities" ||
+                resource === "map" ||
+                resource.startsWith("entities/")
+              ? [
+                  "category",
+                  "section",
+                  "product",
+                  "source",
+                  "freshness",
+                  "search",
+                  "cursor",
+                  "limit",
+                  "bbox",
+                ]
+              : resource === "events" || resource.startsWith("events/")
+                ? [
+                    "from",
+                    "to",
+                    "window",
+                    "source",
+                    "type",
+                    "severity",
+                    "outcome",
+                    "cursor",
+                    "limit",
+                  ]
+                : resource === "conversations"
+                  ? ["cursor"]
+                  : resource.endsWith("/events")
+                    ? ["turn", "kind", "family", "call", "cursor", "limit"]
+                    : resource.endsWith("/summary")
+                      ? ["turnCursor"]
+                      : [];
     for (const key of params.keys())
       if (
         !allowed.includes(key) ||
@@ -126,10 +153,26 @@ async function dispatch(request: Request, context: Context) {
       if (query.bbox !== undefined)
         query.bbox = String(query.bbox).split(",").map(Number);
       let data: unknown;
+      let truncated = false;
       if (inspect) {
         const value = await readBoundedJson(request, 16384);
-        const projection = safeProjection(await inspectStored(value), 240000);
-        data = projection.data;
+        const raw = await inspectStored(value);
+        const projection = safeProjection(raw.result, 220000);
+        truncated = projection.truncated;
+        data = dashboardInspectResult.parse({
+          ...raw,
+          result: projection.data,
+          availability: truncated ? "partial" : raw.availability,
+          truncated,
+          limitations: [
+            ...raw.limitations,
+            ...(truncated
+              ? [
+                  "Resultado incompleto por el límite de tamaño. Reduce los filtros; el contenido omitido no está disponible.",
+                ]
+              : []),
+          ],
+        });
       } else if (execute)
         data = await executeManual(
           owner,
@@ -141,32 +184,35 @@ async function dispatch(request: Request, context: Context) {
         data = await readExecution(owner, path[1] ?? "");
       else if (resource === "entities" || resource === "map")
         result = await readEntities(query, owner, resource === "map");
+      else if (resource.endsWith("/history"))
+        result = await readEntitySeries(
+          dashboardCategory.parse(path[1]),
+          path[2] ?? "",
+          query,
+        );
       else if (resource.startsWith("entities/")) {
         const category = dashboardCategory.parse(path[1]);
-        const page = await readEntities({ category }, owner, false, path[2]);
+        const page = await readEntities(
+          { ...query, category },
+          owner,
+          false,
+          path[2],
+        );
         if (!("entities" in page) || !page.entities.length)
           throw new DashboardAccessError(404, "not_found");
         data = page;
-      } else if (resource === "sources" || resource.startsWith("sources/"))
-        data = await readSources(
-          path[1] ? sourceIdSchema.parse(path[1]) : undefined,
-        );
-      else if (resource === "overview")
+      } else if (resource === "sources" || resource.startsWith("sources/")) {
+        const id = path[1] ? sourceIdSchema.parse(path[1]) : undefined;
         data = {
-          status: await readDashboardStatus(),
-          sources: await readSources(),
+          ...((await readSources(id, params, owner)) as Record<
+            string,
+            unknown
+          >),
+          metrics: await readSourceMetrics(id, params),
         };
+      } else if (resource === "overview") result = await readOverview(params);
       else if (resource === "events" || resource.startsWith("events/")) {
-        const to = new Date().toISOString();
-        data = await readOperationalEvents(
-          {
-            from: new Date(Date.now() - 7 * 86400000).toISOString(),
-            to,
-            ...query,
-          },
-          owner,
-          path[1],
-        );
+        data = await readOperationalEvents(query, owner, path[1]);
       } else if (resource === "conversations")
         data = await readConversationIndex(
           owner,
@@ -181,11 +227,15 @@ async function dispatch(request: Request, context: Context) {
           path[3],
         );
       if (result === undefined)
-        result = dashboardData.parse({
+        result = (
+          resource === "sources" || resource.startsWith("sources/")
+            ? dashboardSourceResponse
+            : dashboardData
+        ).parse({
           schemaVersion: 1,
           readAt: new Date().toISOString(),
           data: data ?? null,
-          truncated: false,
+          truncated,
           nextCursor: null,
         });
     }
