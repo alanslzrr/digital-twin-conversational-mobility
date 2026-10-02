@@ -14,6 +14,7 @@ export default function MobilityMap({
   freshness,
   search,
   onSelect,
+  onViewChange,
 }: {
   category: string;
   section: string;
@@ -22,6 +23,7 @@ export default function MobilityMap({
   freshness: string;
   search: string;
   onSelect: (id: string, product: string) => void;
+  onViewChange: (view: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
     map = useRef<LeafletMap | null>(null),
@@ -48,6 +50,8 @@ export default function MobilityMap({
     | undefined;
   const select = useRef(onSelect);
   select.current = onSelect;
+  const viewChanged = useRef(onViewChange);
+  viewChanged.current = onViewChange;
   useEffect(() => {
     let removed = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -103,6 +107,13 @@ export default function MobilityMap({
             window.history.state,
             "",
             `/dashboard/mobility?${view}`,
+          );
+          viewChanged.current(
+            new URLSearchParams({
+              map: "1",
+              center: view.get("center") ?? "",
+              zoom: view.get("zoom") ?? "",
+            }).toString(),
           );
           const b = m.getBounds();
           setBbox(

@@ -413,6 +413,7 @@ export function Mobility({
           source={source}
           freshness={freshness}
           search={filter}
+          onViewChange={setReturnView}
           onSelect={(id, product) => {
             window.location.href = `/dashboard/mobility/${category}/${encodeURIComponent(id)}?${detailParameters(product)}`;
           }}
