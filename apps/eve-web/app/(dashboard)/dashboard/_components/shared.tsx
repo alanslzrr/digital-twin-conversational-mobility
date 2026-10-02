@@ -84,11 +84,11 @@ export const publicLabel = (key: string) =>
       maximumEur: "Máximo documental (EUR)",
       publishedDate: "Documento comprobado (fecha)",
       effectiveFrom: "Vigente desde",
-      arrivalSeconds:
-        "Llegada de horario (segundos desde inicio del día de servicio)",
-      departureSeconds:
-        "Salida de horario (segundos desde inicio del día de servicio)",
+      arrivalSeconds: "Llegada del horario publicado",
+      departureSeconds: "Salida del horario publicado",
       calendarId: "Calendario publicado",
+      wheelchair: "Accesibilidad declarada para silla de ruedas",
+      kind: "Tipo de lugar",
       bikes: "Bicicletas disponibles",
       docks: "Anclajes disponibles",
       freeSpaces: "Plazas libres publicadas",

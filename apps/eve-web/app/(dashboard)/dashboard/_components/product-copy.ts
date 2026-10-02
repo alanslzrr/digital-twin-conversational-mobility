@@ -67,6 +67,18 @@ export function measurementValue(name: string, value: unknown) {
       : value === 2 || value === "2"
         ? "No accesible según declaración"
         : "Sin declaración verificable";
+  if (name === "kind")
+    return (
+      (
+        {
+          stop: "Parada",
+          station: "Estación",
+          entrance: "Acceso",
+          address: "Dirección",
+          poi: "Lugar de interés",
+        } as Record<string, string>
+      )[String(value)] ?? "Tipo publicado por la fuente"
+    );
   const values: Record<string, string> = {
     instant: "Medida instantánea",
     interval: "Acumulada durante el periodo",
@@ -80,4 +92,28 @@ export function measurementValue(name: string, value: unknown) {
     ["basis", "providerValidity", "quality", "status"].includes(name)
     ? (values[value] ?? "Clasificación publicada; detalle técnico disponible")
     : String(value);
+}
+
+/** Human-readable measurements, shared by list, detail and map summaries. */
+export function measurementDisplay(
+  name: string,
+  value: unknown,
+  unit?: string | null,
+) {
+  if (value === null || value === undefined) return "Sin dato";
+  const coded = ["wheelchair", "arrivalSeconds", "departureSeconds"].includes(
+    name,
+  );
+  const formatted = coded
+    ? measurementValue(name, value)
+    : typeof value === "number"
+      ? new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(
+          value,
+        )
+      : typeof value === "boolean"
+        ? value
+          ? "Sí"
+          : "No"
+        : measurementValue(name, value);
+  return unit && !coded ? `${formatted} ${unit}` : formatted;
 }
