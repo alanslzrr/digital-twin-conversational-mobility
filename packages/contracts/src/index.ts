@@ -254,6 +254,7 @@ export {
   conversationListAction,
   conversationPage,
 } from "./conversations";
+export * from "./dashboard";
 export type {
   DailyForecast,
   DailyWeatherPeriod,
@@ -265,4 +266,5 @@ export type {
   WeatherProduct,
 } from "./journey-weather";
 export { type ParkingTariff, parkingTariffSchema } from "./parking-prices";
+export * from "./telemetry";
 export type { WeatherReading, WeatherStation } from "./weather-observations";
