@@ -41,8 +41,8 @@ it("reads bounded public status without acquisition or pretending traces are ins
       { id: "0", lastSeenAt: time, state: "running" },
       { id: "1", lastSeenAt: null, state: "not_seen" },
     ],
-    captureCoverage: "not_instrumented",
-    captureVersion: null,
+    captureCoverage: "best_effort",
+    captureVersion: 1,
   });
   expect(mocks.activate).not.toHaveBeenCalled();
   expect(mocks.sql).toHaveBeenCalledTimes(3);

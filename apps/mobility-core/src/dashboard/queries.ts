@@ -6,7 +6,9 @@ import { activate, ingestionEnabled } from "../ingestion";
 function iso(value: unknown) {
   if (value === null || value === undefined) return null;
   return value instanceof Date
-    ? value.toISOString()
+    ? Number.isFinite(value.getTime())
+      ? value.toISOString()
+      : null
     : new Date(String(value)).toISOString();
 }
 export async function readDashboardStatus() {
@@ -37,8 +39,8 @@ export async function readDashboardStatus() {
       revisions.map((row) => [String(row.id), String(row.revision)]),
     ),
     // Set by the installed capture implementation, not by the presence of tables.
-    captureVersion: null,
-    captureCoverage: "not_instrumented",
+    captureVersion: 1,
+    captureCoverage: "best_effort",
   });
 }
 
