@@ -81,3 +81,12 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Aplicado el spec-audit de PR #45: seis vistas, M1–M13/G1–G4, captura cualificada, frescura por producto, selección SQL y resultados legibles, sin rediseñar EVE.
 - [Acta con HEAD, pruebas y capturas](acceptance/2026-10-03-core-dashboard-refinement.md): 476 tests generales, 40 pruebas de suite aislada, 31 comprobaciones HTTP y 24 combinaciones de vista/tamaño. Los estados no verificados se enumeran, sin atribuirlos como aprobados.
 - Servicios habituales y despliegues sin modificar.
+
+## [2026-10-03] revisión | Segunda auditoría del dashboard con agent-browser
+
+- Registrados nueve hallazgos nuevos y sus correcciones: contraste claro, landmarks, tabla por teclado, metadatos de navegación, enlaces multilínea, controles de mapa, lenguaje, cámara de retorno y códigos/horarios de medidas.
+- Versionado un arnés opt-in agent-browser 0.38.2, con sesión propia y Better Auth real en el runtime desechable. No incorpora una dependencia al proyecto ni se conecta al navegador del usuario.
+- Verificadas 72 pantallas/formularios: seis vistas × cuatro tamaños × dos temas, 16 formularios y ocho detalles/interacciones; cero incidencias axe detectadas, con 18 resultados indeterminados conservados. Añadidas fichas de fuente/evento y comprobación de 12 tabulaciones retenidas por el diálogo.
+- Comprobados retorno con cámara, consulta guardada sin confirmación de ejecución, duración de turno, teclado, pausa/offline y aislamiento secuencial de dos evaluadores. No se declara carrera concurrente completa ni aceptación visual exhaustiva.
+- `pnpm check`: 479 pruebas aprobadas / 94 opt-in omitidas; suite dashboard separada: 40 pruebas / 9 archivos; build del agente y 31 comprobaciones HTTP locales correctos. La [segunda acta](acceptance/2026-10-03-core-dashboard-second-audit.md) identifica HEAD, evidencia y límites.
+- 69 páginas Markdown, 1.197 enlaces locales y 315 anclas comprobados sin errores; diff correcto. QA cerrada, esquema propio ausente y 3002/3003 libres. Sin merge, cloud, inferencia, adquisiciones nuevas ni modificación de servicios habituales.

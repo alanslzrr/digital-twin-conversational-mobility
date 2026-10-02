@@ -2,7 +2,7 @@
 
 [Índice](index.md) · [Capacidades](overview.md) · [Evolución y evidencia](evolution.md) · [Fuentes](sources/README.md)
 
-Alcance vigente al **02/10/2026**.
+Alcance vigente al **03/10/2026**.
 
 ## Estado
 
@@ -13,7 +13,7 @@ Alcance vigente al **02/10/2026**.
 | R1 — Dominio acordado | **Cerrado.** Fuentes y funciones entregadas, con las exclusiones aprobadas que se enumeran abajo | [Registro de productos](sources/README.md) |
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
-| Panel de Core y telemetría propia | **Refinamiento implementado y validado localmente; verificaciones visuales pendientes antes de aceptación exhaustiva** | [Spec original](plans/2026-10-02-core-dashboard.md) y [spec-audit vigente de PR #45](audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) |
+| Panel de Core y telemetría propia | **Refinamiento implementado y segunda auditoría local completada; límites de aceptación exhaustiva explícitos** | [Spec original](plans/2026-10-02-core-dashboard.md) y [spec-audit vigente de PR #45](audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) |
 | Publicación Vercel | Alternativa de alojamiento | [Preparación cloud](deployment.md) |
 
 ## Capacidades conservadas
@@ -58,4 +58,4 @@ El **02/10/2026** se acordó una ampliación independiente: [panel privado de Mo
 
 Esta ampliación no reabre E2, R0/R1, R2.1 ni las obligaciones de cierre R2 retiradas. La implementación se recoge en el [acta del panel](acceptance/2026-10-02-core-dashboard.md). La actualización del runtime habitual requiere aplicar la migración 0021, renovar el token local y reiniciar Web/Core; no se ha ejecutado sobre los servicios habituales.
 
-La revisión posterior de PR #45 identificó fallos de captura/frescura y una composición visual insuficiente. El usuario pidió completar el dashboard con **datos dinámicos destacados, catálogos separados, lenguaje comprensible y métricas/gráficos con intención**, manteniendo EVE y una estética limpia alineada con las referencias aportadas. El [spec-audit](audits/2026-10-02-core-dashboard-review.md) concreta el encargo de refinamiento dentro de la misma PR, sus lectores pendientes y sus pruebas de aceptación. No añade fuentes, infraestructura ni retención. El [acta de refinamiento del 03/10/2026](acceptance/2026-10-03-core-dashboard-refinement.md) registra la implementación posterior, pruebas y verificaciones no ejecutadas; la evidencia inicial no las sustituye. La instalación habitual sigue requiriendo autorización independiente.
+La revisión posterior de PR #45 identificó fallos de captura/frescura y una composición visual insuficiente. El usuario pidió completar el dashboard con **datos dinámicos destacados, catálogos separados, lenguaje comprensible y métricas/gráficos con intención**, manteniendo EVE y una estética limpia alineada con las referencias aportadas. El [spec-audit](audits/2026-10-02-core-dashboard-review.md) concreta el encargo de refinamiento dentro de la misma PR, sus lectores pendientes y sus pruebas de aceptación. No añade fuentes, infraestructura ni retención. El [acta de refinamiento del 03/10/2026](acceptance/2026-10-03-core-dashboard-refinement.md) registra la implementación posterior, pruebas y verificaciones no ejecutadas; la evidencia inicial no las sustituye. La [segunda auditoría con agent-browser](acceptance/2026-10-03-core-dashboard-second-audit.md) corrige nueve hallazgos y añade 48 combinaciones claro/oscuro, 16 formularios y ocho detalles/interacciones; registra teclado, pausa/offline y aislamiento secuencial de identidades. Conserva los límites no verificados, sin declarar aceptación visual exhaustiva. La instalación habitual sigue requiriendo autorización independiente.
