@@ -2,6 +2,32 @@ import { describe, expect, it } from "vitest";
 import { safeProjection } from "./safe-data";
 
 describe("public allowlist projection", () => {
+  it("preserves public measurement semantics while removing credentials", () => {
+    const p = safeProjection({
+      vehiclesPerHour: 120,
+      occupancyPercent: 15,
+      periodMinutes: 60,
+      basis: "interval",
+      authorization: "Bearer synthetic-secret",
+      measurements: [
+        {
+          name: "precipitation",
+          value: 2,
+          unit: "mm",
+          periodMinutes: 60,
+          password: "synthetic-password",
+        },
+      ],
+    });
+    expect(p.data).toMatchObject({
+      vehiclesPerHour: 120,
+      occupancyPercent: 15,
+      periodMinutes: 60,
+      basis: "interval",
+    });
+    expect(JSON.stringify(p.data)).not.toContain("synthetic-secret");
+    expect(JSON.stringify(p.data)).not.toContain("synthetic-password");
+  });
   it("drops unknown fields, secrets and object storage references recursively", () => {
     const p = safeProjection({
       name: "station",

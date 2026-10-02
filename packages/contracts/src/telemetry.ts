@@ -2,6 +2,24 @@ import { z } from "zod";
 import { conversationSessionId } from "./conversations";
 import { dashboardLimits, dashboardToolName } from "./dashboard";
 
+// EVE qualifies the fixed connection; discovery is not an additional MCP tool.
+export const telemetryToolName = z.enum([
+  ...dashboardToolName.options,
+  ...dashboardToolName.options.map((name) => `mobility__${name}` as const),
+  "connection_search",
+]);
+export function resolveTelemetryTool(value: unknown) {
+  const parsed = telemetryToolName.safeParse(value);
+  if (!parsed.success) return null;
+  const runtimeName = parsed.data;
+  if (runtimeName === "connection_search")
+    return { runtimeName, canonicalName: null, family: "discovery" as const };
+  const canonicalName = dashboardToolName.parse(
+    runtimeName.replace(/^mobility__/, ""),
+  );
+  return { runtimeName, canonicalName, family: "mobility" as const };
+}
+
 const timestamp = z.iso.datetime({ offset: true });
 const key = z
   .string()
@@ -30,7 +48,7 @@ export const telemetryContentPart = z.discriminatedUnion("type", [
   z.strictObject({
     type: z.literal("function_call"),
     callId: key,
-    name: dashboardToolName,
+    name: telemetryToolName,
     arguments: z.string().max(8192),
   }),
   z.strictObject({
@@ -48,14 +66,14 @@ export const telemetryMessage = z.strictObject({
   parts: z.array(telemetryContentPart).max(256),
 });
 export const telemetryFunction = z.strictObject({
-  name: dashboardToolName,
+  name: telemetryToolName,
   description: z.string().max(8192),
   // JSON schema is retained as validated, sanitized text, never arbitrary metadata.
   parametersJson: z.string().max(32000),
 });
 export const telemetryProjection = z.strictObject({
   messages: z.array(telemetryMessage).max(512),
-  functions: z.array(telemetryFunction).max(16),
+  functions: z.array(telemetryFunction).max(17),
 });
 export const telemetryPayload = z
   .strictObject({
@@ -102,7 +120,7 @@ export const telemetryEvent = z.strictObject({
   purpose: z.enum(["step", "compaction"]).nullable(),
   attemptId: z.uuid().nullable(),
   callId: key.nullable(),
-  tool: dashboardToolName.nullable(),
+  tool: telemetryToolName.nullable(),
   providerResponseId: key.nullable(),
   status: z.enum([
     "prepared",
