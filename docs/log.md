@@ -59,3 +59,25 @@ Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza
 ## 02/10/2026 · Panel de Core y telemetría implementados
 
 Actualizadas guía, arquitectura, referencia de límites/scopes/tablas, instalación 0021, procedimiento autorizado de actualización y estado independiente del roadmap. Añadida [acta de pruebas y capturas](acceptance/2026-10-02-core-dashboard.md). Validación: check con 460 tests, build agente, 70 tests PostgreSQL afectados, smoke aislado 20 comprobaciones, navegador y diff check. No se actualizó el runtime habitual ni se llamó al modelo. Los límites de QA visual y de captura best-effort quedan explícitos en el acta.
+
+## 02/10/2026 · Auditoría de PR #45 y refinamiento del panel
+
+Añadida [auditoría del commit 56b1f25](audits/2026-10-02-core-dashboard-review.md), con hallazgos de nombres cualificados EVE, frescura/periodos meteorológicos, uso desconocido, truncamiento y refresco del feed. Incluye revisión de jerarquía visual y propuestas de métricas derivadas de almacenamiento existente. Check correcto (460 tests, 89 omitidos; typecheck/builds con caché), suite afectada SQL/unitaria 70/70 y smoke aislado 20/20. Ocho reproducciones adicionales: seis fallos confirmados y dos controles correctos, archivados fuera de CI. Captura nueva del Resumen en claro; sin modificación del producto, instalación habitual, inferencia ni adquisición de proveedores. El acta anterior se conserva sin reescribir.
+
+Build local del agente correcto; entorno temporal cerrado y esquema desechable eliminado. Verificados `git diff --check` y 193 enlaces/anclas de las cinco páginas revisadas, sin fallos. Sin commit, push ni publicación de review remota.
+
+## 02/10/2026 · Spec-audit de refinamiento completo del dashboard
+
+Ampliada la [auditoría de PR #45](audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) con el encargo vigente para completar las seis vistas: datos que cambian como recorrido inicial, Catálogos de referencia separados y lenguaje orientado a una persona no técnica. Definidas trece métricas, cuatro tipos de gráfico, lectores/contratos pendientes, estados temporales, límites, actualización y catorce escenarios de aceptación, además del recorrido de claridad y la QA visual. Incluye instrucciones breves para el agente, sin sustituir los límites de seguridad/arquitectura del spec original ni reescribir los resultados de las pruebas anteriores.
+
+Archivadas sin modificar las cuatro imágenes aportadas, claramente separadas de la evidencia real del producto. Leídas las skills better-ui y emil-design-eng ya instaladas; consultados sus repositorios primarios, sin reinstalación ni dependencia nueva en la aplicación. Actualizados roadmap, índices, recursos y cabecera del spec original para señalar el refinamiento pendiente dentro de la misma PR.
+
+Revisión solo documental: no se modificó código de aplicación, CI, base de datos o servicios; no se ejecutaron nuevas pruebas funcionales, builds, inferencias ni adquisiciones de proveedores. Sin commit, push, comunicación a otro chat, merge o instalación habitual.
+
+Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comprobados sin errores; `git diff --check` correcto. Verificada la secuencia completa V1–V6, M1–M13, G1–G4 y A1–A14, tablas/bloques Markdown y conservación byte a byte de las cuatro imágenes originales. Esta comprobación no es QA de una interfaz implementada.
+
+## [2026-10-03] implementación | Refinamiento del panel Core
+
+- Aplicado el spec-audit de PR #45: seis vistas, M1–M13/G1–G4, captura cualificada, frescura por producto, selección SQL y resultados legibles, sin rediseñar EVE.
+- [Acta con HEAD, pruebas y capturas](acceptance/2026-10-03-core-dashboard-refinement.md): 476 tests generales, 40 pruebas de suite aislada, 31 comprobaciones HTTP y 24 combinaciones de vista/tamaño. Los estados no verificados se enumeran, sin atribuirlos como aprobados.
+- Servicios habituales y despliegues sin modificar.
