@@ -6,9 +6,9 @@
 
 Madrid Mobility Twin permite preguntar por desplazamientos y por el contexto de movilidad de Madrid en un único chat. Reúne información que, de otro modo, habría que buscar por separado: trenes, autobuses, horarios, incidencias, bicicletas, aparcamiento y meteorología.
 
-El nombre «gemelo digital» describe una representación parcial de esa movilidad, actualizada con publicaciones oficiales. **No es un simulador de toda la ciudad.** Conserva qué dato recibió, de dónde procede y cuándo se observó.
+El nombre «gemelo digital» describe una representación de esa movilidad, actualizada con publicaciones oficiales. Conserva qué dato recibió, de dónde procede y cuándo se observó.
 
-Por ejemplo, puedes pedir un viaje de Atocha Cercanías a Chamartín, limitar cuánto quieres caminar y preguntar después por avisos. El sistema calcula itinerarios; el modelo explica las opciones. No inventa una ruta a partir de su memoria.
+Por ejemplo, puedes pedir un viaje de Atocha Cercanías a Chamartín, limitar cuánto quieres caminar y preguntar después por avisos. El motor de rutas calcula los itinerarios a partir de horarios y calles; el modelo explica las opciones.
 
 ## Qué puedes hacer
 
@@ -26,31 +26,29 @@ Por ejemplo, puedes pedir un viaje de Atocha Cercanías a Chamartín, limitar cu
 | Revisar información anterior | Publicaciones de movilidad retenidas y sus correcciones | «¿Qué sabía el sistema de BiciMAD hace diez minutos?» |
 | Continuar una conversación | Listado propio y reapertura del chat original | Abre **Mis conversaciones** |
 
-Son ejemplos de uso, no resultados medidos hoy. La [guía](user-guide.md) explica cómo interpretar las respuestas y la [referencia](reference/mcp.md) detalla cada consulta.
+La [guía de uso](user-guide.md) explica cómo interpretar las respuestas y la [referencia MCP](reference/mcp.md) detalla cada consulta.
 
 ## Qué hay detrás del chat
 
 1. **Better Auth** comprueba quién eres. Es la biblioteca de acceso con usuario y contraseña.
 2. **EVE** proporciona el chat oficial y coordina la conversación y sus herramientas.
-3. **GPT-6 Luna** interpreta la pregunta y redacta la explicación. Se conecta directamente a OpenAI, sin Gateway.
+3. **El modelo de lenguaje** interpreta la pregunta, solicita las herramientas necesarias y redacta la explicación a partir de sus resultados.
 4. **MCP**, un protocolo de herramientas, permite a EVE pedir operaciones concretas a **Mobility Core**, nuestro servidor de movilidad.
 5. **Mobility Core** consulta datos almacenados, adquiere nuevas publicaciones cuando corresponde y usa **OpenTripPlanner (OTP)** para calcular rutas.
 
-Hay **un servidor MCP con 16 herramientas**, no un servidor por proveedor. El modelo no recibe claves EMT/AEMET ni descarga directamente datos de esos proveedores. [Diagrama completo](architecture.md#arquitectura-general).
+Las **16 herramientas MCP** permiten buscar lugares, planificar viajes y consultar transporte y entorno. Core se encarga de conectar con cada proveedor y de gestionar sus credenciales. [Diagrama completo](architecture.md#arquitectura-general).
 
 ## Qué ocurre mientras nadie lo usa
 
-El ordenador mantiene los procesos locales arrancados, pero las descargas periódicas se limitan a una ventana de actividad de 30 minutos. Una nueva consulta normal reactiva esa ventana. Los datos almacenados se reutilizan entre usuarios: no se descarga todo Madrid cada vez que alguien pregunta.
+El ordenador mantiene los procesos locales arrancados, pero las descargas periódicas se limitan a una ventana de actividad de 30 minutos. Una nueva consulta normal reactiva esa ventana. Las consultas de distintos usuarios reutilizan los datos almacenados.
 
-La meteorología de un viaje también usa caché compartida. Una predicción que ya existe puede servir para varios itinerarios. La hora de descarga no sustituye la hora de la observación.
+La meteorología de un viaje también usa caché compartida. Una predicción que ya existe puede servir para varios itinerarios. Cada resultado conserva la hora de publicación y la hora de descarga.
 
 ## Alcance acordado
 
-La evaluación ya reúne las capacidades de **R0 y R1**, además del historial de conversaciones **R2.1**. No tiene un cierre R2 adicional pendiente. Se retiraron esas obligaciones; no se ejecutaron por el hecho de retirarlas.
+Las rutas combinan Renfe, EMT, Metro Ligero, interurbanos y caminatas. Metro de Madrid está disponible como catálogo de estaciones, pero carece de horarios vigentes para planificar viajes. BiciMAD y aparcamiento ofrecen consultas de disponibilidad y contexto; el planificador no calcula rutas en bici o coche. La accesibilidad corresponde a declaraciones publicadas sobre paradas y vehículos, no al estado operativo de ascensores. [Detalle de cobertura](roadmap.md).
 
-Metro de Madrid conserva catálogo, pero no horarios actuales ni rutas en Metro. No se añadieron rutas en bici/coche, nuevas asociaciones de tiempo real para otras redes ni estado operativo de ascensores. Son exclusiones acordadas, no una lista de tareas a completar. [Alcance exacto](roadmap.md).
-
-El sistema funciona localmente, pero necesita Internet para OpenAI y para adquirir fuentes. Los recursos cloud preparados no significan que haya un despliegue. [Local frente a cloud](deployment.md).
+Las aplicaciones se ejecutan localmente. La conversación y la adquisición de nuevas publicaciones requieren conexión a Internet.
 
 ## Cómo llegamos hasta aquí
 
