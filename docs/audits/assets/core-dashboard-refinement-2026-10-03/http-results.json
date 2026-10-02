@@ -1,0 +1,126 @@
+[
+  {
+    "name": "terminal capture via authenticated internal sink",
+    "ok": true
+  },
+  {
+    "name": "synthetic qualified tool and lifecycle capture",
+    "ok": true
+  },
+  {
+    "name": "Better Auth login 1",
+    "ok": true
+  },
+  {
+    "name": "Better Auth login 2",
+    "ok": true
+  },
+  {
+    "name": "BFF status",
+    "ok": true
+  },
+  {
+    "name": "BFF overview",
+    "ok": true
+  },
+  {
+    "name": "BFF tools",
+    "ok": true
+  },
+  {
+    "name": "BFF entities?category=bikes",
+    "ok": true
+  },
+  {
+    "name": "BFF sources",
+    "ok": true
+  },
+  {
+    "name": "BFF sources?window=24h",
+    "ok": true
+  },
+  {
+    "name": "BFF sources/aemet?window=1h",
+    "ok": true
+  },
+  {
+    "name": "BFF entities?category=places&section=reference&product=reference:tariffs",
+    "ok": true
+  },
+  {
+    "name": "BFF entities/bikes/qa-recent/history?window=6h&product=bicimad",
+    "ok": true
+  },
+  {
+    "name": "BFF events?window=24h",
+    "ok": true
+  },
+  {
+    "name": "BFF conversations/qa-owned/events?family=tools",
+    "ok": true
+  },
+  {
+    "name": "BFF conversations",
+    "ok": true
+  },
+  {
+    "name": "BFF conversations/qa-owned/summary",
+    "ok": true
+  },
+  {
+    "name": "BFF conversations/qa-owned/events",
+    "ok": true
+  },
+  {
+    "name": "BFF conversations/qa-owned/payloads/7564cef5-514a-4f07-9b67-21376491abec",
+    "ok": true
+  },
+  {
+    "name": "derived M1 excludes stale and disabled station readings",
+    "ok": true
+  },
+  {
+    "name": "derived M2 does not add heterogeneous parking categories",
+    "ok": true
+  },
+  {
+    "name": "G2 derives bounded intervals in Core",
+    "ok": true
+  },
+  {
+    "name": "foreign denied conversations/qa-owned/summary",
+    "ok": true
+  },
+  {
+    "name": "foreign denied conversations/qa-owned/events",
+    "ok": true
+  },
+  {
+    "name": "foreign denied conversations/qa-owned/payloads/7564cef5-514a-4f07-9b67-21376491abec",
+    "ok": true
+  },
+  {
+    "name": "stored-only executor",
+    "ok": true
+  },
+  {
+    "name": "duplicate request returns original id",
+    "ok": true
+  },
+  {
+    "name": "foreign execution denied",
+    "ok": true
+  },
+  {
+    "name": "anonymous BFF denied",
+    "ok": true
+  },
+  {
+    "name": "cross-origin writer denied",
+    "ok": true
+  },
+  {
+    "name": "no provider/model requests during stored dashboard reads",
+    "ok": true
+  }
+]
