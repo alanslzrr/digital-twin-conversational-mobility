@@ -54,3 +54,10 @@
     transition: none;
   }
 }
+
+/* Leaflet ships 30px controls; keep the panel's 44px pointer targets. */
+.dashboard-shell .leaflet-container .leaflet-control-zoom a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+}

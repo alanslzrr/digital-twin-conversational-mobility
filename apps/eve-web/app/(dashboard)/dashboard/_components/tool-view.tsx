@@ -103,7 +103,7 @@ export function Tools({ name }: { name?: string }) {
     <>
       <PageTitle
         title={tool ? toolCopy[tool.name].title : "Consultas"}
-        description="Consultar almacenado no ejecuta MCP. La ejecución manual usa el ejecutor real, sin llamar al modelo, y puede adquirir datos o renovar actividad."
+        description="Consultar los datos guardados no ejecuta la herramienta ni pide una lectura nueva. Ejecutarla manualmente puede consultar fuentes y mantener su actualización."
       />
       <State loading={q.isLoading} error={q.error} />
       {!name ? (
