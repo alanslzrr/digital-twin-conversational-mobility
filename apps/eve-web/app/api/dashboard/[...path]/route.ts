@@ -24,7 +24,7 @@ async function dispatch(
       request.method === "POST"
         ? /^(inspect|executions|activity)$/.test(suffix)
         : request.method === "GET" &&
-          /^(status|overview|tools|entities|map|sources|events|conversations|entities\/[^/]+\/[^/]+|sources\/[^/]+|events\/\d+|executions\/[0-9a-f-]{36}|conversations\/[A-Za-z0-9_-]{1,160}\/(summary|events)|conversations\/[A-Za-z0-9_-]{1,160}\/payloads\/[0-9a-f-]{36})$/.test(
+          /^(status|overview|tools|entities|map|sources|events|conversations|entities\/[^/]+\/[^/]+(?:\/history)?|sources\/[^/]+|events\/\d+|executions\/[0-9a-f-]{36}|conversations\/[A-Za-z0-9_-]{1,160}\/(summary|events)|conversations\/[A-Za-z0-9_-]{1,160}\/payloads\/[0-9a-f-]{36})$/.test(
             suffix,
           );
     if (!allowed)

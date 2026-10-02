@@ -3,9 +3,17 @@ import "server-only";
 import {
   dashboardActivity,
   dashboardData,
+  dashboardConversationSummaryResponse,
+  dashboardConversationIndexResponse,
+  dashboardTraceResponse,
+  dashboardTracePayloadResponse,
+  dashboardSourceResponse,
+  dashboardEventPage,
   dashboardEntityPage,
+  dashboardEntitySeries,
   dashboardMapPage,
   dashboardStatus,
+  dashboardOverview,
   dashboardToolCatalog,
 } from "@mobility/contracts";
 import { readBoundedJson } from "../../../src/evaluator-auth";
@@ -68,11 +76,18 @@ export async function coreDashboard(request: Request, path: string) {
     } as RequestInit),
     path === "map" || path.includes("/payloads/") ? 1048576 : 262144,
   );
-  const schema =
-    path === "status"
+  const schema = path === "conversations" ? dashboardConversationIndexResponse : path.includes("/payloads/") ? dashboardTracePayloadResponse :
+      path.startsWith("conversations/") && path.endsWith("/summary") ? dashboardConversationSummaryResponse : path.startsWith("conversations/") && path.endsWith("/events") ? dashboardTraceResponse : path?.endsWith("/history") ? dashboardEntitySeries :
+    path.split("?")[0] === "overview"
+      ? dashboardOverview
+      : path === "status"
       ? dashboardStatus
       : path === "tools"
         ? dashboardToolCatalog
+        : path === "sources" || path.startsWith("sources/")
+          ? dashboardSourceResponse
+        : path === "events" || path.startsWith("events/")
+          ? dashboardData.extend({ data: dashboardEventPage })
         : path === "activity"
           ? dashboardActivity
           : path === "entities"
