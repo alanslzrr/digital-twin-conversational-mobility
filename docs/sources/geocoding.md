@@ -4,9 +4,9 @@
 
 `resolve_address` consulta primero los catálogos locales (Renfe, EMT, CRTM y BiciMAD).
 Si no encuentra candidatos, reutiliza una caché válida del proveedor configurado o
-solicita autorización para consultar externamente ese **lugar público**. No selecciona
-silenciosamente entre candidatos; incluso uno solo conserva precisión estimada y
-requiere confirmación antes de planificar. No garantiza portal ni acceso accesible.
+solicita autorización para consultar externamente ese **lugar público**. Devuelve
+candidatos con su precisión estimada y pide confirmación antes de planificar.
+La coordenada identifica el lugar; la accesibilidad de sus accesos se trata por separado.
 
 ## Proveedor y límites
 
@@ -14,19 +14,19 @@ Adaptador compatible con Search JSONv2 de Nominatim, sin servicio activo por def
 Configurar en Core `GEOCODER_ENABLED=true`, `GEOCODER_URL` (endpoint `/search`) y
 `GEOCODER_USER_AGENT` identificativo. HTTPS remoto, o HTTP de loopback para una
 instancia propia. Se puede cambiar el endpoint o desactivar sin modificar código.
-No introducir credenciales en la URL ni en el navegador. No se habilita en Vercel.
+Las credenciales y la configuración del proveedor se mantienen en Core.
 
 Para **Nominatim público**, el responsable debe elegirlo informadamente y aceptar
 su [política de uso](https://operations.osmfoundation.org/policies/nominatim/);
 solo entonces establecer `GEOCODER_PUBLIC_POLICY_ACCEPTED=true`.
 Máximo del proveedor: **1 petición/s global para toda la aplicación**, identificación
 válida y atribución. No autocompletado, consultas sistemáticas, scraping de detalles
-ni envío de datos personales/confidenciales. No se contrata ningún servicio.
+ni envío de datos personales/confidenciales.
 
 La aplicación aplica un único carril PostgreSQL con lease de 30 s, timeout de red
 10 s y espera mínima de 2 s después de cada respuesta; llamadas concurrentes obtienen
-busy en vez de crear una cola o ráfaga. Fallos conservan backoff de 60 s, no una lista
-vacía ni un supuesto resultado válido. No hay reintentos automáticos ni worker.
+`busy` mientras el carril está ocupado. Los fallos devuelven error y aplican
+un backoff de 60 s. La adquisición se inicia por consulta, con un único intento.
 
 Search usa `countrycodes=es`, idioma español y bounding box aproximada
 [-4.6,39.8,-3.0,41.2]; es un límite espacial, no una frontera administrativa.
@@ -36,9 +36,10 @@ estables por tipo/ID OSM, nunca por el `place_id` interno de Nominatim.
 ## Procedencia, caché y privacidad
 
 Resultados © OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright),
-con enlace al objeto, proveedor, fecha de recuperación y precisión declarada. Son
-coordenadas estimadas, no lecturas en tiempo real. No se almacena la consulta en
-claro ni respuestas raw: clave hash del texto normalizado+proveedor+versión de búsqueda.
+con enlace al objeto, proveedor, fecha de recuperación y precisión declarada.
+La caché se identifica mediante un hash del texto normalizado, proveedor y versión
+de búsqueda. Conserva los candidatos, con las coordenadas y la precisión estimadas,
+en lugar del texto de consulta o la respuesta raw.
 Caché positiva 7 días, negativa 1 hora, máximo 5000 entradas; purga de caducadas
 bajo demanda. Los errores de proveedor no se cachean como ausencia de resultados.
 Las identidades/coordenadas de lugares públicos persisten para conservar UUIDs usados
