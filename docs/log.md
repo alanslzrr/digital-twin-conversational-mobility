@@ -15,3 +15,12 @@ Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza
 - Se retiene la investigación original mediante enlaces y se contrasta la síntesis con código/scripts versionados.
 
 [Verificación de esta revisión](acceptance/2026-10-02-documentation-wiki.md): enlaces/anclas sin errores y sin documentos aislados, seis diagramas renderizados y revisados, fuentes oficiales con restricciones registradas y `pnpm check` aprobado (414 pruebas, 73 omitidas; builds con caché). Sin inferencias, campañas, benchmarks, cambios de datos ni reinicio de runtime.
+
+## [2026-10-02] revisión | Presentación completa del README
+
+- Ampliada la portada del repositorio: propósito, capacidades, ejemplos, componentes y recorrido de una pregunta.
+- Añadido un diagrama Mermaid de presentación y separadas primera instalación y puesta en marcha cotidiana.
+- Explicados requisitos, privacidad, cobertura acordada, estructura del código y comprobaciones disponibles, con enlaces a sus guías canónicas.
+- Conservado el índice de la wiki como entrada al detalle; añadido enlace de vuelta al README.
+- Revisión exclusivamente documental; no modifica funcionalidades, datos, credenciales ni runtime.
+- Verificados enlaces y anclas sin errores, vista HTML del README sin desbordamiento horizontal y diagrama Mermaid renderizado/revisado. `pnpm check` aprobado: 414 pruebas, 73 opt-in omitidas y builds con caché. No se ejecutó ninguna consulta al modelo.
