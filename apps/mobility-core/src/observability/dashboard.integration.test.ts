@@ -271,6 +271,8 @@ describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
         owner,
       );
       expect(next.entities[0]?.id).toBe("b");
+      expect(page.totals?.evaluatedAt).toBeTruthy();
+      expect(next.totals?.evaluatedAt).toBe(page.totals?.evaluatedAt);
       await sql`UPDATE mobility_snapshot SET ingested_at=now()+interval '1 second' WHERE job_id='bicimad'`;
       await expect(
         readEntities({ category: "bikes", limit: 1, cursor }, owner),

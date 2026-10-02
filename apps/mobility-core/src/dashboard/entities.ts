@@ -328,6 +328,11 @@ export async function readEntities(
     "cursor" in input && input.cursor ? decodeCursor(input.cursor) : null;
   if (cursor && (cursor.owner !== owner || cursor.selection !== selection))
     throw new DashboardAccessError(400, "invalid_cursor");
+  const evaluatedAt = cursor?.evaluatedAt
+    ? String(cursor.evaluatedAt)
+    : new Date().toISOString();
+  if (!Number.isFinite(Date.parse(evaluatedAt)))
+    throw new DashboardAccessError(400, "invalid_cursor");
   return database().begin(
     "isolation level repeatable read read only",
     async (tx) => {
@@ -406,10 +411,10 @@ export async function readEntities(
         AND (${input.search ?? null}::text IS NULL OR coalesce(entity->>'name',entity->>'title','') ILIKE '%'||${input.search ?? null}||'%')
         AND (${detailId ?? null}::text IS NULL OR entity_id=${detailId ?? null})
         ORDER BY product_id,entity_id)
-      , classified AS (SELECT *, CASE WHEN ${input.category}='places' THEN 'static' WHEN product_id LIKE 'weather:%' THEN CASE WHEN checked_at IS NULL OR issued_at IS NULL OR valid_to<now() OR checked_at>now()+interval '30 seconds' OR issued_at>now()+interval '5 minutes' OR checked_at<now()-interval '24 hours' OR (product_id<>'weather:warnings:28' AND issued_at<now()-interval '24 hours') THEN 'unavailable' WHEN entity->>'_errorCode' IS NULL AND now()-checked_at<=CASE WHEN product_id='weather:warnings:28' THEN interval '300 seconds' ELSE interval '1800 seconds' END THEN 'recently_checked' ELSE 'stale' END WHEN entity->>'observedAt' IS NULL THEN 'unavailable' WHEN (entity->>'observedAt')::timestamptz>now()+interval '30 seconds' THEN 'unavailable' WHEN now()-(entity->>'observedAt')::timestamptz <= (coalesce((${thresholds}::jsonb->>product_id)::int,CASE WHEN product_id='emt:arrivals' THEN 30 ELSE 0 END))*interval '1 second' THEN 'recent' ELSE 'stale' END AS state FROM selected)
+      , classified AS (SELECT *, CASE WHEN ${input.category}='places' THEN 'static' WHEN product_id LIKE 'weather:%' THEN CASE WHEN checked_at IS NULL OR issued_at IS NULL OR valid_to<${evaluatedAt}::timestamptz OR checked_at>${evaluatedAt}::timestamptz+interval '30 seconds' OR issued_at>${evaluatedAt}::timestamptz+interval '5 minutes' OR checked_at<${evaluatedAt}::timestamptz-interval '24 hours' OR (product_id<>'weather:warnings:28' AND issued_at<${evaluatedAt}::timestamptz-interval '24 hours') THEN 'unavailable' WHEN entity->>'_errorCode' IS NULL AND ${evaluatedAt}::timestamptz-checked_at<=CASE WHEN product_id='weather:warnings:28' THEN interval '300 seconds' ELSE interval '1800 seconds' END THEN 'recently_checked' ELSE 'stale' END WHEN entity->>'observedAt' IS NULL THEN 'unavailable' WHEN (entity->>'observedAt')::timestamptz>${evaluatedAt}::timestamptz+interval '30 seconds' THEN 'unavailable' WHEN ${evaluatedAt}::timestamptz-(entity->>'observedAt')::timestamptz <= (coalesce((${thresholds}::jsonb->>product_id)::int,CASE WHEN product_id='emt:arrivals' THEN 30 ELSE 0 END))*interval '1 second' THEN 'recent' ELSE 'stale' END AS state FROM selected)
       , filtered AS (SELECT * FROM classified WHERE (${bbox !== null}=false OR ((entity->>'longitude')::float8 BETWEEN ${bbox?.[0] ?? -180} AND ${bbox?.[2] ?? 180} AND (entity->>'latitude')::float8 BETWEEN ${bbox?.[1] ?? -90} AND ${bbox?.[3] ?? 90}))
         AND (${input.freshness ?? null}::text IS NULL OR state=${input.freshness ?? null})
-      ), stats AS (SELECT count(*)::int AS total, count(*) FILTER(WHERE state IN ('recent','recently_checked'))::int AS recent,count(*) FILTER(WHERE state='stale')::int AS stale,count(*) FILTER(WHERE state='static')::int AS static,count(*) FILTER(WHERE state IN ('unavailable','unknown'))::int AS unavailable,now() AS evaluated_at FROM filtered)
+      ), stats AS (SELECT count(*)::int AS total, count(*) FILTER(WHERE state IN ('recent','recently_checked'))::int AS recent,count(*) FILTER(WHERE state='stale')::int AS stale,count(*) FILTER(WHERE state='static')::int AS static,count(*) FILTER(WHERE state IN ('unavailable','unknown'))::int AS unavailable,${evaluatedAt}::timestamptz AS evaluated_at FROM filtered)
       SELECT page.*,stats.total AS selection_total,stats.recent AS selection_recent,stats.stale AS selection_stale,stats.static AS selection_static,stats.unavailable AS selection_unavailable,stats.evaluated_at FROM stats LEFT JOIN LATERAL (SELECT * FROM filtered WHERE key>${after} ORDER BY product_id,entity_id LIMIT ${limit + 1}) page ON true`;
       const totals = {
         total: Number(rows[0]?.selection_total ?? 0),
@@ -467,6 +472,7 @@ export async function readEntities(
                 selection,
                 vector,
                 after: String(last.key),
+                evaluatedAt: totals.evaluatedAt,
               })
             : null,
       });

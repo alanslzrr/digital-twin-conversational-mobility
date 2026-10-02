@@ -113,6 +113,7 @@ export function Mobility({
     id
       ? `entities/${category}/${encodeURIComponent(id)}?${qs}`
       : `entities?${qs}`,
+    cursor || section === "reference" ? 0 : 15000,
   );
   const page = (id ? unwrap(q.data) : q.data) as
     | {
@@ -382,6 +383,13 @@ export function Mobility({
           </FieldGroup>
         </form>
       )}
+      {cursor ? (
+        <p className="text-sm text-muted-foreground">
+          Página de una selección anterior; su frescura conserva el instante de
+          evaluación. Vuelve a la primera página para consultar la selección
+          actual.
+        </p>
+      ) : null}
       <State loading={q.isLoading} error={q.error} empty={!entities.length} />
       {!id ? (
         <Button
