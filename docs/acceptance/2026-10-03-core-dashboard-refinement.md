@@ -2,7 +2,7 @@
 
 [Índice](../index.md) · [Auditorías](../audits/index.md) · [Spec original](../plans/2026-10-02-core-dashboard.md) · [Spec-audit](../audits/2026-10-02-core-dashboard-review.md)
 
-Implementación de las seis vistas, M1–M13 y G1–G4 en la misma [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45). HEAD de aplicación verificado: `acb14b373b7351cdada58837eccf1496149f14e9`. Los commits documentales posteriores no cambian la aplicación. Esta acta no sustituye las reproducciones históricas de `56b1f25`.
+Implementación de las seis vistas, M1–M13 y G1–G4 en la misma [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45). HEAD de aplicación verificado: `8f4bd3d256e269158a39e2c83cd5df1fe39a9e26`. Los commits documentales posteriores no cambian la aplicación. Esta acta no sustituye las reproducciones históricas de `56b1f25`.
 
 ## En esta página
 
@@ -18,7 +18,7 @@ Implementación de las seis vistas, M1–M13 y G1–G4 en la misma [PR #45](http
 | Vista | Pregunta y respuesta implementada |
 | --- | --- |
 | Resumen | Cuatro indicadores con definición, excluidos, cobertura, denominador, periodo y enlace. Inventario de 13 productos habilitables, problemas prioritarios, actividad reciente y G2. Sin cifras de usuarios, conversaciones o tokens compartidos. |
-| Movilidad | Datos dinámicos y seis catálogos separados. Selección SQL por producto/fuente/frescura/búsqueda; totales completos antes de paginar. Mapa anónimo, ficha temporal y G3 bajo demanda. |
+| Movilidad | Datos dinámicos y seis catálogos separados. Selección SQL por producto/fuente/frescura/búsqueda; totales completos antes de paginar, con instante de frescura firmado y congelado en páginas posteriores. Mapa anónimo, ficha temporal y G3 bajo demanda. |
 | Consultas | Las 16 herramientas existentes, formularios tipados, ejemplos sin ejecución, lectura almacenada y ejecución confirmada separadas. Resultados específicos y detalles técnicos secundarios. |
 | Fuentes y actualización | Actualización periódica, demanda y referencia separadas; procesos no equivalen a salud. Recursos paginados, M6–M9 y mediana/p95 con muestra visible. |
 | Actividad del sistema | Filtros previos a paginación, periodos relativos o UTC absolutos, G2 sobre el mismo rango y detalle operativo sin contenido privado. |
@@ -76,7 +76,7 @@ Los DTOs de entidades son discriminados por kind y los DTOs de overview, fuentes
 | `pnpm build:agent` | EVE/Nitro compilado: 10,7 MB, 2,42 MB gzip. Sin llamada al modelo. |
 | `RUN_DASHBOARD_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/dashboard apps/mobility-core/src/observability/dashboard.integration.test.ts` | 9 archivos / 40 tests pasan. Es una selección mixta SQL y unitarias, no 40 casos exclusivamente SQL. |
 | `node --env-file=.env.local scripts/test-dashboard-local.mjs --preview` | 31 comprobaciones HTTP pasan; dos identidades sintéticas con login Better Auth real, Core/BFF y captura. [Resultados](../audits/assets/core-dashboard-refinement-2026-10-03/http-results.json). |
-| `EXPLAIN (ANALYZE, FORMAT JSON)` de lectores reales en esquema aislado | 22 consultas; máximo de ejecución 177.908 ms en esta fixture. [Planes resumidos](../audits/assets/core-dashboard-refinement-2026-10-03/sql-plans.json). No SLO ni benchmark de producción. |
+| `EXPLAIN (ANALYZE, FORMAT JSON)` de lectores reales en esquema aislado | 22 consultas; máximo de ejecución 171.723 ms en esta fixture. [Planes resumidos](../audits/assets/core-dashboard-refinement-2026-10-03/sql-plans.json). No SLO ni benchmark de producción. |
 | Navegador autenticado, 1440×900 / 1280×720 / 768×1024 / 390×844 | 24 combinaciones con h1 esperado, sin alertas de error ni desbordamiento horizontal del documento. Las tablas pueden desplazarse en su contenedor. [Medidas](../audits/assets/core-dashboard-refinement-2026-10-03/responsive-results.json). |
 
 La captura de QA es sintética y está aislada del runtime habitual. Las observaciones envejecen durante la revisión y pasan a antiguas sin alterar sus fechas. El guard del servidor de QA permite solo HTTP local a 3002/3003; no es una intercepción de red del navegador ni una garantía contra cualquier mecanismo de salida imaginable.

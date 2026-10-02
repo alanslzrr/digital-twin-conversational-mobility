@@ -4,74 +4,74 @@
   "plans": [
     {
       "root": "Sort",
-      "planningMs": 0.771,
-      "executionMs": 0.865,
+      "planningMs": 0.716,
+      "executionMs": 0.907,
       "rows": 3
     },
     {
       "root": "Nested Loop",
-      "planningMs": 3.144,
-      "executionMs": 0.423,
+      "planningMs": 2.671,
+      "executionMs": 0.419,
       "rows": 2
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.162,
-      "executionMs": 0.04,
+      "planningMs": 0.157,
+      "executionMs": 0.03,
       "rows": 0
     },
     {
       "root": "Hash Join",
-      "planningMs": 0.124,
-      "executionMs": 0.072,
+      "planningMs": 0.126,
+      "executionMs": 0.099,
       "rows": 9
     },
     {
       "root": "Result",
-      "planningMs": 0.111,
-      "executionMs": 0.024,
+      "planningMs": 0.115,
+      "executionMs": 0.023,
       "rows": 1
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.191,
-      "executionMs": 177.908,
+      "planningMs": 0.156,
+      "executionMs": 171.723,
       "rows": 1
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.272,
-      "executionMs": 0.086,
+      "planningMs": 0.293,
+      "executionMs": 0.094,
       "rows": 1
     },
     {
       "root": "Limit",
-      "planningMs": 0.172,
-      "executionMs": 0.063,
+      "planningMs": 0.16,
+      "executionMs": 0.058,
       "rows": 0
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.166,
-      "executionMs": 0.038,
+      "planningMs": 0.178,
+      "executionMs": 0.041,
       "rows": 1
     },
     {
       "root": "Append",
-      "planningMs": 0.147,
-      "executionMs": 0.056,
+      "planningMs": 0.14,
+      "executionMs": 0.054,
       "rows": 1
     },
     {
       "root": "Seq Scan",
-      "planningMs": 0.02,
+      "planningMs": 0.019,
       "executionMs": 0.019,
       "rows": 10
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.475,
-      "executionMs": 0.095,
+      "planningMs": 0.438,
+      "executionMs": 0.088,
       "rows": 1
     },
     {
@@ -82,56 +82,56 @@
     },
     {
       "root": "Limit",
-      "planningMs": 0.384,
-      "executionMs": 1.74,
+      "planningMs": 0.375,
+      "executionMs": 1.733,
       "rows": 21
     },
     {
       "root": "Nested Loop",
-      "planningMs": 0.087,
-      "executionMs": 0.031,
+      "planningMs": 0.091,
+      "executionMs": 0.034,
       "rows": 1
     },
     {
       "root": "Nested Loop",
       "planningMs": 0.129,
-      "executionMs": 0.035,
+      "executionMs": 0.036,
       "rows": 1
     },
     {
       "root": "Unique",
-      "planningMs": 1.425,
-      "executionMs": 0.618,
+      "planningMs": 1.404,
+      "executionMs": 0.624,
       "rows": 60
     },
     {
       "root": "Limit",
-      "planningMs": 0.162,
-      "executionMs": 0.178,
+      "planningMs": 0.145,
+      "executionMs": 0.172,
       "rows": 1
     },
     {
       "root": "Unique",
-      "planningMs": 0.352,
-      "executionMs": 0.055,
+      "planningMs": 0.325,
+      "executionMs": 0.054,
       "rows": 0
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.254,
-      "executionMs": 0.094,
+      "planningMs": 0.248,
+      "executionMs": 0.09,
       "rows": 1
     },
     {
       "root": "Aggregate",
-      "planningMs": 0.174,
-      "executionMs": 0.286,
+      "planningMs": 0.151,
+      "executionMs": 0.276,
       "rows": 1
     },
     {
       "root": "Limit",
-      "planningMs": 0.165,
-      "executionMs": 0.213,
+      "planningMs": 0.143,
+      "executionMs": 0.194,
       "rows": 61
     }
   ]
