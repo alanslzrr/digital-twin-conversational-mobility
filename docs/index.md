@@ -1,5 +1,7 @@
 # Madrid Mobility Twin · Documentación
 
+[Presentación del repositorio](../README.md)
+
 Esta wiki explica qué hace el proyecto, cómo usarlo y cómo mantenerlo. Es una **evaluación universitaria local para hasta cinco personas**, no un servicio público de movilidad. Estado documental: **2 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md).** No necesitas conocer programación para leerlo.
