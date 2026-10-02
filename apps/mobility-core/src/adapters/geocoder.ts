@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { boundedSignal } from "../execution-signal";
 import { numeric } from "./common";
 
 export const geocoderBounds = {
@@ -106,7 +107,7 @@ export async function fetchGeocodes(
     url.searchParams.set(key, value);
   const response = await fetch(url, {
     headers: { "User-Agent": config.agent, Accept: "application/json" },
-    signal: AbortSignal.timeout(10000),
+    signal: boundedSignal(AbortSignal.timeout(10000)),
     redirect: "error",
     cache: "no-store",
   });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { boundedSignal } from "../execution-signal";
 
 export const numeric = z
   .union([z.number(), z.string().trim().min(1)])
@@ -112,7 +113,7 @@ export async function fetchText(
     fetch(url, {
       ...options,
       headers: { Accept: accept, ...options.headers },
-      signal: AbortSignal.timeout(12_000),
+      signal: boundedSignal(AbortSignal.timeout(12_000)),
       redirect: "error",
       cache: "no-store",
     });
