@@ -1,5 +1,9 @@
 # E3 — Continuidad de la ingestión existente
 
+[Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
+
+> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Entrega local del 25/09/2026. E2 permanece cerrado. No se reemplaza el scheduler ni se modifican EVE, modelo, autenticación o proveedores.
 
 ## Cambios funcionales

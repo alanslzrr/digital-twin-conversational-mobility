@@ -1,5 +1,9 @@
 # Entrega local DGT y herramientas agregadas — 28/09/2026
 
+[Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
+
+> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 ## Alcance
 
 DGT DATEX2 3.7 público integrado en Core y worker existente; consultas de incidencias, histórico retenido y salud. Tres agregados MCP almacenados: `get_line_status`, `get_network_status`, `get_mobility_snapshot`. Conexión del agente amplía únicamente descubrimiento/allowlist; interfaz EVE, modelo, autenticación y límites no cambian.
