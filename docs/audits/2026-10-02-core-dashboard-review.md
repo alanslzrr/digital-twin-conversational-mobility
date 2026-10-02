@@ -1,6 +1,7 @@
 # Spec-audit de PR #45: datos, telemetría y dashboard
 
 **Implementación posterior:** [acta de refinamiento del 03/10/2026](../acceptance/2026-10-03-core-dashboard-refinement.md), con HEAD, pruebas, capturas y verificaciones pendientes.
+**Segunda verificación:** [auditoría con agent-browser del 03/10/2026](../acceptance/2026-10-03-core-dashboard-second-audit.md), nueve hallazgos adicionales corregidos y límites de revisión explícitos.
 [Índice](../index.md) · [Auditorías](index.md) · [Spec acordado](../plans/2026-10-02-core-dashboard.md) · [Acta original](../acceptance/2026-10-02-core-dashboard.md) · [Alcance](../roadmap.md)
 
 ## Dictamen

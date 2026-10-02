@@ -4,6 +4,8 @@
 
 Implementación de las seis vistas, M1–M13 y G1–G4 en la misma [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45). HEAD de aplicación verificado: `8f4bd3d256e269158a39e2c83cd5df1fe39a9e26`. Los commits documentales posteriores no cambian la aplicación. Esta acta no sustituye las reproducciones históricas de `56b1f25`.
 
+**Verificación posterior:** [segunda auditoría con agent-browser](2026-10-03-core-dashboard-second-audit.md). Los resultados y límites de esta primera acta se conservan sin reescribir.
+
 ## En esta página
 
 - [Comportamiento entregado](#comportamiento-entregado)
