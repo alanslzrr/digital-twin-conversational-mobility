@@ -39,11 +39,11 @@ flowchart TB
   Core -->|adaptadores controlados| Sources
 ```
 
-1. El [navegador](../apps/eve-web/app) no tiene claves de proveedores ni acceso a la base.
+1. El [navegador](../apps/eve-web/app) muestra el chat y envía las peticiones a la Web con la cookie de sesión.
 2. La [Web/EVE](../apps/eve-web/agent/agent.ts) conecta el modelo y el [MCP de Core](../apps/mobility-core/app/mcp/route.ts). Existe un servidor con 16 herramientas.
 3. [Core](../apps/mobility-core/src) aplica reglas y guarda datos. [PostGIS](../infra/postgres/migrations) añade consultas geográficas a PostgreSQL.
-4. [OTP local](../infra/local/compose.yaml) carga un grafo ya construido. No llama al modelo.
-5. Internet sigue siendo necesario para OpenAI y las nuevas adquisiciones. Neon, Upstash, Blob, Queues y Sandbox cloud no forman parte de este flujo local. Redis está disponible en Compose, pero la vertical no depende de él.
+4. [OTP local](../infra/local/compose.yaml) carga el grafo de horarios y calles que utiliza para calcular rutas.
+5. Las conexiones externas tienen dos funciones: EVE consulta el modelo y Core adquiere publicaciones de las fuentes. Las consultas de movilidad reutilizan los datos y cachés de PostgreSQL.
 
 ## Recorrido de una pregunta
 
@@ -72,13 +72,13 @@ sequenceDiagram
   E-->>U: Respuesta en el chat oficial
 ```
 
-1. [Better Auth](../apps/mobility-core/src/better-auth.ts) valida el login. El proxy mantiene un único origen para el navegador.
-2. El [guard del canal](../apps/eve-web/src/evaluation-guard.ts) comprueba propietario y cuota antes de ejecutar EVE. No basta con ocultar una página o proteger solo middleware.
-3. El [modelo configurado](../apps/eve-web/src/model.ts) usa OpenAI Responses directamente: `gpt-6-luna`, sin Gateway ni fallback.
-4. [MCP](reference/mcp.md) exige JWT de servicio y scope `mobility.read`. Las claves EMT/AEMET no salen de Core.
-5. EVE puede realizar varios pasos y llamadas al modelo para una pregunta. La [continuidad E2](acceptance/2026-09-25-e2-closure.md) usa Approve/Stop; no hace falta crear una campaña.
+1. [Better Auth](../apps/mobility-core/src/better-auth.ts), en Core, valida las credenciales y guarda usuarios y sesiones de acceso en PostgreSQL. El [proxy de autenticación](../apps/eve-web/app/api/auth/[...all]/route.ts) permite que el navegador use `/api/auth/*` desde el mismo origen de la Web. La cookie de sesión es `HttpOnly` y `SameSite=Strict`; usa `Secure` cuando el origen es HTTPS.
+2. El [guard del canal EVE](../apps/eve-web/src/evaluation-guard.ts) consulta la identidad y pide a Core autorización para cada operación. Core comprueba cuenta activa, propietario de la conversación y cuota. Al crear una conversación, el guard registra su identificador y propietario en Core. Así, conocer la URL de otra conversación no da acceso a sus mensajes.
+3. EVE envía el contexto al [modelo configurado](../apps/eve-web/src/model.ts) mediante la API Responses de OpenAI. El modelo solicita herramientas y utiliza sus resultados para elaborar la respuesta.
+4. Las llamadas servidor a servidor usan un JWT con permisos: `mobility.read` para [MCP](reference/mcp.md) y `mobility.evaluation.manage` para gestionar acceso. Esta credencial identifica al servicio Web; la sesión de Better Auth identifica a la persona. Las claves de los proveedores de movilidad permanecen en Core.
+5. EVE puede realizar varios pasos para responder una pregunta. Al alcanzar el límite de continuidad, muestra una pausa: **Approve** permite continuar y **Stop** detiene el turno. [Comportamiento y pruebas](acceptance/2026-09-25-e2-closure.md).
 
-Las herramientas generales de EVE están desactivadas (`defaultTools: false`): no hay shell ni búsqueda web genérica para que el agente eluda Core. La [interfaz oficial](../apps/eve-web/vendor/eve/README.md) se mantiene, con adaptaciones mínimas de acceso e historial.
+EVE tiene habilitadas las herramientas MCP de movilidad. `defaultTools: false` desactiva las herramientas generales de shell y búsqueda web. La [interfaz de EVE](../apps/eve-web/vendor/eve/README.md) incorpora el acceso autenticado y el listado de conversaciones.
 
 ## Adquisición de datos
 
@@ -99,13 +99,13 @@ flowchart TD
   Retry --> State
 ```
 
-1. El [worker](../scripts/ingestion-worker.mjs) no mantiene activa la ventana por sí mismo. Sin uso, deja de pedir datos periódicos.
-2. [Core y sus leases](../apps/mobility-core/src/ingestion.ts) deciden qué trabajo procede. No repiten todos los ciclos perdidos tras una interrupción.
-3. Los [adaptadores](../apps/mobility-core/src/adapters) preservan la hora publicada. Descargar hoy una lectura de ayer no la convierte en actual.
+1. El [worker](../scripts/ingestion-worker.mjs) pide actualizaciones durante la ventana de actividad. Al vencer, espera a que una interacción la renueve.
+2. [Core y sus leases](../apps/mobility-core/src/ingestion.ts) seleccionan trabajos vencidos. Tras una interrupción, retoman la actualización desde el estado guardado y omiten los ciclos ya pasados.
+3. Los [adaptadores](../apps/mobility-core/src/adapters) conservan la hora de la publicación y registran por separado cuándo se adquirió.
 4. [Las políticas de dominio](../packages/domain/src/ingestion.ts) separan frecuencia de adquisición, frescura y reintentos. [Provenance](../packages/provenance/src/index.ts) calcula calidad temporal.
 5. Algunas consultas hacen **read-through**: intentan refrescar solo su fuente si vence, compartiendo locks/backoff. Llegadas EMT, geocodificación y meteorología tienen cachés específicas. Los tres agregados leen almacenamiento, sin refrescar ni renovar la ventana.
 
-No se archivan tokens de login ni respuestas privadas de autenticación. No todos los productos guardan un archivo raw: por ejemplo, llegadas EMT conserva un checksum de resultado. [Persistencia y cadencias](reference/system.md).
+El almacenamiento depende del producto: algunos conservan la publicación original; llegadas EMT guarda el resultado normalizado y su checksum. Las respuestas de autenticación quedan excluidas de estos archivos. [Persistencia y cadencias](reference/system.md).
 
 ## Planificación de un viaje
 
@@ -125,16 +125,16 @@ flowchart TD
 ```
 
 1. [Resolución](../apps/mobility-core/src/mobility.ts) entrega identificadores estables. [Nominatim](sources/geocoding.md) es un respaldo para lugares públicos, con consentimiento.
-2. [Routing](../apps/mobility-core/src/routing.ts) verifica versión de catálogos/grafo, hora, modos y preferencias. `TRANSIT` exige transporte y permite accesos a pie; no equivale a una ruta íntegramente peatonal.
+2. [Routing](../apps/mobility-core/src/routing.ts) verifica versión de catálogos/grafo, hora, modos y preferencias. `TRANSIT` exige al menos un tramo de transporte público y permite accesos a pie.
 3. OTP usa Renfe, EMT, Metro Ligero e interurbanos admitidos por la release. Calendarios, excepciones y frecuencias determinan cada servicio. Metro actual está fuera del alcance.
-4. [Evidencia dinámica](../apps/mobility-core/src/routing-evidence.ts) aplica Renfe cuando hay correspondencia demostrada; avisos EMT contextualizan líneas, sin fabricar desvíos. No hay otro polling RT dentro de OTP.
-5. [Meteorología del viaje](../apps/mobility-core/src/journey-weather.ts) usa lugares y periodos del itinerario, comparte caché y no invalida una ruta por falta de predicción. No sigue al usuario ni cambia automáticamente su viaje.
+4. [Evidencia dinámica](../apps/mobility-core/src/routing-evidence.ts) añade estimaciones Renfe cuando identifica el viaje correspondiente y adjunta avisos EMT a sus líneas. Core utiliza las publicaciones adquiridas por el worker; OTP calcula el itinerario base.
+5. [Meteorología del viaje](../apps/mobility-core/src/journey-weather.ts) consulta la caché por lugares y periodos del itinerario. Añade predicción y avisos disponibles; si faltan, devuelve la ruta con el contexto meteorológico marcado como no disponible.
 
-La accesibilidad separa declaraciones de parada y vehículo; no acredita ascensores operativos. Los IDs de distintas redes se relacionan mediante evidencia, no se fusionan por compartir nombre. [Detalle y activación del grafo](routing-releases.md).
+La accesibilidad describe por separado paradas y vehículos mediante sus atributos estáticos. Las correspondencias entre redes conservan los IDs originales y la evidencia que los relaciona. [Detalle y activación del grafo](routing-releases.md).
 
 ## Dos históricos distintos
 
-El listado de conversaciones y las publicaciones antiguas resuelven necesidades diferentes. No comparten permisos ni almacenamiento de contenido.
+EVE guarda los mensajes del chat; Core guarda el índice de propietarios y las publicaciones de movilidad. Cada consulta utiliza el almacenamiento y los permisos correspondientes.
 
 ```mermaid
 flowchart LR
@@ -146,21 +146,21 @@ flowchart LR
   History --> Revisions[(Publicaciones y revisiones retenidas)]
 ```
 
-1. [Core](../apps/mobility-core/src/conversations.ts) devuelve el índice propio, veinte entradas por página. No copia los mensajes de EVE.
+1. [Core](../apps/mobility-core/src/conversations.ts) devuelve el índice de conversaciones del propietario, veinte entradas por página. Los mensajes se recuperan desde EVE.
 2. [La Web](../apps/eve-web/app/evaluation/conversations.tsx) abre la sesión original; el guard vuelve a comprobar permisos. Una recuperación vacía muestra «no disponible».
 3. [El histórico de movilidad](../apps/mobility-core/src/history.ts) tiene dos lecturas: `event` puede incluir correcciones aprendidas después; `knowledge` solo incluye lo conocido entonces.
-4. El histórico devuelve muestras acotadas de publicaciones retenidas, no toda la ciudad en un instante. La retención objetivo de movilidad es 24 horas, con purga durante actividad.
-5. Expirar permisos del chat no borra físicamente mensajes EVE. [Retención y cuentas](evaluation.md).
+4. El histórico devuelve muestras de publicaciones retenidas. La retención objetivo de movilidad es 24 horas, con purga durante actividad.
+5. La caducidad del chat bloquea el acceso y conserva los mensajes almacenados en EVE. [Retención y cuentas](evaluation.md).
 
 ## Decisiones y fronteras
 
-| Decisión implementada | Qué evita | Dónde se comprueba |
+| Decisión implementada | Función | Dónde se comprueba |
 | --- | --- | --- |
-| Web separada de Core | Importar fuentes/DB en el chat | [Check de fronteras](../scripts/check-boundaries.mjs) |
-| Contratos compartidos estrictos | Peticiones ambiguas o herramientas ficticias | [Contracts](../packages/contracts/src/index.ts) |
-| Reloj del servidor para «hace diez minutos» | Calcular fechas desde datos antiguos | [Histórico](../apps/mobility-core/src/history.ts) |
-| Una representación del resultado MCP | Duplicar evidencia en el contexto | [Serialización](../apps/mobility-core/src/mcp-result.ts) |
-| Releases coordinadas | Usar un catálogo y un grafo de versiones incompatibles | [Activador](../scripts/activate-routing-release.mjs) |
-| Pruebas offline sin claves | Necesitar cuentas de proveedor para compilar o revisar | [CI](../.github/workflows/ci.yml) |
+| Web separada de Core | Concentrar fuentes y base de datos en Core | [Check de fronteras](../scripts/check-boundaries.mjs) |
+| Contratos compartidos estrictos | Validar entradas y definir resultados entre componentes | [Contracts](../packages/contracts/src/index.ts) |
+| Reloj del servidor para «hace diez minutos» | Resolver fechas relativas desde la hora de consulta | [Histórico](../apps/mobility-core/src/history.ts) |
+| Una representación del resultado MCP | Entregar una única copia de cada resultado al agente | [Serialización](../apps/mobility-core/src/mcp-result.ts) |
+| Releases coordinadas | Mantener catálogos y grafo en la misma versión | [Activador](../scripts/activate-routing-release.mjs) |
+| Pruebas offline sin claves | Ejecutar comprobaciones con fixtures reproducibles | [CI](../.github/workflows/ci.yml) |
 
-**Fuentes y evidencia:** [recursos técnicos](resources/index.md#tecnología), [registro de fuentes](sources/README.md), [actas por entrega](acceptance/index.md), [historia del proyecto](evolution.md). La arquitectura cloud inicial fue una alternativa de despliegue; no describe procesos locales como si fueran Functions o Queues.
+**Fuentes y evidencia:** [recursos técnicos](resources/index.md#tecnología), [registro de fuentes](sources/README.md), [actas por entrega](acceptance/index.md), [historia del proyecto](evolution.md).
