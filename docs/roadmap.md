@@ -2,7 +2,7 @@
 
 [Índice](index.md) · [Capacidades](overview.md) · [Evolución y evidencia](evolution.md) · [Fuentes](sources/README.md)
 
-Actualizado el **02/10/2026**. Este documento define el alcance vigente. Las listas de tareas de actas o planes anteriores describen su fecha, no nuevas obligaciones.
+Alcance vigente al **02/10/2026**.
 
 ## Estado
 
@@ -12,8 +12,8 @@ Actualizado el **02/10/2026**. Este documento define el alcance vigente. Las lis
 | E2 — Conversación | **Cerrado.** Pausa, aprobación y rechazo nativos de EVE; límites y telemetría conservados | [Acta E2](acceptance/2026-09-25-e2-closure.md) |
 | R1 — Dominio acordado | **Cerrado.** Fuentes y funciones entregadas, con las exclusiones aprobadas que se enumeran abajo | [Registro de productos](sources/README.md) |
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
-| R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario**, no certificadas ni ejecutadas por esta decisión | [Decisión sobre R2](#decisión-sobre-r2) |
-| Publicación Vercel | Alternativa documentada, no tarea programada ni condición de cierre | [Preparación cloud](deployment.md) |
+| R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
+| Publicación Vercel | Alternativa de alojamiento | [Preparación cloud](deployment.md) |
 
 ## Capacidades conservadas
 
@@ -41,18 +41,14 @@ Consulta [qué permite cada capacidad](overview.md), [cómo funciona](architectu
 | RT adicional CRTM y nueva asociación de llegadas EMT a viajes GTFS para alterar itinerarios | 02/10/2026 | Llegadas por parada, overlays y avisos existentes |
 | Estado operativo de ascensores/escaleras y verificación de recorrido accesible completo | 02/10/2026 | Accesibilidad estática y avisos de accesibilidad recibidos |
 
-Estas capacidades no se declaran implementadas ni técnicamente imposibles. No son trabajo aplazado ni se convierten en tareas al volver a leer una investigación.
+Las exclusiones delimitan esta versión y quedan fuera del trabajo planificado.
 
 ## Decisión sobre R2
 
 El **02/10/2026**, el usuario retiró **todos los pendientes de cierre R2**. Esto incluye nuevas campañas, métricas como condición de cierre, comprobaciones adicionales de concurrencia/uso, ensayos prolongados, más pares de rutas, mediciones de memoria OTP y un acta final obligatoria.
 
-**Retirado no significa aprobado por una prueba.** Las pruebas realmente ejecutadas conservan sus resultados en el [archivo de evidencia](acceptance/index.md). Los scripts de diagnóstico y experimentos existentes no se eliminan, pero su existencia no impone ejecutarlos. Los controles de seguridad de la aplicación y la regla de desarrollo `pnpm check` tampoco se eliminan.
-
-R2.1 continúa disponible. Las instrucciones de instalación, mantenimiento y recuperación se documentan como ayuda operativa, no como una nueva barrera de aceptación.
+La retirada cancela esos requisitos de cierre. Las pruebas ejecutadas se recogen en el [archivo de evidencia](acceptance/index.md). Se conservan el historial de conversaciones R2.1, los controles de seguridad, los scripts de diagnóstico y `pnpm check` como comprobación de desarrollo.
 
 ## Cómo continuar
 
-No hay otro bloque funcional obligatorio en este roadmap. Se puede usar el sistema dentro del alcance acordado y mantener sus datos mediante la [operación local](local-runtime.md). Una nueva funcionalidad, campaña o publicación requiere una petición nueva; una limitación por sí sola no la autoriza.
-
-La reorganización documental queda registrada en el [log de la wiki](log.md). No cambia código, fuentes, cuentas ni runtime.
+El alcance funcional acordado está entregado. Para utilizarlo y mantener sus datos, sigue la [operación local](local-runtime.md). Las ampliaciones se decidirán como nuevos encargos.
