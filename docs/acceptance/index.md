@@ -4,8 +4,6 @@
 
 Resultados ejecutados y límites de cada entrega.
 
-Los documentos conservan sus rutas y evidencia. R0/E2/R1 están cerrados; las obligaciones R2 retiradas no se reabren desde este archivo.
-
 | Documento | Qué encontrarás |
 | --- | --- |
 | [2026-09-25-e2-closure](2026-09-25-e2-closure.md) | E2 — cierre del control conversacional |
@@ -25,5 +23,5 @@ Los documentos conservan sus rutas y evidencia. R0/E2/R1 están cerrados; las ob
 | [2026-09-30-daily-weather](2026-09-30-daily-weather.md) | Predicción diaria municipal — entrega local |
 | [2026-09-30-weather-observations](2026-09-30-weather-observations.md) | Observaciones AEMET por ubicación — entrega local |
 | [2026-10-01-parking-prices](2026-10-01-parking-prices.md) | Tarifas verificadas y coste orientativo de aparcamiento |
-| [local-runtime-history](local-runtime-history.md) | Guía anterior archivada; preserva mediciones y transiciones, no usar como runbook actual. |
-| [2026-10-02-documentation-wiki](2026-10-02-documentation-wiki.md) | Reorganización, retirada R2 y verificaciones documentales ejecutadas; sin cambios de runtime. |
+| [local-runtime-history](local-runtime-history.md) | Mediciones y transiciones de la instalación inicial. Procedimientos actuales en [operación local](../local-runtime.md). |
+| [2026-10-02-documentation-wiki](2026-10-02-documentation-wiki.md) | Reorganización, retirada R2 y verificaciones documentales ejecutadas. |

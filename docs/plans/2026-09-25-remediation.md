@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
 
-> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Plan histórico · 25/09/2026.**
 
 Fecha: **25/09/2026**. Estado: **ejecución iniciada por autorización del usuario; E0 mínimo y E1 implementados y validados localmente**. E2 cerrado con criterio revisado por el usuario; E3–E8 pendientes; R0–R2 no cerrados. [Evidencia de la primera entrega](../acceptance/2026-09-25-routing.md).
 

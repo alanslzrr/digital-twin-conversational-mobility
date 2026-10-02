@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de research](index.md) · [Estado vigente](../roadmap.md)
 
-> **Investigación histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Investigación histórica · 29/09/2026.**
 
 Fecha: **29/09/2026**. Base inspeccionada: `b31abe9`. Investigación de solo lectura; no implementación. El alcance ejecutable está en el [plan para el agente](../plans/2026-09-29-static-accessibility.md).
 

@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
 
-> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Esta propuesta está retirada; no debe ejecutarse. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+> **Plan histórico · 29/09/2026.** Propuesta retirada.
 
 **No implementar este plan.** El usuario aprobó el 29/09/2026 excluir del cierre los horarios/routing actuales de Metro de Madrid y las correspondencias adicionales propuestas. No contratar otro proveedor ni conservar este bloque como tarea pendiente.
 

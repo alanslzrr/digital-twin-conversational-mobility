@@ -2,7 +2,7 @@
 
 [Índice de la wiki](../index.md) · [Actas](index.md) · [Operación vigente](../local-runtime.md)
 
-> **Archivo histórico.** Copia del contenido de `docs/local-runtime.md` anterior a la reorganización documental del 02/10/2026 (revisión `fbb129d`). Conserva las mediciones y transiciones registradas; no documenta una nueva ejecución. Los procedimientos se sustituyen por la [instalación](../installation.md), [operación](../local-runtime.md) y [releases](../routing-releases.md) vigentes. Las obligaciones de cierre R2 quedaron retiradas por [decisión del usuario](../roadmap.md#decisión-sobre-r2).
+> **Guía archivada · revisión `fbb129d`.** Procedimientos actuales: [instalación](../installation.md), [operación](../local-runtime.md) y [releases](../routing-releases.md).
 
 # Movilidad local primero
 

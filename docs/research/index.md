@@ -4,8 +4,6 @@
 
 Análisis con referencias y conclusiones de su fecha; el catálogo de recursos los conecta con el código.
 
-Los documentos conservan sus rutas y evidencia. R0/E2/R1 están cerrados; las obligaciones R2 retiradas no se reabren desde este archivo.
-
 | Documento | Qué encontrarás |
 | --- | --- |
 | [2026-09-28-journey-weather](2026-09-28-journey-weather.md) | Meteorología como contexto del desplazamiento |
