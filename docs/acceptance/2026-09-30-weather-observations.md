@@ -1,5 +1,9 @@
 # Observaciones AEMET por ubicación — entrega local
 
+[Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
+
+> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 - Catálogo inicial versionado de 25 estaciones: evidencia combinada de inventario Madrid y observaciones oficiales, incluidas Venturada, Barajas RS y Navacerrada. No representa toda la red.
 - Un único job AEMET conserva cadencia de diez minutos, actividad, leases y backoff. Adquiere envelope + conjunto nacional y guarda únicamente el extracto regional, con límites existentes. Sin migraciones ni sincronizador de catálogos.
 - `get_environment`: estación exacta o ubicación resuelta; radio de 20 km, prioridad a la estación fresca más próxima (dos horas), alternativa antigua explícita. Sin selector: Retiro. Desconocida, conocida sin datos y falta de cobertura son estados distintos.

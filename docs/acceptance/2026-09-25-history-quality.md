@@ -1,6 +1,19 @@
 # E5 — Histórico y calidad temporal por entidad
 
+[Índice de la wiki](../index.md) · [Archivo de acceptance](index.md) · [Estado vigente](../roadmap.md)
+
+> **Acta histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Implementación local del 25/09/2026; E2 sigue cerrado. No se han actualizado el runtime habitual ni su esquema/datos. No hay campañas conversacionales nuevas.
+
+## Índice interno
+
+- [Histórico explícito](#histórico-explícito)
+- [Calidad por entidad](#calidad-por-entidad)
+- [Catálogo oficial de aire](#catálogo-oficial-de-aire)
+- [Verificación](#verificación)
+- [Integración / reversión pendiente (E8)](#integración--reversión-pendiente-e8)
+
 
 ## Histórico explícito
 
