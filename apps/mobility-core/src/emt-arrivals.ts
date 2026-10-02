@@ -92,7 +92,11 @@ async function refresh(stopId: string) {
   }
 }
 
-export async function emtArrivals(placeId: string, limit: number) {
+export async function emtArrivals(
+  placeId: string,
+  limit: number,
+  acquire = true,
+) {
   const sql = database();
   const [stop] =
     await sql`SELECT p.id,p.name,i.external_id,c.version,c.fetched_at,c.manifest FROM canonical_place p
@@ -104,7 +108,7 @@ export async function emtArrivals(placeId: string, limit: number) {
       reason: "current_emt_stop_required",
       arrivals: [],
     };
-  await refresh(stop.external_id);
+  if (acquire) await refresh(stop.external_id);
   const [row] =
     await sql`SELECT * FROM emt_arrival_cache WHERE stop_id=${stop.external_id}`;
   const [gate] =
