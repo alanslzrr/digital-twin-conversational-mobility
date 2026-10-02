@@ -69,6 +69,12 @@ jobs:
           done
           pnpm smoke --production
           pnpm smoke:evaluation
+      - name: Verify dashboard SQL and authenticated HTTP in disposable schemas
+        env:
+          RUN_DASHBOARD_DB_TESTS: "1"
+        run: |
+          node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/dashboard apps/mobility-core/src/observability/dashboard.integration.test.ts
+          node --env-file=.env.local scripts/test-dashboard-local.mjs
       - name: Stop local services
         if: always()
         run: |
