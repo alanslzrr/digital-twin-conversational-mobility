@@ -46,3 +46,16 @@ Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza
 - Añadido `docs/README.md` con accesos a explicación, uso, operación y referencia técnica.
 - Enlazada la portada desde el README del proyecto y el índice completo.
 - Verificación conjunta: 1.004 enlaces y 255 anclas correctos; `pnpm check` aprobado con 414 pruebas y 73 omitidas. Typecheck y builds reutilizaron la caché de Turbo.
+
+## [2026-10-02] especificación | Panel de Core y telemetría propia
+
+- Preparado el [spec de implementación en una sola PR](plans/2026-10-02-core-dashboard.md), con decisiones de vistas, mapa OSM, acceso existente, actividad visible, consultas manuales, retención de siete días y continuidad visual EVE/Community Agent confirmadas.
+- Contrastados los efectos de las 16 herramientas, la salud disponible y las carencias de eventos/trazas persistidos; separadas lectura almacenada, renovación de ventana y ejecución explícita.
+- Definidos contratos, autorización/propiedad, instrumentación saneada, límites, migración aditiva, actualización, pruebas y entrega. Revisión cruzada de Core, telemetría y UI incorporada.
+- Enlazado como ampliación nueva en roadmap e índices, sin reabrir entregas cerradas ni obligaciones R2 retiradas. Añadidas referencias primarias de template, SWR y mapa.
+- Verificados 1.043 enlaces locales y 273 anclas en los 71 Markdown versionados o nuevos, sin errores; `git diff --check` correcto. Revisados contratos y criterios con el código, sin nuevos diagramas.
+- Solo documentación: sin implementación, instalación de dependencias, migraciones, inferencias, consultas a proveedores de movilidad o cambios de runtime. No se ejecutaron `pnpm check`, builds ni pruebas funcionales en esta entrega; quedan especificados para la PR de implementación. Sin commit, push o PR documental separada.
+
+## 02/10/2026 · Panel de Core y telemetría implementados
+
+Actualizadas guía, arquitectura, referencia de límites/scopes/tablas, instalación 0021, procedimiento autorizado de actualización y estado independiente del roadmap. Añadida [acta de pruebas y capturas](acceptance/2026-10-02-core-dashboard.md). Validación: check con 460 tests, build agente, 70 tests PostgreSQL afectados, smoke aislado 20 comprobaciones, navegador y diff check. No se actualizó el runtime habitual ni se llamó al modelo. Los límites de QA visual y de captura best-effort quedan explícitos en el acta.

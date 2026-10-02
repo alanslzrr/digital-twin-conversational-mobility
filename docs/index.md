@@ -28,6 +28,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twi
 | Diagnóstico | [Problemas frecuentes](troubleshooting.md): qué revisar ante cada síntoma |
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
+| Desarrollo | [Spec del panel y telemetría](plans/2026-10-02-core-dashboard.md): seis vistas implementadas; [validación aislada](acceptance/2026-10-02-core-dashboard.md) y actualización local pendiente |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
 | Fuentes | [CRTM](sources/crtm.md), [DGT](sources/dgt.md), [geocodificación](sources/geocoding.md): semántica específica |
 | Recursos | [Catálogo de referencias](resources/index.md): investigación, documentación oficial y aplicación en el código |
