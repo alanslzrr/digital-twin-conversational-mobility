@@ -13,10 +13,10 @@ import { Input } from "@/components/ui/input";
 import { DashboardHttpError, useDashboard } from "@/src/dashboard-client";
 import { EntityDetail } from "./entity-detail";
 import { EntityHistory } from "./entity-history";
-import { FreshnessBreakdown, number } from "./insights";
+import { FreshnessBreakdown } from "./insights";
 import {
   evidenceExplanation,
-  measurementValue,
+  measurementDisplay,
   productLabel,
 } from "./product-copy";
 import { Instant, PageTitle, publicLabel, State, Technical } from "./shared";
@@ -512,16 +512,7 @@ export function Mobility({
                       ? e.measurements.map((m) => (
                           <div key={m.name}>
                             {publicLabel(m.name)}:{" "}
-                            {m.value === null
-                              ? "No disponible"
-                              : typeof m.value === "number"
-                                ? number(m.value)
-                                : typeof m.value === "boolean"
-                                  ? m.value
-                                    ? "Sí"
-                                    : "No"
-                                  : measurementValue(m.name, m.value)}{" "}
-                            {m.unit}
+                            {measurementDisplay(m.name, m.value, m.unit)}
                             {m.basis === "interval"
                               ? ` · acumulada o agregada durante ${m.periodMinutes ?? "su periodo"} min`
                               : m.basis === "instant"

@@ -1,10 +1,9 @@
 "use client";
 import type { DashboardEntity } from "@mobility/contracts";
 import Link from "next/link";
-import { number } from "./insights";
 import {
   evidenceExplanation,
-  measurementValue,
+  measurementDisplay,
   productLabel,
 } from "./product-copy";
 import { Instant, publicLabel } from "./shared";
@@ -38,16 +37,7 @@ export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
               {publicLabel(m.name)}
             </dt>
             <dd className="mt-1 text-lg font-medium tabular-nums">
-              {m.value === null
-                ? "Sin dato"
-                : typeof m.value === "number"
-                  ? number(m.value)
-                  : typeof m.value === "boolean"
-                    ? m.value
-                      ? "Sí"
-                      : "No"
-                    : measurementValue(m.name, m.value)}{" "}
-              {m.unit}
+              {measurementDisplay(m.name, m.value, m.unit)}
             </dd>
             {m.basis ? (
               <p className="mt-1 text-xs text-muted-foreground">
