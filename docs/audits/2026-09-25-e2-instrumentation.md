@@ -1,5 +1,9 @@
 # E2 — presupuesto conversacional: implementación y aceptación offline
 
+[Índice de la wiki](../index.md) · [Archivo de audits](index.md) · [Estado vigente](../roadmap.md)
+
+> **Auditoría histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 **Estado vigente: E2 cerrado con criterio revisado por el usuario.** [Acta de cierre](../acceptance/2026-09-25-e2-closure.md). Pausa/aprobación/rechazo verificados offline; campaña real excluida del requisito. El flujo y tabla de ledger que siguen documentan el modo experimental `MOBILITY_BUDGET_MODE=campaign`, no el modo interactivo predeterminado.
 
 **Evidencia histórica — revisión posterior:** [check estándar limpio y tres hallazgos reproducidos](2026-09-25-e2-review.md). Este documento conserva la evidencia inicial; no implica que E2 esté listo para integrar.
@@ -7,6 +11,17 @@
 **Estado histórico anterior al cambio de alcance:** implementación local y pruebas sin gasto completadas. La aceptación
 conversacional real T01–T13 queda pendiente: el usuario confirmó **«Solo pruebas
 sin gasto por ahora»**. No se ha activado una campaña ni llamado al proveedor.
+
+## Índice interno
+
+- [Separación de E1](#separación-de-e1)
+- [Flujo y límites efectivos](#flujo-y-límites-efectivos)
+- [Medición antes de optimizar](#medición-antes-de-optimizar)
+- [Compactación con evidencia conservada](#compactación-con-evidencia-conservada)
+- [Validación realizada](#validación-realizada)
+- [Operación posterior, separada de esta entrega](#operación-posterior-separada-de-esta-entrega)
+- [Estado tras correcciones de revisión](#estado-tras-correcciones-de-revisión)
+
 
 ## Separación de E1
 
