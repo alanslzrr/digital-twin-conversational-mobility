@@ -1,49 +1,47 @@
-# Preparación cloud sin publicación
+# Preparación cloud y alternativa Vercel
 
-## Estado al 23 de septiembre de 2026
+[Índice](index.md) · [Arquitectura local](architecture.md) · [Recursos](resources/index.md#cloud-y-alternativas) · [Cuentas](resources/accounts.md#preparación-cloud-anterior)
 
-Scope Vercel `alansalazar`, plan Hobby para proyecto universitario. No se ha comprado ningún plan ni creado deployments. Dos proyectos privados de código, Node 24.x, región de Functions `cdg1`:
+**No hay despliegue cloud descrito como activo.** La preparación inicial permitió comprobar recursos gratuitos; después se priorizó el funcionamiento completo local. Vercel es una alternativa, no el siguiente bloque obligatorio.
 
-| Proyecto | Root |
-| --- | --- |
-| mobility-twin-web | apps/eve-web |
-| mobility-twin-core | apps/mobility-core |
+## Qué se preparó
 
-Los dos `vercel.json` mantienen `git.deploymentEnabled:false`; también está desactivado `gitProviderOptions.createDeployments` en Vercel. No ejecutar un despliegue manual sin aprobación. Las URLs configuradas reservan el destino, no acreditan un servicio publicado.
+Registro de preparación del **23/09/2026**, no inventario remoto actualizado durante esta revisión:
 
-| Recurso | Plan/configuración | ID |
+| Elemento | Configuración registrada | Para qué se preparó |
 | --- | --- | --- |
-| Neon mobility-twin-evaluation | free_v3, fra1, auth integrada desactivada | store_3XxjUJNron1x9oAY |
-| Upstash mobility-twin-cache | free, fra1, autoUpgrade=false, prodPack=false | store_6tttSaGcdEtv3ebx |
-| Blob mobility-twin-raw | privado, fra1, cuota Hobby | store_OiblEykn0UtVgA49 |
+| Cuenta Vercel `alansalazar` | Hobby, proyecto universitario; sin compra de plan | Posible publicación posterior |
+| `mobility-twin-web` | Raíz `apps/eve-web`, Node 24.x, región `cdg1` | Web/EVE |
+| `mobility-twin-core` | Raíz `apps/mobility-core`, Node 24.x, región `cdg1` | Core/MCP |
+| Neon `mobility-twin-evaluation` | `free_v3`, `fra1`, auth integrada desactivada | PostgreSQL/PostGIS |
+| Upstash `mobility-twin-cache` | Free, `fra1`, `autoUpgrade=false`, `prodPack=false` | Redis REST |
+| Blob `mobility-twin-raw` | Privado, `fra1`, cuota Hobby de entonces | Archivos |
 
-Todos conectados **solo a production de Core**, no a previews/development. PostGIS 3.6 y tres migraciones verificados; Redis REST y Blob privado probados con escritura/lectura/borrado de datos temporales. Esto no implementa todavía la caché del dominio ni almacenamiento raw de ingesta.
+Los almacenes se conectaron solo al entorno `production` de Core, no a Web/previews/development. Se verificaron entonces PostGIS 3.6, tres migraciones y probes temporales de escritura/lectura/borrado en Redis/Blob. **Ese estado de tres migraciones no es el esquema local actual**, que evolucionó hasta 0020. Tampoco demuestra que raw/caché de dominio se hayan migrado a cloud.
 
-## Variables y separación
+El usuario aceptó manualmente las condiciones de Upstash desde el flujo de integración Vercel. Esa aceptación permitió continuar el alta. No necesita repetirse para iniciar Docker local ni sustituye revisar condiciones al contratar otro servicio.
 
-**Web:** `OPENAI_API_KEY`, `MOBILITY_MCP_URL`, `MOBILITY_MCP_TOKEN`, `EVALUATION_ORIGIN`. Modelo fijo `gpt-6-luna` por Responses directo; sin Gateway, BYOK de Gateway ni selección por `EVE_MODEL`.
+Los archivos versionados [Web](../apps/eve-web/vercel.json) y [Core](../apps/mobility-core/vercel.json) mantienen `git.deploymentEnabled:false`. En la preparación también se desactivó `gitProviderOptions.createDeployments`. Una URL configurada o un proyecto creado no acredita publicación.
 
-**Core:** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BETTER_AUTH_SECRET`, `MOBILITY_JWT_SECRET`, `MOBILITY_JWT_ISSUER`, `MOBILITY_JWT_AUDIENCE`, `EVALUATION_ORIGIN`, `BLOB_READ_WRITE_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`. La integración Upstash genera también `KV_REST_API_*`: los aliases están configurados. Credenciales de fuentes se añadirán después.
+## Qué no está desplegado
 
-`INGESTION_ENABLED=false` y `OTP_SANDBOX_ENABLED=false`; no hay consumidores ni proveedor OTP que ejecutar. No hay Cron de tiempo real ni Sandbox iniciado.
+No se activaron Cron RT, consumidores Queues, OTP Sandbox ni una cadena de ingestión cloud. Los valores `INGESTION_ENABLED=false` y `OTP_SANDBOX_ENABLED=false` de la preparación impiden tratarlos como servicios disponibles.
 
-Los archivos `.env.cloud.*.local` están ignorados y con permisos 0600. **Vercel devuelve `[SENSITIVE]` al descargar secretos marcados sensibles**: nunca sobrescribir las copias locales reales con esos marcadores. `configure:vercel --apply` exige la copia local de Core y la clave raíz, conserva secretos existentes y renueva el JWT de servicio de siete días. No despliega ni contrata recursos.
+La implementación local guarda raw y releases en disco y ejecuta un worker Node. No basta con subir ese bucle a una Function. El chat usa OpenAI directo, no AI Gateway. Redis no es necesario para el dominio local.
 
-```bash
-pnpm configure:vercel --apply
-node --env-file=.env.cloud.core.local scripts/migrate.mjs --allow-remote
-node --env-file=.env.cloud.core.local scripts/check-cloud.mjs --probe
-ALLOW_REMOTE_ADMIN=true node --env-file=.env.cloud.core.local scripts/evaluator.mjs list
-```
+## Archivos y utilidades conservados
 
-Las migraciones tienen checksum, transacción y advisory lock. Nunca se ejecutan durante un build. `check-cloud --probe` escribe y elimina un objeto pequeño por almacén; no es una ingesta de movilidad.
+Los entornos privados `.env.cloud.*.local` están ignorados y con permisos restringidos. No se publican sus valores ni se mezclan con `.env.local` de la instalación local. [Variables por componente](reference/system.md#variables-y-secretos).
 
-## Antes de publicar, con autorización nueva
+- [Configurador Vercel](../scripts/configure-vercel.mjs): `pnpm configure:vercel --apply` modifica configuración/secretos de proyectos; no usar para el arranque local.
+- [Migrador](../scripts/migrate.mjs): la operación remota requiere `--allow-remote` y el entorno cloud elegido expresamente.
+- [Probe cloud](../scripts/check-cloud.mjs): `--probe` escribe y elimina objetos de prueba; no es un chequeo de solo lectura.
+- [Administrador de cuentas](../scripts/evaluator.mjs): cloud exige `ALLOW_REMOTE_ADMIN=true`; sus cuentas no son las locales.
 
-1. Renovar JWT de servicio si han pasado siete días; comprobar expiración de evaluadores y límites de gasto de la cuenta del modelo. Las cuotas de la aplicación no son un límite monetario absoluto.
-2. Acordar retención y borrado físico de Workflow, descritos en [evaluation.md](evaluation.md).
-3. Probar HTTPS/cookies/login y streaming en un despliegue deliberado; el flujo real actual se verificó en builds productivos **locales**, no en cloud.
-4. Revisar OTP con el usuario; licencias, permisos y cadencia de fuentes antes de implementar ingestión.
-5. Si se habilita Git, revisar tanto los archivos de proyecto como el control remoto. Mantener previews aislados.
+Vercel puede devolver el marcador `[SENSITIVE]` al descargar secretos sensibles. No sobrescribas una copia privada real con ese marcador. Ningún procedimiento documental autoriza ejecutar estas utilidades.
 
-CLI reproducible `pnpm exec vercel` 59.25.4; enlaces `.vercel` ignorados por aplicación. Las instalaciones Marketplace pueden añadir skills/lockfiles auxiliares: no incluirlos como código del producto.
+## Si se decide publicar en el futuro
+
+Una petición nueva debe decidir entorno, coste, almacenamiento durable, ejecución de ingestión, alojamiento OTP y controles de acceso/retención del destino. Los límites/precios del brief inicial no son garantías actuales. No se programa esa adaptación ni una campaña de pruebas por el hecho de documentarla.
+
+Referencias oficiales: [integraciones](https://vercel.com/docs/integrations), [EVE en Vercel](https://github.com/vercel/eve/blob/main/docs/guides/deployment/vercel.mdx), [precios](https://vercel.com/pricing), [términos](https://vercel.com/legal/terms). [Decisión de alcance vigente](roadmap.md).

@@ -1,14 +1,23 @@
 # Índice de fuentes y alcance R1
 
+[Índice de la wiki](../index.md) · [Registro de fuentes](README.md) · [Recursos y altas](../resources/index.md) · [Referencia MCP](../reference/mcp.md)
+
 Registro documental para la evaluación local no comercial, consolidado el **02/10/2026**. Cada fila distingue producto, condiciones y límites; no existe una licencia genérica para todos los datos. La evidencia enlazada describe comprobaciones anteriores, no una nueva campaña ni disponibilidad garantizada hoy.
 
-La cadencia del publicador no es la adquisición local ni la antigüedad: las adquisiciones dinámicas respetan actividad, leases y backoff; una descarga no rejuvenece observaciones. [Políticas locales de frescura](../local-runtime.md), [retención e histórico parcial](../acceptance/2026-09-25-history-quality.md) y [versiones/calendarios de routing](../routing-releases.md). Los fallos conservan evidencia anterior con su calidad; el cierre R1 no garantiza cobertura exhaustiva, servicio operativo ni replay completo.
+La cadencia del publicador no es la adquisición local ni la antigüedad: las adquisiciones dinámicas respetan actividad, leases y backoff; una descarga no rejuvenece observaciones. [Políticas locales de frescura](../local-runtime.md), [retención e histórico parcial](../acceptance/2026-09-25-history-quality.md) y [versiones/calendarios de routing](../routing-releases.md). Los fallos conservan evidencia anterior con su calidad; el cierre R1 no garantiza cobertura exhaustiva, servicio operativo.
+
+## En esta página
+
+- [Registro de productos](#registro-de-productos)
+- [Evidencia de revisión y límites aceptados](#evidencia-de-revisión-y-límites-aceptados)
+
+## Registro de productos
 
 | Fuente / producto | Uso actual | Cobertura | Acceso y actualización | Condiciones / atribución | Evidencia existente |
 | --- | --- | --- | --- | --- | --- |
 | Renfe GTFS | Catálogo, horarios y grafo | Cercanías Madrid, extracto `10T`; calendario por release, no indefinido | Público, sin clave; actualización/importación/release explícitas, sin sincronización diaria automática | [Ficha](https://data.renfe.com/dataset/horarios-cercanias): CC BY 4.0; atribuir Renfe, conservar conjunto, versión y fechas | [Routing y releases](../acceptance/2026-09-25-routing-releases.md) |
 | Renfe actualizaciones de viajes RT | Salidas y overlay sobre itinerarios identificados | Viajes del GTFS instalado con identidad, fecha, versión y frescura válidas | JSON público, sin clave; publicador 20 s; adquisición local mínima 20 s, frescura 40 s | [Ficha RT](https://data.renfe.com/dataset/horarios-viaje-cercanias): CC BY 4.0; atribuir Renfe y distinguir elaboración propia | [Matching y límites](../routing-releases.md) |
-| Renfe avisos | Incidencias y avisos pertinentes, incluidos los de accesibilidad existentes | Entidades reconocidas; vigencia publicada, no garantía de normalidad | JSON oficial público, sin clave; adquisición mínima 30 s, frescura 90 s; cadencia del publicador no acreditada aquí | [Portal Renfe](https://data.renfe.com/); conservar atribución y referencia del feed; no trasladar automáticamente la licencia de trip updates a otro producto | [Semántica de avisos](../acceptance/2026-09-25-functional-continuity.md) |
+| Renfe avisos | Incidencias y avisos pertinentes, incluidos los de accesibilidad existentes | Entidades reconocidas; vigencia publicada, no garantía de normalidad | JSON oficial público, sin clave; adquisición mínima 30 s, frescura 90 s; publicador 20 s según su ficha | [Ficha de avisos](https://data.renfe.com/dataset/incidencias-avisos): CC BY 4.0, contrastada para este producto; conservar atribución Renfe y referencia del feed | [Semántica de avisos](../acceptance/2026-09-25-functional-continuity.md) |
 | CRTM GTFS Metro | Resolución y correspondencias existentes | Catálogo; horarios caducados el 27/05/2026, sin routing actual | ArcGIS público, sin clave; preparación/importación manual versionada | [Condiciones CRTM](https://www.crtm.es/licencia-de-uso), **Powered by CRTM** con enlace; no presumir Creative Commons | [Items y vigencias](crtm.md) |
 | CRTM GTFS Metro Ligero / interurbanos | Horarios estáticos, transbordos y grafo | Redes instaladas; calendarios por feed, asociaciones parciales; sin RT CRTM | ArcGIS público, sin clave; actualización explícita coordinada; no cadencia local periódica | [Condiciones CRTM](https://www.crtm.es/licencia-de-uso), **Powered by CRTM**, versión y fechas | [Catálogos](crtm.md), [release](../routing-releases.md) |
 | EMT GTFS publicado por CRTM | Grafo estático EMT y correspondencias justificadas con API | Feed instalado, no identidad RT de viaje deducida por línea | Descarga pública/importación por release, sin credenciales | [Condiciones del publicador CRTM](https://www.crtm.es/licencia-de-uso), **Powered by CRTM**; no sustituirlas por las de la API EMT | [Manifiestos y correspondencias](../routing-releases.md) |
@@ -31,7 +40,7 @@ La cadencia del publicador no es la adquisición local ni la antigüedad: las ad
 
 ## Evidencia de revisión y límites aceptados
 
-Este índice recoge el contraste oficial aportado por el usuario y las referencias consultadas el 02/10/2026. BiciMAD, DGT y CRTM se contrastaron nuevamente sin equiparar sus licencias. La página EMT de condiciones respondió 503 en la reconsulta: se conserva el contraste aportado y la evidencia existente, sin afirmar una descarga satisfactoria nueva. No es autorización para explotación comercial o despliegue cloud; estos requieren su revisión propia.
+Este índice recoge el contraste oficial aportado por el usuario y las referencias consultadas el 02/10/2026. BiciMAD, DGT y CRTM se contrastaron nuevamente sin equiparar sus licencias. La reconsulta del registro original recibió 503 de EMT. Durante la reorganización documental del mismo día, la página de condiciones redirigió a login. Se conserva el contraste previo sin afirmar acceso a contenido restringido nuevo. No es autorización para explotación comercial o despliegue cloud; estos requieren su revisión propia.
 
 `license_reviewed_at` **no prueba una revisión**: `scripts/configure-local-mobility.mjs` lo rellena al activar fuentes y `scripts/import-renfe.mjs` al importar. No se ha corregido ni usado esa fecha como evidencia; el registro verificable es documental. Las credenciales se configuran privadamente, nunca en este índice; `AEMET_API_KEY` requiere revisión/renovación antes de su caducidad configurada y EMT puede revocar acceso. No se reproduce ningún valor ni se afirma vigencia de credenciales por estar documentadas.
 
