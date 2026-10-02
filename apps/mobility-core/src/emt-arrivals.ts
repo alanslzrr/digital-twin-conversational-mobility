@@ -8,6 +8,7 @@ import {
 } from "./adapters/emt-transit";
 import { database } from "./database";
 import { ingestionEnabled } from "./ingestion";
+import { recordOperationalEvent } from "./observability/events";
 
 const iso = (value: Date | string) => new Date(value).toISOString();
 type Arrival = ReturnType<typeof parseEmtArrivals>["arrivals"][number];
@@ -62,13 +63,14 @@ async function refresh(stopId: string) {
     return { failures: Math.max(Number(stop.failures), Number(gate.failures)) };
   });
   if (!claim) return;
+  const started = performance.now();
   try {
     const result = await fetchEmtArrivals(stopId);
     const hash = `sha256:${createHash("sha256").update(result.raw).digest("hex")}`;
-    await sql.begin(async (tx) => {
+    const published = await sql.begin(async (tx) => {
       const [owner] =
         await tx`SELECT singleton FROM emt_arrival_gate WHERE lease_token=${token} AND lease_until>now() FOR UPDATE`;
-      if (!owner) return;
+      if (!owner) return false;
       const [saved] =
         await tx`UPDATE emt_arrival_cache SET payload=${tx.json(result.arrivals)},observed_at=${result.observedAt},ingested_at=now(),raw_reference=${hash},
         next_due_at=now()+interval '30 seconds',lease_token=NULL,lease_until=NULL,failures=0,error_code=NULL
@@ -76,6 +78,17 @@ async function refresh(stopId: string) {
         AND (observed_at IS NULL OR observed_at<=${result.observedAt}) RETURNING stop_id`;
       if (!saved) throw Error("out_of_order_feed");
       await tx`UPDATE emt_arrival_gate SET next_due_at=now()+interval '5 seconds',lease_token=NULL,lease_until=NULL,failures=0,error_code=NULL WHERE lease_token=${token}`;
+      return true;
+    });
+    await recordOperationalEvent({
+      operationId: token,
+      component: "emt",
+      type: published ? "refresh" : "lease_lost",
+      source: "emt",
+      job: "arrivals",
+      outcome: published ? "success" : "lease_lost",
+      durationMs: performance.now() - started,
+      errorCode: null,
     });
   } catch (error) {
     const reason = sourceErrorCode(error);
@@ -88,6 +101,16 @@ async function refresh(stopId: string) {
       await tx`UPDATE emt_arrival_cache SET next_due_at=now()+${delay}*interval '1 second',lease_token=NULL,lease_until=NULL,failures=${failures},error_code=${reason}
         WHERE stop_id=${stopId} AND lease_token=${token} AND lease_until>now()`;
       await tx`UPDATE emt_arrival_gate SET next_due_at=now()+${delay}*interval '1 second',lease_token=NULL,lease_until=NULL,failures=${failures},error_code=${reason} WHERE lease_token=${token}`;
+    });
+    await recordOperationalEvent({
+      operationId: token,
+      component: "emt",
+      type: "refresh",
+      source: "emt",
+      job: "arrivals",
+      outcome: "error",
+      durationMs: performance.now() - started,
+      errorCode: reason,
     });
   }
 }

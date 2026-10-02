@@ -3,6 +3,7 @@ import { sourceErrorCode } from "./adapters/common";
 import { fetchGeocodes, geocoderConfig } from "./adapters/geocoder";
 import { database } from "./database";
 import { resolvePlace } from "./mobility";
+import { recordOperationalEvent } from "./observability/events";
 
 type Candidate = Awaited<ReturnType<typeof fetchGeocodes>>[number] & {
   id: string;
@@ -86,9 +87,10 @@ export async function resolveAddress(query: string, allowExternal: boolean) {
       places: [],
       coverage,
     };
+  const started = performance.now();
   try {
     const candidates = await fetchGeocodes(normalized, config);
-    return await sql.begin(async (tx) => {
+    const published = await sql.begin(async (tx) => {
       const [owner] =
         await tx`SELECT singleton FROM geocode_gate WHERE lease_token=${token} AND lease_until>now() FOR UPDATE`;
       if (!owner)
@@ -120,9 +122,30 @@ export async function resolveAddress(query: string, allowExternal: boolean) {
       await tx`UPDATE geocode_gate SET lease_token=NULL,lease_until=NULL,next_due_at=now()+interval '2 seconds',failures=0,error_code=NULL WHERE lease_token=${token}`;
       return present(saved, fetchedAt, config.url, false);
     });
+    await recordOperationalEvent({
+      operationId: token,
+      component: "geocoder",
+      type: published.status === "unavailable" ? "lease_lost" : "publication",
+      source: "osm",
+      job: "geocoding",
+      outcome: published.status === "unavailable" ? "lease_lost" : "success",
+      durationMs: performance.now() - started,
+      errorCode: null,
+    });
+    return published;
   } catch (error) {
     const reason = sourceErrorCode(error);
     await sql`UPDATE geocode_gate SET lease_token=NULL,lease_until=NULL,next_due_at=now()+interval '60 seconds',failures=failures+1,error_code=${reason} WHERE lease_token=${token}`;
+    await recordOperationalEvent({
+      operationId: token,
+      component: "geocoder",
+      type: "publication",
+      source: "osm",
+      job: "geocoding",
+      outcome: "error",
+      durationMs: performance.now() - started,
+      errorCode: reason,
+    });
     return { status: "unavailable", reason, places: [], coverage };
   }
 }

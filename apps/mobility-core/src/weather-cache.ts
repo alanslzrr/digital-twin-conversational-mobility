@@ -7,6 +7,7 @@ import {
   WeatherHttpError,
 } from "./adapters/journey-weather";
 import { weatherDatabase } from "./database";
+import { recordOperationalEvent } from "./observability/events";
 import { weatherQuery } from "./weather-query";
 import type { ForecastRow } from "./weather-selection";
 export const weatherInterval = (resource: string) =>
@@ -32,6 +33,7 @@ export async function refreshWeather(resource: string, signal: AbortSignal) {
     signal,
   );
   if (!row) return false;
+  const started = performance.now();
   try {
     const result = await fetchWeatherProduct(resource, signal, {
       payload: row.payload as WeatherProduct | null,
@@ -67,6 +69,16 @@ export async function refreshWeather(resource: string, signal: AbortSignal) {
       signal,
     );
     if (!saved.length) throw Error("out_of_order_feed");
+    await recordOperationalEvent({
+      operationId: token,
+      component: "weather",
+      type: "refresh",
+      source: "aemet",
+      job: "weather",
+      outcome: "success",
+      durationMs: performance.now() - started,
+      errorCode: null,
+    });
   } catch (error) {
     const code = sourceErrorCode(error),
       failures = Math.min(Number(row.failures) + 1, 20),
@@ -83,6 +95,16 @@ export async function refreshWeather(resource: string, signal: AbortSignal) {
       ) UPDATE weather_gate SET lease_token=NULL,lease_until=NULL,next_due_at=now()+${delay}*interval '1 second' WHERE lease_token=${token}`,
       AbortSignal.timeout(500),
     ).catch(() => {});
+    await recordOperationalEvent({
+      operationId: token,
+      component: "weather",
+      type: "refresh",
+      source: "aemet",
+      job: "weather",
+      outcome: "error",
+      durationMs: performance.now() - started,
+      errorCode: code,
+    });
   }
   return true;
 }
