@@ -1,6 +1,19 @@
 # Metro: alternativas reales y decisión de alcance
 
+[Índice de la wiki](../index.md) · [Archivo de research](index.md) · [Estado vigente](../roadmap.md)
+
+> **Investigación histórica.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Investigado el **29/09/2026**. Sustituye la recomendación anterior de desarrollar correspondencias como siguiente bloque. **Esa propuesta se retira:** no resuelve rutas Metro y el usuario no quiere una entrega parcial que conserve el problema principal.
+
+## Índice interno
+
+- [Decisión posterior aprobada](#decisión-posterior-aprobada)
+- [Resultado de la investigación](#resultado-de-la-investigación)
+- [Alternativas examinadas](#alternativas-examinadas)
+- [Consecuencia para un eventual agente](#consecuencia-para-un-eventual-agente)
+- [Evidencia y cambios realizados](#evidencia-y-cambios-realizados)
+
 
 ## Decisión posterior aprobada
 
