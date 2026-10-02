@@ -140,3 +140,19 @@ Dos carriles procesan trabajos vencidos con lease de 90 s y backoff. El heartbea
 Raw e histórico de movilidad tienen retención objetivo de 24 horas, purgada durante ticks activos. El apagado no ejecuta la purga. Puede conservarse el último snapshot antiguo, identificado como tal. Las conversaciones caducadas permanecen en el almacenamiento EVE hasta su borrado; la aplicación carece de purga automática de transcripciones.
 
 **Implementación:** [supervisor](../scripts/start-local.mjs), [migrador](../scripts/migrate.mjs), [worker](../scripts/ingestion-worker.mjs), [operación de releases](routing-releases.md). **Evidencia histórica:** [entrega local](acceptance/2026-09-25-local-delivery.md) y [registro anterior](acceptance/local-runtime-history.md).
+
+## Actualizar el panel
+
+La validación del panel se realizó en puertos 3002/3003 y esquema PostgreSQL desechable. No actualizó los servicios habituales 3000/3001. Para instalarlo, el responsable debe autorizar una ventana de actualización local y seguir el procedimiento existente de copia de seguridad/parada.
+
+1. Conserva una copia de seguridad con el procedimiento de esta página.
+2. Detén Web/Core con el supervisor existente; no reconstruyas OTP.
+3. Actualiza el checkout a la entrega del panel.
+4. Ejecuta `pnpm install --frozen-lockfile` con Node 24.
+5. Ejecuta `pnpm db:migrate`: aplica 0021 sobre las migraciones anteriores.
+6. Ejecuta `pnpm setup:local --refresh-token`: añade los scopes internos del panel/captura al token local sin publicar valores.
+7. Ejecuta `pnpm check` y `pnpm build:agent`.
+8. Arranca con `pnpm start:local` y abre EVE con una cuenta existente.
+9. Comprueba navegación Panel/Telemetría y que una lectura almacenada no inicia adquisición. No realices llamadas al modelo como parte de esta actualización.
+
+Para revertir el código, detén Web/Core, vuelve al commit anterior, recompila Web/agente y arranca. La migración 0021 es aditiva: conserva sus tablas, no ejecutes una down-migration destructiva. El token con scopes adicionales sigue sujeto a los endpoints y autorización del Core en ejecución. [Acta y límites](acceptance/2026-10-02-core-dashboard.md).
