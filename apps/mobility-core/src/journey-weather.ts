@@ -7,6 +7,7 @@ import type {
 import { selectWarnings, weatherRelevance } from "@mobility/domain";
 import { weatherFreshness } from "@mobility/provenance";
 import { weatherDatabase } from "./database";
+import { boundedSignal } from "./execution-signal";
 import { readWeatherProducts, weatherProducts } from "./weather-cache";
 import { weatherQuery } from "./weather-query";
 import { chooseWeather } from "./weather-selection";
@@ -41,7 +42,7 @@ export async function journeyWeather(
   product?: "hourly_forecast" | "daily_forecast" | "warnings",
   refresh = true,
 ) {
-  const signal = AbortSignal.timeout(2000);
+  const signal = boundedSignal(AbortSignal.timeout(2000));
   try {
     const sites: Site[] = [];
     for (const [alternative, r] of routes.entries()) {
