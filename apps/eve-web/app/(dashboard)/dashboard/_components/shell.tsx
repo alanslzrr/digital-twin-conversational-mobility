@@ -1,4 +1,5 @@
 "use client";
+import "./dashboard.css";
 import {
   Activity,
   ArrowLeft,
@@ -30,10 +31,14 @@ import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 
 const links = [
   { href: "/dashboard", label: "Resumen", icon: Blocks },
-  { href: "/dashboard/mobility", label: "Datos de movilidad", icon: Database },
-  { href: "/dashboard/tools", label: "Herramientas MCP", icon: Wrench },
-  { href: "/dashboard/sources", label: "Fuentes e ingestión", icon: Radio },
-  { href: "/dashboard/activity", label: "Eventos", icon: Activity },
+  { href: "/dashboard/mobility", label: "Movilidad", icon: Database },
+  { href: "/dashboard/tools", label: "Consultas", icon: Wrench },
+  { href: "/dashboard/sources", label: "Fuentes y actualización", icon: Radio },
+  {
+    href: "/dashboard/activity",
+    label: "Actividad del sistema",
+    icon: Activity,
+  },
   {
     href: "/dashboard/conversations",
     label: "Mis conversaciones",
@@ -44,35 +49,61 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
   return (
     <nav aria-label="Panel">
-      {links.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          {...(onNavigate ? { onClick: onNavigate } : {})}
-          href={href}
-          aria-current={path === href ? "page" : undefined}
-          className={cn(
-            "mb-1 flex items-center gap-3 rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            (href === "/dashboard" ? path === href : path.startsWith(href))
-              ? "bg-accent font-medium"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground",
-          )}
-        >
-          <Icon size={16} />
-          {label}
-        </Link>
+      {links.map(({ href, label, icon: Icon }, index) => (
+        <div key={href}>
+          {[0, 3, 5].includes(index) ? (
+            <p className="mb-2 mt-5 px-3 text-xs font-medium text-muted-foreground">
+              {index === 0
+                ? "Información"
+                : index === 3
+                  ? "Sistema"
+                  : "Personal"}
+            </p>
+          ) : null}
+          <Link
+            key={href}
+            {...(onNavigate ? { onClick: onNavigate } : {})}
+            href={href}
+            aria-current={
+              (href === "/dashboard" ? path === href : path.startsWith(href))
+                ? "page"
+                : undefined
+            }
+            className={cn(
+              "mb-1 flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              (href === "/dashboard" ? path === href : path.startsWith(href))
+                ? "bg-accent font-medium"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+          >
+            <Icon size={16} />
+            {label}
+          </Link>
+        </div>
       ))}
     </nav>
   );
 }
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const ctx = useDashboardContext();
+  const [refreshNotice, setRefreshNotice] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const { data, error } = useDashboard("status", 3000);
   const { mutate } = useSWRConfig();
   const status = data as { activeUntil?: string; ingestionEnabled?: boolean };
+  const signOut = async () => {
+    ctx.clear();
+    const r = await fetch("/api/auth/sign-out", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    if (r.ok) window.location.replace("/evaluation");
+    else window.alert("No se pudo cerrar sesión.");
+  };
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[220px_1fr]">
-      <aside className="hidden border-r bg-card px-4 py-6 md:block">
+    <div className="dashboard-shell min-h-dvh md:grid md:grid-cols-[220px_1fr]">
+      <aside className="hidden min-h-dvh flex-col border-r bg-card px-4 py-6 md:flex">
         <p className="mb-7 px-3 text-sm font-semibold">Mobility Core</p>
         <Navigation />
         <Link
@@ -82,6 +113,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <ArrowLeft size={16} />
           Volver al chat
         </Link>
+        <div className="mt-auto border-t pt-5">
+          <p className="px-3 text-xs text-muted-foreground">
+            Cuenta de evaluación
+          </p>
+          <p className="mt-2 break-words px-3 text-sm">{ctx.identity.label}</p>
+          <Button
+            variant="ghost"
+            className="mt-2 w-full justify-start"
+            onClick={signOut}
+          >
+            Cerrar sesión
+          </Button>
+        </div>
       </aside>
       <div className="min-w-0">
         <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b bg-card px-5 py-3 md:px-8">
@@ -97,7 +141,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     <Menu />
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="dashboard-dialog">
                   <DialogTitle>Mobility Core</DialogTitle>
                   <DialogDescription>
                     Vistas del panel privado de evaluación.
@@ -110,8 +154,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="text-sm font-medium">Panel de evaluación</span>
             <Badge variant="secondary">Privado</Badge>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="hidden text-xs text-muted-foreground sm:block">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="hidden text-xs text-muted-foreground sm:block md:hidden">
               {ctx.identity.label}
             </span>
             <Button
@@ -126,31 +170,47 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               size="icon"
               variant="ghost"
               aria-label="Actualizar pantalla"
-              onClick={() =>
+              onClick={() => {
+                const now = Date.now();
+                const waits = [...ctx.eligibility]
+                  .filter(
+                    ([key]) => key !== "status" && ctx.activePaths.has(key),
+                  )
+                  .map(([, v]) =>
+                    Math.max(
+                      0,
+                      15000 - (now - v.at),
+                      (v.retryUntil ?? 0) - now,
+                    ),
+                  );
+                const wait = Math.max(0, ...waits);
+                setRefreshNotice(
+                  ctx.paused
+                    ? "La actualización está pausada; reanúdala para releer datos guardados."
+                    : wait > 0
+                      ? `Podrás releer en ${Math.ceil(wait / 1000)} segundos.`
+                      : "Relectura solicitada; cada dato conserva su fecha.",
+                );
                 void mutate(
                   (key) =>
                     typeof key === "string" &&
-                    key.startsWith(`${ctx.identity.principalId}:`),
+                    key.startsWith(`${ctx.identity.principalId}:`) &&
+                    (key.endsWith(":status") ||
+                      ctx.activePaths.has(
+                        key.slice(ctx.identity.principalId.length + 1),
+                      )),
                   undefined,
-                  { revalidate: true },
-                )
-              }
+                  { revalidate: true, populateCache: false },
+                );
+              }}
             >
               <RefreshCw />
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              onClick={async () => {
-                ctx.clear();
-                const r = await fetch("/api/auth/sign-out", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: "{}",
-                });
-                if (r.ok) window.location.replace("/evaluation");
-                else window.alert("No se pudo cerrar sesión.");
-              }}
+              className="md:hidden"
+              onClick={signOut}
             >
               Salir
             </Button>
@@ -174,6 +234,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     })
                   : "inactiva"}
           </span>
+        </div>
+        <div className="px-5 pt-3 text-xs leading-5 text-muted-foreground md:px-8">
+          <p>
+            Actualizar pantalla relee los datos guardados. No solicita una
+            lectura nueva a las fuentes.
+          </p>
+          <p>
+            {ctx.paused
+              ? "Panel pausado; el sistema puede seguir actualizándose por otra actividad."
+              : "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."}
+          </p>
+          {refreshNotice ? <p role="status">{refreshNotice}</p> : null}
         </div>
         <main className="mx-auto flex max-w-[1440px] flex-col gap-6 p-5 md:p-8">
           {children}
