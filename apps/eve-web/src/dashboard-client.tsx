@@ -1,11 +1,19 @@
 "use client";
 import {
   dashboardActivity,
+  dashboardConversationIndexResponse,
+  dashboardConversationSummaryResponse,
   dashboardData,
   dashboardEntityPage,
+  dashboardEntitySeries,
+  dashboardEventPage,
   dashboardMapPage,
+  dashboardOverview,
+  dashboardSourceResponse,
   dashboardStatus,
   dashboardToolCatalog,
+  dashboardTracePayloadResponse,
+  dashboardTraceResponse,
 } from "@mobility/contracts";
 import {
   createContext,
@@ -19,8 +27,9 @@ import {
 } from "react";
 import useSWR, { type State, SWRConfig } from "swr";
 import {
+  type DashboardRead,
   dashboardRetryDelay,
-  pollingEligible,
+  eligibleDashboardRead,
   startVisibleHeartbeat,
 } from "./dashboard-polling";
 export class DashboardHttpError extends Error {
@@ -39,7 +48,9 @@ type Context = {
   visible: boolean;
   request: (path: string, method?: string, body?: unknown) => Promise<unknown>;
   clear: () => void;
-  eligibility: Map<string, { at: number; value: unknown; error?: unknown }>;
+  activePaths: Map<string, number>;
+  eligibility: Map<string, DashboardRead>;
+  pending: Map<string, Promise<unknown>>;
 };
 const DashboardContext = createContext<Context | null>(null);
 export function useDashboardContext() {
@@ -61,16 +72,24 @@ export function DashboardProvider({
       () => new Map<string, State>([[identity.principalId, {}]]),
       [identity.principalId],
     );
+  const scope = useMemo(
+    () => ({
+      principalId: identity.principalId,
+      activePaths: new Map<string, number>(),
+      eligibility: new Map<string, DashboardRead>(),
+      pending: new Map<string, Promise<unknown>>(),
+    }),
+    [identity.principalId],
+  );
+  const { activePaths, eligibility, pending } = scope;
   const heartbeat = useRef(0);
-  const eligibility = useRef(
-    new Map<string, { at: number; value: unknown; error?: unknown }>(),
-  ).current;
   const clear = useCallback(() => {
     for (const c of controllers.current) c.abort();
     controllers.current.clear();
     cache.clear();
     eligibility.clear();
-  }, [cache, eligibility]);
+    pending.clear();
+  }, [cache, eligibility, pending]);
   const request = async (path: string, method = "GET", body?: unknown) => {
     const controller = new AbortController();
     controllers.current.add(controller);
@@ -99,17 +118,33 @@ export function DashboardProvider({
       if (controller.signal.aborted) throw new Error("Respuesta descartada");
       const root = path.split("?")[0];
       const schema =
-        root === "status"
-          ? dashboardStatus
-          : root === "tools"
-            ? dashboardToolCatalog
-            : root === "activity"
-              ? dashboardActivity
-              : root === "entities"
-                ? dashboardEntityPage
-                : root === "map"
-                  ? dashboardMapPage
-                  : dashboardData;
+        root === "conversations"
+          ? dashboardConversationIndexResponse
+          : root?.includes("/payloads/")
+            ? dashboardTracePayloadResponse
+            : root?.startsWith("conversations/") && root.endsWith("/summary")
+              ? dashboardConversationSummaryResponse
+              : root?.startsWith("conversations/") && root.endsWith("/events")
+                ? dashboardTraceResponse
+                : root?.endsWith("/history")
+                  ? dashboardEntitySeries
+                  : root === "overview"
+                    ? dashboardOverview
+                    : root === "status"
+                      ? dashboardStatus
+                      : root === "tools"
+                        ? dashboardToolCatalog
+                        : root === "sources" || root?.startsWith("sources/")
+                          ? dashboardSourceResponse
+                          : root === "events" || root?.startsWith("events/")
+                            ? dashboardData.extend({ data: dashboardEventPage })
+                            : root === "activity"
+                              ? dashboardActivity
+                              : root === "entities"
+                                ? dashboardEntityPage
+                                : root === "map"
+                                  ? dashboardMapPage
+                                  : dashboardData;
       return schema.parse(value);
     } finally {
       controllers.current.delete(controller);
@@ -184,6 +219,8 @@ export function DashboardProvider({
         request,
         clear,
         eligibility,
+        activePaths,
+        pending,
       }}
     >
       <SWRConfig
@@ -203,6 +240,15 @@ export function DashboardProvider({
 export function useDashboard(path: string | null, interval = 15000) {
   const ctx = useDashboardContext();
   const last = ctx.eligibility;
+  useEffect(() => {
+    if (!path) return;
+    ctx.activePaths.set(path, (ctx.activePaths.get(path) ?? 0) + 1);
+    return () => {
+      const count = (ctx.activePaths.get(path) ?? 1) - 1;
+      if (count === 0) ctx.activePaths.delete(path);
+      else ctx.activePaths.set(path, count);
+    };
+  }, [path, ctx.activePaths]);
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
   useEffect(() => {
     if (ctx.paused || !ctx.visible) {
@@ -219,23 +265,13 @@ export function useDashboard(path: string | null, interval = 15000) {
     key,
     async () => {
       if (!path) return null;
-      const old = last.get(path);
-      if (old && !pollingEligible(old.at, interval)) {
-        if (old.error) throw old.error;
-        return old.value;
-      }
-      let value: unknown;
-      try {
-        value = await ctx.request(path);
-      } catch (error) {
-        last.set(path, { at: Date.now(), value: old?.value, error });
-        throw error;
-      }
-      last.set(path, { at: Date.now(), value });
-      if (last.size > 32) last.delete(last.keys().next().value ?? "");
-      return value;
+      return eligibleDashboardRead(path, interval, last, ctx.pending, () =>
+        ctx.request(path),
+      );
     },
     {
+      revalidateOnFocus: interval > 0,
+      revalidateOnReconnect: interval > 0,
       dedupingInterval: interval || 15000,
       isPaused: () => ctx.paused || !ctx.visible,
       refreshInterval: (data: unknown) => {

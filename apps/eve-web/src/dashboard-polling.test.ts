@@ -48,3 +48,84 @@ it("floors retries by surface eligibility and respects server retry-after", () =
   expect(dashboardRetryDelay(15000, 0, 1)).toBe(15000);
   expect(dashboardRetryDelay(3000, 60000, 2)).toBe(60000);
 });
+
+it("deduplicates slow reads across entry points and keeps the minimum after completion", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(100000);
+  const { eligibleDashboardRead } = await import("./dashboard-polling");
+  const entries = new Map(),
+    pending = new Map();
+  let finish: (value: unknown) => void = () => {};
+  const request = vi.fn(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const first = eligibleDashboardRead(
+    "entities",
+    15000,
+    entries,
+    pending,
+    request,
+  );
+  const focus = eligibleDashboardRead(
+    "entities",
+    15000,
+    entries,
+    pending,
+    request,
+  );
+  vi.advanceTimersByTime(20000);
+  finish({ retained: true });
+  expect(await first).toEqual({ retained: true });
+  expect(await focus).toEqual({ retained: true });
+  expect(request).toHaveBeenCalledTimes(1);
+  await eligibleDashboardRead("entities", 15000, entries, pending, request);
+  expect(request).toHaveBeenCalledTimes(1);
+  vi.advanceTimersByTime(15000);
+  const next = eligibleDashboardRead(
+    "entities",
+    15000,
+    entries,
+    pending,
+    request,
+  );
+  finish({ retained: true });
+  await next;
+  expect(request).toHaveBeenCalledTimes(2);
+});
+it("respects Retry-After on focus/manual paths and never substitutes another identity's cache", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(100000);
+  const { eligibleDashboardRead } = await import("./dashboard-polling");
+  const entries = new Map(),
+    pending = new Map();
+  const failure = { retryAfter: 60000 };
+  const request = vi.fn(async () => {
+    throw failure;
+  });
+  await expect(
+    eligibleDashboardRead("status", 3000, entries, pending, request),
+  ).rejects.toBe(failure);
+  vi.advanceTimersByTime(15000);
+  await expect(
+    eligibleDashboardRead("status", 3000, entries, pending, request),
+  ).rejects.toBe(failure);
+  expect(request).toHaveBeenCalledTimes(1);
+  const otherIdentity = vi.fn(async () => "different-owner");
+  expect(
+    await eligibleDashboardRead(
+      "status",
+      3000,
+      new Map(),
+      new Map(),
+      otherIdentity,
+    ),
+  ).toBe("different-owner");
+  vi.advanceTimersByTime(45000);
+  await expect(
+    eligibleDashboardRead("status", 3000, entries, pending, request),
+  ).rejects.toBe(failure);
+  expect(request).toHaveBeenCalledTimes(2);
+});
