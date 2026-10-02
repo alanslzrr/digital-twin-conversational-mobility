@@ -1,0 +1,118 @@
+
+ RUN  v5.0.1 /Users/alansalazar/Documents/ChatGPT/digital-twin-conversational-mobility
+
+ ❯ apps/eve-web/src/pr45-audit.temporary.test.ts (3 tests | 2 failed) 17ms
+   × audit: capture real EVE qualified tool name 3ms
+   × audit: preserve effective qualified function definitions and calls 6ms
+ ❯ apps/mobility-core/src/observability/pr45-audit.temporary.test.ts (5 tests | 4 failed) 646ms
+   ❯ dashboard end-to-end isolated PostgreSQL (5)
+     × audit: missing usage must keep all token counters unknown 95ms
+     × audit: each forecast row retains its own valid interval and variable 78ms
+     × audit: old-issued forecast is not rejuvenated by recent 304 check 49ms
+     × audit: display and filter weather errors consistently with Core freshness 43ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/eve-web/src/pr45-audit.temporary.test.ts > audit: capture real EVE qualified tool name
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ apps/eve-web/src/pr45-audit.temporary.test.ts:9:15
+      7|  const send=vi.fn(async()=>Response.json({accepted:true}));vi.stubGlob…
+      8|  await captureTool({principalId:'synthetic',sessionId:'synthetic',turn…
+      9|  expect(send).toHaveBeenCalledTimes(1);
+       |               ^
+     10| });
+     11| it('audit: preserve effective qualified function definitions and calls…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  apps/eve-web/src/pr45-audit.temporary.test.ts > audit: preserve effective qualified function definitions and calls
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/eve-web/src/pr45-audit.temporary.test.ts:13:30
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  apps/mobility-core/src/observability/pr45-audit.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > audit: missing usage must keep all token counters unknown
+AssertionError: expected { state: 'succeeded', …(14) } to match object { usage: { inputTokens: null, …(3) } }
+(21 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "usage": {
+-     "cachedInputTokens": null,
++     "cachedInputTokens": 0,
+      "inputTokens": null,
+      "outputTokens": null,
+-     "reasoningTokens": null,
++     "reasoningTokens": 0,
+    },
+  }
+
+ ❯ apps/mobility-core/src/observability/pr45-audit.temporary.test.ts:133:23
+    131|       await storeTelemetry(batch([event({ usage: null })], [], owner, …
+    132|       const summary = await readTrace(owner, 'audit-no-usage', 'summar…
+    133|       expect(summary).toMatchObject({usage:{inputTokens:null,outputTok…
+       |                       ^
+    134|     });
+    135|     it("audit: each forecast row retains its own valid interval and va…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  apps/mobility-core/src/observability/pr45-audit.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > audit: each forecast row retains its own valid interval and variable
+AssertionError: expected '2026-10-02T19:58:41.647Z' to be '2026-10-02T20:58:41.647Z' // Object.is equality
+
+Expected: "2026-10-02T20:58:41.647Z"
+Received: "2026-10-02T19:58:41.647Z"
+
+ ❯ apps/mobility-core/src/observability/pr45-audit.temporary.test.ts:140:54
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  apps/mobility-core/src/observability/pr45-audit.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > audit: old-issued forecast is not rejuvenated by recent 304 check
+AssertionError: expected 'recently_checked' to be 'unavailable' // Object.is equality
+
+Expected: "unavailable"
+Received: "recently_checked"
+
+ ❯ apps/mobility-core/src/observability/pr45-audit.temporary.test.ts:146:54
+    144|       await sql`UPDATE weather_product SET issued_at=now()-interval '2…
+    145|       const result=await readEntities({category:'environment',source:'…
+    146|       expect(result.entities[0]?.evidence.freshness).toBe('unavailable…
+       |                                                      ^
+    147|     });
+    148|     it("audit: display and filter weather errors consistently with Cor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  apps/mobility-core/src/observability/pr45-audit.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > audit: display and filter weather errors consistently with Core freshness
+AssertionError: expected 'recently_checked' to be 'stale' // Object.is equality
+
+Expected: "stale"
+Received: "recently_checked"
+
+ ❯ apps/mobility-core/src/observability/pr45-audit.temporary.test.ts:151:54
+    149|       await sql`UPDATE weather_product SET issued_at=now(),checked_at=…
+    150|       const result=await readEntities({category:'environment',source:'…
+    151|       expect(result.entities[0]?.evidence.freshness).toBe('stale');
+       |                                                      ^
+    152|       const filtered=await readEntities({category:'environment',source…
+    153|       expect(filtered.entities).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 2 passed (8)
+   Start at  21:58:40
+   Duration  1.55s (import 47%, tests 38%, transform 14%)
+
