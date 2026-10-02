@@ -1,6 +1,20 @@
 # R1 — Accesibilidad estática trazable: instrucciones para el agente
 
+[Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
+
+> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **29/09/2026**. **Plan preparado; implementación pendiente.**
+
+## Índice interno
+
+- [Encargo](#encargo)
+- [1. Persistencia mínima, sin nueva infraestructura](#1-persistencia-mínima-sin-nueva-infraestructura)
+- [2. Contrato y reglas exactas](#2-contrato-y-reglas-exactas)
+- [3. Integración, sin cambiar el router](#3-integración-sin-cambiar-el-router)
+- [4. Calidad conocida y respuesta de EVE](#4-calidad-conocida-y-respuesta-de-eve)
+- [5. Pruebas proporcionales y cierre](#5-pruebas-proporcionales-y-cierre)
+
 
 ## Encargo
 

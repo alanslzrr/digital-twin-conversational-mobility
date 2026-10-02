@@ -1,8 +1,22 @@
 # R2.1 — Historial de conversaciones
 
+[Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
+
+> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **28/09/2026**. Estado: **implementado y comprobado localmente**. [Evidencia e integración](../acceptance/2026-09-28-conversation-history.md).
 
 Este documento conserva las instrucciones aprobadas de R2.1 del [roadmap local](../roadmap.md). Pertenece a la experiencia de evaluación R2; no depende de terminar las ampliaciones de fuentes R1. Las instrucciones siguientes describen el alcance ejecutado; el estado y los resultados están en la evidencia de entrega.
+
+## Índice interno
+
+- [Objetivo y alcance cerrado](#objetivo-y-alcance-cerrado)
+- [Instrucciones de implementación, en orden](#instrucciones-de-implementación-en-orden)
+- [Fuera de este bloque](#fuera-de-este-bloque)
+- [Pruebas necesarias y suficientes](#pruebas-necesarias-y-suficientes)
+- [Entrega y criterio de cierre](#entrega-y-criterio-de-cierre)
+- [Archivos de referencia](#archivos-de-referencia)
+
 
 ## Objetivo y alcance cerrado
 

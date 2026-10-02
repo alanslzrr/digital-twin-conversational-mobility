@@ -1,10 +1,25 @@
 # Instrucciones para entregar predicción diaria AEMET
 
+[Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
+
+> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **30/09/2026**. **Plan preparado; implementación pendiente.**
 
 Implementa y entrega localmente **predicción diaria municipal como ampliación del contexto meteorológico existente**. Lee la [investigación y contraste de fuentes](../research/2026-09-30-daily-weather.md), `AGENTS.md`, el [roadmap](../roadmap.md) y la [operación local](../local-runtime.md). No repitas la investigación completa ni conviertas este bloque en otra auditoría general.
 
 Base al redactar: `main` en `59613bf`. Los documentos están en `alanslzrr/daily-weather-plan`, inicialmente sin commit. Comprueba el estado real y consérvalos. Este plan fija las decisiones funcionales; los nombres internos pueden ajustarse a las convenciones existentes sin alterar la semántica.
+
+## Índice interno
+
+- [Resultado y alcance](#resultado-y-alcance)
+- [Fuente y adquisición](#fuente-y-adquisición)
+- [Contrato y semántica](#contrato-y-semántica)
+- [Caché y selección sin multiplicar peticiones](#caché-y-selección-sin-multiplicar-peticiones)
+- [Herramientas y conversación](#herramientas-y-conversación)
+- [Archivos de partida](#archivos-de-partida)
+- [Pruebas proporcionales y entrega](#pruebas-proporcionales-y-entrega)
+
 
 ## Resultado y alcance
 

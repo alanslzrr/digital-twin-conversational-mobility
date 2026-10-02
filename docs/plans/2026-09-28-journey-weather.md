@@ -1,6 +1,20 @@
 # R1 — Contexto meteorológico del itinerario: instrucciones para el agente
 
+[Índice de la wiki](../index.md) · [Archivo de plans](index.md) · [Estado vigente](../roadmap.md)
+
+> **Plan histórico.** Conserva los hechos y conclusiones de su fecha. Las instrucciones o pendientes originales no sustituyen el alcance vigente. Las obligaciones de cierre R2 se retiraron por [decisión del usuario](../roadmap.md#decisión-sobre-r2); no se declaran ejecutadas. Para operar, usa la [guía actual](../local-runtime.md).
+
 Fecha: **28/09/2026**. **Alcance acordado; implementación pendiente.**
+
+## Índice interno
+
+- [Encargo y lectura obligatoria](#encargo-y-lectura-obligatoria)
+- [Resultado esperado](#resultado-esperado)
+- [Implementación, en este orden](#implementación-en-este-orden)
+- [Pruebas necesarias y suficientes](#pruebas-necesarias-y-suficientes)
+- [Entrega completa](#entrega-completa)
+- [Referencias de código para empezar](#referencias-de-código-para-empezar)
+
 
 ## Encargo y lectura obligatoria
 
