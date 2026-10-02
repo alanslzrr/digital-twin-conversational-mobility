@@ -130,6 +130,7 @@ CREATE TABLE dashboard_tool_execution (
   lease_until timestamptz NOT NULL,
   expires_at timestamptz NOT NULL DEFAULT now() + interval '7 days',
   retained_bytes integer NOT NULL DEFAULT 0 CHECK (retained_bytes BETWEEN 0 AND 264192),
+  reserved_bytes integer NOT NULL DEFAULT 0 CHECK (reserved_bytes BETWEEN 0 AND 264192),
   truncated boolean NOT NULL DEFAULT false,
   error_code text,
   UNIQUE (evaluator_id,request_id),
