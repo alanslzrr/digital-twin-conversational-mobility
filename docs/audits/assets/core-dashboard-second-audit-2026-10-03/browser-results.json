@@ -1,0 +1,794 @@
+[
+  {
+    "name": "overview-1440-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobility-1440-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "tools-1440-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "sources-1440-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "activity-1440-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "conversations-1440-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "overview-1280-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobility-1280-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "tools-1280-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "sources-1280-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "activity-1280-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "conversations-1280-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "overview-768-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobility-768-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "tools-768-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "sources-768-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "activity-768-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "conversations-768-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "overview-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "mobility-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "tools-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "sources-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "activity-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversations-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "overview-1440-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobility-1440-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "tools-1440-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "sources-1440-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "activity-1440-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "conversations-1440-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "overview-1280-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobility-1280-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "tools-1280-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "sources-1280-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "activity-1280-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "conversations-1280-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1280,
+      "width": 1280
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "overview-768-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobility-768-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "tools-768-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "sources-768-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "activity-768-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "conversations-768-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 768,
+      "width": 768
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "overview-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "mobility-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "tools-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "sources-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "activity-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversations-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "form-get_line_status",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_network_status",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_mobility_snapshot",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_source_health",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-resolve_place",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-resolve_address",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-plan_journey",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_emt_arrivals",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_crtm_timetable",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_departures",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_incidents",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_bike_availability",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_environment",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_road_state",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_historical_state",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "form-get_parking",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "entity-history-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "map-fallback-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "reference-reload-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "stored-inspection-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "selected-turn-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "trace-tools-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "mobile-navigation-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "keyboard-table-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  }
+]
