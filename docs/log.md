@@ -24,3 +24,25 @@ Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza
 - Conservado el índice de la wiki como entrada al detalle; añadido enlace de vuelta al README.
 - Revisión exclusivamente documental; no modifica funcionalidades, datos, credenciales ni runtime.
 - Verificados enlaces y anclas sin errores, vista HTML del README sin desbordamiento horizontal y diagrama Mermaid renderizado/revisado. `pnpm check` aprobado: 414 pruebas, 73 opt-in omitidas y builds con caché. No se ejecutó ninguna consulta al modelo.
+
+## [2026-10-02] revisión | Explicaciones de componentes y acceso
+
+- Reescritas la presentación y la evolución para explicar responsabilidades y flujos.
+- Detalladas las sesiones Better Auth, el proxy Web, la propiedad de conversaciones y los permisos de servicio.
+- Retiradas de las páginas introductorias las comparaciones con tecnologías descartadas, los cupos de cuentas y los comentarios sobre la redacción. Los límites operativos permanecen en la administración de cuentas.
+- Actualizadas las reglas de edición para mantener esta separación.
+- Verificados 1.034 enlaces locales y 286 anclas; ningún documento aislado. Comandos, bloques de código y diagramas conservados. `git diff --check` correcto.
+
+## [2026-10-02] revisión | Redacción directa en guías y referencias
+
+- Revisados README, guías de uso y operación, arquitectura, configuración, fuentes y recursos.
+- Sustituidas advertencias genéricas por el comportamiento, la condición o la acción correspondiente.
+- Concentradas las decisiones de alcance en el roadmap y abreviadas las etiquetas de archivo; conservados los cuerpos de las actas, investigaciones y planes originales.
+- Añadida una revisión editorial a las reglas de mantenimiento.
+- Comprobados 978 enlaces locales y 254 anclas, sin errores ni documentos aislados. Conservados los enlaces externos, los bloques de comandos y diagramas, y los cuerpos de 33 documentos históricos. `git diff --check` correcto.
+
+## [2026-10-02] revisión | Portada de navegación de docs
+
+- Añadido `docs/README.md` con accesos a explicación, uso, operación y referencia técnica.
+- Enlazada la portada desde el README del proyecto y el índice completo.
+- Verificación conjunta: 1.004 enlaces y 255 anclas correctos; `pnpm check` aprobado con 414 pruebas y 73 omitidas. Typecheck y builds reutilizaron la caché de Turbo.
