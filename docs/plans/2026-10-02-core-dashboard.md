@@ -2,7 +2,7 @@
 
 [Índice](../index.md) · [Planes](index.md) · [Alcance vigente](../roadmap.md) · [Arquitectura actual](../architecture.md) · [Contrato MCP](../reference/mcp.md)
 
-**Fecha: 02/10/2026. Estado: encargo implementado y validado en entorno aislado; véase el [acta](../acceptance/2026-10-02-core-dashboard.md). Instalación habitual pendiente de autorización. Entrega: una sola PR**, con commits pequeños por responsabilidad. Este documento es el encargo completo de esa PR, no una secuencia de ampliaciones futuras.
+**Fecha: 02/10/2026. Estado: implementación inicial validada en entorno aislado; véase el [acta](../acceptance/2026-10-02-core-dashboard.md). La revisión posterior exige las correcciones y el refinamiento definidos en el [spec-audit vigente](../audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente). Instalación habitual pendiente de autorización. Entrega: una sola PR**, con commits pequeños por responsabilidad. Este documento conserva el encargo original y sus límites; el spec-audit concreta las seis vistas, métricas y aceptación del refinamiento en esa misma PR, sin sustituir arquitectura, seguridad o retención.
 
 Añadir un panel privado al Web existente para comprender los datos que Mobility Core ofrece, su funcionamiento técnico y la telemetría de las conversaciones propias. Adaptar el aspecto de Community Agent sin importar su backend. No sustituir Mobility Core, sus herramientas, la ingestión, Better Auth ni el chat oficial de EVE.
 
