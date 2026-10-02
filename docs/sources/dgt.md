@@ -1,5 +1,7 @@
 # DGT DATEX2 3.7 y agregados almacenados
 
+[Índice de la wiki](../index.md) · [Registro de fuentes](README.md) · [Recursos y altas](../resources/index.md) · [Referencia MCP](../reference/mcp.md)
+
 ## Fuente y acceso verificados — 28/09/2026
 
 - [Conjunto oficial NAP](https://nap.dgt.es/es/dataset/incidencias-dgt-datex2-v3-7).
@@ -18,7 +20,7 @@ El XSD define `validityStatus=active` como activo según el publicador **indepen
 
 Una publicación completa sustituye el snapshot. Identidades ausentes se marcan `withdrawn_from_publication`: puede tratarse de finalización, cancelación o corrección, pero el motivo y fin real no están publicados. Reapariciones conservan identidad. Una publicación anterior no retira ni regresa el estado actual. Reintentos idénticos no duplican revisiones; correcciones sí se conservan en el histórico existente.
 
-Migración `0017` añade el job y una tabla de estado/retiradas; no otro scheduler. Retiradas consultables hasta 24 h (lectura limitada a 10.000 retiradas); raw e histórico usan retención existente de 24 h. No hay archivo permanente, replay completo ni lista de cancelaciones confirmadas. Nunca se retira todo por un error HTTP/XML.
+Migración `0017` añade el job y una tabla de estado/retiradas; no otro scheduler. Retiradas consultables hasta 24 h (lectura limitada a 10.000 retiradas); raw e histórico usan retención existente de 24 h. No hay archivo permanente ni lista de cancelaciones confirmadas. Nunca se retira todo por un error HTTP/XML.
 
 ## Consultas MCP
 
