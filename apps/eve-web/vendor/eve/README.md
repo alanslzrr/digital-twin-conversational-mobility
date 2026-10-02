@@ -22,3 +22,12 @@ Normal operation uses native EVE session-limit continuation (Approve/Stop), veri
 The login gate links accidental `localhost:3000` visits to the canonical loopback origin without forwarding session URLs, and distinguishes access/origin, rate-limit and service errors from invalid credentials. Upstream chat markup remains unchanged.
 
 R2.1 adds a minimal **Mis conversaciones** dialog using the installed Dialog/Button primitives alongside the authentication controls. Its Core-backed owner index returns only creation/access-expiry metadata, twenty records per page; EVE remains the sole message store and performs native `initialSession`/`resume` recovery. The dialog is mounted separately from the chat, refreshes only on open/load-more, aborts late reads on close/logout, and is keyed to the authenticated evaluator. Focus/visibility rechecks identity without interrupting an unchanged chat. Session pages key the native chat by session ID; unsuccessful empty recovery shows a generic unavailable state without a replacement session. On narrow screens only the header name is hidden to leave room for the access controls; composer, messages, streaming and native approval controls remain upstream.
+
+The independent Core dashboard lives at /dashboard, sharing the existing
+Better Auth evaluator gate, primitives, Geist font and semantic tokens. Two
+minimal navigation buttons (Panel and Telemetría) are added to the existing
+evaluation controls, outside the upstream chat tree. The Responses transport and
+public lifecycle/tool hooks now emit best-effort sanitized observability to the
+fixed Core service; failure to capture never substitutes or interrupts chat
+results. Browser code never receives the service token. Detailed payloads are
+loaded only after an owner explicitly opens them.
