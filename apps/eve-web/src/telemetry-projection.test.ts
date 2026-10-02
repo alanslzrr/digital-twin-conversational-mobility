@@ -78,3 +78,36 @@ describe("effective wire capture", () => {
     expect(p.truncated).toBe(true);
   });
 });
+
+it("retains only fixed qualified tools and distinguishes discovery without widening MCP", () => {
+  const p = projectPayload(
+    {
+      tools: [
+        {
+          type: "function",
+          name: "mobility__get_network_status",
+          parameters: {},
+        },
+        { type: "function", name: "connection_search", parameters: {} },
+        { type: "function", name: "other__get_network_status", parameters: {} },
+      ],
+      input: [
+        {
+          type: "function_call",
+          name: "mobility__get_network_status",
+          call_id: "real_call",
+          arguments: "{}",
+        },
+      ],
+    },
+    "model_input",
+  );
+  expect(p.content.functions.map((f) => f.name)).toEqual([
+    "mobility__get_network_status",
+    "connection_search",
+  ]);
+  expect(p.content.messages[0]?.parts[0]).toMatchObject({
+    name: "mobility__get_network_status",
+    callId: "real_call",
+  });
+});
