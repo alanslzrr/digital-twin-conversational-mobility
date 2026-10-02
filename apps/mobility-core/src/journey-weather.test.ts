@@ -229,3 +229,19 @@ it.each([
       ).toBe("unavailable");
   },
 );
+
+it("stored weather inspection never demands or acquires municipal products", async () => {
+  mocks.products.mockImplementation(async () => {
+    throw new Error("Demand/acquisition forbidden");
+  });
+  const result = await journeyWeather(
+    [route],
+    point,
+    point,
+    "hourly_forecast",
+    false,
+  );
+  expect(result.status).toBe("evaluated");
+  expect(mocks.read).toHaveBeenCalledOnce();
+  expect(mocks.products).not.toHaveBeenCalled();
+});
