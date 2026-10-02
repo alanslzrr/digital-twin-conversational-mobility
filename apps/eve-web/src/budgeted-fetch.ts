@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
+import type { TelemetryPayload } from "@mobility/contracts";
 import { contextFootprint } from "./context-footprint";
 import { coreAccess } from "./evaluator-auth";
+import { sendTelemetry, event as traceEvent } from "./telemetry";
+import { projectPayload } from "./telemetry-projection";
 
 export type BudgetContext = {
   principalId: string;
@@ -75,6 +78,15 @@ export function budgetedFetch(
       return object(await result.json());
     };
     const startedAt = Date.now();
+    const monotonicStart = performance.now();
+    let inputPayload: TelemetryPayload | null = null;
+    let terminalResponse: Record<string, unknown> | null = null;
+    let terminalState:
+      | "unknown"
+      | "succeeded"
+      | "incomplete"
+      | "failed"
+      | "cancelled" = "unknown";
     // Interactive sessions use EVE's server-side approval gate, not an operator campaign.
     // Campaign mode remains an explicit opt-in for separately bounded experiments.
     const grant =
@@ -126,6 +138,70 @@ export function budgetedFetch(
         }),
       );
       finished = true;
+      try {
+        const output = terminalResponse
+          ? projectPayload(terminalResponse, "model_output")
+          : null;
+        const status = signal.aborted ? "cancelled" : terminalState;
+        const payloads = [inputPayload, output].filter(
+          (p): p is TelemetryPayload => p !== null,
+        );
+        const rawUsage = object(terminalResponse?.usage);
+        const reasoning = object(
+          rawUsage.output_tokens_details,
+        ).reasoning_tokens;
+        await sendTelemetry(
+          scope.principalId,
+          scope.sessionId,
+          [
+            traceEvent({
+              eventKey: `${attemptId}:terminal`,
+              kind:
+                status === "cancelled"
+                  ? "attempt_cancelled"
+                  : status === "succeeded"
+                    ? "attempt_completed"
+                    : status === "incomplete"
+                      ? "attempt_incomplete"
+                      : "attempt_failed",
+              status,
+              attemptId,
+              turnId: scope.turnId,
+              stepIndex: scope.stepIndex,
+              purpose: scope.purpose,
+              providerResponseId:
+                typeof terminalResponse?.id === "string"
+                  ? terminalResponse.id
+                  : null,
+              durationMs: performance.now() - monotonicStart,
+              usage: usage
+                ? {
+                    inputTokens: usage.input,
+                    outputTokens: usage.output,
+                    cachedInputTokens: usage.cached,
+                    reasoningTokens: integer(reasoning) ? reasoning : null,
+                  }
+                : null,
+              payloadIds: payloads.map((p) => p.id),
+              captureStatus: output ? output.captureStatus : "missing",
+              sentCallIds:
+                dispatched && Array.isArray(body.input)
+                  ? body.input
+                      .filter(
+                        (item) =>
+                          object(item).type === "function_call_output" &&
+                          typeof object(item).call_id === "string",
+                      )
+                      .map((item) => String(object(item).call_id))
+                      .slice(0, 128)
+                  : [],
+            }),
+          ],
+          payloads,
+        );
+      } catch {
+        /* Payload/sink failures cannot change the result of inference. */
+      }
     };
     try {
       body.store = false;
@@ -135,6 +211,29 @@ export function budgetedFetch(
           : grant.outputLimit,
         grant.outputLimit,
       );
+      try {
+        inputPayload = projectPayload(body, "model_input");
+        await sendTelemetry(
+          scope.principalId,
+          scope.sessionId,
+          [
+            traceEvent({
+              eventKey: `${attemptId}:prepared`,
+              kind: "attempt_prepared",
+              status: "prepared",
+              attemptId,
+              turnId: scope.turnId,
+              stepIndex: scope.stepIndex,
+              purpose: scope.purpose,
+              payloadIds: [inputPayload.id],
+              captureStatus: inputPayload.captureStatus,
+            }),
+          ],
+          [inputPayload],
+        );
+      } catch {
+        /* safe projection is best effort */
+      }
       console.info(
         JSON.stringify({
           kind: "mobility.context.metric",
@@ -191,6 +290,21 @@ export function budgetedFetch(
         dispatched = true;
       }
       signal.throwIfAborted();
+      try {
+        await sendTelemetry(scope.principalId, scope.sessionId, [
+          traceEvent({
+            eventKey: `${attemptId}:dispatch`,
+            kind: "attempt_dispatched",
+            status: "running",
+            attemptId,
+            turnId: scope.turnId,
+            stepIndex: scope.stepIndex,
+            purpose: scope.purpose,
+          }),
+        ]);
+      } catch {
+        /* Observability cannot prevent provider dispatch. */
+      }
       const response = await network(url, {
         ...init,
         redirect: "error",
@@ -199,12 +313,24 @@ export function budgetedFetch(
       });
       if (!response.ok) {
         await response.body?.cancel();
+        terminalState = "failed";
         await finish(null); // Even 5xx/cancellation are not proof of zero usage.
         throw fail();
       }
       if (!body.stream) {
         const text = await boundedText(response);
-        await finish(responseUsage(object(JSON.parse(text)).usage));
+        terminalResponse = object(JSON.parse(text));
+        terminalState =
+          terminalResponse.status === "incomplete"
+            ? "incomplete"
+            : terminalResponse.status === "failed"
+              ? "failed"
+              : terminalResponse.status === "cancelled"
+                ? "cancelled"
+                : terminalResponse.status === "completed"
+                  ? "succeeded"
+                  : "unknown";
+        await finish(responseUsage(terminalResponse.usage));
         return new Response(text, {
           status: response.status,
           headers: response.headers,
@@ -236,9 +362,18 @@ export function budgetedFetch(
                   const event = object(JSON.parse(data));
                   if (
                     event.type === "response.completed" ||
-                    event.type === "response.incomplete"
-                  )
-                    usage = responseUsage(object(event.response).usage);
+                    event.type === "response.incomplete" ||
+                    event.type === "response.failed"
+                  ) {
+                    terminalResponse = object(event.response);
+                    terminalState =
+                      event.type === "response.completed"
+                        ? "succeeded"
+                        : event.type === "response.incomplete"
+                          ? "incomplete"
+                          : "failed";
+                    usage = responseUsage(terminalResponse.usage);
+                  }
                 }
               }
               newline = pending.indexOf("\n");
@@ -251,6 +386,7 @@ export function budgetedFetch(
           }
         },
         async cancel() {
+          terminalState = "cancelled";
           await reader.cancel().catch(() => {});
           await finish(null).catch(() => {});
         },
