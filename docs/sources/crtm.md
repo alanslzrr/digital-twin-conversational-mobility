@@ -6,7 +6,7 @@ Estado vigente: persistencia, catálogos y consulta MCP instalados mediante 0014
 Routing Metro Ligero/interurbanos/EMT incorporado posteriormente por PR #26;
 véanse [releases y límites](../routing-releases.md) y [operación local](../local-runtime.md).
 Metro conserva catálogo, pero no horarios actuales ni presencia en el grafo por
-caducidad. No hay RT CRTM. EMT y R0 permanecen entregados; E2 permanece cerrado.
+caducidad. Las consultas CRTM utilizan horarios estáticos.
 
 ## Índice interno
 
@@ -27,7 +27,7 @@ caducidad. No hay RT CRTM. EMT y R0 permanecen entregados; E2 permanece cerrado.
 
 Las paradas incluyen estaciones y accesos cuando los contiene el GTFS; no son
 recuentos de andenes. El intervalo del manifiesto es la envolvente de calendarios
-y excepciones positivas, **no garantiza servicio todos los días**. La consulta aplica día de semana y excepciones por servicio.
+y excepciones positivas. La consulta aplica día de semana y excepciones para determinar el servicio de cada fecha.
 
 Descarga oficial: `https://www.arcgis.com/sharing/rest/content/items/{item}/data`.
 Metadatos: el mismo item sin `/data`, con `?f=json`. El registro de código contiene
@@ -41,9 +41,8 @@ vigentes. [Investigación](../research/2026-09-29-metro-crtm-coverage.md) y
 alcance se revisa en la [investigación de alternativas](../research/2026-09-29-metro-alternatives.md).
 
 **Powered by CRTM** — [Consorcio Regional de Transportes de Madrid](https://www.crtm.es/).
-Rige la [licencia específica CRTM](https://www.crtm.es/licencia-de-uso), no se
-presupone una licencia Creative Commons. Conservar atribución, versión, fechas y
-límites; no presentar el tratamiento como respaldo oficial del producto.
+Rige la [licencia específica CRTM](https://www.crtm.es/licencia-de-uso). Conserva
+la atribución, versión, fechas y condiciones del conjunto.
 `agency_id=CRTM` identifica aquí al publicador, no a la empresa operadora de cada bus.
 
 ## Operación manual
@@ -66,8 +65,8 @@ Se limita tamaño de descarga, archivos, descompresión y filas. No se extraen
 rutas del ZIP. El export en `data/sources/crtm/<conjunto>/<sha256>/` contiene CSV
 normalizados y `manifest.json`: hash del ZIP y tablas, versión del parser,
 publicación/recuperación, conteos, calendario, atribución y límites. Una repetición
-idéntica conserva la evidencia original de recuperación; no afirma que los datos
-hayan cambiado. Un export incompatible existente se rechaza, no se sobrescribe.
+idéntica reutiliza la evidencia original de recuperación. Un export incompatible
+existente se rechaza para conservar la versión anterior.
 Los archivos generados no se versionan en Git.
 
 ## Semántica conservada
@@ -107,22 +106,19 @@ repetidas mantienen secuencia; la última visita sin parada posterior no es una
 salida, aunque el feed publique departure_time y pickup_type=0. Destino: stop_headsign, después trip_headsign, o
 **desconocido**. Se omiten puntos sin hora, sin interpolar; timepoint=0 es aproximado.
 Las ventanas de frecuencia desplazan la plantilla según la secuencia de parada y
-mantienen exact_times, intervalo y extremo final exclusivo; no se fabrican llegadas.
+mantienen exact_times, intervalo y extremo final exclusivo.
 Los códigos pickup_type 2/3 exigen acuerdos con el operador; 1 no permite embarcar.
 
 Las correspondencias conservan UUID por red: estación padre publicada con el mismo
 ID y coordenadas a un máximo de 100 m. Devuelven versión y vigencia de la otra red,
 no fusionan lugares ni prometen tiempo de transbordo/accesibilidad. La cobertura es
-parcial: estas fuentes identifican al publicador CRTM, no a cada empresa; no hay
-correspondencias EMT/Renfe inventadas. Metro caducado conserva catálogo y enlaces,
-pero rechaza horarios actuales. `get_source_health(source=crtm)` diferencia redes
-importadas y envolventes vigentes/caducadas; nunca declara RT por tener catálogo.
+parcial: estas fuentes identifican al publicador CRTM en lugar de cada empresa. Metro caducado conserva catálogo y enlaces,
+pero rechaza horarios actuales. `get_source_health(source=crtm)` informa de las
+redes importadas y la vigencia de sus calendarios.
 
-Fuera del alcance de cierre por acuerdo del 29/09/2026: horarios/routing actuales
-de Metro de Madrid y relaciones adicionales CRTM↔EMT/Renfe. Catálogo Metro y
-correspondencias existentes se conservan. RT de las otras redes CRTM mantiene su
-estado en el [roadmap](../roadmap.md). Geocodificación, routing multioperador dentro
-de la cobertura vigente y actualización coordinada ya están entregados.
+La cobertura actual de horarios, routing y correspondencias se recoge en el
+[roadmap](../roadmap.md). Las actualizaciones se realizan mediante la
+[release coordinada](../routing-releases.md).
 
 ## Persistencia y operación local
 
@@ -142,8 +138,8 @@ node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/interurban/
 
 El importador verifica hashes de los mismos bytes que consume PostgreSQL, conteos,
 red y referencias. Reintentar la misma versión no altera la fecha de incorporación.
-Un error revierte toda la sustitución. La importación conserva la vigencia del
-manifest: almacenar Metro no convierte sus horarios caducados en actuales.
+Un error revierte toda la sustitución. La importación conserva las fechas de
+vigencia del manifiesto.
 
 Regresión opt-in con exports preparados y PostgreSQL local:
 
@@ -155,9 +151,8 @@ Esta prueba crea y elimina un esquema temporal, sin modificar tablas habituales.
 Regresiones de consulta: `RUN_CRTM_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/crtm.integration.test.ts`.
 Comprobación MCP del runtime: `pnpm smoke:mobility --crtm-only`. No llama al modelo
 ni a proveedores ni OTP; como las otras herramientas, puede renovar la ventana de
-actividad local. Los datos y la compilación se actualizan explícitamente, no mediante
-un nuevo scheduler.
+actividad local.
 
 El catálogo puede incluir paradas sin stop_times (por ejemplo, `par_8_09568` en el
-export interurbano comprobado). Resolver una parada no garantiza disponer de su
-horario; una respuesta vacía no demuestra ausencia de servicio real.
+export interurbano comprobado). En ese caso, la resolución devuelve la parada y la consulta de horarios indica
+que falta su horario en el catálogo instalado.
