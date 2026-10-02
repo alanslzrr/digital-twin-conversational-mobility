@@ -1,24 +1,61 @@
-# Versioned local routing releases
+# Releases locales de routing
 
-The release unit is the GTFS archives, normalized catalogs, OSM extract, OTP configuration/image and built graph. A SHA-256 manifest identifies every input and the graph. Preparation and building take place under `data/routing-releases/<id>` and do not change the active database or router. `data/otp` becomes an atomic symlink on first activation; its original directory is retained.
+[Índice](index.md) · [Instalación](installation.md#datos-y-routing) · [Operación](local-runtime.md) · [Evidencia](acceptance/2026-09-25-routing-releases.md)
 
-## Prepare and build
+Una **release** reúne GTFS, catálogos normalizados, calles OSM, configuración/imagen OTP y grafo construido. Permite actualizarlos juntos y recuperar una versión anterior coherente. Los hashes SHA-256 del manifiesto identifican los archivos.
+
+## En esta página
+
+- [Flujo de actualización](#flujo-de-actualización)
+- [Preparar y construir](#preparar-y-construir)
+- [Activar en mantenimiento](#activar-en-mantenimiento)
+- [Volver atrás o recuperar una activación](#volver-atrás-o-recuperar-una-activación)
+- [Tiempo real sobre rutas previstas](#tiempo-real-sobre-rutas-previstas)
+
+## Flujo de actualización
+
+```mermaid
+flowchart TD
+  Official[GTFS, OSM y configuración] --> Stage[Preparar release fuera del activo]
+  Stage --> Build[Construir grafo y verificar manifiesto]
+  Build --> Stop[Detener aplicaciones y respaldar DB]
+  Stop --> Journal[Registrar versión anterior y journal]
+  Journal --> Activate[Importar catálogos y cambiar enlace activo]
+  Activate --> Router[Recrear OTP y verificar feeds]
+  Router -->|correcto| Start[Arrancar aplicaciones compatibles]
+  Router -->|fallo| Restore[Restaurar release anterior]
+  Restore --> Check[Verificar recuperación antes de arrancar]
+```
+
+1. [Preparación](../scripts/prepare-routing-release.py) trabaja bajo `data/routing-releases/<id>`, no sobre el activo.
+2. [Construcción](../scripts/build-routing-release.mjs) guarda grafo e informes en esa release.
+3. [Activación](../scripts/activate-routing-release.mjs) exige mantenimiento y guarda un journal: registro de una transición no terminada.
+4. Catálogos y grafo cambian como una operación de mantenimiento con recuperación compensatoria, **no como una transacción de cero interrupciones**.
+5. Core rechaza routing mientras exista el journal o no coincidan versiones. Un fallo no se oculta devolviendo una ruta de otra versión.
+
+## Preparar y construir
 
 ```sh
-# Reuse already prepared official data; reject conflicting archives.
+# Reutiliza archivos preparados; rechaza archivos fuente contradictorios.
 python3 scripts/prepare-routing-release.py
-# Or explicitly fetch new official datasets into staging:
+# Alternativa: descarga expresamente nuevas fuentes oficiales.
 python3 scripts/prepare-routing-release.py --refresh
 node scripts/build-routing-release.mjs <release-id>
 ```
 
-No scheduler is added. Refresh is explicit; a failed download/build leaves the current release usable. An expired feed is excluded from the graph but its catalog remains available. Calendar envelopes are preliminary eligibility only: OTP applies GTFS calendars, exceptions and frequencies. Current Metro de Madrid schedules/routes and additional CRTM-to-EMT/Renfe correspondences are outside the agreed evaluation scope; retain the Metro catalog and existing correspondences. This exclusion does not remove historical timetable queries admitted by the existing contract or routing on other supported networks.
+Elige **una** preparación. Sustituye `<release-id>` por el ID resultante. No hay scheduler de actualización de grafos. Un fallo en esta etapa no cambia la versión activa.
 
-The current build includes Renfe, EMT, Metro Ligero and interurban networks. EMT official GTFS: CRTM ArcGIS item `868df0e58fca47e79b942902dffd7da0`, [CRTM license](https://www.crtm.es/licencia-de-uso). Its prepared version has service envelope 24/07/2026–31/12/2026 and 72,510 frequency rows. Non-exact frequencies produce planning estimates, not precise scheduled departures. Source versions and per-feed coverage are in the release manifest. Graph build warnings remain in the build report/log; no network-wide accuracy or accessibility guarantee is implied.
+Los calendarios por feed deciden la elegibilidad inicial; OTP aplica después días, excepciones y frecuencias. Un feed caducado puede conservar catálogo sin entrar en el grafo. La [release documentada](acceptance/2026-09-25-routing-releases.md) incluyó Renfe, EMT, Metro Ligero e interurbanos. Los horarios/routing actuales de Metro y nuevas correspondencias quedan fuera del [alcance acordado](roadmap.md).
 
-## Maintenance activation
+La versión EMT preparada en aquella entrega tenía cobertura 24/07/2026–31/12/2026 y 72.510 filas de frecuencia. Son datos de esa versión, no una garantía del próximo feed. Una frecuencia no exacta produce una estimación de planificación, no una salida puntual publicada.
 
-Stop the known `start:local` supervisor (SIGTERM) and verify Core, Web, agent and worker have stopped. Do not kill unrelated processes by port. Take a private PostgreSQL custom-format backup and list its archive contents before migrating; the archive contains authentication/conversation data and must not be committed.
+En una instalación vacía crea antes la [base inicial Renfe](installation.md#datos-y-routing). El activador necesita grafo/export/DB coherentes para capturar el destino de rollback inicial.
+
+## Activar en mantenimiento
+
+1. Detén el supervisor conocido `start:local` con Ctrl-C/SIGTERM. Comprueba que Core, Web, agente y worker han terminado. No mates procesos ajenos por puerto.
+2. Conserva Postgres activo y crea el [respaldo privado](local-runtime.md#respaldo-y-recuperación).
+3. Ejecuta:
 
 ```sh
 pnpm db:migrate
@@ -28,26 +65,38 @@ pnpm build:agent
 pnpm start:local
 ```
 
-Use compatible built Core/Web/agent code. The script rejects a running app, takes an exclusive local lock, verifies checksums, records the rollback target before modifying the active installation, imports catalogs and recreates OTP. It verifies the loaded feed set before completing. This is a **maintenance transaction with compensating rollback**, not a zero-downtime database transaction: applications remain stopped across the transition. Core refuses routing while the journal exists and verifies graph/catalog versions on queries. The old release and stable place identities are retained. No authentication or conversation tables are rolled back.
+El script comprueba hashes, adquiere un bloqueo local exclusivo y registra la versión previa antes de modificar la instalación. Importa catálogos, cambia `data/otp` por un enlace atómico y recrea OTP. En la primera activación conserva el directorio original. Verifica los feeds cargados antes de terminar. Las aplicaciones permanecen paradas durante la transición.
 
-EMT API stops are linked to GTFS stops only by identical published stop identifiers and coordinates within 100 m, with a unique match. UUIDs remain separate. Actual itinerary transfers expose both stop identifiers and walking evidence from OTP's street graph; names alone never merge stations. These paths do not prove accessible or guaranteed transfers.
+Los IDs estables se conservan. Las paradas API EMT se relacionan con GTFS solo por ID publicado idéntico, coordenadas a menos de 100 m y coincidencia única. Sus UUIDs siguen separados. Las correspondencias de un itinerario incluyen los identificadores y la caminata calculada, no una garantía de accesibilidad ni conexión.
 
-## Rollback and interrupted activation
+## Volver atrás o recuperar una activación
 
-With applications stopped:
+Con aplicaciones detenidas:
 
 ```sh
 node --env-file=.env.local scripts/activate-routing-release.mjs rollback --maintenance
-# Following a terminated/crashed transition, restore the journal's prior release:
+# Si hubo una transición interrumpida:
 node --env-file=.env.local scripts/activate-routing-release.mjs recover --maintenance
 ```
 
-The recovery command refuses to steal a live process lock. If activation fails, automatic compensating rollback is attempted; if that also fails, retain the journal and keep applications stopped. Resolve the underlying Docker/database/filesystem failure, then run recovery. Do not delete a journal to bypass the guard. Filesystem operations use atomic renames; this is not a guarantee against disk corruption or power-loss durability. Keep the independent database backup and release directories. Do not run legacy `otp:prepare`/`otp:build` against the active symlink; they reject overwriting it.
+`rollback` vuelve a la release anterior registrada. `recover` usa el journal de la transición interrumpida. No ejecutes ambos de forma rutinaria. No restaura tablas de autenticación ni contenido conversacional.
 
-## Real-time application and limits
+Si la activación falla intenta compensar automáticamente. Si también falla la compensación, deja el journal y las aplicaciones paradas. Corrige el problema de disco, Docker o DB y ejecuta `recover`. El comando no roba el bloqueo de un proceso vivo. **No borres el journal para eludir la protección.**
 
-OTP has **no RT updaters**. Core reads snapshots produced by the existing activity-window worker. It applies fresh Renfe updates only when static version, trip identity and service date match. An explicit service date is preferred; when Renfe omits it, the existing Madrid observation-day policy is bounded to the same civil departure day and a two-hour schedule window, and reported as `observation_day_nearby_schedule`. This is a conservative fallback, not a provider-published date. Endpoint estimates require unique static and RT stop identity; trip-level delay is propagated only when all supplied stop updates agree and none is ambiguous or NO_DATA (absolute endpoint estimates take precedence), following the [GTFS-RT reference](https://gtfs.org/documentation/realtime/reference/#message-tripupdate). circular/repeated stops without sufficient sequence evidence fall back to scheduled times. Cancellation/skipped endpoints remove candidates; updated transfer walking times and missed connections are checked before sorting alternatives. Original scheduled times remain visible. For near-now queries, positive fresh delays permit one additional OTP window, capped at 30 minutes and ten candidates, to discover still-boardable delayed trains; access walking is recomputed from the requested instant. Larger delays or interrupted supplemental searches are not exhaustive coverage. Active, explicitly scoped Renfe alerts annotate affected legs; NO_SERVICE removes affected alternatives. Old alerts without retained selectors cannot cancel routes.
+Los renombrados atómicos no protegen contra toda corrupción de disco: conserva backup y directorios de release. No ejecutes `otp:prepare`/`otp:build` legacy sobre el enlace activo; rechazan sobrescribirlo.
 
-Fresh EMT notices are attached by exact public line label (leading zeroes preserved) and overlapping validity. They warn about possible diversions, but do not invent revised geometry or cancel a specific trip without evidence.
+## Tiempo real sobre rutas previstas
 
-No stale update is applied. Partial endpoint evidence remains partial, not a wholly live journey. EMT arrival API predictions lack a demonstrated GTFS trip mapping and are not attached by line alone; query them separately. CRTM real-time sources are not implemented. Absence of matched alerts is not evidence of normal service. Bicycle/car routing, operational accessibility and network-wide RT coverage remain separate roadmap items.
+OTP **no tiene updaters RT** en esta instalación. Core reutiliza snapshots del worker y preserva horarios originales.
+
+- Renfe se aplica solo con versión estática, identidad del viaje y fecha de servicio compatibles, además de frescura.
+- Si falta fecha explícita, la política existente usa día de observación Madrid y una ventana de dos horas respecto al horario. Se etiqueta `observation_day_nearby_schedule`; no se presenta como fecha publicada por Renfe.
+- Estimaciones de extremos requieren identidad de parada inequívoca. Un retraso global solo se propaga cuando las actualizaciones son compatibles y no hay ambigüedad/`NO_DATA`; prevalecen estimaciones absolutas de los extremos.
+- Paradas repetidas sin secuencia suficiente conservan horarios previstos. Cancelaciones y extremos omitidos retiran candidatos; se comprueban caminatas y conexiones perdidas antes de ordenar.
+- Cerca de «ahora», un retraso positivo fresco permite una búsqueda OTP adicional, hasta 30 minutos y diez candidatos, para encontrar trenes todavía abordables. No pretende cubrir retrasos mayores exhaustivamente.
+- Avisos Renfe activos y con selectores retenidos anotan tramos; `NO_SERVICE` puede excluir alternativas afectadas. Avisos sin esos selectores no cancelan rutas por suposición.
+- Avisos EMT frescos se adjuntan por etiqueta exacta y vigencia. Conservan ceros iniciales; no inventan geometrías alternativas ni cancelan un viaje sin evidencia.
+
+Estimaciones EMT por parada no se asignan a un viaje GTFS por compartir línea. Evidencia parcial sigue siendo parcial, no un viaje completo en vivo. Las ampliaciones RT/accesibilidad y bici/coche excluidas no son pendientes de esta entrega.
+
+**Implementación:** [routing](../apps/mobility-core/src/routing.ts), [evidencia](../apps/mobility-core/src/routing-evidence.ts), [reglas RT](../packages/domain/src/routing-realtime.ts). **Fuentes:** [OTP 2.10.0](https://docs.opentripplanner.org/en/v2.10.0/), [GTFS-RT](https://gtfs.org/documentation/realtime/reference/#message-tripupdate), [registro de fuentes](sources/README.md). **Pruebas:** [E1](acceptance/2026-09-25-routing.md) y [release/rollback](acceptance/2026-09-25-routing-releases.md).
