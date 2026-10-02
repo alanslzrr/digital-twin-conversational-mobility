@@ -2,7 +2,7 @@
 
 [Índice](../index.md) · [Arquitectura](../architecture.md) · [Guía de uso](../user-guide.md) · [Configuración](system.md)
 
-MCP es el protocolo con el que EVE ejecuta operaciones de Core. Esta referencia describe las herramientas **registradas**, no las propuestas iniciales. Contrato canónico: [schemas de entrada](../../packages/contracts/src/index.ts); registro y autorización: [ruta MCP](../../apps/mobility-core/app/mcp/route.ts).
+MCP es el protocolo con el que EVE ejecuta las 16 herramientas de Mobility Core. Contrato canónico: [schemas de entrada](../../packages/contracts/src/index.ts); registro y autorización: [ruta MCP](../../apps/mobility-core/app/mcp/route.ts).
 
 ## Navegación
 
@@ -15,10 +15,10 @@ MCP es el protocolo con el que EVE ejecuta operaciones de Core. Esta referencia 
 
 ## Acceso y convenciones
 
-- Endpoint local: `http://127.0.0.1:3001/mcp`. GET/POST/DELETE pasan por autorización de servicio, JWT válido y scope **`mobility.read`**; no es un endpoint anónimo.
-- El navegador no recibe esa credencial. Better Auth y la propiedad de sesión se comprueban en el canal EVE antes de usarla. La credencial MCP por sí sola no es una identidad de evaluador.
+- Endpoint local: `http://127.0.0.1:3001/mcp`. GET/POST/DELETE pasan por autorización de servicio, JWT válido y scope **`mobility.read`**.
+- La credencial MCP se utiliza entre servidores. Better Auth identifica a la persona y el canal EVE comprueba la propiedad de la conversación antes de ejecutar sus herramientas.
 - Todas las herramientas consultan información. Aun así, una lectura puede renovar actividad, refrescar datos o poblar caché. Los tres agregados son la excepción: solo leen almacenamiento.
-- Los ejemplos siguientes son **entradas ilustrativas**, no respuestas reales. Un marcador `UUID_*` debe sustituirse por un UUID devuelto por resolución; no es una entrada válida para copiar literalmente.
+- Los ejemplos muestran entradas de las herramientas. Sustituye cada marcador `UUID_*` por un UUID devuelto por la resolución de lugares.
 - Las horas ISO incluyen zona (`Z` o desplazamiento); las fechas de servicio CRTM y parking son fechas civiles Madrid. `departureTime: "now"` y `minutesAgo` usan el reloj de Core.
 - Los resultados varían por capacidad: revisa estado, motivo, fuente, tiempos, frescura y cobertura, no solo la lista. [Serialización MCP](../../apps/mobility-core/src/mcp-result.ts) evita duplicar la misma evidencia en el contexto.
 
@@ -67,14 +67,14 @@ Calcula opciones y conserva las preferencias del usuario.
 }
 ```
 
-La caminata máxima suma los tramos a pie. No se relajan preferencias para fabricar opciones. `no_route` no equivale a timeout, grafo ausente, calendario vencido o petición inválida. La cobertura incluye Renfe/EMT/Metro Ligero/interurbanos admitidos, no Metro actual. [Routing](../../apps/mobility-core/src/routing.ts) · [Releases y overlays](../routing-releases.md) · [Evidencia](../acceptance/2026-09-25-routing-releases.md).
+La caminata máxima suma todos los tramos a pie. Si ningún itinerario cumple las preferencias, devuelve `no_route`. Los fallos de conexión, grafo, calendario o contrato tienen códigos propios. La cobertura incluye Renfe/EMT/Metro Ligero/interurbanos admitidos, no Metro actual. [Routing](../../apps/mobility-core/src/routing.ts) · [Releases y overlays](../routing-releases.md) · [Evidencia](../acceptance/2026-09-25-routing-releases.md).
 
 ### `get_departures`
 
 - Entrada: `placeId` UUID Renfe, `limit` 1–20 (10).
 - Resultado: salidas previstas y estimaciones Renfe coincidentes, destino y accesibilidad declarada; llegada estimada y salida estimada son campos distintos.
 - Ejemplo: `{"placeId":"UUID_RENFE","limit":5}`.
-- Sin RT no se afirma puntualidad. Un destino requiere GTFS o secuencia del viaje, no el nombre de una variante.
+- Las estimaciones RT se presentan junto al horario previsto. El destino se obtiene del GTFS o de la secuencia del viaje; si falta esa información, se devuelve como desconocido.
 - [Implementación](../../apps/mobility-core/src/mobility.ts) · [Evidencia de destinos](../acceptance/2026-09-25-line-destinations.md).
 
 ### `get_emt_arrivals`
@@ -91,7 +91,7 @@ La caminata máxima suma los tramos a pie. No se relajan preferencias para fabri
 - Sin fecha usa hoy Madrid; sin hora usa ahora para hoy, o `00:00:00` para otro día. Busca un único día de servicio, aplicando calendario/excepciones.
 - Resultado: salidas estáticas y ventanas de frecuencia, destino y evidencia de parada/vehículo. No presenta una llegada terminal como salida.
 - Ejemplo: `{"placeId":"UUID_CRTM","limit":5}`.
-- Las horas mayores de 24 pertenecen al mismo día de servicio GTFS. Frecuencia no exacta no es llegada individual. Metro caducado no ofrece horarios actuales.
+- Las horas mayores de 24 pertenecen al mismo día de servicio GTFS. Los servicios de frecuencia no exacta devuelven intervalos. Metro caducado no ofrece horarios actuales.
 - [Implementación](../../apps/mobility-core/src/crtm.ts) · [Contrato y fuente CRTM](../sources/crtm.md).
 
 ## Avisos y contexto
@@ -101,7 +101,7 @@ La caminata máxima suma los tramos a pie. No se relajan preferencias para fabri
 - Entrada: `source` (`renfe|emt|dgt`, por defecto `renfe`); `line` opcional (hasta 20 caracteres); `query` opcional para DGT (2–120); `includeWithdrawn` opcional DGT; `limit` 1–30 (10).
 - Resultado: avisos con identidad, vigencia y frescura. DGT conserva carretera/zona, versiones, extremos y retiradas.
 - Ejemplos: `{"source":"renfe","line":"C-5"}`; `{"source":"dgt","query":"A-6"}`.
-- Retirada del feed no confirma cancelación; vacío no significa servicio normal. La línea desconocida se distingue de una conocida sin avisos.
+- DGT distingue retiradas de la publicación y cancelaciones explícitas. La consulta de líneas diferencia línea desconocida de línea conocida sin avisos publicados.
 - [Movilidad](../../apps/mobility-core/src/mobility.ts) · [DGT](../../apps/mobility-core/src/dgt.ts) · [Fuente DGT](../sources/dgt.md).
 
 ### `get_bike_availability`
@@ -114,18 +114,18 @@ La caminata máxima suma los tramos a pie. No se relajan preferencias para fabri
 ### `get_environment`
 
 - Comunes: `kind` (`air|weather`, por defecto `air`), `limit` 1–30 (10).
-- Aire: `stationId` opcional (hasta 30 caracteres) y `pollutant` opcional (`SO2|CO|NO|NO2|PM2.5|PM10|NOx|O3`). Devuelve medidas/unidades y tiempos, no diagnóstico sanitario.
+- Aire: `stationId` opcional (hasta 30 caracteres) y `pollutant` opcional (`SO2|CO|NO|NO2|PM2.5|PM10|NOx|O3`). Devuelve medidas, unidades y tiempos.
 - Tiempo observado: `weatherProduct: "observation"`; `stationId` **o** `placeId`, no ambos. Sin selector usa Retiro (`3195`) de forma explícita. No admite pedir una observación futura.
 - Predicción/avisos: `weatherProduct` (`hourly_forecast|daily_forecast|warnings`), `placeId` resuelto; `fromTime/toTime` opcionales ISO con zona. La diaria permite hasta siete fechas locales con fin exclusivo; conserva periodos y extremos diarios.
-- Resultado: producto seleccionado y evidencia de cobertura/antigüedad. Por ubicación, observación de estación fresca más cercana hasta 20 km; si solo existe antigua lo dice, sin sustituir silenciosamente por Retiro.
+- Resultado: producto seleccionado y evidencia de cobertura/antigüedad. Por ubicación, observación de estación fresca más cercana hasta 20 km; si solo existe una lectura antigua, devuelve su estado y antigüedad.
 - Ejemplos: `{"kind":"weather","weatherProduct":"observation","stationId":"3195"}`; `{"kind":"air","pollutant":"NO2"}`; `{"kind":"weather","weatherProduct":"daily_forecast","placeId":"UUID_LUGAR"}`.
-- `plan_journey` ya añade contexto meteorológico: no repetir una adquisición por alternativa. Caducidad y horizonte son diagnósticos distintos.
+- `plan_journey` incorpora este contexto desde la caché compartida. La consulta distingue un producto caducado de una fecha fuera del horizonte publicado.
 - [Consulta](../../apps/mobility-core/src/weather-query.ts) · [Observaciones](../../apps/mobility-core/src/weather-observations.ts) · [Actas meteorológicas](../acceptance/index.md).
 
 ### `get_road_state`
 
 - Entrada: `query` (2–120), `limit` 1–20 (10).
-- Resultado: mediciones de sensores municipales encontrados; intensidad/ocupación con fecha. No son incidencias DGT ni tiempos de viaje.
+- Resultado: mediciones de intensidad y ocupación de los sensores municipales, con fecha. Para incidencias de carretera, usa `get_incidents(source=dgt)`.
 - Ejemplo: `{"query":"Castellana","limit":5}`.
 - [Implementación](../../apps/mobility-core/src/mobility.ts) · [Fuente municipal](../sources/README.md).
 
@@ -135,7 +135,7 @@ La caminata máxima suma los tramos a pie. No se relajan preferencias para fabri
 - Opcionales: `durationMinutes` entero 1–1440, `vehicleType: "car"`, `date: "YYYY-MM-DD"`.
 - Resultado: ocupación por categoría y tiempos; tarifa documental independiente; cálculo orientativo, ejemplo publicado o máximo; escenarios de gratuidad condicionada separados.
 - Ejemplo: `{"query":"Plaza Mayor","durationMinutes":120,"vehicleType":"car"}`.
-- Proyecta a futuro precios conocidos con etiqueta explícita. «Hoy» usa reloj Madrid, no la fecha de revisión de la tarifa. Sin precio no devuelve cero.
+- Proyecta a futuro precios conocidos con etiqueta explícita. «Hoy» usa reloj Madrid, no la fecha de revisión de la tarifa. La falta de tarifa se indica como precio no disponible.
 - [Cálculo](../../packages/domain/src/parking-prices.ts) · [Catálogo y fuentes](../../apps/mobility-core/src/catalogs/parking-prices.ts) · [Acta](../acceptance/2026-10-01-parking-prices.md).
 
 ## Estado e histórico
@@ -145,7 +145,7 @@ La caminata máxima suma los tramos a pie. No se relajan preferencias para fabri
 - Entrada: `source` opcional de `sourceId`; `{}` consulta todas.
 - Resultado: salud persistida, datos disponibles/edad, actividad, heartbeat, fallos y cobertura; catálogos estáticos se distinguen de lecturas dinámicas.
 - Ejemplo: `{"source":"aemet"}`.
-- `not_initialized` significa que faltan datos instalados, no que el proveedor haya fallado. Un proceso vivo no significa que sus lecturas sean frescas.
+- `not_initialized` indica que faltan los datos iniciales. El heartbeat describe la actividad del proceso; los tiempos de publicación describen la frescura de cada fuente.
 - [Implementación](../../apps/mobility-core/src/mobility.ts) · [Ingestión](../acceptance/2026-09-25-ingestion.md).
 
 ### `get_historical_state`
@@ -163,7 +163,7 @@ Los tres leen datos existentes, sin fanout a proveedores ni activación de la ve
 ### `get_line_status`
 
 - Entrada: `source` (`renfe|emt|crtm`), `line` (1–40); `network` para CRTM (`metro|light-rail|interurban|emt`); `limit` 1–20 (5).
-- Resultado: identidad de línea, cobertura estática y avisos retenidos. Requiere red para desambiguar CRTM. No certifica servicio normal.
+- Resultado: identidad de línea, cobertura estática y avisos retenidos. Requiere red para desambiguar CRTM.
 - Ejemplo: `{"source":"renfe","line":"C5"}`.
 
 ### `get_network_status`
@@ -175,7 +175,7 @@ Los tres leen datos existentes, sin fanout a proveedores ni activación de la ve
 ### `get_mobility_snapshot`
 
 - Entrada: `source` opcional de `sourceId`.
-- Resultado: resumen transversal de componentes retenidos y ausencias; cada componente tiene su propio momento, no un instante global en vivo.
+- Resultado: resumen transversal de componentes retenidos y ausencias; cada componente conserva su propia fecha de referencia.
 - Ejemplo: `{}`.
 
 **Referencias:** [productos y atribución](../sources/README.md), [especificación MCP y librería usada](../resources/index.md#tecnología), [glosario](../glossary.md).
