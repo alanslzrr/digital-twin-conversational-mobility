@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import {
-  dashboardToolName,
   redactText,
   safeProjection,
   type TelemetryPayload,
   telemetryPayload,
+  telemetryToolName,
 } from "@mobility/contracts";
 export function record(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -49,7 +49,7 @@ export function projectPayload(
     }
     if (
       i.type === "function_call" &&
-      dashboardToolName.safeParse(i.name).success &&
+      telemetryToolName.safeParse(i.name).success &&
       typeof i.call_id === "string"
     ) {
       messages.push({
@@ -57,7 +57,7 @@ export function projectPayload(
         parts: [
           {
             type: "function_call",
-            name: dashboardToolName.parse(i.name),
+            name: telemetryToolName.parse(i.name),
             callId: i.call_id,
             arguments: text(i.arguments, 8192),
           },
@@ -127,11 +127,11 @@ export function projectPayload(
   }
   const functions: TelemetryPayload["content"]["functions"] = [];
   if (Array.isArray(source.tools))
-    for (const raw of source.tools.slice(0, 16)) {
+    for (const raw of source.tools.slice(0, 17)) {
       const t = record(raw);
       if (
         t.type !== "function" ||
-        !dashboardToolName.safeParse(t.name).success
+        !telemetryToolName.safeParse(t.name).success
       ) {
         redacted = true;
         continue;
@@ -172,7 +172,7 @@ export function projectPayload(
       redacted ||= safe.redacted;
       truncated ||= safe.truncated;
       functions.push({
-        name: dashboardToolName.parse(t.name),
+        name: telemetryToolName.parse(t.name),
         description: text(t.description, 8192),
         parametersJson: JSON.stringify(safe.data),
       });

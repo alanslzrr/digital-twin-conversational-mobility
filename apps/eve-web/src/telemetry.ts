@@ -11,10 +11,15 @@ const early = new Map<
   string,
   { events: TelemetryEvent[]; at: number; omitted: number }
 >();
+const turnStarts = new Map<string, { at: number; seen: number }>();
 const toolStarts = new Map<string, { at: number; seen: number }>();
 const registered = new Map<string, { principalId: string; at: number }>();
 function sweep() {
   const cutoff = Date.now() - 1800000;
+  for (const [key, v] of turnStarts)
+    if (v.seen < cutoff) turnStarts.delete(key);
+  while (turnStarts.size > 1000)
+    turnStarts.delete(turnStarts.keys().next().value ?? "");
   for (const [key, v] of toolStarts)
     if (v.seen < cutoff) toolStarts.delete(key);
   while (toolStarts.size > 1000)
@@ -130,6 +135,16 @@ export async function captureLifecycle(value: unknown, sessionId: string) {
       "step.completed": "step_completed",
     };
     if (!kinds[type]) return;
+    const turnKey =
+      typeof data.turnId === "string" ? `${sessionId}:${data.turnId}` : null;
+    const started = turnKey ? turnStarts.get(turnKey) : undefined;
+    if (turnKey && type === "turn.started" && !turnStarts.has(turnKey))
+      turnStarts.set(turnKey, { at: performance.now(), seen: Date.now() });
+    if (
+      turnKey &&
+      ["turn.completed", "turn.failed", "turn.cancelled"].includes(type)
+    )
+      turnStarts.delete(turnKey);
     const e = event({
       eventKey:
         typeof meta.id === "string" ? `${meta.id}:${type}` : randomUUID(),
@@ -142,6 +157,10 @@ export async function captureLifecycle(value: unknown, sessionId: string) {
             ? "cancelled"
             : "running",
       turnId: typeof data.turnId === "string" ? data.turnId : null,
+      durationMs:
+        started && type.startsWith("turn.") && type !== "turn.started"
+          ? Math.max(0, performance.now() - started.at)
+          : null,
       stepIndex: typeof data.stepIndex === "number" ? data.stepIndex : null,
       sequence: typeof data.sequence === "number" ? data.sequence : 0,
       occurredAt:
@@ -177,16 +196,16 @@ export async function captureTool(
   name: unknown,
   isError = false,
 ) {
-  const { dashboardToolName } = await import("@mobility/contracts");
+  const { telemetryToolName } = await import("@mobility/contracts");
   const { projectPayload } = await import("./telemetry-projection");
   try {
     sweep();
-    const key = scope.sessionId + ":" + callId;
+    const key = `${scope.sessionId}:${callId}`;
     const start = toolStarts.get(key);
     if (kind === "tool_requested")
       toolStarts.set(key, { at: performance.now(), seen: Date.now() });
     else toolStarts.delete(key);
-    const tool = dashboardToolName.parse(name);
+    const tool = telemetryToolName.parse(name);
     const payload = projectPayload(
       value,
       kind === "tool_requested" ? "tool_input" : "tool_output",
@@ -231,15 +250,15 @@ export async function captureToolTerminal(
   name: unknown,
 ) {
   try {
-    const { dashboardToolName } = await import("@mobility/contracts");
-    toolStarts.delete(scope.sessionId + ":" + callId);
+    const { telemetryToolName } = await import("@mobility/contracts");
+    toolStarts.delete(`${scope.sessionId}:${callId}`);
     await sendTelemetry(scope.principalId, scope.sessionId, [
       event({
         eventKey: `${callId}:${kind}`,
         kind,
-        status: kind === "tool_cancelled" ? "cancelled" : "failed",
+        status: kind === "tool_cancelled" ? "cancelled" : "rejected",
         callId,
-        tool: dashboardToolName.parse(name),
+        tool: telemetryToolName.parse(name),
         turnId: scope.turnId,
         errorCode:
           kind === "tool_rejected" ? "tool_budget_rejected" : "tool_cancelled",
