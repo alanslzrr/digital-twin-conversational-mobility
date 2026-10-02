@@ -1,18 +1,29 @@
 # CRTM: catálogos y consulta de horarios estáticos
 
+[Índice de la wiki](../index.md) · [Registro de fuentes](README.md) · [Recursos y altas](../resources/index.md) · [Referencia MCP](../reference/mcp.md)
+
 Estado vigente: persistencia, catálogos y consulta MCP instalados mediante 0014.
 Routing Metro Ligero/interurbanos/EMT incorporado posteriormente por PR #26;
 véanse [releases y límites](../routing-releases.md) y [operación local](../local-runtime.md).
 Metro conserva catálogo, pero no horarios actuales ni presencia en el grafo por
 caducidad. No hay RT CRTM. EMT y R0 permanecen entregados; E2 permanece cerrado.
 
+## Índice interno
+
+- [Fuentes oficiales comprobadas el 25/09/2026](#fuentes-oficiales-comprobadas-el-25092026)
+- [Operación manual](#operación-manual)
+- [Semántica conservada](#semántica-conservada)
+- [Consultas MCP y límites](#consultas-mcp-y-límites)
+- [Persistencia y operación local](#persistencia-y-operación-local)
+
+
 ## Fuentes oficiales comprobadas el 25/09/2026
 
 | Conjunto | Item público de ConsorcioRegional | Paradas / líneas / viajes | Límite superior de servicio |
 | --- | --- | --- | --- |
-| Metro | `5c7f2951962540d69ffe8f640d94c246` | 1050 / 13 / 120 | 27/05/2026, **caducado** |
-| Metro Ligero / Tranvía | `aaed26cc0ff64b0c947ac0bc3e033196` | 96 / 4 / 3001 | 22/07/2027 |
-| Interurbanos | `885399f83408473c8d815e40c5e702b7` | 8406 / 354 / 49398 | 26/08/2027 |
+| Metro | [5c7f2951962540d69ffe8f640d94c246](https://www.arcgis.com/sharing/rest/content/items/5c7f2951962540d69ffe8f640d94c246?f=json) | 1050 / 13 / 120 | 27/05/2026, **caducado** |
+| Metro Ligero / Tranvía | [aaed26cc0ff64b0c947ac0bc3e033196](https://www.arcgis.com/sharing/rest/content/items/aaed26cc0ff64b0c947ac0bc3e033196?f=json) | 96 / 4 / 3001 | 22/07/2027 |
+| Interurbanos | [885399f83408473c8d815e40c5e702b7](https://www.arcgis.com/sharing/rest/content/items/885399f83408473c8d815e40c5e702b7?f=json) | 8406 / 354 / 49398 | 26/08/2027 |
 
 Las paradas incluyen estaciones y accesos cuando los contiene el GTFS; no son
 recuentos de andenes. El intervalo del manifiesto es la envolvente de calendarios
@@ -36,6 +47,8 @@ límites; no presentar el tratamiento como respaldo oficial del producto.
 `agency_id=CRTM` identifica aquí al publicador, no a la empresa operadora de cada bus.
 
 ## Operación manual
+
+Para actualizar una instalación con routing multioperador, usa la [release coordinada](../routing-releases.md). Los comandos de esta sección documentan la preparación aislada de catálogos, no una actualización completa del grafo activo.
 
 Requiere Python 3.11 o posterior, biblioteca estándar, sin credenciales:
 
@@ -120,11 +133,11 @@ una parada desaparece y reaparece; no fusiona redes por nombre. Las secuencias
 repetidas, calendarios, excepciones y ventanas de frecuencia se almacenan sin
 convertirlas en llegadas en tiempo real.
 
-Tras aplicar las migraciones mediante el procedimiento local con respaldo:
+Para una importación aislada sin grafo activo, tras las migraciones y el respaldo, sustituye `VERSION_DEL_EXPORT` por el hash del directorio preparado. No ejecutes esta sustitución por red sobre una release activa; su activador invoca el importador de forma coordinada:
 
 ```sh
-node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/light-rail/<version>
-node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/interurban/<version>
+node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/light-rail/VERSION_DEL_EXPORT
+node --env-file=.env.local scripts/import-crtm.mjs data/sources/crtm/interurban/VERSION_DEL_EXPORT
 ```
 
 El importador verifica hashes de los mismos bytes que consume PostgreSQL, conteos,

@@ -1,5 +1,7 @@
 # Geocodificación controlada
 
+[Índice de la wiki](../index.md) · [Registro de fuentes](README.md) · [Recursos y altas](../resources/index.md) · [Referencia MCP](../reference/mcp.md)
+
 `resolve_address` consulta primero los catálogos locales (Renfe, EMT, CRTM y BiciMAD).
 Si no encuentra candidatos, reutiliza una caché válida del proveedor configurado o
 solicita autorización para consultar externamente ese **lugar público**. No selecciona
