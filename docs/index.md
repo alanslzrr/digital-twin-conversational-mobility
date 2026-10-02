@@ -1,10 +1,10 @@
 # Madrid Mobility Twin · Documentación
 
-[Presentación del repositorio](../README.md)
+[Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Esta wiki explica qué hace el proyecto, cómo usarlo y cómo mantenerlo. Es una **evaluación universitaria local para hasta cinco personas**, no un servicio público de movilidad. Estado documental: **2 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twin. Actualizado el **2 de octubre de 2026**.
 
-**Empieza por [el proyecto en diez minutos](overview.md).** No necesitas conocer programación para leerlo.
+**Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 
 ## Elige un recorrido
 
@@ -19,7 +19,7 @@ Esta wiki explica qué hace el proyecto, cómo usarlo y cómo mantenerlo. Es una
 | Sección | Página y finalidad |
 | --- | --- |
 | Empieza aquí | [Visión general](overview.md): utilidad, capacidades y ejemplos sin tecnicismos |
-| Cómo funciona | [Arquitectura](architecture.md): componentes, límites y cinco flujos explicados |
+| Cómo funciona | [Arquitectura](architecture.md): componentes, autenticación, consultas, ingestión e historial |
 | Guía de uso | [Conversar con el sistema](user-guide.md): acceso, consultas, historial y continuidad |
 | Instalación | [Preparación inicial](installation.md): requisitos, cuentas, claves, datos y primer arranque |
 | Operación | [Runtime local](local-runtime.md): iniciar, parar, actualizar, respaldar y recuperar |
@@ -32,18 +32,13 @@ Esta wiki explica qué hace el proyecto, cómo usarlo y cómo mantenerlo. Es una
 | Fuentes | [CRTM](sources/crtm.md), [DGT](sources/dgt.md), [geocodificación](sources/geocoding.md): semántica específica |
 | Recursos | [Catálogo de referencias](resources/index.md): investigación, documentación oficial y aplicación en el código |
 | Recursos | [Cuentas y claves](resources/accounts.md): pasos manuales OpenAI, EMT, AEMET y Nominatim |
-| Alternativa cloud | [Preparación Vercel](deployment.md): lo aprovisionado, lo no publicado y diferencias con local |
+| Alternativa cloud | [Preparación Vercel](deployment.md): recursos y configuración de alojamiento |
 | Evolución | [Historia del proyecto](evolution.md): etapas, decisiones, PR y pruebas realizadas |
-| Evolución | [Roadmap vigente](roadmap.md): entregas cerradas y exclusiones aprobadas, sin obligaciones R2 retiradas |
+| Evolución | [Roadmap vigente](roadmap.md): alcance y estado de las entregas |
 | Evidencia | [Actas](acceptance/index.md), [auditorías](audits/index.md), [planes](plans/index.md), [investigaciones](research/index.md): archivo completo |
 | Consulta | [Glosario](glossary.md): términos técnicos explicados en una frase |
 | Mantenimiento | [Reglas de la wiki](AGENTS.md) y [registro de revisiones](log.md) |
 
-## Cómo leer esta wiki
+## Guías y archivo
 
-- **Documentación vigente:** explica el código versionado y la operación actual. No prueba que un proveedor responda en este instante.
-- **Evidencia histórica:** registra lo comprobado en una fecha. Conserva sus resultados aunque la cobertura haya crecido después.
-- **Ejemplo:** muestra qué pedir o cómo formar una entrada; no es una respuesta real ni promete cifras.
-- **Alcance:** R0 y R1 están cerrados. R2.1 sigue implementado. Las obligaciones de cierre R2 se retiraron por decisión del usuario; no se presentan como pruebas realizadas. [Decisión completa](roadmap.md#decisión-sobre-r2).
-
-Cada tema enlaza su explicación con código, fuentes y evidencia. Los documentos originales permanecen en sus rutas. No se publican archivos privados, claves ni credenciales de evaluadores.
+Las guías describen el funcionamiento actual. Las actas, auditorías, planes e investigaciones conservan los resultados y decisiones de cada fecha. Consulta el [roadmap](roadmap.md) para conocer el alcance vigente.
