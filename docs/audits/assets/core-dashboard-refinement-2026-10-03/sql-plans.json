@@ -1,0 +1,138 @@
+{
+  "environment": "isolated PostgreSQL, synthetic fixtures, not production performance",
+  "queryCount": 22,
+  "plans": [
+    {
+      "root": "Sort",
+      "planningMs": 0.771,
+      "executionMs": 0.865,
+      "rows": 3
+    },
+    {
+      "root": "Nested Loop",
+      "planningMs": 3.144,
+      "executionMs": 0.423,
+      "rows": 2
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.162,
+      "executionMs": 0.04,
+      "rows": 0
+    },
+    {
+      "root": "Hash Join",
+      "planningMs": 0.124,
+      "executionMs": 0.072,
+      "rows": 9
+    },
+    {
+      "root": "Result",
+      "planningMs": 0.111,
+      "executionMs": 0.024,
+      "rows": 1
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.191,
+      "executionMs": 177.908,
+      "rows": 1
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.272,
+      "executionMs": 0.086,
+      "rows": 1
+    },
+    {
+      "root": "Limit",
+      "planningMs": 0.172,
+      "executionMs": 0.063,
+      "rows": 0
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.166,
+      "executionMs": 0.038,
+      "rows": 1
+    },
+    {
+      "root": "Append",
+      "planningMs": 0.147,
+      "executionMs": 0.056,
+      "rows": 1
+    },
+    {
+      "root": "Seq Scan",
+      "planningMs": 0.02,
+      "executionMs": 0.019,
+      "rows": 10
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.475,
+      "executionMs": 0.095,
+      "rows": 1
+    },
+    {
+      "root": "Limit",
+      "planningMs": 0.085,
+      "executionMs": 0.06,
+      "rows": 0
+    },
+    {
+      "root": "Limit",
+      "planningMs": 0.384,
+      "executionMs": 1.74,
+      "rows": 21
+    },
+    {
+      "root": "Nested Loop",
+      "planningMs": 0.087,
+      "executionMs": 0.031,
+      "rows": 1
+    },
+    {
+      "root": "Nested Loop",
+      "planningMs": 0.129,
+      "executionMs": 0.035,
+      "rows": 1
+    },
+    {
+      "root": "Unique",
+      "planningMs": 1.425,
+      "executionMs": 0.618,
+      "rows": 60
+    },
+    {
+      "root": "Limit",
+      "planningMs": 0.162,
+      "executionMs": 0.178,
+      "rows": 1
+    },
+    {
+      "root": "Unique",
+      "planningMs": 0.352,
+      "executionMs": 0.055,
+      "rows": 0
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.254,
+      "executionMs": 0.094,
+      "rows": 1
+    },
+    {
+      "root": "Aggregate",
+      "planningMs": 0.174,
+      "executionMs": 0.286,
+      "rows": 1
+    },
+    {
+      "root": "Limit",
+      "planningMs": 0.165,
+      "executionMs": 0.213,
+      "rows": 61
+    }
+  ]
+}
