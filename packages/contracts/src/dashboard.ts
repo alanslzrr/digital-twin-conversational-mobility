@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  dashboardEventOutcome,
+  dashboardEventType,
+} from "./dashboard-insights";
 
 export const dashboardScopes = {
   read: "mobility.dashboard.read",
@@ -70,6 +74,8 @@ const envelope = { schemaVersion: z.literal(1), readAt: timestamp };
 
 export const dashboardEntityQuery = z.strictObject({
   category: dashboardCategory,
+  section: z.enum(["dynamic", "reference"]).optional(),
+  product: publicId.optional(),
   source: z
     .string()
     .min(1)
@@ -98,18 +104,23 @@ export const dashboardMapQuery = dashboardEntityQuery
   });
 export const dashboardEventQuery = z
   .strictObject({
-    from: timestamp,
-    to: timestamp,
+    from: timestamp.optional(),
+    to: timestamp.optional(),
+    window: z.enum(["1h", "24h", "7d"]).optional(),
     source: publicId.optional(),
-    type: publicId.optional(),
+    type: dashboardEventType.optional(),
+    outcome: dashboardEventOutcome.optional(),
     severity: z.enum(["info", "warning", "error"]).optional(),
     cursor: z.string().min(1).max(4096).optional(),
     limit: z.number().int().min(1).max(100).default(50),
   })
-  .refine(({ from, to }) => {
+  .refine(({ from, to, window }) => {
+    if (window && (from || to)) return false;
+    if (!from && !to) return true;
+    if (!from || !to) return false;
     const range = Date.parse(to) - Date.parse(from);
-    return range >= 0 && range <= dashboardLimits.retentionDays * 86400000;
-  }, "Event range must be at most seven days");
+    return range > 0 && range <= dashboardLimits.retentionDays * 86400000;
+  }, "Use a relative window or a complete absolute range of at most seven days");
 
 export const dashboardEvidence = z.strictObject({
   sourceId: publicId,
@@ -120,6 +131,7 @@ export const dashboardEvidence = z.strictObject({
   checkedAt: timestamp.nullable(),
   issuedAt: timestamp.nullable(),
   issuedAtRaw: z.string().max(100).nullable(),
+  ageBasis: timestamp.nullable().optional(),
   validFrom: timestamp.nullable(),
   validTo: timestamp.nullable(),
   freshness: dashboardFreshness,
@@ -136,20 +148,76 @@ export const dashboardMeasurement = z.strictObject({
     .union([z.string().max(2000), z.number().finite(), z.boolean()])
     .nullable(),
   unit: z.string().max(40).nullable(),
+  basis: z.enum(["instant", "interval"]).optional(),
+  periodMinutes: z.number().nonnegative().optional(),
 });
-export const dashboardEntity = z.strictObject({
+const dashboardEntityBase = z.strictObject({
   id: publicId,
   category: dashboardCategory,
   name: z.string().min(1).max(300),
   latitude: z.number().min(-90).max(90).nullable(),
   longitude: z.number().min(-180).max(180).nullable(),
   evidence: dashboardEvidence,
+  kind: z.enum([
+    "catalog",
+    "arrival",
+    "notice",
+    "bike",
+    "observation",
+    "forecast",
+    "traffic",
+    "parking",
+  ]),
   measurements: z.array(dashboardMeasurement).max(64),
   truncated: z.boolean(),
+});
+export const dashboardEntity = z.discriminatedUnion("kind", [
+  dashboardEntityBase.extend({
+    kind: z.literal("catalog"),
+    category: z.literal("places"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("arrival"),
+    category: z.literal("departures"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("notice"),
+    category: z.literal("incidents"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("bike"),
+    category: z.literal("bikes"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("observation"),
+    category: z.literal("environment"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("forecast"),
+    category: z.literal("environment"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("traffic"),
+    category: z.literal("traffic"),
+  }),
+  dashboardEntityBase.extend({
+    kind: z.literal("parking"),
+    category: z.literal("parking"),
+  }),
+]);
+export const dashboardSelectionTotals = z.strictObject({
+  total: z.number().int().nonnegative(),
+  recent: z.number().int().nonnegative(),
+  stale: z.number().int().nonnegative(),
+  unavailable: z.number().int().nonnegative(),
+  static: z.number().int().nonnegative(),
+  unit: z.string().max(100),
+  evaluatedAt: timestamp,
 });
 export const dashboardEntityPage = z.strictObject({
   ...envelope,
   entities: z.array(dashboardEntity).max(100),
+  totals: dashboardSelectionTotals.optional(),
   nextCursor: z.string().max(4096).nullable(),
   revisions: z.record(publicId, z.string().max(200)),
   limited: z.boolean(),
@@ -158,6 +226,7 @@ export const dashboardEntityPage = z.strictObject({
 export const dashboardMapPage = z.strictObject({
   ...envelope,
   entities: z.array(dashboardEntity).max(1000),
+  totals: dashboardSelectionTotals.optional(),
   revisions: z.record(publicId, z.string().max(200)),
   limited: z.boolean(),
   countScope: z.literal("returned_viewport"),
@@ -240,4 +309,19 @@ export const dashboardData = z.strictObject({
   data: z.json(),
   truncated: z.boolean(),
   nextCursor: z.string().max(4096).nullable(),
+});
+export const dashboardInspectResult = z.strictObject({
+  schemaVersion: z.literal(1),
+  tool: dashboardToolName,
+  executionMode: z.literal("stored_only"),
+  evaluatedAt: timestamp,
+  availability: z.enum([
+    "available",
+    "partial",
+    "unavailable",
+    "not_materialized",
+  ]),
+  result: z.json(),
+  truncated: z.boolean(),
+  limitations: z.array(z.string().max(1000)).max(20),
 });

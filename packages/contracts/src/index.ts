@@ -255,6 +255,9 @@ export {
   conversationPage,
 } from "./conversations";
 export * from "./dashboard";
+export * from "./dashboard-conversations";
+export * from "./dashboard-insights";
+export * from "./dashboard-sources";
 export type {
   DailyForecast,
   DailyWeatherPeriod,
