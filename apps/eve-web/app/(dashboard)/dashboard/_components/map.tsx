@@ -10,6 +10,7 @@ export default function MobilityMap({
   category,
   section,
   product,
+  parkingCategory,
   source,
   freshness,
   search,
@@ -19,6 +20,7 @@ export default function MobilityMap({
   category: string;
   section: string;
   product: string;
+  parkingCategory: string;
   source: string;
   freshness: string;
   search: string;
@@ -36,6 +38,7 @@ export default function MobilityMap({
     category,
     section,
     ...(product ? { product } : {}),
+    ...(category === "parking" && parkingCategory ? { parkingCategory } : {}),
     bbox,
     ...(search ? { search } : {}),
     ...(source ? { source } : {}),

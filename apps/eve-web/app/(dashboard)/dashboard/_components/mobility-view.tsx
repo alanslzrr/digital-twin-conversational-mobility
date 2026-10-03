@@ -82,6 +82,8 @@ export function Mobility({
       setProduct(params.get("product") ?? "reference:places");
       if (!initialCategory) setCategory("places");
     }
+    if (params.get("parkingCategory"))
+      setParkingCategory(params.get("parkingCategory") ?? "");
     if (params.get("product")) setProduct(params.get("product") ?? "");
     if (schemas.sourceIdSchema.safeParse(params.get("source")).success)
       setSource(params.get("source") ?? "");
@@ -94,6 +96,7 @@ export function Mobility({
     }
   }, [initialCategory, id]);
   const [category, setCategory] = useState(initialCategory ?? "bikes"),
+    [parkingCategory, setParkingCategory] = useState(""),
     [source, setSource] = useState(""),
     [freshness, setFreshness] = useState(""),
     [search, setSearch] = useState(""),
@@ -104,6 +107,7 @@ export function Mobility({
     category,
     section,
     ...(product ? { product } : {}),
+    ...(category === "parking" && parkingCategory ? { parkingCategory } : {}),
     ...(source ? { source } : {}),
     ...(freshness ? { freshness } : {}),
     ...(filter ? { search: filter } : {}),
@@ -280,6 +284,12 @@ export function Mobility({
           </select>
         </Field>
       ) : null}
+      {category === "parking" && parkingCategory ? (
+        <p className="text-sm text-muted-foreground">
+          Categoría de plazas seleccionada: {parkingCategory}. Solo se muestran
+          muestras de esta categoría.
+        </p>
+      ) : null}
       {page?.totals &&
       (product || ["bikes", "traffic", "parking"].includes(category)) ? (
         <FreshnessBreakdown {...page.totals} />
@@ -410,6 +420,7 @@ export function Mobility({
           category={category}
           section={section}
           product={product}
+          parkingCategory={parkingCategory}
           source={source}
           freshness={freshness}
           search={filter}

@@ -9,7 +9,10 @@ import { ActivityChart, MetricStrip, number } from "./insights";
 import { Instant, PageTitle, State } from "./shared";
 export function Overview() {
   const [window, setWindow] = useState("24h");
-  const q = useDashboard(`overview?window=${window}`);
+  const [parkingCategory, setParkingCategory] = useState("");
+  const q = useDashboard(
+    `overview?${new URLSearchParams({ window, ...(parkingCategory ? { parkingCategory } : {}) })}`,
+  );
   const data = q.data as DashboardOverview | undefined;
   return (
     <>
@@ -20,6 +23,33 @@ export function Overview() {
       <State loading={q.isLoading} error={q.error} />
       {data ? (
         <>
+          <Field className="max-w-sm">
+            <FieldLabel htmlFor="overview-parking-category">
+              Categoría de plazas
+            </FieldLabel>
+            {data.parkingCategories.length > 1 ? (
+              <select
+                id="overview-parking-category"
+                value={data.parkingCategory ?? ""}
+                onChange={(e) => setParkingCategory(e.target.value)}
+                className="min-h-11 rounded-md border bg-background px-3 text-sm"
+              >
+                {data.parkingCategories.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label} ({c.code})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p>
+                {data.parkingCategories[0]?.label ?? "Sin categoría publicada"}
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              La cifra de plazas solo suma esta categoría; no se suman
+              categorías diferentes.
+            </p>
+          </Field>
           <MetricStrip metrics={data.metrics} />
           <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
             <section className="overflow-hidden rounded-lg border bg-card">
