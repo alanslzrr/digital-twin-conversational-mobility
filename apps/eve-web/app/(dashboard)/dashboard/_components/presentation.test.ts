@@ -29,12 +29,12 @@ it("explains truncated inspection results without a primary JSON wall", () => {
       },
     }),
   );
-  expect(html).toContain("Resultado incompleto");
+  expect(html).toContain("Result truncated");
   expect(html).toContain("QA sintética");
-  expect(html).toContain("Bicicletas disponibles");
-  expect(html).toContain("Solo almacenamiento; sin adquisición");
+  expect(html).toContain("Available bikes");
+  expect(html).toContain("Stored only; no provider acquisition");
   expect(html).toContain("<details");
-  expect(html.indexOf("Resultado incompleto")).toBeLessThan(
+  expect(html.indexOf("Result truncated")).toBeLessThan(
     html.indexOf("<details"),
   );
 });
@@ -61,7 +61,7 @@ it("does not display an uninstrumented activity interval as zero captured", () =
       },
     }),
   );
-  expect(html).toContain("Sin dato");
+  expect(html).toContain("Unknown");
   expect(html).not.toContain("<svg");
 });
 
@@ -76,12 +76,12 @@ it("keeps partial coverage distinct from byte truncation", () => {
       },
     }),
   );
-  expect(html).toContain("Cobertura parcial");
-  expect(html).not.toContain("límite de tamaño");
+  expect(html).toContain("Partial selection coverage");
+  expect(html).not.toContain("size limit");
 });
 it("does not reconstruct missing private capture", () => {
   const html = renderToStaticMarkup(
     React.createElement(TracePayload, { value: { captureStatus: "missing" } }),
   );
-  expect(html).toContain("Lo que nunca se capturó");
+  expect(html).toContain("Uncaptured content");
 });

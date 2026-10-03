@@ -1,56 +1,52 @@
 const products: Record<string, string> = {
-  bicimad: "Bicicletas BiciMAD",
-  "madrid-parking": "Ocupación de aparcamientos",
-  "madrid-traffic": "Sensores de tráfico",
-  "madrid-air": "Calidad del aire",
-  aemet: "Observaciones meteorológicas",
-  "renfe-trips": "Estimaciones Renfe",
-  "renfe-alerts": "Avisos Renfe",
-  "emt-alerts": "Avisos EMT",
-  "dgt-incidents": "Incidencias de carreteras",
-  "reference:places": "Lugares publicados",
-  "reference:lines": "Líneas publicadas",
-  "reference:timetables": "Horarios de referencia",
-  "reference:accessibility": "Accesibilidad declarada",
-  "reference:tariffs": "Tarifas documentales",
-  "reference:geography": "Geografía municipal",
+  bicimad: "BiciMAD bikes",
+  "madrid-parking": "Parking occupancy",
+  "madrid-traffic": "Traffic sensors",
+  "madrid-air": "Air quality",
+  aemet: "Weather observations",
+  "renfe-trips": "Renfe estimates",
+  "renfe-alerts": "Renfe alerts",
+  "emt-alerts": "EMT alerts",
+  "dgt-incidents": "Road incidents",
+  "reference:places": "Published places",
+  "reference:lines": "Published lines",
+  "reference:timetables": "Reference timetables",
+  "reference:accessibility": "Declared accessibility",
+  "reference:tariffs": "Documentary fares",
+  "reference:geography": "Municipal geography",
 };
 export function productLabel(id: string) {
   return (
     products[id] ??
     (id.startsWith("weather:daily:")
-      ? "Predicción diaria"
+      ? "Daily forecast"
       : id.startsWith("weather:warnings:")
-        ? "Avisos meteorológicos"
+        ? "Weather warnings"
         : id.startsWith("weather:")
-          ? "Predicción horaria"
+          ? "Hourly forecast"
           : id.startsWith("emt:")
-            ? "Llegadas EMT"
+            ? "EMT arrivals"
             : id.startsWith("crtm:")
-              ? "Catálogo de transporte CRTM"
-              : "Información publicada")
+              ? "CRTM transport catalog"
+              : "Published information")
   );
 }
 export function evidenceExplanation(reason: string | null, coverage: string) {
   const reasons: Record<string, string> = {
-    missing_observation:
-      "La fuente no publicó una hora de observación verificable.",
+    missing_observation: "Source supplied no verifiable observation time.",
     invalid_timestamp: "Fecha publicada no utilizable.",
-    future_observation: "Hora de observación fuera del margen permitido.",
-    last_refresh_failed:
-      "El último intento falló; se conserva la lectura anterior.",
-    old_issue:
-      "La publicación es demasiado antigua, aunque se haya comprobado recientemente.",
+    future_observation: "Observation time outside permitted margin.",
+    last_refresh_failed: "Last attempt failed; previous observation retained.",
+    old_issue: "Publication is stale despite a recent check.",
     outside_horizon: "El periodo publicado ya ha terminado.",
   };
   return reason
-    ? (reasons[reason] ??
-        "La evidencia tiene limitaciones; consulta las fechas del detalle.")
+    ? (reasons[reason] ?? "Evidence has limits; inspect detailed times.")
     : coverage === "partial"
-      ? "Cobertura publicada parcial; no representa toda la ciudad."
+      ? "Partial published coverage, not citywide coverage."
       : coverage === "complete"
-        ? "Completa para esta selección, no garantía de disponibilidad."
-        : "No se dispone de evidencia suficiente para esta selección.";
+        ? "Complete for this selection, not an availability guarantee."
+        : "Insufficient evidence for this selection.";
 }
 export function measurementValue(name: string, value: unknown) {
   if (
@@ -59,38 +55,38 @@ export function measurementValue(name: string, value: unknown) {
   ) {
     const hours = Math.floor(value / 3600),
       minutes = Math.floor((value % 3600) / 60);
-    return `${String(hours % 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}${hours >= 24 ? " (día siguiente del servicio)" : ""}`;
+    return `${String(hours % 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}${hours >= 24 ? " (next service day)" : ""}`;
   }
   if (name === "wheelchair")
     return value === 1 || value === "1"
-      ? "Accesibilidad declarada"
+      ? "Declared accessibility"
       : value === 2 || value === "2"
-        ? "No accesible según declaración"
-        : "Sin declaración verificable";
+        ? "Not accessible as declared"
+        : "No verifiable declaration";
   if (name === "kind")
     return (
       (
         {
-          stop: "Parada",
-          station: "Estación",
+          stop: "Stop",
+          station: "Station",
           entrance: "Acceso",
-          address: "Dirección",
-          poi: "Lugar de interés",
+          address: "Address",
+          poi: "Point of interest",
         } as Record<string, string>
-      )[String(value)] ?? "Tipo publicado por la fuente"
+      )[String(value)] ?? "Published source type"
     );
   const values: Record<string, string> = {
-    instant: "Medida instantánea",
-    interval: "Acumulada durante el periodo",
-    active: "Vigente según la fuente",
+    instant: "Instant measurement",
+    interval: "Accumulated over the period",
+    active: "Active as published",
     unknown: "No confirmado",
     inactive: "No vigente",
     provisional: "Provisional",
-    validated: "Validada",
+    validated: "Validated",
   };
   return typeof value === "string" &&
     ["basis", "providerValidity", "quality", "status"].includes(name)
-    ? (values[value] ?? "Clasificación publicada; detalle técnico disponible")
+    ? (values[value] ?? "Published classification; technical details available")
     : String(value);
 }
 
@@ -100,7 +96,7 @@ export function measurementDisplay(
   value: unknown,
   unit?: string | null,
 ) {
-  if (value === null || value === undefined) return "Sin dato";
+  if (value === null || value === undefined) return "Unknown";
   const coded = ["wheelchair", "arrivalSeconds", "departureSeconds"].includes(
     name,
   );
@@ -112,7 +108,7 @@ export function measurementDisplay(
         )
       : typeof value === "boolean"
         ? value
-          ? "Sí"
+          ? "Yes"
           : "No"
         : measurementValue(name, value);
   return unit && !coded ? `${formatted} ${unit}` : formatted;
