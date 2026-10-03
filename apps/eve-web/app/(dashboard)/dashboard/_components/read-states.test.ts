@@ -8,6 +8,7 @@ vi.stubGlobal("React", React);
 const reads = vi.hoisted(() => ({
   source: undefined as unknown,
   error: null as unknown,
+  statusError: null as unknown,
 }));
 vi.mock("@/src/dashboard-client", () => ({
   useDashboard: (path: string) =>
@@ -19,13 +20,14 @@ vi.mock("@/src/dashboard-client", () => ({
             ],
           },
           isLoading: false,
-          error: null,
+          error: reads.statusError,
         }
       : { data: reads.source, error: reads.error, isLoading: false },
 }));
 afterEach(() => {
   reads.source = undefined;
   reads.error = null;
+  reads.statusError = null;
 });
 it("first source failure never displays empty groups or false issue totals, despite worker success", () => {
   reads.error = new Error("Synthetic read failure");
@@ -60,4 +62,19 @@ it("an error never uses the successful empty message", () => {
   );
   expect(html).toContain("not an empty result");
   expect(html).not.toContain("No stored records");
+});
+
+it("worker fetch failure is scoped separately from a successful source read", () => {
+  reads.source = {
+    readAt: "2026-10-03T08:00:00Z",
+    data: {
+      sources: [{ id: "bicimad", enabled: true, streams: [] }],
+      metrics: { issueProducts: [], monitoredProducts: 1, errors: null },
+    },
+  };
+  reads.statusError = new Error("Worker status unavailable");
+  const html = renderToStaticMarkup(React.createElement(Sources));
+  expect(html).toContain("status read failed");
+  expect(html).toContain("Source products");
+  expect(html).not.toContain("Source evidence unavailable");
 });

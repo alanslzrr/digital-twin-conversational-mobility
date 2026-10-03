@@ -396,10 +396,16 @@ function SourcesContent({ id }: { id?: string }) {
         </>
       ) : null}
       <details className="dc-card">
-        <summary className="cursor-pointer">
+        <summary id="worker-signals" className="cursor-pointer">
           Worker signals · independent of provider evidence
+          {status.error ? " · status read failed" : ""}
         </summary>
         <h2 className="text-sm font-medium">Worker signals</h2>
+        <State
+          data={status.data}
+          loading={status.isLoading}
+          error={status.error}
+        />
         <p className="mt-1 text-xs text-muted-foreground">
           Not provider health or freshness evidence.
         </p>

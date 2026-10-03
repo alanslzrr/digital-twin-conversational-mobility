@@ -215,6 +215,19 @@ try {
   );
   inspect("sources-first-failure");
   b("network", "unroute");
+  page("/sources");
+  b("network", "route", "**/api/dashboard/status", "--abort");
+  b("wait", "3500");
+  b("scrollintoview", "#worker-signals");
+  b("click", "#worker-signals");
+  b("wait", "--text", "status read failed");
+  check(
+    "worker fetch failure preserves source evidence",
+    text().includes("Source products") &&
+      !text().includes("Source evidence unavailable"),
+  );
+  inspect("worker-fetch-failure");
+  b("network", "unroute");
   page("/tools/get_bike_availability");
   click("Load example without execution");
   click("Run query", "radio");
