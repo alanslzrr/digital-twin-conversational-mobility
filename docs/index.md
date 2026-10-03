@@ -29,6 +29,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twi
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
 | Desarrollo | [Spec original del panel y telemetría](plans/2026-10-02-core-dashboard.md): arquitectura y límites de la implementación inicial; [validación aislada](acceptance/2026-10-02-core-dashboard.md) conservada como evidencia |
+| Rediseño | [Rediseño de seis vistas](acceptance/2026-10-03-core-dashboard-redesign.md): contratos conservados, validación sintética y aceptación manual pendiente; PR #45 sin integrar |
 | Refinamiento | [Segunda auditoría con agent-browser](acceptance/2026-10-03-core-dashboard-second-audit.md), con nueve hallazgos corregidos y alcance explícito; [Implementación y validación local](acceptance/2026-10-03-core-dashboard-refinement.md), con verificaciones pendientes; [spec-audit de PR #45](audits/2026-10-02-core-dashboard-review.md): corregir captura/datos y completar las seis vistas con lenguaje claro, gráficos, separación de catálogos y criterios de aceptación; sin instalación habitual |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
 | Fuentes | [CRTM](sources/crtm.md), [DGT](sources/dgt.md), [geocodificación](sources/geocoding.md): semántica específica |
