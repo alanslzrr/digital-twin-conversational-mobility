@@ -1,0 +1,171 @@
+- link "Skip to content" [ref=e2258]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e2259]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e2260]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e2269]
+    - link "Mobility" [ref=e2270]
+    - link "Queries" [ref=e2271]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e2272]
+    - link "Activity" [ref=e2273]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e2274]
+  - link "Open chat" [ref=e2261]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e2262]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Sources"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:49:03 CEST"
+  - button "Pause refresh" [ref=e2263]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e2264]
+  - button "Data timing" [expanded=false, ref=e2265]
+- main
+  - heading "Sources" [level=1, ref=e2266]
+  - paragraph
+    - StaticText "Stored provider evidence and scoped operational signals."
+  - group "Operation period"
+    - Legend
+      - StaticText "Operation period"
+    - LabelText [ref=e2275] clickable [cursor:pointer]
+      - radio "1 hour" [checked=false, ref=e2290]
+      - StaticText "1 hour"
+    - LabelText [ref=e2276] clickable [cursor:pointer]
+      - radio "24 hours" [checked=true, ref=e2291]
+      - StaticText "24 hours"
+    - LabelText [ref=e2277] clickable [cursor:pointer]
+      - radio "7 days" [checked=false, ref=e2292]
+      - StaticText "7 days"
+  - LabelText
+    - StaticText "Operation"
+  - combobox "Operation" [expanded=false, ref=e2267]: All, broken down
+    - MenuListPopup
+      - option "All, broken down" [selected, ref=e2293]
+      - option "Publication" [ref=e2294]
+      - option "On-demand refresh" [ref=e2295]
+      - option "Graph activation" [ref=e2296]
+      - option "Lease lost" [ref=e2297]
+      - option "Lease recovered" [ref=e2298]
+  - generic
+    - article
+      - heading "Products with recorded current issues" [level=2, ref=e2299]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Monitored products: 13. Recorded errors or missing worker signal during an active window. Normal absence of demand or an inactive window is not a failure."
+    - article
+      - heading "Recorded errors in period" [level=2, ref=e2300]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Unique retained error events, not an availability rate. "
+        - link "Inspect activity" [ref=e2301]
+  - generic
+    - heading "Source products" [level=2, ref=e2278]
+    - paragraph
+      - StaticText "Registered sources and stored product evidence. Enabled does not mean recent."
+    - link "AEMET" [ref=e2279]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "BiciMAD" [ref=e2280]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "CRTM transport" [ref=e2281]
+    - StaticText "Disabled"
+    - StaticText "0"
+    - StaticText " periodic ·"
+    - StaticText "1"
+    - StaticText "reference products"
+    - link "Roads DGT" [ref=e2282]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "EMT buses" [ref=e2283]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid air quality" [ref=e2284]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid parking" [ref=e2285]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid traffic sensors" [ref=e2286]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "OpenStreetMap geography" [ref=e2287]
+    - StaticText "Disabled"
+    - StaticText "0"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Renfe" [ref=e2288]
+    - StaticText "Enabled"
+    - StaticText "2"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+  - region "Durations by component and operation" [ref=e2268] focusable [tabindex]
+    - heading "Comparable operation durations" [level=2, ref=e2289]
+    - paragraph
+      - StaticText "Median with available samples by component and operation, not provider HTTP latency. p95 requires at least 20 samples."
+    - table
+      - rowgroup
+        - row
+          - columnheader "Operation / component" [ref=e2306]
+          - columnheader "Sample" [ref=e2307]
+          - columnheader "Median" [ref=e2308]
+          - columnheader "p95" [ref=e2309]
+      - row
+        - cell "Publication · Periodic capture" [ref=e2302]
+          - StaticText "Publication · Periodic capture"
+        - cell "8" [ref=e2303]
+        - cell "13.5 ms" [ref=e2304]
+          - StaticText "13.5 ms"
+        - cell "Insufficient samples" [ref=e2305]
+  - paragraph
+    - StaticText "Best-effort capture · "
+    - time
+      - StaticText "02/10/2026, 11:49:03 CEST"
+    - StaticText " — "
+    - time
+      - StaticText "03/10/2026, 11:49:03 CEST"
+  - group
+    - DisclosureTriangle "Sanitized technical details" [expanded=false]
+      - StaticText "Sanitized technical details"
+  - group
+    - DisclosureTriangle "Worker signals · independent of provider evidence" [expanded=false]
+      - StaticText "Worker signals · independent of provider evidence"
+- alert

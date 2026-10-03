@@ -1,0 +1,102 @@
+{
+  "axeVersion": "4.12.1",
+  "counts": {
+    "inapplicable": 57,
+    "incomplete": 2,
+    "passes": 32,
+    "violations": 0
+  },
+  "incomplete": [
+    {
+      "help": "ARIA hidden element must not be focusable or contain focusable elements",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-hidden-focus?application=axeAPI",
+      "id": "aria-hidden-focus",
+      "impact": "serious",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+          "target": [
+            "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"][aria-hidden=\"true\"]:nth-child(1)"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<div class=\"dashboard-shell\" lang=\"en\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
+          "target": [
+            ".dashboard-shell"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+          "target": [
+            "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"][aria-hidden=\"true\"]:nth-child(10)"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-10.8.1"
+      ]
+    },
+    {
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodeCount": 2,
+      "nodes": [
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+          "html": "<dd>Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds. Refresh only reads stored evidence.</dd>",
+          "target": [
+            "div:nth-child(2) > dd"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
+          "html": "<p class=\"dc-meta\">Visible, unpaused activity renews the bounded capture window every 60 seconds. Pausing stops renewal, not an in-progress provider request. Observation and ingestion times remain attached to each record.</p>",
+          "target": [
+            ".dc-sheet-body > p"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ]
+    }
+  ],
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 8205334907631297000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "not_configured",
+    "reused": true,
+    "saveStatus": "not_attempted"
+  },
+  "url": "http://127.0.0.1:3002/dashboard",
+  "violations": []
+}

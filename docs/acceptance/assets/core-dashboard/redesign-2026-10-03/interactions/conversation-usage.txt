@@ -1,0 +1,212 @@
+- link "Skip to content" [ref=e579]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e580]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e581]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e594]
+    - link "Mobility" [ref=e595]
+    - link "Queries" [ref=e596]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e597]
+    - link "Activity" [ref=e598]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e599]
+  - link "Open chat" [ref=e582]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e583]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "My conversations"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:47:33 CEST"
+  - button "Pause refresh" [ref=e584]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e585]
+  - button "Data timing" [expanded=false, ref=e586]
+- main
+  - heading "My conversations" [level=1, ref=e587]
+  - paragraph
+    - StaticText "Inspect your sessions, captured tool calls and reported usage."
+  - complementary
+    - heading "Sessions on this page" [level=2, ref=e600]
+    - link "Conversation 03/10/2026, 11:43:03 CEST" [ref=e601]
+      - strong
+        - StaticText "Conversation"
+      - paragraph
+        - time
+          - StaticText "03/10/2026, 11:43:03 CEST"
+  - link "All my conversations" [ref=e588]
+  - link "Open chat" [ref=e589]
+  - LabelText
+    - StaticText "Turn (returned page)"
+  - combobox "Turn (returned page)" [expanded=false, ref=e590]: All retained turns
+    - MenuListPopup
+      - option "All retained turns" [selected, ref=e607]
+      - option "Turn 1 · Unknown state" [ref=e608]
+      - option "Turn 2 · Completed" [ref=e609]
+      - option "Turn 3 · Completed" [ref=e610]
+      - option "Turn 4 · Completed" [ref=e611]
+      - option "Turn 5 · Completed" [ref=e612]
+      - option "Turn 6 · Completed" [ref=e613]
+      - option "Turn 7 · Completed" [ref=e614]
+      - option "Turn 8 · Completed" [ref=e615]
+      - option "Turn 9 · Completed" [ref=e616]
+  - tablist "Conversation detail" [ref=e591] focusable [tabindex]
+    - tab "Timeline" [ref=e602]
+    - tab "Tools" [ref=e603]
+    - tab "Usage" [selected, ref=e604]
+    - tab "Model" [ref=e605]
+    - tab "Content" [ref=e606]
+  - tabpanel "Usage" [ref=e639] focusable [tabindex]
+    - region "Conversation summary" [ref=e640]
+      - article
+        - heading "Reported tokens" [level=2, ref=e642]
+        - paragraph
+          - StaticText "324"
+        - paragraph
+          - StaticText "Only attempts with known input and output. Cache and reasoning subsets are not added again."
+      - article
+        - heading "Tool calls" [level=2, ref=e643]
+        - paragraph
+          - StaticText "1"
+        - paragraph
+          - StaticText "Each call counted once, even across multiple events. Excludes discovery and manual executions."
+      - article
+        - heading "Dispatched model attempts" [level=2, ref=e644]
+        - paragraph
+          - StaticText "9"
+        - paragraph
+          - StaticText "Observed dispatches; retries and compactions are distinct attempts."
+      - article
+        - heading "Turn duration" [level=2, ref=e645]
+        - paragraph
+          - StaticText "Unknown"
+        - paragraph
+          - StaticText "Select a turn to inspect duration."
+    - paragraph
+      - StaticText "Input: 248 · Output: 76 · 1 attempts without complete reported usage."
+    - DescriptionList
+      - term "Input"
+      - definition
+        - StaticText "248 · reported in 8 de 9 retained attempts"
+      - term "Output"
+      - definition
+        - StaticText "76 · reported in 8 de 9 retained attempts"
+      - term "Cache (input subset)"
+      - definition
+        - StaticText "26 · reported in 8 de 9 retained attempts"
+      - term "Reported reasoning (subset, no content)"
+      - definition
+        - StaticText "Unknown · reported in 0 de 9 retained attempts"
+    - paragraph
+      - StaticText "Tools: 1 requested · 1 with result · 0 failed · 0 rejected · 0 cancelled · 0 pending in capture. Missing events do not prove non-execution."
+    - generic
+      - heading "Reported usage by turn" [level=2, ref=e641]
+      - paragraph
+        - StaticText "Up to 50 turns per page. Session totals cover all retained attempts. Unknown is not zero."
+      - table
+        - rowgroup
+          - row
+            - columnheader "Turn" [ref=e691]
+            - columnheader "Input" [ref=e692]
+            - columnheader "Output" [ref=e693]
+            - columnheader "Duration" [ref=e694]
+            - columnheader "Coverage" [ref=e695]
+        - row
+          - cell "Turn 1" [ref=e646]
+            - button "Turn 1" [ref=e696]
+              - StaticText "Turn 1"
+          - cell "10" [ref=e647]
+          - cell "4" [ref=e648]
+          - cell "No measurement" [ref=e649]
+          - cell "1 de 1 attempts with complete usage" [ref=e650]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 2" [ref=e651]
+            - button "Turn 2" [ref=e697]
+              - StaticText "Turn 2"
+          - cell "10" [ref=e652]
+          - cell "0" [ref=e653]
+          - cell "1,200 ms" [ref=e654]
+          - cell "1 de 1 attempts with complete usage" [ref=e655]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 3" [ref=e656]
+            - button "Turn 3" [ref=e698]
+              - StaticText "Turn 3"
+          - cell "17" [ref=e657]
+          - cell "3" [ref=e658]
+          - cell "1,500 ms" [ref=e659]
+          - cell "1 de 1 attempts with complete usage" [ref=e660]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 4" [ref=e661]
+            - button "Turn 4" [ref=e699]
+              - StaticText "Turn 4"
+          - cell "24" [ref=e662]
+          - cell "6" [ref=e663]
+          - cell "1,800 ms" [ref=e664]
+          - cell "1 de 1 attempts with complete usage" [ref=e665]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 5" [ref=e666]
+            - button "Turn 5" [ref=e700]
+              - StaticText "Turn 5"
+          - cell "31" [ref=e667]
+          - cell "9" [ref=e668]
+          - cell "2,100 ms" [ref=e669]
+          - cell "1 de 1 attempts with complete usage" [ref=e670]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 6" [ref=e671]
+            - button "Turn 6" [ref=e701]
+              - StaticText "Turn 6"
+          - cell "Unknown" [ref=e672]
+          - cell "Unknown" [ref=e673]
+          - cell "2,400 ms" [ref=e674]
+          - cell "0 de 1 attempts with complete usage" [ref=e675]
+            - StaticText "0 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 7" [ref=e676]
+            - button "Turn 7" [ref=e702]
+              - StaticText "Turn 7"
+          - cell "45" [ref=e677]
+          - cell "15" [ref=e678]
+          - cell "2,700 ms" [ref=e679]
+          - cell "1 de 1 attempts with complete usage" [ref=e680]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 8" [ref=e681]
+            - button "Turn 8" [ref=e703]
+              - StaticText "Turn 8"
+          - cell "52" [ref=e682]
+          - cell "18" [ref=e683]
+          - cell "3,000 ms" [ref=e684]
+          - cell "1 de 1 attempts with complete usage" [ref=e685]
+            - StaticText "1 de 1 attempts with complete usage"
+        - row
+          - cell "Turn 9" [ref=e686]
+            - button "Turn 9" [ref=e704]
+              - StaticText "Turn 9"
+          - cell "59" [ref=e687]
+          - cell "21" [ref=e688]
+          - cell "3,300 ms" [ref=e689]
+          - cell "1 de 1 attempts with complete usage" [ref=e690]
+            - StaticText "1 de 1 attempts with complete usage"
+    - paragraph
+      - StaticText "9 turns with retained evidence. Up to 50 per page; session totals include all retained attempts."
+  - group
+    - DisclosureTriangle "Sanitized technical details" [expanded=false]
+      - StaticText "Sanitized technical details"
+  - button "Capture and retention" [expanded=false, ref=e593]
+- alert

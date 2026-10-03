@@ -1,0 +1,50 @@
+{
+  "counts": {
+    "inapplicable": 44,
+    "incomplete": 1,
+    "passes": 45,
+    "violations": 0
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "help": "ARIA attributes must conform to valid values",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+      "id": "aria-valid-attr-value",
+      "impact": "critical",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_2npfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Open navigation\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_2npfivb_\" data-state=\"closed\">",
+          "target": [
+            "button[aria-label=\"Open navigation\"]"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_97pfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Data timing\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_97pfivb_\" data-state=\"closed\">",
+          "target": [
+            "button[aria-label=\"Data timing\"]"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_kpbsnvpfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_kpbsnvpfivb...\" data-state=\"closed\">",
+          "target": [
+            "button[aria-controls=\"radix-_R_kpbsnvpfivb_\"]"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ]
+    }
+  ]
+}

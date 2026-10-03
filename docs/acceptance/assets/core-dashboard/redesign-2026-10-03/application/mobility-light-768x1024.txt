@@ -1,0 +1,155 @@
+- link "Skip to content" [ref=e2788]
+- banner
+  - button "Open navigation" [expanded=false, ref=e2794]
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:49:19 CEST"
+  - button "Pause refresh" [ref=e2789]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e2790]
+  - button "Data timing" [expanded=false, ref=e2791]
+- main
+  - heading "Mobility" [level=1, ref=e2792]
+  - paragraph
+    - StaticText "Explore stored measurements, reference catalogs and their evidence."
+  - group "Evidence family"
+    - Legend
+      - StaticText "Evidence family"
+    - LabelText [ref=e2795] clickable [cursor:pointer]
+      - radio "Dynamic" [checked=true, ref=e2809]
+      - StaticText "Dynamic"
+    - LabelText [ref=e2796] clickable [cursor:pointer]
+      - radio "Reference" [checked=false, ref=e2810]
+      - StaticText "Reference"
+  - group "Product family"
+    - Legend
+      - StaticText "Product family"
+    - LabelText [ref=e2797] clickable [cursor:pointer]
+      - radio "Departures and arrivals" [checked=false, ref=e2811]
+      - StaticText "Departures and arrivals"
+    - LabelText [ref=e2798] clickable [cursor:pointer]
+      - radio "Incidents" [checked=false, ref=e2812]
+      - StaticText "Incidents"
+    - LabelText [ref=e2799] clickable [cursor:pointer]
+      - radio "BiciMAD" [checked=true, ref=e2813]
+      - StaticText "BiciMAD"
+    - LabelText [ref=e2800] clickable [cursor:pointer]
+      - radio "Air and weather" [checked=false, ref=e2814]
+      - StaticText "Air and weather"
+    - LabelText [ref=e2801] clickable [cursor:pointer]
+      - radio "Traffic" [checked=false, ref=e2815]
+      - StaticText "Traffic"
+    - LabelText [ref=e2802] clickable [cursor:pointer]
+      - radio "Parking" [checked=false, ref=e2816]
+      - StaticText "Parking"
+  - form
+    - LabelText
+      - StaticText "Search entity"
+    - textbox "Search entity" [ref=e2803]
+    - button "Search" [ref=e2804]
+    - group "Freshness"
+      - Legend
+        - StaticText "Freshness"
+      - LabelText [ref=e2817] clickable [cursor:pointer]
+        - radio "All" [checked=true, ref=e2823]
+        - StaticText "All"
+      - LabelText [ref=e2818] clickable [cursor:pointer]
+        - radio "Recent" [checked=false, ref=e2824]
+        - StaticText "Recent"
+      - LabelText [ref=e2819] clickable [cursor:pointer]
+        - radio "Stale" [checked=false, ref=e2825]
+        - StaticText "Stale"
+      - LabelText [ref=e2820] clickable [cursor:pointer]
+        - radio "Unavailable" [checked=false, ref=e2826]
+        - StaticText "Unavailable"
+    - button "Filters" [expanded=false, ref=e2805]
+  - group "Workspace view"
+    - Legend
+      - StaticText "Workspace view"
+    - LabelText [ref=e2806] clickable [cursor:pointer]
+      - radio "List" [checked=true, ref=e2821]
+      - StaticText "List"
+    - LabelText [ref=e2807] clickable [cursor:pointer]
+      - radio "Map + list" [checked=false, ref=e2822]
+      - StaticText "Map + list"
+  - StaticText "List includes unmapped entities. Map reads are independently viewport-scoped."
+  - table
+    - rowgroup
+      - row
+        - columnheader "Entity / evidence" [ref=e2835]
+        - columnheader "Measurements" [ref=e2836]
+    - row
+      - cell "QA sintética · alquiler deshabilitado Stale · bicimad" [ref=e2827]
+        - button "QA sintética · alquiler deshabilitado" [ref=e2837]
+        - paragraph
+          - StaticText "Stale · bicimad"
+      - cell "Available bikes: 5 bicicletas Available docks: 10 anclajes" [ref=e2828]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "5 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "10 anclajes"
+    - row
+      - cell "QA sintética · sin observación Unavailable · bicimad No published coordinates" [ref=e2829]
+        - button "QA sintética · sin observación" [ref=e2838]
+        - paragraph
+          - StaticText "Unavailable · bicimad"
+        - paragraph
+          - StaticText "No published coordinates"
+      - cell "Available bikes: 0 bicicletas Available docks: 0 anclajes" [ref=e2830]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "0 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "0 anclajes"
+    - row
+      - cell "QA sintética · estación antigua Stale · bicimad" [ref=e2831]
+        - button "QA sintética · estación antigua" [ref=e2839]
+        - paragraph
+          - StaticText "Stale · bicimad"
+      - cell "Available bikes: 9 bicicletas Available docks: 3 anclajes" [ref=e2832]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "9 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "3 anclajes"
+    - row
+      - cell "QA sintética · estación reciente Stale · bicimad" [ref=e2833]
+        - button "QA sintética · estación reciente" [ref=e2840]
+        - paragraph
+          - StaticText "Stale · bicimad"
+      - cell "Available bikes: 4 bicicletas Available docks: 8 anclajes" [ref=e2834]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "4 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "8 anclajes"
+  - StaticText "4"
+  - StaticText " rows returned on this page"
+  - region "Product age coverage" [ref=e2793]
+    - heading "Selection evidence coverage" [level=2, ref=e2808]
+    - paragraph
+      - StaticText "4 registros del producto in the complete selection, not only this page."
+    - list
+      - listitem [level=1]
+        - StaticText "Recent readings: 0"
+      - listitem [level=1]
+        - StaticText "Stale evidence: 3"
+      - listitem [level=1]
+        - StaticText "No usable evidence: 1"
+      - listitem [level=1]
+        - StaticText "Reference: 0"
+- alert

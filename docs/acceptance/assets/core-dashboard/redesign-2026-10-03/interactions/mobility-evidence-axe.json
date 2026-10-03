@@ -1,0 +1,158 @@
+{
+  "axeVersion": "4.12.1",
+  "counts": {
+    "inapplicable": 56,
+    "incomplete": 2,
+    "passes": 33,
+    "violations": 0
+  },
+  "incomplete": [
+    {
+      "help": "ARIA hidden element must not be focusable or contain focusable elements",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-hidden-focus?application=axeAPI",
+      "id": "aria-hidden-focus",
+      "impact": "serious",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+          "target": [
+            "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"][aria-hidden=\"true\"]:nth-child(1)"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<div class=\"dashboard-shell\" lang=\"en\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
+          "target": [
+            ".dashboard-shell"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+          "target": [
+            "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"][aria-hidden=\"true\"]:nth-child(10)"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-10.8.1"
+      ]
+    },
+    {
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodeCount": 20,
+      "nodes": [
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<input data-slot=\"input\" class=\"h-9 w-full min-w-0 r...\" id=\"search\" placeholder=\"Search entities\" maxlength=\"100\" value=\"\">",
+          "target": [
+            "#search"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"submit\">",
+          "target": [
+            "button[type=\"submit\"]"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>All</span>",
+          "target": [
+            "form > fieldset > label:nth-child(2) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Recent</span>",
+          "target": [
+            "form > fieldset > label:nth-child(3) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Stale</span>",
+          "target": [
+            "form > fieldset > label:nth-child(4) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Unavailable</span>",
+          "target": [
+            "form > fieldset > label:nth-child(5) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>List</span>",
+          "target": [
+            ".dc-toolbar:nth-child(4) > fieldset > label:nth-child(2) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Map + list</span>",
+          "target": [
+            ".dc-toolbar:nth-child(4) > fieldset > label:nth-child(3) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span class=\"dc-meta\">List includes unmapped entities. Map reads are independently viewport-scoped.</span>",
+          "target": [
+            ".dc-toolbar:nth-child(4) > .dc-meta"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters",
+          "html": "<span aria-hidden=\"true\">−</span>",
+          "target": [
+            ".leaflet-control-zoom-out > span[aria-hidden=\"true\"]"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ]
+    }
+  ],
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 8205334907631297000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "not_configured",
+    "reused": true,
+    "saveStatus": "not_attempted"
+  },
+  "url": "http://127.0.0.1:3002/dashboard/mobility?category=bikes&section=dynamic&map=1&center=40.416800%2C-3.703800&zoom=13",
+  "violations": []
+}

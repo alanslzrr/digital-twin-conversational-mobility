@@ -1,0 +1,54 @@
+- complementary "Navegación y cuenta"
+  - paragraph
+    - StaticText "Mobility Core"
+  - navigation "Panel" [ref=e368]
+    - paragraph
+      - StaticText "Información"
+    - link "Resumen" [ref=e374]
+    - link "Movilidad" [ref=e375]
+    - link "Consultas" [ref=e376]
+    - paragraph
+      - StaticText "Sistema"
+    - link "Fuentes y actualización" [ref=e377]
+    - link "Actividad del sistema" [ref=e378]
+    - paragraph
+      - StaticText "Personal"
+    - link "Mis conversaciones" [ref=e379]
+  - link "Volver al chat" [ref=e369]
+  - paragraph
+    - StaticText "Cuenta de evaluación"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Cerrar sesión" [ref=e370]
+- banner
+  - StaticText "Panel de evaluación"
+  - StaticText "Privado"
+  - button "Pausar actualización" [ref=e371]
+  - button "Actualizar pantalla" [ref=e372]
+- region "Estado de actualización" [ref=e366]
+  - StaticText "Actualización de pantalla:"
+  - StaticText "visible"
+  - StaticText "Actualización desde las fuentes:"
+  - StaticText "deshabilitada"
+- region "Cómo se actualiza la información" [ref=e367]
+  - paragraph
+    - StaticText "Actualizar pantalla relee los datos guardados. No solicita una lectura nueva a las fuentes."
+  - paragraph
+    - StaticText "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."
+- main
+  - heading "Mis conversaciones" [level=1, ref=e373]
+  - paragraph
+    - StaticText "Solo tus conversaciones con acceso vigente. Captura no exhaustiva: lo no registrado permanece desconocido, no se reconstruye."
+  - article
+    - heading "Conversación 1" [level=2, ref=e380]
+      - StaticText "Conversación 1"
+    - paragraph
+      - StaticText "Creada: "
+      - time
+        - StaticText "3/10/2026, 10:30:51 CEST"
+      - StaticText " · Captura no exhaustiva"
+    - link "Abrir chat" [ref=e381]
+    - link "Examinar conversación" [ref=e382]
+  - paragraph
+    - StaticText "Retención de hasta siete días. Límites: 16 MiB y 10.000 eventos por conversación, 256 MiB por evaluador; entrada modelo 512 KB, salida 64 KB, argumentos 8 KB y resultados 32 KB. Sin estimación de coste ni reconstrucción histórica."
+- alert

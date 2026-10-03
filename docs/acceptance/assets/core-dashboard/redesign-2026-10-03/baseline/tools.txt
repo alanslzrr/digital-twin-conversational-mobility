@@ -1,0 +1,138 @@
+- complementary "Navegación y cuenta"
+  - paragraph
+    - StaticText "Mobility Core"
+  - navigation "Panel" [ref=e152]
+    - paragraph
+      - StaticText "Información"
+    - link "Resumen" [ref=e174]
+    - link "Movilidad" [ref=e175]
+    - link "Consultas" [ref=e176]
+    - paragraph
+      - StaticText "Sistema"
+    - link "Fuentes y actualización" [ref=e177]
+    - link "Actividad del sistema" [ref=e178]
+    - paragraph
+      - StaticText "Personal"
+    - link "Mis conversaciones" [ref=e179]
+  - link "Volver al chat" [ref=e153]
+  - paragraph
+    - StaticText "Cuenta de evaluación"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Cerrar sesión" [ref=e154]
+- banner
+  - StaticText "Panel de evaluación"
+  - StaticText "Privado"
+  - button "Pausar actualización" [ref=e155]
+  - button "Actualizar pantalla" [ref=e156]
+- region "Estado de actualización" [ref=e150]
+  - StaticText "Actualización de pantalla:"
+  - StaticText "visible"
+  - StaticText "Actualización desde las fuentes:"
+  - StaticText "deshabilitada"
+- region "Cómo se actualiza la información" [ref=e151]
+  - paragraph
+    - StaticText "Actualizar pantalla relee los datos guardados. No solicita una lectura nueva a las fuentes."
+  - paragraph
+    - StaticText "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."
+- main
+  - heading "Consultas" [level=1, ref=e157]
+  - paragraph
+    - StaticText "Consultar los datos guardados no ejecuta la herramienta ni pide una lectura nueva. Ejecutarla manualmente puede consultar fuentes y mantener su actualización."
+  - link "Examinar una línea ¿Qué catálogo, cobertura y avisos guardados reconoce el sistema para una línea? Solo almacenamiento" [ref=e158]
+    - heading "Examinar una línea" [level=2, ref=e180]
+    - paragraph
+      - StaticText "¿Qué catálogo, cobertura y avisos guardados reconoce el sistema para una línea?"
+    - paragraph
+      - StaticText "Solo almacenamiento"
+  - link "Examinar una red ¿Qué evidencia publicada hay guardada para esta red? No equivale a garantía de funcionamiento normal. Solo almacenamiento" [ref=e159]
+    - heading "Examinar una red" [level=2, ref=e181]
+    - paragraph
+      - StaticText "¿Qué evidencia publicada hay guardada para esta red? No equivale a garantía de funcionamiento normal."
+    - paragraph
+      - StaticText "Solo almacenamiento"
+  - link "Consultar resumen almacenado ¿Qué evidencia conserva el sistema por producto y cuáles son sus ausencias y límites? Solo almacenamiento" [ref=e160]
+    - heading "Consultar resumen almacenado" [level=2, ref=e182]
+    - paragraph
+      - StaticText "¿Qué evidencia conserva el sistema por producto y cuáles son sus ausencias y límites?"
+    - paragraph
+      - StaticText "Solo almacenamiento"
+  - link "Examinar una fuente ¿Qué señal técnica y evidencia guardada hay de la fuente? Un proceso activo no certifica datos recientes. Efectos posibles: Mantener la ventana de actualización" [ref=e161]
+    - heading "Examinar una fuente" [level=2, ref=e183]
+    - paragraph
+      - StaticText "¿Qué señal técnica y evidencia guardada hay de la fuente? Un proceso activo no certifica datos recientes."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización"
+  - link "Encontrar un lugar guardado ¿Qué estaciones o lugares guardados coinciden con este nombre? Efectos posibles: Mantener la ventana de actualización" [ref=e162]
+    - heading "Encontrar un lugar guardado" [level=2, ref=e184]
+    - paragraph
+      - StaticText "¿Qué estaciones o lugares guardados coinciden con este nombre?"
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización"
+  - link "Buscar una dirección ¿Hay una ubicación guardada para esta dirección? La búsqueda externa requiere autorización específica. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Guardar un resultado en caché" [ref=e163]
+    - heading "Buscar una dirección" [level=2, ref=e185]
+    - paragraph
+      - StaticText "¿Hay una ubicación guardada para esta dirección? La búsqueda externa requiere autorización específica."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Guardar un resultado en caché"
+  - link "Planificar un recorrido ¿Qué itinerarios puede calcular el sistema entre dos lugares? Requiere ejecución explícita del motor de rutas. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Registrar demanda meteorológica · Guardar un resultado en caché · Calcular itinerarios con el motor de rutas" [ref=e164]
+    - heading "Planificar un recorrido" [level=2, ref=e186]
+    - paragraph
+      - StaticText "¿Qué itinerarios puede calcular el sistema entre dos lugares? Requiere ejecución explícita del motor de rutas."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Registrar demanda meteorológica · Guardar un resultado en caché · Calcular itinerarios con el motor de rutas"
+  - link "Consultar llegadas EMT ¿Qué estimaciones están guardadas para una parada? Consultar almacenado no activa nueva demanda. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Guardar un resultado en caché" [ref=e165]
+    - heading "Consultar llegadas EMT" [level=2, ref=e187]
+    - paragraph
+      - StaticText "¿Qué estimaciones están guardadas para una parada? Consultar almacenado no activa nueva demanda."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Guardar un resultado en caché"
+  - link "Consultar horario publicado ¿Qué horario y calendario publicados corresponden a la selección? No son estimaciones de llegada. Efectos posibles: Mantener la ventana de actualización" [ref=e166]
+    - heading "Consultar horario publicado" [level=2, ref=e188]
+    - paragraph
+      - StaticText "¿Qué horario y calendario publicados corresponden a la selección? No son estimaciones de llegada."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización"
+  - link "Consultar salidas ¿Qué salidas puede calcular el motor para un lugar? No se reconstruyen como resultado completo desde lecturas parciales. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Calcular itinerarios con el motor de rutas" [ref=e167]
+    - heading "Consultar salidas" [level=2, ref=e189]
+    - paragraph
+      - StaticText "¿Qué salidas puede calcular el motor para un lugar? No se reconstruyen como resultado completo desde lecturas parciales."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Calcular itinerarios con el motor de rutas"
+  - link "Consultar incidencias y avisos ¿Qué avisos publicados están guardados y qué vigencia tienen? No garantiza servicio normal cuando no hay avisos. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor" [ref=e168]
+    - heading "Consultar incidencias y avisos" [level=2, ref=e190]
+    - paragraph
+      - StaticText "¿Qué avisos publicados están guardados y qué vigencia tienen? No garantiza servicio normal cuando no hay avisos."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor"
+  - link "Consultar bicicletas ¿Qué bicicletas y anclajes se publicaron para esta ubicación y cuándo se observaron? Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor" [ref=e169]
+    - heading "Consultar bicicletas" [level=2, ref=e191]
+    - paragraph
+      - StaticText "¿Qué bicicletas y anclajes se publicaron para esta ubicación y cuándo se observaron?"
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor"
+  - link "Consultar aire y meteorología ¿Qué observaciones, predicciones o avisos hay guardados? Cada tipo conserva sus fechas y unidades. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Registrar demanda meteorológica · Guardar un resultado en caché" [ref=e170]
+    - heading "Consultar aire y meteorología" [level=2, ref=e192]
+    - paragraph
+      - StaticText "¿Qué observaciones, predicciones o avisos hay guardados? Cada tipo conserva sus fechas y unidades."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor · Registrar demanda meteorológica · Guardar un resultado en caché"
+  - link "Consultar sensores de tráfico ¿Qué intensidad y ocupación publicaron los sensores? No son tiempos de viaje ni incidencias DGT. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor" [ref=e171]
+    - heading "Consultar sensores de tráfico" [level=2, ref=e193]
+    - paragraph
+      - StaticText "¿Qué intensidad y ocupación publicaron los sensores? No son tiempos de viaje ni incidencias DGT."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor"
+  - link "Consultar evidencia histórica ¿Qué revisiones permanecen guardadas para ese instante? Devuelve un índice parcial, no una reconstrucción completa. Efectos posibles: Mantener la ventana de actualización" [ref=e172]
+    - heading "Consultar evidencia histórica" [level=2, ref=e194]
+    - paragraph
+      - StaticText "¿Qué revisiones permanecen guardadas para ese instante? Devuelve un índice parcial, no una reconstrucción completa."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización"
+  - link "Consultar aparcamientos ¿Qué plazas publicó un aparcamiento? Las categorías y tarifas no se suman como una disponibilidad única. Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor" [ref=e173]
+    - heading "Consultar aparcamientos" [level=2, ref=e195]
+    - paragraph
+      - StaticText "¿Qué plazas publicó un aparcamiento? Las categorías y tarifas no se suman como una disponibilidad única."
+    - paragraph
+      - StaticText "Efectos posibles: Mantener la ventana de actualización · Consultar al proveedor"
+- alert

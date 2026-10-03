@@ -1,0 +1,146 @@
+- link "Skip to content" [ref=e1415]
+- banner
+  - button "Open navigation" [expanded=false, ref=e1421]
+  - button "Pause refresh" [ref=e1416]
+  - button "Refresh stored data" [ref=e1417]
+  - button "Data timing" [expanded=false, ref=e1418]
+- main
+  - heading "Activity" [level=1, ref=e1419]
+  - paragraph
+    - StaticText "Recorded operational events. Missing capture is not zero activity."
+  - group "Activity period"
+    - Legend
+      - StaticText "Activity period"
+    - LabelText [ref=e1422] clickable [cursor:pointer]
+      - radio "1 hour" [checked=false, ref=e1426]
+      - StaticText "1 hour"
+    - LabelText [ref=e1423] clickable [cursor:pointer]
+      - radio "24 hours" [checked=true, ref=e1427]
+      - StaticText "24 hours"
+    - LabelText [ref=e1424] clickable [cursor:pointer]
+      - radio "7 days" [checked=false, ref=e1428]
+      - StaticText "7 days"
+  - button "Filters" [expanded=false, ref=e1420]
+  - StaticText "Europe/Madrid · Best-effort capture"
+  - generic
+    - heading "Recorded activity" [level=2, ref=e1425]
+    - group "Chart series"
+      - Legend
+        - StaticText "Chart series"
+      - LabelText [ref=e1429] clickable [cursor:pointer]
+        - radio "Publications" [checked=false, ref=e1433]
+        - StaticText "Publications"
+      - LabelText [ref=e1430] clickable [cursor:pointer]
+        - radio "Errors" [checked=false, ref=e1434]
+        - StaticText "Errors"
+      - LabelText [ref=e1431] clickable [cursor:pointer]
+        - radio "Both" [checked=true, ref=e1435]
+        - StaticText "Both"
+    - paragraph
+      - StaticText "Publications 7 · Errors 1 · Counts, not traffic or freshness"
+    - image "Recorded count bars. Use the interval buttons or exact-data table for values."
+      - StaticText "0"
+      - StaticText "2"
+      - StaticText "3"
+      - StaticText "02 Oct, 11:48"
+      - StaticText "03 Oct, 11:48"
+    - group "Inspect count intervals"
+      - LabelText
+        - StaticText "Inspect interval"
+      - slider "Inspect interval" [ref=e1432]: 0
+    - paragraph
+      - StaticText "Europe/Madrid · Best-effort capture. Dashed gaps before retained evidence are unknown, not zero."
+    - group
+      - DisclosureTriangle "Exact interval data" [expanded=false]
+  - table
+    - rowgroup
+      - row
+        - columnheader "Instant" [ref=e1476]
+        - columnheader "Component" [ref=e1477]
+        - columnheader "Source / job" [ref=e1478]
+        - columnheader "Type" [ref=e1479]
+        - columnheader "Outcome" [ref=e1480]
+    - row
+      - cell "03/10/2026, 11:28:03 CEST" [ref=e1436]
+        - link "03/10/2026, 11:28:03 CEST" [ref=e1481]
+          - time
+            - StaticText "03/10/2026, 11:28:03 CEST"
+      - cell "Periodic capture" [ref=e1437]
+      - cell "bicimad / bicimad" [ref=e1438]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1439]
+      - cell "Completed" [ref=e1440]
+    - row
+      - cell "03/10/2026, 11:13:03 CEST" [ref=e1441]
+        - link "03/10/2026, 11:13:03 CEST" [ref=e1482]
+          - time
+            - StaticText "03/10/2026, 11:13:03 CEST"
+      - cell "Periodic capture" [ref=e1442]
+      - cell "bicimad / bicimad" [ref=e1443]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1444]
+      - cell "Completed" [ref=e1445]
+    - row
+      - cell "03/10/2026, 10:58:03 CEST" [ref=e1446]
+        - link "03/10/2026, 10:58:03 CEST" [ref=e1483]
+          - time
+            - StaticText "03/10/2026, 10:58:03 CEST"
+      - cell "Periodic capture" [ref=e1447]
+      - cell "bicimad / bicimad" [ref=e1448]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1449]
+      - cell "Completed" [ref=e1450]
+    - row
+      - cell "03/10/2026, 10:43:03 CEST" [ref=e1451]
+        - link "03/10/2026, 10:43:03 CEST" [ref=e1484]
+          - time
+            - StaticText "03/10/2026, 10:43:03 CEST"
+      - cell "Periodic capture" [ref=e1452]
+      - cell "bicimad / bicimad" [ref=e1453]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1454]
+      - cell "Completed" [ref=e1455]
+    - row
+      - cell "03/10/2026, 10:28:03 CEST" [ref=e1456]
+        - link "03/10/2026, 10:28:03 CEST" [ref=e1485]
+          - time
+            - StaticText "03/10/2026, 10:28:03 CEST"
+      - cell "Periodic capture" [ref=e1457]
+      - cell "bicimad / bicimad" [ref=e1458]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1459]
+      - cell "Failed Recorded issue. Open details for evidence." [ref=e1460]
+        - StaticText "Failed"
+        - paragraph
+          - StaticText "Recorded issue. Open details for evidence."
+    - row
+      - cell "03/10/2026, 10:13:03 CEST" [ref=e1461]
+        - link "03/10/2026, 10:13:03 CEST" [ref=e1486]
+          - time
+            - StaticText "03/10/2026, 10:13:03 CEST"
+      - cell "Periodic capture" [ref=e1462]
+      - cell "bicimad / bicimad" [ref=e1463]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1464]
+      - cell "Completed" [ref=e1465]
+    - row
+      - cell "03/10/2026, 9:58:03 CEST" [ref=e1466]
+        - link "03/10/2026, 9:58:03 CEST" [ref=e1487]
+          - time
+            - StaticText "03/10/2026, 9:58:03 CEST"
+      - cell "Periodic capture" [ref=e1467]
+      - cell "bicimad / bicimad" [ref=e1468]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1469]
+      - cell "Completed" [ref=e1470]
+    - row
+      - cell "03/10/2026, 9:43:03 CEST" [ref=e1471]
+        - link "03/10/2026, 9:43:03 CEST" [ref=e1488]
+          - time
+            - StaticText "03/10/2026, 9:43:03 CEST"
+      - cell "Periodic capture" [ref=e1472]
+      - cell "bicimad / bicimad" [ref=e1473]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1474]
+      - cell "Completed" [ref=e1475]
+- alert

@@ -1,0 +1,107 @@
+- generic
+  - dialog "Activity filters"
+    - heading "Activity filters" [level=2, ref=e349]
+    - button "Close details" [ref=e350]
+    - paragraph
+      - StaticText "Custom dates are Europe/Madrid civil times; transport uses UTC instants."
+    - group
+      - LabelText
+        - StaticText "Source"
+      - combobox "Source" [expanded=false, ref=e351]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e359]
+          - option "renfe" [ref=e360]
+          - option "emt" [ref=e361]
+          - option "bicimad" [ref=e362]
+          - option "crtm" [ref=e363]
+          - option "aemet" [ref=e364]
+          - option "dgt" [ref=e365]
+          - option "madrid-air" [ref=e366]
+          - option "madrid-traffic" [ref=e367]
+          - option "madrid-parking" [ref=e368]
+          - option "osm" [ref=e369]
+    - group
+      - LabelText
+        - StaticText "Severity"
+      - combobox "Severity" [expanded=false, ref=e352]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e370]
+          - option "Information" [ref=e371]
+          - option "Warning" [ref=e372]
+          - option "Failed" [ref=e373]
+    - group
+      - LabelText
+        - StaticText "Event type"
+      - combobox "Event type" [expanded=false, ref=e353]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e374]
+          - option "Information stored" [ref=e375]
+          - option "Refresh attempt" [ref=e376]
+          - option "Worker lease lost" [ref=e377]
+          - option "Lease recovered" [ref=e378]
+          - option "Work released" [ref=e379]
+    - group
+      - LabelText
+        - StaticText "Outcome"
+      - combobox "Outcome" [expanded=false, ref=e354]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e380]
+          - option "Completed" [ref=e381]
+          - option "Historical only" [ref=e382]
+          - option "Failed" [ref=e383]
+          - option "Worker lease lost" [ref=e384]
+          - option "Storage error" [ref=e385]
+    - group
+      - LabelText
+        - StaticText "From (Europe/Madrid)"
+      - DateTime "From (Europe/Madrid)": 2026-10-25T02:30
+        - generic
+          - spinbutton "Day Day" [ref=e398]: 25
+            - StaticText "25"
+          - StaticText "/"
+          - spinbutton "Month Month" [ref=e399]: 10
+            - StaticText "10"
+          - StaticText "/"
+          - spinbutton "Year Year" [ref=e400]: 2026
+            - StaticText "2026"
+          - StaticText ", "
+          - spinbutton "Hours Hours" [ref=e401]: 2
+            - StaticText "02"
+          - StaticText ":"
+          - spinbutton "Minutes Minutes" [ref=e402]: 30
+            - StaticText "30"
+        - button "Show local date and time picker" [ref=e357]
+      - group "from UTC offset (required)"
+        - Legend
+          - StaticText "from UTC offset (required)"
+        - LabelText [ref=e396] clickable [cursor:pointer]
+          - radio "UTC+01:00" [checked=false, ref=e403]
+          - StaticText "UTC+01:00"
+        - LabelText [ref=e397] clickable [cursor:pointer]
+          - radio "UTC+02:00" [checked=false, ref=e404]
+          - StaticText "UTC+02:00"
+    - group
+      - LabelText
+        - StaticText "To (Europe/Madrid)"
+      - DateTime "To (Europe/Madrid)": 2026-10-03T11:47
+        - generic
+          - spinbutton "Day Day" [ref=e391]: 3
+            - StaticText "03"
+          - StaticText "/"
+          - spinbutton "Month Month" [ref=e392]: 10
+            - StaticText "10"
+          - StaticText "/"
+          - spinbutton "Year Year" [ref=e393]: 2026
+            - StaticText "2026"
+          - StaticText ", "
+          - spinbutton "Hours Hours" [ref=e394]: 11
+            - StaticText "11"
+          - StaticText ":"
+          - spinbutton "Minutes Minutes" [ref=e395]: 47
+            - StaticText "47"
+        - button "Show local date and time picker" [ref=e358]
+    - alert
+      - StaticText "Invalid or nonexistent local time. For an ambiguous time choose its UTC offset."
+    - generic
+      - button "Apply" [ref=e355]
+      - button "Cancel" [ref=e356]

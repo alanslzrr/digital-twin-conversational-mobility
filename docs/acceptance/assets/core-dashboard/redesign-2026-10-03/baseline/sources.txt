@@ -1,0 +1,153 @@
+- complementary "Navegación y cuenta"
+  - paragraph
+    - StaticText "Mobility Core"
+  - navigation "Panel" [ref=e198]
+    - paragraph
+      - StaticText "Información"
+    - link "Resumen" [ref=e205]
+    - link "Movilidad" [ref=e206]
+    - link "Consultas" [ref=e207]
+    - paragraph
+      - StaticText "Sistema"
+    - link "Fuentes y actualización" [ref=e208]
+    - link "Actividad del sistema" [ref=e209]
+    - paragraph
+      - StaticText "Personal"
+    - link "Mis conversaciones" [ref=e210]
+  - link "Volver al chat" [ref=e199]
+  - paragraph
+    - StaticText "Cuenta de evaluación"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Cerrar sesión" [ref=e200]
+- banner
+  - StaticText "Panel de evaluación"
+  - StaticText "Privado"
+  - button "Pausar actualización" [ref=e201]
+  - button "Actualizar pantalla" [ref=e202]
+- region "Estado de actualización" [ref=e196]
+  - StaticText "Actualización de pantalla:"
+  - StaticText "visible"
+  - StaticText "Actualización desde las fuentes:"
+  - StaticText "deshabilitada"
+- region "Cómo se actualiza la información" [ref=e197]
+  - paragraph
+    - StaticText "Actualizar pantalla relee los datos guardados. No solicita una lectura nueva a las fuentes."
+  - paragraph
+    - StaticText "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."
+- main
+  - heading "Fuentes y actualización" [level=1, ref=e203]
+  - paragraph
+    - StaticText "Cómo llega la información y por qué puede no renovarse. Los procesos activos no certifican que el proveedor tenga lecturas recientes."
+  - generic
+    - heading "Señales de los procesos de actualización" [level=2, ref=e211]
+    - paragraph
+      - StaticText "No certifican la salud ni la frescura de los proveedores."
+    - paragraph
+      - StaticText "Proceso de actualización 1: Deshabilitado · No disponible"
+    - paragraph
+      - StaticText "Proceso de actualización 2: Deshabilitado · No disponible"
+  - group
+    - LabelText
+      - StaticText "Periodo de operaciones registradas"
+    - combobox "Periodo de operaciones registradas" [expanded=false, ref=e212]: Últimas 24 horas
+      - MenuListPopup
+        - option "Última hora" [ref=e232]
+        - option "Últimas 24 horas" [selected, ref=e233]
+        - option "Siete días" [ref=e234]
+  - group
+    - LabelText
+      - StaticText "Tipo de operación"
+    - combobox "Tipo de operación" [expanded=false, ref=e213]: Todos, desglosados
+      - MenuListPopup
+        - option "Todos, desglosados" [selected, ref=e235]
+        - option "Publicación" [ref=e236]
+        - option "Actualización bajo demanda" [ref=e237]
+        - option "Activación de grafo" [ref=e238]
+        - option "Reserva perdida" [ref=e239]
+        - option "Reserva recuperada" [ref=e240]
+  - generic
+    - article
+      - heading "Productos con fallos actuales registrados" [level=2, ref=e230]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Productos supervisados: 13. Con error registrado o falta de señal del proceso durante una ventana activa. Ausencia normal de demanda o ventana inactiva no es un fallo."
+    - article
+      - heading "Errores registrados en el periodo" [level=2, ref=e231]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Eventos de error únicos retenidos, no una tasa de disponibilidad."
+        - link "Examinar actividad" [ref=e241]
+  - generic
+    - heading "Actualización periódica" [level=2, ref=e214]
+    - link "AEMET Habilitada" [ref=e215]
+      - StaticText "AEMET"
+      - StaticText "Habilitada"
+    - link "BiciMAD Habilitada" [ref=e216]
+      - StaticText "BiciMAD"
+      - StaticText "Habilitada"
+    - link "Carreteras DGT Habilitada" [ref=e217]
+      - StaticText "Carreteras DGT"
+      - StaticText "Habilitada"
+    - link "Autobuses EMT Habilitada" [ref=e218]
+      - StaticText "Autobuses EMT"
+      - StaticText "Habilitada"
+    - link "Calidad del aire de Madrid Habilitada" [ref=e219]
+      - StaticText "Calidad del aire de Madrid"
+      - StaticText "Habilitada"
+    - link "Aparcamientos de Madrid Habilitada" [ref=e220]
+      - StaticText "Aparcamientos de Madrid"
+      - StaticText "Habilitada"
+    - link "Sensores de tráfico de Madrid Habilitada" [ref=e221]
+      - StaticText "Sensores de tráfico de Madrid"
+      - StaticText "Habilitada"
+    - link "Renfe Habilitada" [ref=e222]
+      - StaticText "Renfe"
+      - StaticText "Habilitada"
+  - generic
+    - heading "Consulta bajo demanda" [level=2, ref=e223]
+    - link "AEMET Habilitada" [ref=e224]
+      - StaticText "AEMET"
+      - StaticText "Habilitada"
+    - link "Autobuses EMT Habilitada" [ref=e225]
+      - StaticText "Autobuses EMT"
+      - StaticText "Habilitada"
+    - link "Geografía OpenStreetMap Deshabilitada" [ref=e226]
+      - StaticText "Geografía OpenStreetMap"
+      - StaticText "Deshabilitada"
+  - generic
+    - heading "Catálogos de referencia" [level=2, ref=e227]
+    - link "Transporte CRTM Deshabilitada" [ref=e228]
+      - StaticText "Transporte CRTM"
+      - StaticText "Deshabilitada"
+  - region "Latencias por componente y operación" [ref=e204] focusable [tabindex]
+    - heading "Duración de operaciones comparables" [level=2, ref=e229]
+    - paragraph
+      - StaticText "Mediana por componente y tipo. No es latencia HTTP del proveedor; p95 solo con al menos 20 mediciones."
+    - table
+      - rowgroup
+        - row
+          - columnheader "Operación / componente" [ref=e246]
+          - columnheader "Muestra" [ref=e247]
+          - columnheader "Mediana" [ref=e248]
+          - columnheader "p95" [ref=e249]
+      - row
+        - cell "Publicación · Actualización periódica" [ref=e242]
+          - StaticText "Publicación · Actualización periódica"
+        - cell "8" [ref=e243]
+        - cell "13,5 ms" [ref=e244]
+          - StaticText "13,5 ms"
+        - cell "Muestra insuficiente" [ref=e245]
+  - paragraph
+    - StaticText "Captura no exhaustiva · "
+    - time
+      - StaticText "2/10/2026, 10:31:47 CEST"
+    - StaticText " —"
+    - time
+      - StaticText "3/10/2026, 10:31:47 CEST"
+  - group
+    - DisclosureTriangle "Detalle técnico saneado" [expanded=false]
+      - StaticText "Detalle técnico saneado"
+- alert

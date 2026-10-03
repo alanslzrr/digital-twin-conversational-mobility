@@ -1,0 +1,147 @@
+- link "Skip to content" [ref=e2869]
+- banner
+  - button "Open navigation" [expanded=false, ref=e2876]
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:49:22 CEST"
+  - button "Pause refresh" [ref=e2870]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e2871]
+  - button "Data timing" [expanded=false, ref=e2872]
+- main
+  - heading "Sources" [level=1, ref=e2873]
+  - paragraph
+    - StaticText "Stored provider evidence and scoped operational signals."
+  - group "Operation period"
+    - Legend
+      - StaticText "Operation period"
+    - LabelText [ref=e2877] clickable [cursor:pointer]
+      - radio "1 hour" [checked=false, ref=e2892]
+      - StaticText "1 hour"
+    - LabelText [ref=e2878] clickable [cursor:pointer]
+      - radio "24 hours" [checked=true, ref=e2893]
+      - StaticText "24 hours"
+    - LabelText [ref=e2879] clickable [cursor:pointer]
+      - radio "7 days" [checked=false, ref=e2894]
+      - StaticText "7 days"
+  - LabelText
+    - StaticText "Operation"
+  - combobox "Operation" [expanded=false, ref=e2874]: All, broken down
+    - MenuListPopup
+      - option "All, broken down" [selected, ref=e2895]
+      - option "Publication" [ref=e2896]
+      - option "On-demand refresh" [ref=e2897]
+      - option "Graph activation" [ref=e2898]
+      - option "Lease lost" [ref=e2899]
+      - option "Lease recovered" [ref=e2900]
+  - generic
+    - article
+      - heading "Products with recorded current issues" [level=2, ref=e2901]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Monitored products: 13. Recorded errors or missing worker signal during an active window. Normal absence of demand or an inactive window is not a failure."
+    - article
+      - heading "Recorded errors in period" [level=2, ref=e2902]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Unique retained error events, not an availability rate. "
+        - link "Inspect activity" [ref=e2903]
+  - generic
+    - heading "Source products" [level=2, ref=e2880]
+    - paragraph
+      - StaticText "Registered sources and stored product evidence. Enabled does not mean recent."
+    - link "AEMET" [ref=e2881]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "BiciMAD" [ref=e2882]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "CRTM transport" [ref=e2883]
+    - StaticText "Disabled"
+    - StaticText "0"
+    - StaticText " periodic ·"
+    - StaticText "1"
+    - StaticText "reference products"
+    - link "Roads DGT" [ref=e2884]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "EMT buses" [ref=e2885]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid air quality" [ref=e2886]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid parking" [ref=e2887]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid traffic sensors" [ref=e2888]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "OpenStreetMap geography" [ref=e2889]
+    - StaticText "Disabled"
+    - StaticText "0"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Renfe" [ref=e2890]
+    - StaticText "Enabled"
+    - StaticText "2"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+  - region "Durations by component and operation" [ref=e2875] focusable [tabindex]
+    - heading "Comparable operation durations" [level=2, ref=e2891]
+    - paragraph
+      - StaticText "Median with available samples by component and operation, not provider HTTP latency. p95 requires at least 20 samples."
+    - table
+      - rowgroup
+        - row
+          - columnheader "Operation / component" [ref=e2908]
+          - columnheader "Sample" [ref=e2909]
+          - columnheader "Median" [ref=e2910]
+          - columnheader "p95" [ref=e2911]
+      - row
+        - cell "Publication · Periodic capture" [ref=e2904]
+          - StaticText "Publication · Periodic capture"
+        - cell "8" [ref=e2905]
+        - cell "13.5 ms" [ref=e2906]
+          - StaticText "13.5 ms"
+        - cell "Insufficient samples" [ref=e2907]
+  - paragraph
+    - StaticText "Best-effort capture · "
+    - time
+      - StaticText "02/10/2026, 11:49:22 CEST"
+    - StaticText " — "
+    - time
+      - StaticText "03/10/2026, 11:49:22 CEST"
+  - group
+    - DisclosureTriangle "Sanitized technical details" [expanded=false]
+      - StaticText "Sanitized technical details"
+  - group
+    - DisclosureTriangle "Worker signals · independent of provider evidence" [expanded=false]
+      - StaticText "Worker signals · independent of provider evidence"
+- alert

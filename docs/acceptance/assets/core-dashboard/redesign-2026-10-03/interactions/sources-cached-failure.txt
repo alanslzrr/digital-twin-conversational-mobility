@@ -1,0 +1,175 @@
+- link "Skip to content" [ref=e405]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e406]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e407]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e416]
+    - link "Mobility" [ref=e417]
+    - link "Queries" [ref=e418]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e419]
+    - link "Activity" [ref=e420]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e421]
+  - link "Open chat" [ref=e408]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e409]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Sources"
+  - StaticText "Cached · refresh failed"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:47:10 CEST"
+  - button "Pause refresh" [ref=e410]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e411]
+  - button "Data timing" [expanded=false, ref=e412]
+- status
+  - StaticText "Stored-data refresh requested."
+- main
+  - heading "Sources" [level=1, ref=e413]
+  - paragraph
+    - StaticText "Stored provider evidence and scoped operational signals."
+  - alert
+    - StaticText "Refresh failed. Previously loaded evidence remains at its original successful read time."
+  - group "Operation period"
+    - Legend
+      - StaticText "Operation period"
+    - LabelText [ref=e422] clickable [cursor:pointer]
+      - radio "1 hour" [checked=false, ref=e437]
+      - StaticText "1 hour"
+    - LabelText [ref=e423] clickable [cursor:pointer]
+      - radio "24 hours" [checked=true, ref=e438]
+      - StaticText "24 hours"
+    - LabelText [ref=e424] clickable [cursor:pointer]
+      - radio "7 days" [checked=false, ref=e439]
+      - StaticText "7 days"
+  - LabelText
+    - StaticText "Operation"
+  - combobox "Operation" [expanded=false, ref=e414]: All, broken down
+    - MenuListPopup
+      - option "All, broken down" [selected, ref=e440]
+      - option "Publication" [ref=e441]
+      - option "On-demand refresh" [ref=e442]
+      - option "Graph activation" [ref=e443]
+      - option "Lease lost" [ref=e444]
+      - option "Lease recovered" [ref=e445]
+  - generic
+    - article
+      - heading "Products with recorded current issues" [level=2, ref=e446]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Monitored products: 13. Recorded errors or missing worker signal during an active window. Normal absence of demand or an inactive window is not a failure."
+    - article
+      - heading "Recorded errors in period" [level=2, ref=e447]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Unique retained error events, not an availability rate. "
+        - link "Inspect activity" [ref=e448]
+  - generic
+    - heading "Source products" [level=2, ref=e425]
+    - paragraph
+      - StaticText "Registered sources and stored product evidence. Enabled does not mean recent."
+    - link "AEMET" [ref=e426]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "BiciMAD" [ref=e427]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "CRTM transport" [ref=e428]
+    - StaticText "Disabled"
+    - StaticText "0"
+    - StaticText " periodic ·"
+    - StaticText "1"
+    - StaticText "reference products"
+    - link "Roads DGT" [ref=e429]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "EMT buses" [ref=e430]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid air quality" [ref=e431]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid parking" [ref=e432]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Madrid traffic sensors" [ref=e433]
+    - StaticText "Enabled"
+    - StaticText "1"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "OpenStreetMap geography" [ref=e434]
+    - StaticText "Disabled"
+    - StaticText "0"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+    - link "Renfe" [ref=e435]
+    - StaticText "Enabled"
+    - StaticText "2"
+    - StaticText " periodic ·"
+    - StaticText "0"
+    - StaticText "reference products"
+  - region "Durations by component and operation" [ref=e415] focusable [tabindex]
+    - heading "Comparable operation durations" [level=2, ref=e436]
+    - paragraph
+      - StaticText "Median with available samples by component and operation, not provider HTTP latency. p95 requires at least 20 samples."
+    - table
+      - rowgroup
+        - row
+          - columnheader "Operation / component" [ref=e453]
+          - columnheader "Sample" [ref=e454]
+          - columnheader "Median" [ref=e455]
+          - columnheader "p95" [ref=e456]
+      - row
+        - cell "Publication · Periodic capture" [ref=e449]
+          - StaticText "Publication · Periodic capture"
+        - cell "8" [ref=e450]
+        - cell "13.5 ms" [ref=e451]
+          - StaticText "13.5 ms"
+        - cell "Insufficient samples" [ref=e452]
+  - paragraph
+    - StaticText "Best-effort capture · "
+    - time
+      - StaticText "02/10/2026, 11:47:10 CEST"
+    - StaticText " — "
+    - time
+      - StaticText "03/10/2026, 11:47:10 CEST"
+  - group
+    - DisclosureTriangle "Sanitized technical details" [expanded=false]
+      - StaticText "Sanitized technical details"
+  - group
+    - DisclosureTriangle "Worker signals · independent of provider evidence" [expanded=false]
+      - StaticText "Worker signals · independent of provider evidence"
+- alert

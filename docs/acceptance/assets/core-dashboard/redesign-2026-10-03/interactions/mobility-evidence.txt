@@ -1,0 +1,48 @@
+- generic
+  - dialog "QA sintética · estación reciente"
+    - heading "QA sintética · estación reciente" [level=2, ref=e211]
+    - button "Close details" [ref=e212]
+    - paragraph
+      - StaticText "QA sintética · estación reciente details"
+    - generic
+      - heading "QA sintética · estación reciente" [level=2, ref=e214]
+      - paragraph
+        - StaticText "BiciMAD bikes · Stale evidence"
+      - paragraph
+        - StaticText "Partial published coverage, not citywide coverage."
+      - DescriptionList
+        - term "Available bikes"
+        - definition
+          - StaticText "4 bicicletas"
+        - term "Available docks"
+        - definition
+          - StaticText "8 anclajes"
+        - term "Rental enabled"
+        - definition
+          - StaticText "Yes"
+        - term "Installed station"
+        - definition
+          - StaticText "Yes"
+        - term "Return enabled"
+        - definition
+          - StaticText "Yes"
+      - paragraph
+        - StaticText "Published observation: "
+        - time
+          - StaticText "03/10/2026, 11:42:58 CEST"
+      - paragraph
+        - StaticText "Storage ingestion: "
+        - time
+          - StaticText "03/10/2026, 11:43:03 CEST"
+        - StaticText ". Does not renew the observation."
+      - paragraph
+        - StaticText "Published coordinates do not certify measurement coverage."
+      - paragraph
+        - StaticText "Declared quality: Provisional."
+      - link "Inspect source and refresh evidence" [ref=e215]
+    - generic
+      - heading "Retained measurement history" [level=2, ref=e216]
+      - paragraph
+        - StaticText "Read retained history, not the provider. Up to 24 hours with observation and ingestion time per point."
+      - button "Read stored history" [ref=e217]
+    - link "Open linked detail" [ref=e213]

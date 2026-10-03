@@ -1,0 +1,179 @@
+- link "Skip to content" [ref=e716]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e717]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e718]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e726]
+    - link "Mobility" [ref=e727]
+    - link "Queries" [ref=e728]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e729]
+    - link "Activity" [ref=e730]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e731]
+  - link "Open chat" [ref=e719]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e720]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Mobility"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:48:11 CEST"
+  - button "Pause refresh" [ref=e721]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e722]
+  - button "Data timing" [expanded=false, ref=e723]
+- main
+  - heading "Mobility" [level=1, ref=e724]
+  - paragraph
+    - StaticText "Explore stored measurements, reference catalogs and their evidence."
+  - group "Evidence family"
+    - Legend
+      - StaticText "Evidence family"
+    - LabelText [ref=e732] clickable [cursor:pointer]
+      - radio "Dynamic" [checked=true, ref=e746]
+      - StaticText "Dynamic"
+    - LabelText [ref=e733] clickable [cursor:pointer]
+      - radio "Reference" [checked=false, ref=e747]
+      - StaticText "Reference"
+  - group "Product family"
+    - Legend
+      - StaticText "Product family"
+    - LabelText [ref=e734] clickable [cursor:pointer]
+      - radio "Departures and arrivals" [checked=false, ref=e748]
+      - StaticText "Departures and arrivals"
+    - LabelText [ref=e735] clickable [cursor:pointer]
+      - radio "Incidents" [checked=false, ref=e749]
+      - StaticText "Incidents"
+    - LabelText [ref=e736] clickable [cursor:pointer]
+      - radio "BiciMAD" [checked=true, ref=e750]
+      - StaticText "BiciMAD"
+    - LabelText [ref=e737] clickable [cursor:pointer]
+      - radio "Air and weather" [checked=false, ref=e751]
+      - StaticText "Air and weather"
+    - LabelText [ref=e738] clickable [cursor:pointer]
+      - radio "Traffic" [checked=false, ref=e752]
+      - StaticText "Traffic"
+    - LabelText [ref=e739] clickable [cursor:pointer]
+      - radio "Parking" [checked=false, ref=e753]
+      - StaticText "Parking"
+  - form
+    - LabelText
+      - StaticText "Search entity"
+    - textbox "Search entity" [ref=e740]
+    - button "Search" [ref=e741]
+    - group "Freshness"
+      - Legend
+        - StaticText "Freshness"
+      - LabelText [ref=e754] clickable [cursor:pointer]
+        - radio "All" [checked=true, ref=e760]
+        - StaticText "All"
+      - LabelText [ref=e755] clickable [cursor:pointer]
+        - radio "Recent" [checked=false, ref=e761]
+        - StaticText "Recent"
+      - LabelText [ref=e756] clickable [cursor:pointer]
+        - radio "Stale" [checked=false, ref=e762]
+        - StaticText "Stale"
+      - LabelText [ref=e757] clickable [cursor:pointer]
+        - radio "Unavailable" [checked=false, ref=e763]
+        - StaticText "Unavailable"
+    - button "Filters" [expanded=false, ref=e742]
+  - group "Workspace view"
+    - Legend
+      - StaticText "Workspace view"
+    - LabelText [ref=e743] clickable [cursor:pointer]
+      - radio "List" [checked=true, ref=e758]
+      - StaticText "List"
+    - LabelText [ref=e744] clickable [cursor:pointer]
+      - radio "Map + list" [checked=false, ref=e759]
+      - StaticText "Map + list"
+  - StaticText "List includes unmapped entities. Map reads are independently viewport-scoped."
+  - table
+    - rowgroup
+      - row
+        - columnheader "Entity / evidence" [ref=e772]
+        - columnheader "Measurements" [ref=e773]
+    - row
+      - cell "QA sintética · alquiler deshabilitado Stale · bicimad" [ref=e764]
+        - button "QA sintética · alquiler deshabilitado" [ref=e774]
+        - paragraph
+          - StaticText "Stale · bicimad"
+      - cell "Available bikes: 5 bicicletas Available docks: 10 anclajes" [ref=e765]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "5 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "10 anclajes"
+    - row
+      - cell "QA sintética · sin observación Unavailable · bicimad No published coordinates" [ref=e766]
+        - button "QA sintética · sin observación" [ref=e775]
+        - paragraph
+          - StaticText "Unavailable · bicimad"
+        - paragraph
+          - StaticText "No published coordinates"
+      - cell "Available bikes: 0 bicicletas Available docks: 0 anclajes" [ref=e767]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "0 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "0 anclajes"
+    - row
+      - cell "QA sintética · estación antigua Stale · bicimad" [ref=e768]
+        - button "QA sintética · estación antigua" [ref=e776]
+        - paragraph
+          - StaticText "Stale · bicimad"
+      - cell "Available bikes: 9 bicicletas Available docks: 3 anclajes" [ref=e769]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "9 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "3 anclajes"
+    - row
+      - cell "QA sintética · estación reciente Stale · bicimad" [ref=e770]
+        - button "QA sintética · estación reciente" [ref=e777]
+        - paragraph
+          - StaticText "Stale · bicimad"
+      - cell "Available bikes: 4 bicicletas Available docks: 8 anclajes" [ref=e771]
+        - paragraph
+          - StaticText "Available bikes: "
+          - strong
+            - StaticText "4 bicicletas"
+        - paragraph
+          - StaticText "Available docks: "
+          - strong
+            - StaticText "8 anclajes"
+  - StaticText "4"
+  - StaticText " rows returned on this page"
+  - region "Product age coverage" [ref=e725]
+    - heading "Selection evidence coverage" [level=2, ref=e745]
+    - paragraph
+      - StaticText "4 registros del producto in the complete selection, not only this page."
+    - list
+      - listitem [level=1]
+        - StaticText "Recent readings: 0"
+      - listitem [level=1]
+        - StaticText "Stale evidence: 3"
+      - listitem [level=1]
+        - StaticText "No usable evidence: 1"
+      - listitem [level=1]
+        - StaticText "Reference: 0"
+- alert
