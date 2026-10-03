@@ -2,6 +2,34 @@ import { describe, expect, it } from "vitest";
 import { safeProjection } from "./safe-data";
 
 describe("public allowlist projection", () => {
+  it("preserves public routing activation time without exposing its manifest", () => {
+    const activatedAt = "2026-10-03T10:00:00.000Z";
+    expect(
+      safeProjection({
+        routes: [
+          {
+            id: "release-1",
+            state: "active",
+            activatedAt,
+            createdAt: activatedAt,
+            manifest: { secret: "not-public" },
+          },
+        ],
+      }).data,
+    ).toEqual({
+      routes: [
+        {
+          id: "release-1",
+          state: "active",
+          activatedAt,
+          createdAt: activatedAt,
+        },
+      ],
+    });
+    expect(safeProjection({ activatedAt: null }).data).toEqual({
+      activatedAt: null,
+    });
+  });
   it("preserves public measurement semantics while removing credentials", () => {
     const p = safeProjection({
       vehiclesPerHour: 120,

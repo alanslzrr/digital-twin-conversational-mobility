@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
+import { dashboardSourceResponse } from "@mobility/contracts";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -10,6 +11,8 @@ vi.mock("../database", () => ({ database: () => fixture.sql }));
 
 import { readEntities } from "./entities";
 import { readOverview } from "./overview";
+import { readSources } from "./readers";
+import { readSourceMetrics } from "./source-metrics";
 
 const schema = `dashboard_regression_${randomUUID().replaceAll("-", "")}`;
 const owner = randomUUID();
@@ -47,6 +50,33 @@ describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
       if (admin) {
         await admin.unsafe(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);
         await admin.end();
+      }
+    });
+    it("validates Sources with an installed routing release before and after activation", async () => {
+      await sql`INSERT INTO routing_release(id,manifest,state) VALUES('synthetic-source-release','{}'::jsonb,'prepared')`;
+      for (const activated of [false, true]) {
+        if (activated)
+          await sql`UPDATE routing_release SET state='active',activated_at=now() WHERE id='synthetic-source-release'`;
+        const data = {
+          ...(await readSources()),
+          metrics: await readSourceMetrics(undefined, new URLSearchParams()),
+        };
+        const response = dashboardSourceResponse.parse({
+          schemaVersion: 1,
+          readAt: new Date().toISOString(),
+          data,
+          truncated: false,
+          nextCursor: null,
+        });
+        expect(response.data.routes).toHaveLength(1);
+        expect(response.data.routes[0]?.state).toBe(
+          activated ? "active" : "prepared",
+        );
+        if (activated)
+          expect(response.data.routes[0]?.activatedAt).toEqual(
+            expect.any(String),
+          );
+        else expect(response.data.routes[0]?.activatedAt).toBeNull();
       }
     });
     it("keeps DGT published nested coordinates in the viewport result", async () => {
