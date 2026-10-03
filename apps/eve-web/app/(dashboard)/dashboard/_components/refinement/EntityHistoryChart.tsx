@@ -147,7 +147,7 @@ export function EntityHistoryChart({
             className="rf-table-region"
             aria-label={`${label} exact observations`}
           >
-            <Table>
+            <Table aria-label="Entity observation history">
               <caption className="sr-only">
                 Every supplied observation, including revisions. {data.unit}.
               </caption>

@@ -220,7 +220,7 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
             className="rf-table-region"
             aria-label="Exact activity counts"
           >
-            <Table>
+            <Table aria-label="Activity intervals">
               <caption className="sr-only">
                 Returned activity bins. Capture is best-effort.
               </caption>

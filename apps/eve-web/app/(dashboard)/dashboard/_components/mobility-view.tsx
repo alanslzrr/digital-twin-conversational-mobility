@@ -494,7 +494,7 @@ export function Mobility({
         {id && entities[0] ? <EntityDetail entity={entities[0]} /> : null}
         {!id && entities.length ? (
           <Card className="dc-list-stage">
-            <Table>
+            <Table aria-label="Mobility entities">
               <thead>
                 <tr>
                   <th scope="col">Entity / evidence</th>
