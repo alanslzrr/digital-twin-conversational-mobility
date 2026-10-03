@@ -30,7 +30,7 @@ function list(v: unknown): Record<string, unknown>[] {
 export function Events({ id }: { id?: string }) {
   const [range, setRange] = useState(() => ({
     to: new Date().toISOString(),
-    from: new Date(Date.now() - 7 * 86400000).toISOString(),
+    from: new Date(Date.now() - 86400000).toISOString(),
   }));
   const [severity, setSeverity] = useState(""),
     [source, setSource] = useState(""),
@@ -89,6 +89,13 @@ export function Events({ id }: { id?: string }) {
   );
   const value = obj(unwrap(q.data)),
     events = list(value.events);
+  const effective = obj(value.range);
+  const displayedRange =
+    !customRange &&
+    typeof effective.from === "string" &&
+    typeof effective.to === "string"
+      ? { from: effective.from, to: effective.to }
+      : range;
   return (
     <>
       <PageTitle
@@ -199,12 +206,13 @@ export function Events({ id }: { id?: string }) {
               <Input
                 id={`event-${k}`}
                 type="datetime-local"
-                value={range[k].slice(0, 16)}
+                disabled={!customRange && (!effective.from || q.isLoading)}
+                value={displayedRange[k].slice(0, 16)}
                 onChange={(e) => {
                   if (e.target.value) {
                     const instant = new Date(`${e.target.value}Z`);
                     if (!Number.isFinite(instant.getTime())) return;
-                    setRange((r) => ({ ...r, [k]: instant.toISOString() }));
+                    setRange({ ...displayedRange, [k]: instant.toISOString() });
                     setCustomRange(true);
                     setCursor(null);
                   }
