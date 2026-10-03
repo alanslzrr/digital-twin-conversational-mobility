@@ -86,6 +86,7 @@ function inspect(name, screenshot = true) {
       "--screenshot-quality",
       "70",
       "screenshot",
+      ...(name === "R1-dgt-list-map" ? ["--full"] : []),
       resolve(output, `${name}.jpg`),
     );
   results.push({
