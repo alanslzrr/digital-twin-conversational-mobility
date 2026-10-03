@@ -1,0 +1,207 @@
+- link "Skip to content" [ref=e2530]
+- complementary "Navigation and account"
+  - link "Mobility Core" [ref=e2551]
+    - StaticText "Mobility Core"
+  - navigation "Dashboard" [ref=e2552]
+    - list
+      - listitem [level=1]
+        - link "Overview" [ref=e2572]
+          - StaticText "Overview"
+      - listitem [level=1]
+        - link "Mobility" [ref=e2573]
+          - StaticText "Mobility"
+      - listitem [level=1]
+        - link "Queries" [ref=e2574]
+          - StaticText "Queries"
+      - listitem [level=1]
+        - link "Sources" [ref=e2575]
+          - StaticText "Sources"
+      - listitem [level=1]
+        - link "Activity" [ref=e2576]
+          - StaticText "Activity"
+      - listitem [level=1]
+        - link "My conversations" [ref=e2577]
+          - StaticText "My conversations"
+  - list
+    - listitem [level=1]
+      - button "Account: QA evaluator 1" [expanded=false, ref=e2568]
+        - StaticText "QA evaluator 1"
+    - listitem [level=1]
+      - link "Open chat" [ref=e2569]
+        - StaticText "Open chat"
+    - listitem [level=1]
+      - button "Sign out" [ref=e2570]
+        - StaticText "Sign out"
+- banner
+  - button "Toggle navigation" [ref=e2531]
+    - StaticText "Toggle Sidebar"
+  - StaticText "Sources"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "17:06:22 CEST"
+  - button "Pause refresh" [ref=e2532]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e2533]
+  - button "Data timing" [expanded=false, ref=e2534]
+- main
+  - heading "Sources" [level=1, ref=e2535]
+  - radiogroup "Operation period" [ref=e2536] focusable [tabindex]
+    - generic
+      - radio "1 hour" [checked=false, ref=e2556]
+      - LabelText
+        - StaticText "1 hour"
+    - generic
+      - radio "24 hours" [checked=true, ref=e2557]
+      - LabelText
+        - StaticText "24 hours"
+    - generic
+      - radio "7 days" [checked=false, ref=e2558]
+      - LabelText
+        - StaticText "7 days"
+  - radiogroup "Operation" [ref=e2537] focusable [tabindex]
+    - generic
+      - radio "All" [checked=true, ref=e2559]
+      - LabelText
+        - StaticText "All"
+    - generic
+      - radio "Publication" [checked=false, ref=e2560]
+      - LabelText
+        - StaticText "Publication"
+    - generic
+      - radio "On-demand refresh" [checked=false, ref=e2561]
+      - LabelText
+        - StaticText "On-demand refresh"
+    - generic
+      - radio "Graph activation" [checked=false, ref=e2562]
+      - LabelText
+        - StaticText "Graph activation"
+    - generic
+      - radio "Lease lost" [checked=false, ref=e2563]
+      - LabelText
+        - StaticText "Lease lost"
+    - generic
+      - radio "Lease recovered" [checked=false, ref=e2564]
+      - LabelText
+        - StaticText "Lease recovered"
+  - generic
+    - article
+      - heading "Products with recorded current issues" [level=2, ref=e2565]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Monitored products: 13. Recorded errors or missing worker signal during an active window. Normal absence of demand or an inactive window is not a failure."
+    - article
+      - heading "Recorded errors in period" [level=2, ref=e2566]
+      - paragraph
+        - StaticText "1"
+      - paragraph
+        - StaticText "Unique retained error events, not an availability rate. "
+        - link "Inspect activity" [ref=e2571]
+  - heading "Source products" [level=2, ref=e2538]
+  - paragraph
+    - StaticText "Registered sources and stored product evidence. Enabled does not mean recent."
+  - link "AEMET" [ref=e2539]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "BiciMAD" [ref=e2540]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "CRTM transport" [ref=e2541]
+  - StaticText "Disabled"
+  - StaticText "0"
+  - StaticText " periodic ·"
+  - StaticText "1"
+  - StaticText "reference products"
+  - link "Roads DGT" [ref=e2542]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "EMT buses" [ref=e2543]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "Madrid air quality" [ref=e2544]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "Madrid parking" [ref=e2545]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "Madrid traffic sensors" [ref=e2546]
+  - StaticText "Enabled"
+  - StaticText "1"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "OpenStreetMap geography" [ref=e2547]
+  - StaticText "Disabled"
+  - StaticText "0"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - link "Renfe" [ref=e2548]
+  - StaticText "Enabled"
+  - StaticText "2"
+  - StaticText " periodic ·"
+  - StaticText "0"
+  - StaticText "reference products"
+  - heading "Recorded operation durations" [level=2, ref=e2549]
+  - paragraph
+    - StaticText "Median with available samples; p95 with at least 20. Not provider HTTP latency."
+  - paragraph
+    - StaticText "Filled dot: median. Outline square: p95. Recorded summaries, not a distribution."
+  - generic
+    - heading "publication" [level=3, ref=e2553]
+    - StaticText "Recorded ms · scale 0–"
+    - StaticText "13.5"
+    - region "publication recorded durations" [ref=e2554]
+      - region "Scrollable data table" [ref=e2567] focusable [tabindex]
+        - table "Median dot and p95 square are summary statistics, not a distribution or confidence interval."
+          - caption
+            - StaticText "Median dot and p95 square are summary statistics, not a distribution or confidence interval."
+          - rowgroup
+            - row
+              - columnheader "Component" [ref=e2582]
+              - columnheader "Samples" [ref=e2583]
+              - columnheader "Median (ms)" [ref=e2584]
+              - columnheader "p95 (ms)" [ref=e2585]
+              - columnheader "Summary" [ref=e2586]
+          - row
+            - cell "ingestion" [ref=e2578]
+            - cell "8" [ref=e2579]
+            - cell "13.5" [ref=e2580]
+            - cell "Unavailable: n < 20" [ref=e2581]
+            - cell
+  - paragraph
+    - StaticText "Best-effort capture · "
+    - time
+      - StaticText "02/10/2026, 17:06:22 CEST"
+    - StaticText " — "
+    - time
+      - StaticText "03/10/2026, 17:06:22 CEST"
+  - button "Sanitized technical details" [expanded=false, ref=e2555]
+    - StaticText "Sanitized technical details"
+  - heading "Worker signals" [level=2, ref=e2550]
+  - paragraph
+    - StaticText "Not provider health or freshness evidence."
+  - paragraph
+    - StaticText "Worker 1: Disabled · Unavailable"
+  - paragraph
+    - StaticText "Worker 2: Disabled · Unavailable"
+- alert

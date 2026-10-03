@@ -1,0 +1,95 @@
+{
+  "axeVersion": "4.12.1",
+  "counts": {
+    "inapplicable": 49,
+    "incomplete": 2,
+    "passes": 39,
+    "violations": 0
+  },
+  "incomplete": [
+    {
+      "help": "ARIA hidden element must not be focusable or contain focusable elements",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-hidden-focus?application=axeAPI",
+      "id": "aria-hidden-focus",
+      "impact": "serious",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+          "target": [
+            "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"]:nth-child(1)"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<div data-slot=\"sidebar-wrapper\" style=\"--sidebar-width:200px;--sidebar-width-icon:56px\" class=\"group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar dashboard-shell\" lang=\"en\" data-resolved=\"true\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
+          "target": [
+            ".group\\/sidebar-wrapper"
+          ]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+          "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+          "target": [
+            "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"]:nth-child(10)"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.name-role-value",
+        "wcag2a",
+        "wcag412",
+        "TTv5",
+        "TT6.a",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-10.8.1"
+      ]
+    },
+    {
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodeCount": 1,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Axe encountered an error; test the page for this type of problem manually",
+          "html": "<a href=\"https://leafletjs.com\" title=\"A JavaScript library for interactive maps\">",
+          "target": [
+            "a[href$=\"leafletjs.com\"]"
+          ]
+        }
+      ],
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ]
+    }
+  ],
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 8205334907631297000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "not_configured",
+    "reused": true,
+    "saveStatus": "not_attempted"
+  },
+  "url": "http://127.0.0.1:3002/dashboard/mobility?category=bikes&section=dynamic&map=1&center=40.416800%2C-3.703800&zoom=13",
+  "violations": []
+}

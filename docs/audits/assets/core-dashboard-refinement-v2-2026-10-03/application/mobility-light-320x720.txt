@@ -1,0 +1,128 @@
+- link "Skip to content" [ref=e4379]
+- banner
+  - button "Toggle navigation" [ref=e4380]
+    - StaticText "Toggle Sidebar"
+  - button "Pause refresh" [ref=e4381]
+  - button "Refresh stored data" [ref=e4382]
+  - button "Data timing" [expanded=false, ref=e4383]
+- main
+  - heading "Mobility" [level=1, ref=e4384]
+  - radiogroup "Evidence family" [ref=e4385] focusable [tabindex]
+    - generic
+      - radio "Dynamic" [checked=true, ref=e4395]
+      - LabelText
+        - StaticText "Dynamic"
+    - generic
+      - radio "Reference" [checked=false, ref=e4396]
+      - LabelText
+        - StaticText "Reference"
+  - radiogroup "Product family" [ref=e4386] focusable [tabindex]
+    - generic
+      - radio "Departures and arrivals" [checked=false, ref=e4397]
+      - LabelText
+        - StaticText "Departures and arrivals"
+    - generic
+      - radio "Incidents" [checked=false, ref=e4398]
+      - LabelText
+        - StaticText "Incidents"
+    - generic
+      - radio "BiciMAD" [checked=true, ref=e4399]
+      - LabelText
+        - StaticText "BiciMAD"
+    - generic
+      - radio "Air and weather" [checked=false, ref=e4400]
+      - LabelText
+        - StaticText "Air and weather"
+    - generic
+      - radio "Traffic" [checked=false, ref=e4401]
+      - LabelText
+        - StaticText "Traffic"
+    - generic
+      - radio "Parking" [checked=false, ref=e4402]
+      - LabelText
+        - StaticText "Parking"
+  - form
+    - LabelText
+      - StaticText "Search entity"
+    - textbox "Search entity" [ref=e4389]
+    - button "Search" [ref=e4390]
+    - radiogroup "Freshness" [ref=e4391] focusable [tabindex]
+      - generic
+        - radio "All" [checked=true, ref=e4403]
+        - LabelText
+          - StaticText "All"
+      - generic
+        - radio "Recent" [checked=false, ref=e4404]
+        - LabelText
+          - StaticText "Recent"
+      - generic
+        - radio "Stale" [checked=false, ref=e4405]
+        - LabelText
+          - StaticText "Stale"
+      - generic
+        - radio "Unavailable" [checked=false, ref=e4406]
+        - LabelText
+          - StaticText "Unavailable"
+    - button "Filters" [expanded=false, ref=e4392]
+    - radiogroup "Workspace view" [ref=e4393] focusable [tabindex]
+      - generic
+        - radio "List" [checked=true, ref=e4407]
+        - LabelText
+          - StaticText "List"
+      - generic
+        - radio "Map + list" [checked=false, ref=e4408]
+        - LabelText
+          - StaticText "Map + list"
+  - region "Product age coverage" [ref=e4387]
+    - heading "Selection evidence coverage" [level=2, ref=e4394]
+    - paragraph
+      - StaticText "4 product records in the complete selection, not only this page."
+    - list
+      - listitem [level=1]
+        - StaticText "Recent readings: 0"
+      - listitem [level=1]
+        - StaticText "Stale evidence: 3"
+      - listitem [level=1]
+        - StaticText "No usable evidence: 1"
+      - listitem [level=1]
+        - StaticText "Reference: 0"
+  - region "Scrollable data table" [ref=e4388] focusable [tabindex]
+    - table
+      - rowgroup
+        - row
+          - columnheader "Entity / evidence" [ref=e4421]
+          - columnheader "Bikes" [ref=e4422]
+          - columnheader "Docks" [ref=e4423]
+      - row
+        - cell "QA sintética · alquiler deshabilitado Stale · bicimad" [ref=e4409]
+          - button "QA sintética · alquiler deshabilitado" [ref=e4424]
+          - paragraph
+            - StaticText "Stale · bicimad"
+        - cell "5" [ref=e4410]
+        - cell "10" [ref=e4411]
+      - row
+        - cell "QA sintética · sin observación Unavailable · bicimad No published coordinates" [ref=e4412]
+          - button "QA sintética · sin observación" [ref=e4425]
+          - paragraph
+            - StaticText "Unavailable · bicimad"
+          - paragraph
+            - StaticText "No published coordinates"
+        - cell "0" [ref=e4413]
+        - cell "0" [ref=e4414]
+      - row
+        - cell "QA sintética · estación antigua Stale · bicimad" [ref=e4415]
+          - button "QA sintética · estación antigua" [ref=e4426]
+          - paragraph
+            - StaticText "Stale · bicimad"
+        - cell "9" [ref=e4416]
+        - cell "3" [ref=e4417]
+      - row
+        - cell "QA sintética · estación reciente Stale · bicimad" [ref=e4418]
+          - button "QA sintética · estación reciente" [ref=e4427]
+          - paragraph
+            - StaticText "Stale · bicimad"
+        - cell "4" [ref=e4419]
+        - cell "8" [ref=e4420]
+  - StaticText "4"
+  - StaticText " rows returned on this page"
+- alert

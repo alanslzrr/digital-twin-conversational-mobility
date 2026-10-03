@@ -1,0 +1,166 @@
+- link "Skip to content" [ref=e3232]
+- complementary "Navigation and account"
+  - link "Mobility Core" [ref=e3242]
+  - navigation "Dashboard" [ref=e3243]
+    - list
+      - listitem [level=1]
+        - link "Overview" [ref=e3279]
+          - StaticText "Overview"
+      - listitem [level=1]
+        - link "Mobility" [ref=e3280]
+          - StaticText "Mobility"
+      - listitem [level=1]
+        - link "Queries" [ref=e3281]
+          - StaticText "Queries"
+      - listitem [level=1]
+        - link "Sources" [ref=e3282]
+          - StaticText "Sources"
+      - listitem [level=1]
+        - link "Activity" [ref=e3283]
+          - StaticText "Activity"
+      - listitem [level=1]
+        - link "My conversations" [ref=e3284]
+          - StaticText "My conversations"
+  - list
+    - listitem [level=1]
+      - button "Account: QA evaluator 1" [expanded=false, ref=e3258]
+        - StaticText "QA evaluator 1"
+    - listitem [level=1]
+      - link "Open chat" [ref=e3259]
+        - StaticText "Open chat"
+    - listitem [level=1]
+      - button "Sign out" [ref=e3260]
+        - StaticText "Sign out"
+- banner
+  - button "Toggle navigation" [ref=e3233]
+    - StaticText "Toggle Sidebar"
+  - StaticText "Mobility"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "17:06:39 CEST"
+  - button "Pause refresh" [ref=e3234]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e3235]
+  - button "Data timing" [expanded=false, ref=e3236]
+- main
+  - heading "Mobility" [level=1, ref=e3237]
+  - radiogroup "Evidence family" [ref=e3238] focusable [tabindex]
+    - generic
+      - radio "Dynamic" [checked=true, ref=e3250]
+      - LabelText
+        - StaticText "Dynamic"
+    - generic
+      - radio "Reference" [checked=false, ref=e3251]
+      - LabelText
+        - StaticText "Reference"
+  - radiogroup "Product family" [ref=e3239] focusable [tabindex]
+    - generic
+      - radio "Departures and arrivals" [checked=false, ref=e3252]
+      - LabelText
+        - StaticText "Departures and arrivals"
+    - generic
+      - radio "Incidents" [checked=false, ref=e3253]
+      - LabelText
+        - StaticText "Incidents"
+    - generic
+      - radio "BiciMAD" [checked=true, ref=e3254]
+      - LabelText
+        - StaticText "BiciMAD"
+    - generic
+      - radio "Air and weather" [checked=false, ref=e3255]
+      - LabelText
+        - StaticText "Air and weather"
+    - generic
+      - radio "Traffic" [checked=false, ref=e3256]
+      - LabelText
+        - StaticText "Traffic"
+    - generic
+      - radio "Parking" [checked=false, ref=e3257]
+      - LabelText
+        - StaticText "Parking"
+  - form
+    - LabelText
+      - StaticText "Search entity"
+    - textbox "Search entity" [ref=e3244]
+    - button "Search" [ref=e3245]
+    - radiogroup "Freshness" [ref=e3246] focusable [tabindex]
+      - generic
+        - radio "All" [checked=true, ref=e3261]
+        - LabelText
+          - StaticText "All"
+      - generic
+        - radio "Recent" [checked=false, ref=e3262]
+        - LabelText
+          - StaticText "Recent"
+      - generic
+        - radio "Stale" [checked=false, ref=e3263]
+        - LabelText
+          - StaticText "Stale"
+      - generic
+        - radio "Unavailable" [checked=false, ref=e3264]
+        - LabelText
+          - StaticText "Unavailable"
+    - button "Filters" [expanded=false, ref=e3247]
+    - radiogroup "Workspace view" [ref=e3248] focusable [tabindex]
+      - generic
+        - radio "List" [checked=true, ref=e3265]
+        - LabelText
+          - StaticText "List"
+      - generic
+        - radio "Map + list" [checked=false, ref=e3266]
+        - LabelText
+          - StaticText "Map + list"
+  - region "Product age coverage" [ref=e3240]
+    - heading "Selection evidence coverage" [level=2, ref=e3249]
+    - paragraph
+      - StaticText "4 product records in the complete selection, not only this page."
+    - list
+      - listitem [level=1]
+        - StaticText "Recent readings: 0"
+      - listitem [level=1]
+        - StaticText "Stale evidence: 3"
+      - listitem [level=1]
+        - StaticText "No usable evidence: 1"
+      - listitem [level=1]
+        - StaticText "Reference: 0"
+  - region "Scrollable data table" [ref=e3241] focusable [tabindex]
+    - table
+      - rowgroup
+        - row
+          - columnheader "Entity / evidence" [ref=e3285]
+          - columnheader "Bikes" [ref=e3286]
+          - columnheader "Docks" [ref=e3287]
+      - row
+        - cell "QA sintética · alquiler deshabilitado Stale · bicimad" [ref=e3267]
+          - button "QA sintética · alquiler deshabilitado" [ref=e3288]
+          - paragraph
+            - StaticText "Stale · bicimad"
+        - cell "5" [ref=e3268]
+        - cell "10" [ref=e3269]
+      - row
+        - cell "QA sintética · sin observación Unavailable · bicimad No published coordinates" [ref=e3270]
+          - button "QA sintética · sin observación" [ref=e3289]
+          - paragraph
+            - StaticText "Unavailable · bicimad"
+          - paragraph
+            - StaticText "No published coordinates"
+        - cell "0" [ref=e3271]
+        - cell "0" [ref=e3272]
+      - row
+        - cell "QA sintética · estación antigua Stale · bicimad" [ref=e3273]
+          - button "QA sintética · estación antigua" [ref=e3290]
+          - paragraph
+            - StaticText "Stale · bicimad"
+        - cell "9" [ref=e3274]
+        - cell "3" [ref=e3275]
+      - row
+        - cell "QA sintética · estación reciente Stale · bicimad" [ref=e3276]
+          - button "QA sintética · estación reciente" [ref=e3291]
+          - paragraph
+            - StaticText "Stale · bicimad"
+        - cell "4" [ref=e3277]
+        - cell "8" [ref=e3278]
+  - StaticText "4"
+  - StaticText " rows returned on this page"
+- alert

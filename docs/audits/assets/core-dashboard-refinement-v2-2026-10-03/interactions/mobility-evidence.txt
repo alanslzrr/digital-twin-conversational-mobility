@@ -1,0 +1,101 @@
+- generic
+  - dialog "QA sintética · estación reciente"
+    - heading "QA sintética · estación reciente" [level=2, ref=e233]
+    - button "Close details" [ref=e234]
+    - paragraph
+      - StaticText "QA sintética · estación reciente details"
+    - generic
+      - heading "QA sintética · estación reciente" [level=2, ref=e236]
+      - paragraph
+        - StaticText "BiciMAD bikes · Recent reading"
+      - paragraph
+        - StaticText "Partial published coverage, not citywide coverage."
+      - DescriptionList
+        - term "Available bikes"
+        - definition
+          - StaticText "4 bicicletas"
+        - term "Available docks"
+        - definition
+          - StaticText "8 anclajes"
+        - term "Rental enabled"
+        - definition
+          - StaticText "Yes"
+        - term "Installed station"
+        - definition
+          - StaticText "Yes"
+        - term "Return enabled"
+        - definition
+          - StaticText "Yes"
+      - paragraph
+        - StaticText "Published observation: "
+        - time
+          - StaticText "03/10/2026, 17:04:50 CEST"
+      - paragraph
+        - StaticText "Storage ingestion: "
+        - time
+          - StaticText "03/10/2026, 17:04:55 CEST"
+        - StaticText ". Does not renew the observation."
+      - paragraph
+        - StaticText "Published coordinates do not certify measurement coverage."
+      - paragraph
+        - StaticText "Declared quality: Provisional."
+      - link "Inspect source and refresh evidence" [ref=e237]
+    - generic
+      - heading "Retained measurement history" [level=2, ref=e238]
+      - paragraph
+        - StaticText "Read retained history, not the provider. Up to 24 hours with observation and ingestion time per point."
+      - group
+        - LabelText
+          - StaticText "Retained period"
+        - combobox "Retained period" [expanded=false, ref=e240]: 6 hours
+          - MenuListPopup
+            - option "1 hour" [ref=e248]
+            - option "6 hours" [selected, ref=e249]
+            - option "24 hours" [ref=e250]
+      - group
+        - LabelText
+          - StaticText "Measurement"
+        - combobox "Measurement" [expanded=false, ref=e241]: Available bikes
+          - MenuListPopup
+            - option "Available bikes" [selected, ref=e251]
+            - option "Available docks" [ref=e252]
+      - paragraph
+        - StaticText "bicicletas · 12 samples retained"
+      - region "Available bikes" [ref=e239]
+        - heading "Available bikes" [level=3, ref=e242]
+        - StaticText "bicicletas"
+        - paragraph
+          - StaticText "Recorded observations · Europe/Madrid · partial coverage"
+        - tablist "Available bikes representation" [ref=e243] focusable [tabindex]
+          - tab "Chart" [selected, ref=e245]
+          - tab "Exact data" [ref=e246]
+        - tabpanel "Chart" [ref=e244] focusable [tabindex]
+          - region "Available bikes, bicicletas. Gaps are not zero." [ref=e247]
+            - generic [ref=e253] clickable [onclick]
+              - application [ref=e254] focusable [tabindex]
+                - group [ref=e255] clickable [onclick]
+                - group
+                - group
+                - group
+                - group
+                - group [ref=e256] clickable [onclick]
+                - group
+                - group [ref=e257] clickable [onclick]
+                - group
+                - group
+                - group
+                - group [ref=e258] clickable [onclick]
+                  - StaticText "16:14"
+                  - StaticText "16:29"
+                  - StaticText "16:44"
+                  - StaticText "16:59"
+                  - StaticText "0"
+                  - StaticText "1"
+                  - StaticText "2"
+                  - StaticText "3"
+                  - StaticText "4"
+          - paragraph
+            - StaticText "11 capture gaps; connecting lines stop at gaps."
+      - paragraph
+        - StaticText "Observaciones con la última revisión retenida; algunas correcciones se conocieron después. Hasta 24 horas retenidas y última muestra por intervalo; sin interpolación ni reconstrucción completa del sistema."
+    - link "Open linked detail" [ref=e235]

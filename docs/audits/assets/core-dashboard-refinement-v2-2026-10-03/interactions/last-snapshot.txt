@@ -1,0 +1,16 @@
+- link "Skip to content" [ref=e1045]
+- banner
+  - button "Toggle navigation" [ref=e1046]
+    - StaticText "Toggle Sidebar"
+  - button "Pause refresh" [ref=e1047]
+  - button "Refresh stored data" [ref=e1048]
+  - button "Data timing" [expanded=false, ref=e1049]
+- main
+  - heading "My conversations" [level=1, ref=e1050]
+  - heading "No captured conversations yet" [level=2, ref=e1051]
+  - paragraph
+    - StaticText "Open chat to start a conversation. Only your sessions with current access appear here; missing capture is not reconstructed."
+  - link "Open chat" [ref=e1052]
+  - button "Capture and retention" [ref=e1053]
+  - button "Capture and retention" [expanded=false, ref=e1054]
+- alert

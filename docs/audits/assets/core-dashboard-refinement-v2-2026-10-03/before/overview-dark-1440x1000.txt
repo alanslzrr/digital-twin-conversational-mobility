@@ -1,0 +1,198 @@
+- link "Skip to content" [ref=e2]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e3]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e4]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e13]
+    - link "Mobility" [ref=e14]
+    - link "Queries" [ref=e15]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e16]
+    - link "Activity" [ref=e17]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e18]
+  - link "Open chat" [ref=e5]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e6]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Overview"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 16:25:24 CEST"
+  - button "Pause refresh" [ref=e7]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e8]
+  - button "Data timing" [expanded=false, ref=e9]
+- main
+  - heading "Overview" [level=1, ref=e10]
+  - paragraph
+    - StaticText "Stored mobility evidence at a glance."
+  - region "Mobility indicators" [ref=e11]
+    - generic
+      - heading "Available bikes" [level=2, ref=e40]
+      - paragraph
+        - StaticText "—"
+        - StaticText "Unknown"
+        - StaticText "bikes"
+      - paragraph
+        - StaticText "0 / 4 stored stations"
+      - link "View data" [ref=e41]
+      - button "Definition" [expanded=false, ref=e42]
+    - generic
+      - heading "Published parking spaces" [level=2, ref=e43]
+      - paragraph
+        - StaticText "3"
+        - StaticText "spaces"
+      - paragraph
+        - StaticText "1 / 1 stored parking facilities"
+      - link "View data" [ref=e44]
+      - button "Definition" [expanded=false, ref=e45]
+    - generic
+      - heading "Active published notices" [level=2, ref=e46]
+      - paragraph
+        - StaticText "2"
+        - StaticText "notices"
+      - paragraph
+        - StaticText "Non-exhaustive published coverage"
+      - link "View data" [ref=e47]
+      - button "Definition" [expanded=false, ref=e48]
+    - generic
+      - heading "Product readiness" [level=2, ref=e49]
+      - paragraph
+        - StaticText "6"
+        - StaticText "dynamic products"
+      - paragraph
+        - StaticText "6 / 13 enabled products"
+      - link "View data" [ref=e50]
+      - button "Definition" [expanded=false, ref=e51]
+  - LabelText
+    - StaticText "Parking category"
+  - combobox "Parking category" [expanded=false, ref=e12]: Categoría publicada A (a)
+    - MenuListPopup
+      - option "Categoría publicada A (a)" [selected, ref=e52]
+      - option "Categoría publicada B (b)" [ref=e53]
+  - StaticText "Only this category is summed."
+  - generic
+    - heading "Product readiness" [level=2, ref=e19]
+    - link "Sources" [ref=e20]
+    - paragraph
+      - StaticText "Readiness of observed products, not citywide coverage."
+    - heading "Periodic evidence" [level=3, ref=e21]
+    - link "Incidencias DGT" [ref=e22]
+    - StaticText "Usable evidence"
+    - StaticText "1 registros"
+    - link "Avisos EMT" [ref=e23]
+    - StaticText "Usable evidence"
+    - StaticText "1 registros"
+    - link "Estimaciones Renfe" [ref=e24]
+    - StaticText "Needs evidence"
+    - StaticText "Count unavailable"
+    - link "Avisos Renfe" [ref=e25]
+    - StaticText "Needs evidence"
+    - StaticText "Count unavailable"
+    - link "Bicicletas BiciMAD" [ref=e26]
+    - StaticText "Needs evidence"
+    - StaticText "4 estaciones"
+    - link "Calidad del aire" [ref=e27]
+    - StaticText "Usable evidence"
+    - StaticText "1 medidas"
+    - link "Sensores de tráfico" [ref=e28]
+    - StaticText "Usable evidence"
+    - StaticText "1 registros"
+    - link "Ocupación de aparcamientos" [ref=e29]
+    - StaticText "Usable evidence"
+    - StaticText "2 muestras por categoría"
+    - link "Observaciones meteorológicas" [ref=e30]
+    - StaticText "Needs evidence"
+    - StaticText "Count unavailable"
+    - heading "On-demand evidence" [level=3, ref=e31]
+    - link "Llegadas EMT" [ref=e32]
+    - StaticText "Needs evidence"
+    - StaticText "0 recursos consultados"
+    - link "Predicción horaria" [ref=e33]
+    - StaticText "Usable evidence"
+    - StaticText "1 recursos consultados"
+    - link "Predicción diaria" [ref=e34]
+    - StaticText "Needs evidence"
+    - StaticText "Count unavailable"
+    - link "Avisos meteorológicos" [ref=e35]
+    - StaticText "Needs evidence"
+    - StaticText "Count unavailable"
+    - link "Browse reference catalogs" [ref=e36]
+  - generic
+    - heading "Needs attention" [level=2, ref=e37]
+    - list
+      - listitem [level=1]
+        - paragraph
+          - StaticText "Observaciones meteorológicas: El último intento de actualización falló; la lectura guardada conserva su fecha."
+        - link "Inspect evidence" [ref=e57]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "Estimaciones Renfe: Sin lectura guardada."
+        - link "Inspect evidence" [ref=e58]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "Avisos Renfe: Sin lectura guardada."
+        - link "Inspect evidence" [ref=e59]
+  - generic
+    - heading "Recent activity" [level=2, ref=e38]
+    - link "View all" [ref=e39]
+    - group "Recent activity period"
+      - Legend
+        - StaticText "Recent activity period"
+      - LabelText [ref=e54] clickable [cursor:pointer]
+        - radio "1 hour" [checked=false, ref=e60]
+        - StaticText "1 hour"
+      - LabelText [ref=e55] clickable [cursor:pointer]
+        - radio "24 hours" [checked=true, ref=e61]
+        - StaticText "24 hours"
+      - LabelText [ref=e56] clickable [cursor:pointer]
+        - radio "7 days" [checked=false, ref=e62]
+        - StaticText "7 days"
+    - list
+      - listitem [level=1]
+        - link "Information stored · bicimad" [ref=e63]
+          - StaticText "Information stored · bicimad"
+        - paragraph
+          - StaticText "Completed · "
+          - time
+            - StaticText "03/10/2026, 16:08:30 CEST"
+      - listitem [level=1]
+        - link "Information stored · bicimad" [ref=e64]
+          - StaticText "Information stored · bicimad"
+        - paragraph
+          - StaticText "Completed · "
+          - time
+            - StaticText "03/10/2026, 15:53:30 CEST"
+      - listitem [level=1]
+        - link "Information stored · bicimad" [ref=e65]
+          - StaticText "Information stored · bicimad"
+        - paragraph
+          - StaticText "Completed · "
+          - time
+            - StaticText "03/10/2026, 15:38:30 CEST"
+      - listitem [level=1]
+        - link "Information stored · bicimad" [ref=e66]
+          - StaticText "Information stored · bicimad"
+        - paragraph
+          - StaticText "Completed · "
+          - time
+            - StaticText "03/10/2026, 15:23:30 CEST"
+      - listitem [level=1]
+        - link "Information stored · bicimad" [ref=e67]
+          - StaticText "Information stored · bicimad"
+        - paragraph
+          - StaticText "Failed · "
+          - time
+            - StaticText "03/10/2026, 15:08:30 CEST"
+- alert

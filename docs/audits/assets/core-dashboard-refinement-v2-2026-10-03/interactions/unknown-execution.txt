@@ -1,0 +1,203 @@
+- link "Skip to content" [ref=e631]
+- complementary "Navigation and account"
+  - link "Mobility Core" [ref=e640]
+    - StaticText "Mobility Core"
+  - navigation "Dashboard" [ref=e641]
+    - list
+      - listitem [level=1]
+        - link "Overview" [ref=e675]
+          - StaticText "Overview"
+      - listitem [level=1]
+        - link "Mobility" [ref=e676]
+          - StaticText "Mobility"
+      - listitem [level=1]
+        - link "Queries" [ref=e677]
+          - StaticText "Queries"
+      - listitem [level=1]
+        - link "Sources" [ref=e678]
+          - StaticText "Sources"
+      - listitem [level=1]
+        - link "Activity" [ref=e679]
+          - StaticText "Activity"
+      - listitem [level=1]
+        - link "My conversations" [ref=e680]
+          - StaticText "My conversations"
+  - list
+    - listitem [level=1]
+      - button "Account: QA evaluator 1" [expanded=false, ref=e670]
+        - StaticText "QA evaluator 1"
+    - listitem [level=1]
+      - link "Open chat" [ref=e671]
+        - StaticText "Open chat"
+    - listitem [level=1]
+      - button "Sign out" [ref=e672]
+        - StaticText "Sign out"
+- banner
+  - button "Toggle navigation" [ref=e632]
+    - StaticText "Toggle Sidebar"
+  - StaticText "Queries"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "17:05:54 CEST"
+  - button "Pause refresh" [ref=e633]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e634]
+  - button "Data timing" [expanded=false, ref=e635]
+- main
+  - heading "Queries" [level=1, ref=e636]
+  - LabelText
+    - StaticText "Search registered tools"
+  - textbox "Search registered tools" [ref=e637]
+  - generic
+    - heading "Places" [level=2, ref=e642]
+    - link "Find a stored place resolve_place" [ref=e643]
+      - strong
+        - StaticText "Find a stored place"
+      - paragraph
+        - StaticText "resolve_place"
+    - link "Resolve an address resolve_address" [ref=e644]
+      - strong
+        - StaticText "Resolve an address"
+      - paragraph
+        - StaticText "resolve_address"
+    - heading "Journeys and timetables" [level=2, ref=e645]
+    - link "Plan a journey plan_journey" [ref=e646]
+      - strong
+        - StaticText "Plan a journey"
+      - paragraph
+        - StaticText "plan_journey"
+    - link "Get EMT arrivals get_emt_arrivals" [ref=e647]
+      - strong
+        - StaticText "Get EMT arrivals"
+      - paragraph
+        - StaticText "get_emt_arrivals"
+    - link "Read published timetable get_crtm_timetable" [ref=e648]
+      - strong
+        - StaticText "Read published timetable"
+      - paragraph
+        - StaticText "get_crtm_timetable"
+    - link "Get departures get_departures" [ref=e649]
+      - strong
+        - StaticText "Get departures"
+      - paragraph
+        - StaticText "get_departures"
+    - heading "Mobility evidence" [level=2, ref=e650]
+    - link "Read incidents and alerts get_incidents" [ref=e651]
+      - strong
+        - StaticText "Read incidents and alerts"
+      - paragraph
+        - StaticText "get_incidents"
+    - link "Read bike availability get_bike_availability" [ref=e652]
+      - strong
+        - StaticText "Read bike availability"
+      - paragraph
+        - StaticText "get_bike_availability"
+    - link "Read air and weather get_environment" [ref=e653]
+      - strong
+        - StaticText "Read air and weather"
+      - paragraph
+        - StaticText "get_environment"
+    - link "Read traffic sensors get_road_state" [ref=e654]
+      - strong
+        - StaticText "Read traffic sensors"
+      - paragraph
+        - StaticText "get_road_state"
+    - link "Read historical evidence get_historical_state" [ref=e655]
+      - strong
+        - StaticText "Read historical evidence"
+      - paragraph
+        - StaticText "get_historical_state"
+    - link "Read parking get_parking" [ref=e656]
+      - strong
+        - StaticText "Read parking"
+      - paragraph
+        - StaticText "get_parking"
+    - heading "System and coverage" [level=2, ref=e657]
+    - link "Inspect a line get_line_status" [ref=e658]
+      - strong
+        - StaticText "Inspect a line"
+      - paragraph
+        - StaticText "get_line_status"
+    - link "Inspect network status get_network_status" [ref=e659]
+      - strong
+        - StaticText "Inspect network status"
+      - paragraph
+        - StaticText "get_network_status"
+    - link "Read mobility snapshot get_mobility_snapshot" [ref=e660]
+      - strong
+        - StaticText "Read mobility snapshot"
+      - paragraph
+        - StaticText "get_mobility_snapshot"
+    - link "Inspect source health get_source_health" [ref=e661]
+      - strong
+        - StaticText "Inspect source health"
+      - paragraph
+        - StaticText "get_source_health"
+  - heading "Read bike availability" [level=2, ref=e638]
+  - link "Back to catalog" [ref=e639]
+  - paragraph
+    - StaticText "Published bikes, docks and observation times for this place."
+  - button "Sanitized technical details" [expanded=false, ref=e662]
+    - StaticText "Sanitized technical details"
+  - form
+    - radiogroup "Query mode" [ref=e663] focusable [tabindex]
+      - generic
+        - radio "Stored evidence" [checked=false, ref=e673]
+        - LabelText
+          - StaticText "Stored evidence"
+      - generic
+        - radio "Run query" [checked=true, ref=e674]
+        - LabelText
+          - StaticText "Run query"
+    - paragraph
+      - StaticText "Explicit execution. Possible effects: Maintain the activity window · Query the provider"
+    - paragraph
+      - StaticText "Published bikes, docks and observation times for this place."
+    - button "Load example without execution" [ref=e664]
+    - group
+      - LabelText
+        - StaticText "Selected stored place"
+      - combobox "Selected stored place" [expanded=false, ref=e666]: QA sintética · lugar guardado
+        - MenuListPopup
+          - option "Select a stored place" [ref=e681]
+          - option "QA sintética · lugar guardado" [selected, ref=e682]
+          - option "QA sintética · horario caducado" [ref=e683]
+      - paragraph
+        - StaticText "Up to 100 stored reference places. Search for a place or enter a known ID in advanced configuration; no fabricated location."
+    - group
+      - LabelText
+        - StaticText "Place or address query"
+      - textbox "Place or address query" [ref=e667]: Callao
+        - StaticText "Callao"
+    - group
+      - LabelText
+        - StaticText "Result limit"
+      - spinbutton "Result limit" [ref=e668]
+    - button "Advanced configuration" [expanded=false, ref=e669]
+      - StaticText "Advanced configuration"
+    - group
+      - checkbox "I confirm explicit execution and its declared effects" [checked=true, ref=e684]
+      - paragraph
+        - StaticText "One execution reservation per evaluator, six executions/minute and sixty/day. Address lookup still requires specific allowExternal consent."
+    - button "Run query" [disabled, ref=e665]
+    - alert
+      - StaticText "Execution outcome unknown. Recover this request by ID before another execution. Cancelling the screen does not cancel the provider."
+    - paragraph
+      - StaticText "Request ID: fe63353e-6430-48c2-b0d5-22b6dd270e3a"
+    - button "Recover status by request ID" [ref=e685]
+    - paragraph
+      - StaticText "Inspector limit: 256 KB. EVE context: 32 KB. Inspector evidence does not certify what the model received."
+  - generic
+    - heading "Query result" [level=2, ref=e686]
+    - paragraph
+      - StaticText "Execution outcome unknown. Recover by ID without re-execution."
+    - paragraph
+      - StaticText "Query evaluated: Unavailable · Explicit manual execution."
+    - paragraph
+      - StaticText "No reading collection in this result. Tool limitations describe its scope; inspect sanitized metadata below."
+    - button "Sanitized technical details" [expanded=false, ref=e688]
+      - StaticText "Sanitized technical details"
+  - button "Sanitized technical details" [expanded=false, ref=e687]
+    - StaticText "Sanitized technical details"
+- alert

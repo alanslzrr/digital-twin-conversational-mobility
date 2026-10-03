@@ -1,0 +1,21 @@
+- link "Skip to content" [ref=e1976]
+- banner
+  - button "Toggle navigation" [ref=e1977]
+    - StaticText "Toggle Sidebar"
+  - button "Pause refresh" [ref=e1978]
+  - button "Refresh stored data" [ref=e1979]
+  - button "Data timing" [expanded=false, ref=e1980]
+- main
+  - heading "My conversations" [level=1, ref=e1981]
+  - article
+    - heading "Conversation 1" [level=2, ref=e1983]
+      - StaticText "Conversation 1"
+    - paragraph
+      - StaticText "Created: "
+      - time
+        - StaticText "03/10/2026, 17:04:55 CEST"
+      - StaticText " · Best-effort capture"
+    - link "Open chat" [ref=e1984]
+    - link "Inspect conversation" [ref=e1985]
+  - button "Capture and retention" [expanded=false, ref=e1982]
+- alert

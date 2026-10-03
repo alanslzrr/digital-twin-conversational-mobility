@@ -1,0 +1,174 @@
+- link "Skip to content" [ref=e2102]
+- banner
+  - button "Toggle navigation" [ref=e2103]
+    - StaticText "Toggle Sidebar"
+  - button "Pause refresh" [ref=e2104]
+  - button "Refresh stored data" [ref=e2105]
+  - button "Data timing" [expanded=false, ref=e2106]
+- main
+  - heading "Queries" [level=1, ref=e2107]
+  - LabelText
+    - StaticText "Search registered tools"
+  - textbox "Search registered tools" [ref=e2108]
+  - heading "Places" [level=2, ref=e2109]
+  - link "Find a stored place resolve_place" [ref=e2110]
+    - strong
+      - StaticText "Find a stored place"
+    - paragraph
+      - StaticText "resolve_place"
+  - link "Resolve an address resolve_address" [ref=e2111]
+    - strong
+      - StaticText "Resolve an address"
+    - paragraph
+      - StaticText "resolve_address"
+  - heading "Journeys and timetables" [level=2, ref=e2112]
+  - link "Plan a journey plan_journey" [ref=e2113]
+    - strong
+      - StaticText "Plan a journey"
+    - paragraph
+      - StaticText "plan_journey"
+  - link "Get EMT arrivals get_emt_arrivals" [ref=e2114]
+    - strong
+      - StaticText "Get EMT arrivals"
+    - paragraph
+      - StaticText "get_emt_arrivals"
+  - link "Read published timetable get_crtm_timetable" [ref=e2115]
+    - strong
+      - StaticText "Read published timetable"
+    - paragraph
+      - StaticText "get_crtm_timetable"
+  - link "Get departures get_departures" [ref=e2116]
+    - strong
+      - StaticText "Get departures"
+    - paragraph
+      - StaticText "get_departures"
+  - heading "Mobility evidence" [level=2, ref=e2117]
+  - link "Read incidents and alerts get_incidents" [ref=e2118]
+    - strong
+      - StaticText "Read incidents and alerts"
+    - paragraph
+      - StaticText "get_incidents"
+  - link "Read bike availability get_bike_availability" [ref=e2119]
+    - strong
+      - StaticText "Read bike availability"
+    - paragraph
+      - StaticText "get_bike_availability"
+  - link "Read air and weather get_environment" [ref=e2120]
+    - strong
+      - StaticText "Read air and weather"
+    - paragraph
+      - StaticText "get_environment"
+  - link "Read traffic sensors get_road_state" [ref=e2121]
+    - strong
+      - StaticText "Read traffic sensors"
+    - paragraph
+      - StaticText "get_road_state"
+  - link "Read historical evidence get_historical_state" [ref=e2122]
+    - strong
+      - StaticText "Read historical evidence"
+    - paragraph
+      - StaticText "get_historical_state"
+  - link "Read parking get_parking" [ref=e2123]
+    - strong
+      - StaticText "Read parking"
+    - paragraph
+      - StaticText "get_parking"
+  - heading "System and coverage" [level=2, ref=e2124]
+  - link "Inspect a line get_line_status" [ref=e2125]
+    - strong
+      - StaticText "Inspect a line"
+    - paragraph
+      - StaticText "get_line_status"
+  - link "Inspect network status get_network_status" [ref=e2126]
+    - strong
+      - StaticText "Inspect network status"
+    - paragraph
+      - StaticText "get_network_status"
+  - link "Read mobility snapshot get_mobility_snapshot" [ref=e2127]
+    - strong
+      - StaticText "Read mobility snapshot"
+    - paragraph
+      - StaticText "get_mobility_snapshot"
+  - link "Inspect source health get_source_health" [ref=e2128]
+    - strong
+      - StaticText "Inspect source health"
+    - paragraph
+      - StaticText "get_source_health"
+  - heading "Inspect a line" [level=2, ref=e2129]
+  - paragraph
+    - StaticText "Stored catalog coverage and alerts for a line."
+  - button "Sanitized technical details" [expanded=false, ref=e2130]
+    - StaticText "Sanitized technical details"
+  - form
+    - radiogroup "Query mode" [ref=e2131] focusable [tabindex]
+      - generic
+        - radio "Stored evidence" [checked=true, ref=e2139]
+        - LabelText
+          - StaticText "Stored evidence"
+      - generic
+        - radio "Run query" [checked=false, ref=e2140]
+        - LabelText
+          - StaticText "Run query"
+    - paragraph
+      - StaticText "Read stored evidence without executing this tool."
+    - paragraph
+      - StaticText "Stored catalog coverage and alerts for a line."
+    - button "Load example without execution" [ref=e2132]
+    - group
+      - LabelText
+        - StaticText "Information source"
+      - radiogroup "Information source" [ref=e2134] focusable [tabindex]
+        - generic
+          - radio "Default" [checked=true, ref=e2141]
+          - LabelText
+            - StaticText "Default"
+        - generic
+          - radio "Renfe" [checked=false, ref=e2142]
+          - LabelText
+            - StaticText "Renfe"
+        - generic
+          - radio "EMT buses" [checked=false, ref=e2143]
+          - LabelText
+            - StaticText "EMT buses"
+        - generic
+          - radio "CRTM transport" [checked=false, ref=e2144]
+          - LabelText
+            - StaticText "CRTM transport"
+    - group
+      - LabelText
+        - StaticText "Transport network"
+      - radiogroup "Transport network" [ref=e2135] focusable [tabindex]
+        - generic
+          - radio "Default" [checked=true, ref=e2145]
+          - LabelText
+            - StaticText "Default"
+        - generic
+          - radio "Metro" [checked=false, ref=e2146]
+          - LabelText
+            - StaticText "Metro"
+        - generic
+          - radio "Light rail" [checked=false, ref=e2147]
+          - LabelText
+            - StaticText "Light rail"
+        - generic
+          - radio "Interurban buses" [checked=false, ref=e2148]
+          - LabelText
+            - StaticText "Interurban buses"
+        - generic
+          - radio "EMT buses" [checked=false, ref=e2149]
+          - LabelText
+            - StaticText "EMT buses"
+    - group
+      - LabelText
+        - StaticText "Published line"
+      - textbox "Published line" [ref=e2136]
+    - group
+      - LabelText
+        - StaticText "Result limit"
+      - spinbutton "Result limit" [ref=e2137]
+    - button "Advanced configuration" [expanded=false, ref=e2138]
+      - StaticText "Advanced configuration"
+    - button "Inspect stored evidence" [ref=e2133]
+    - paragraph
+      - StaticText "Inspector limit: 256 KB. EVE context: 32 KB. Inspector evidence does not certify what the model received."
+- alert

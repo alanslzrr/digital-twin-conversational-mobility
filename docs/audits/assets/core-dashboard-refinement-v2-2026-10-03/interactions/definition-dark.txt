@@ -1,0 +1,36 @@
+- generic
+  - dialog "Available bikes definition"
+    - heading "Available bikes definition" [level=2, ref=e83]
+    - button "Close details" [ref=e84]
+    - paragraph
+      - StaticText "Available bikes definition details"
+    - DescriptionList
+      - term "Comparison"
+      - definition
+        - StaticText "No previous successful reading in this session. Global historical baselines are not exposed."
+      - term "Definition"
+      - definition
+        - StaticText "Suma de bicicletas publicadas por estaciones únicas instaladas y habilitadas para alquiler, observadas en los últimos 60 segundos."
+      - term "Coverage"
+      - definition
+        - StaticText "1 de 4 estaciones del catálogo almacenado"
+      - term "Selection"
+      - definition
+        - StaticText "Estaciones BiciMAD instaladas y habilitadas para alquiler"
+      - term "Evidence period"
+      - definition
+        - time
+          - StaticText "03/10/2026, 17:04:16 CEST"
+        - StaticText " — "
+        - time
+          - StaticText "03/10/2026, 17:05:16 CEST"
+      - term "Provenance"
+      - definition
+        - StaticText "Lecturas de estaciones BiciMAD guardadas"
+      - term "Excluded"
+      - definition
+        - StaticText "Excluye estaciones antiguas, deshabilitadas y sin lectura; no es una garantía de disponibilidad al llegar."
+      - term "Evaluated"
+      - definition
+        - time
+          - StaticText "03/10/2026, 17:05:16 CEST"

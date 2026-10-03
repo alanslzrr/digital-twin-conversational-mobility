@@ -1,0 +1,9 @@
+
+ RUN  v5.0.1 /Users/alansalazar/Documents/ChatGPT/digital-twin-conversational-mobility
+
+
+ Test Files  4 passed (4)
+      Tests  28 passed (28)
+   Start at  16:43:17
+   Duration  949ms (import 67%, transform 24%, tests 8%, worker 1%)
+
