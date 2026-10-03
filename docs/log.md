@@ -121,3 +121,10 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 
 - Sistema visual aplicado a las seis vistas en `92d0d7d`: KPI con alcance y medidor solo si reconcilia, tablas de evidencia/fuentes/turnos, codificación de frescura única en barras, franja y mapa, control de retención único y modo de consulta visible. Sin cambios de contratos, lectores, dependencias ni chat oficial.
 - `pnpm check` correcto (508 tests, 99 omitidos); formato de 98 JSON de evidencia V2 con contenido idéntico. Capturas 1440×1000 oscuro/claro de las seis vistas. [Acta y límites](acceptance/2026-10-03-core-dashboard-refinement-v2-continuation.md): zoom 200 %, lector de pantalla, matriz móvil, fallo Sources habitual y braces siguen abiertos; sin merge ni despliegue.
+
+
+## [2026-10-03] feat | Selector de tema y cabecera mínima del panel
+
+- Selector claro/oscuro/sistema (`@ncdai/theme-switcher`, `next-themes` 0.4.6) limitado al panel mediante `data-dashboard-theme`, con transición circle-blur solo en rutas del panel. El chat EVE oficial no cambia.
+- Eliminados los acentos laterales de selección y alertas; cabecera sin borde con lectura, pausa, refresco, tiempos y tema plegables, y estados anómalos siempre visibles en la píldora.
+- `pnpm check` correcto; capturas oscuro/claro forzado, detalle de conversación y móvil 390 px. [Acta y límites](acceptance/2026-10-03-core-dashboard-theme-header.md); sin merge ni despliegue.
