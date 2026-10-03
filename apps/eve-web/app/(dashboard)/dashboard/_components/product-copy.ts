@@ -3,6 +3,10 @@ const products: Record<string, string> = {
   "madrid-parking": "Parking occupancy",
   "madrid-traffic": "Traffic sensors",
   "madrid-air": "Air quality",
+  "weather:daily": "Daily forecast",
+  "weather:forecast": "Hourly forecast",
+  "weather:warnings": "Weather warnings",
+  "emt:arrivals": "EMT arrivals",
   aemet: "Weather observations",
   "renfe-trips": "Renfe estimates",
   "renfe-alerts": "Renfe alerts",
@@ -69,7 +73,7 @@ export function measurementValue(name: string, value: unknown) {
         {
           stop: "Stop",
           station: "Station",
-          entrance: "Acceso",
+          entrance: "Entrance",
           address: "Address",
           poi: "Point of interest",
         } as Record<string, string>
@@ -112,4 +116,18 @@ export function measurementDisplay(
           : "No"
         : measurementValue(name, value);
   return unit && !coded ? `${formatted} ${unit}` : formatted;
+}
+
+export function productUnit(unit: string) {
+  return (
+    (
+      {
+        estaciones: "stations",
+        medidas: "measurements",
+        registros: "records",
+        "muestras por categoría": "category samples",
+        "recursos consultados": "queried resources",
+      } as Record<string, string>
+    )[unit] ?? unit
+  );
 }
