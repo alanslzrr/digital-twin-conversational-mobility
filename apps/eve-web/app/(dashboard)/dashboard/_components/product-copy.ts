@@ -34,11 +34,11 @@ export function productLabel(id: string) {
 export function evidenceExplanation(reason: string | null, coverage: string) {
   const reasons: Record<string, string> = {
     missing_observation: "Source supplied no verifiable observation time.",
-    invalid_timestamp: "Fecha publicada no utilizable.",
+    invalid_timestamp: "Published time unusable.",
     future_observation: "Observation time outside permitted margin.",
     last_refresh_failed: "Last attempt failed; previous observation retained.",
     old_issue: "Publication is stale despite a recent check.",
-    outside_horizon: "El periodo publicado ya ha terminado.",
+    outside_horizon: "Published interval ended.",
   };
   return reason
     ? (reasons[reason] ?? "Evidence has limits; inspect detailed times.")
@@ -79,8 +79,8 @@ export function measurementValue(name: string, value: unknown) {
     instant: "Instant measurement",
     interval: "Accumulated over the period",
     active: "Active as published",
-    unknown: "No confirmado",
-    inactive: "No vigente",
+    unknown: "Unknown",
+    inactive: "Inactive",
     provisional: "Provisional",
     validated: "Validated",
   };
@@ -103,7 +103,7 @@ export function measurementDisplay(
   const formatted = coded
     ? measurementValue(name, value)
     : typeof value === "number"
-      ? new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(
+      ? new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(
           value,
         )
       : typeof value === "boolean"

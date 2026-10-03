@@ -3,12 +3,13 @@ import type { DashboardEntity } from "@mobility/contracts";
 import * as schemas from "@mobility/contracts";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DashboardHttpError, useDashboard } from "@/src/dashboard-client";
+import { primaryMeasurements } from "@/src/dashboard-presentation";
 import { EntityDetail } from "./entity-detail";
 import { EntityHistory } from "./entity-history";
 import { FreshnessBreakdown } from "./insights";
@@ -58,42 +59,55 @@ export function Mobility({
   const [product, setProduct] = useState("");
   const [returnView, setReturnView] = useState("");
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const view = new URLSearchParams();
-    for (const key of [
-      "map",
-      "center",
-      "zoom",
-      "returnProduct",
-      "returnCursor",
-    ])
-      if (params.has(key)) view.set(key, params.get(key) ?? "");
-    setReturnView(view.toString());
-    if (!id)
-      setMap(
-        params.get("map") === "1" ||
-          (!params.has("map") &&
-            window.matchMedia("(min-width:1100px)").matches),
+    const restore = () => {
+      const params = new URLSearchParams(window.location.search);
+      const view = new URLSearchParams();
+      for (const key of [
+        "map",
+        "center",
+        "zoom",
+        "returnProduct",
+        "returnCursor",
+      ])
+        if (params.has(key)) view.set(key, params.get(key) ?? "");
+      setReturnView(view.toString());
+      if (!id)
+        setMap(
+          params.get("map") === "1" ||
+            (!params.has("map") &&
+              window.matchMedia("(min-width:1100px)").matches),
+        );
+      const cat = schemas.dashboardCategory.safeParse(params.get("category"));
+      if (cat.success && !initialCategory) setCategory(cat.data);
+      if (params.get("section") === "reference") {
+        setSection("reference");
+        setProduct(params.get("product") ?? "reference:places");
+        if (!initialCategory) setCategory("places");
+      }
+      setSource("");
+      setFreshness("");
+      setProduct(
+        params.get("section") === "reference" ? "reference:places" : "",
       );
-    const cat = schemas.dashboardCategory.safeParse(params.get("category"));
-    if (cat.success && !initialCategory) setCategory(cat.data);
-    if (params.get("section") === "reference") {
-      setSection("reference");
-      setProduct(params.get("product") ?? "reference:places");
-      if (!initialCategory) setCategory("places");
-    }
-    if (params.get("parkingCategory"))
-      setParkingCategory(params.get("parkingCategory") ?? "");
-    if (params.get("product")) setProduct(params.get("product") ?? "");
-    if (schemas.sourceIdSchema.safeParse(params.get("source")).success)
-      setSource(params.get("source") ?? "");
-    if (schemas.dashboardFreshness.safeParse(params.get("freshness")).success)
-      setFreshness(params.get("freshness") ?? "");
-    if (!id && params.get("cursor")) setCursor(params.get("cursor"));
-    if (params.get("search")) {
-      setSearch(params.get("search") ?? "");
-      setFilter(params.get("search") ?? "");
-    }
+      setSearch("");
+      setFilter("");
+      setCursor(null);
+      if (params.get("parkingCategory"))
+        setParkingCategory(params.get("parkingCategory") ?? "");
+      if (params.get("product")) setProduct(params.get("product") ?? "");
+      if (schemas.sourceIdSchema.safeParse(params.get("source")).success)
+        setSource(params.get("source") ?? "");
+      if (schemas.dashboardFreshness.safeParse(params.get("freshness")).success)
+        setFreshness(params.get("freshness") ?? "");
+      if (!id && params.get("cursor")) setCursor(params.get("cursor"));
+      if (params.get("search")) {
+        setSearch(params.get("search") ?? "");
+        setFilter(params.get("search") ?? "");
+      }
+    };
+    restore();
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
   }, [initialCategory, id]);
   const [category, setCategory] = useState(initialCategory ?? "bikes"),
     [parkingCategory, setParkingCategory] = useState(""),
@@ -104,6 +118,7 @@ export function Mobility({
     [cursor, setCursor] = useState<string | null>(null),
     [map, setMap] = useState(false);
   const [selected, setSelected] = useState<DashboardEntity | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [draftSource, setDraftSource] = useState(source);
   const qs = new URLSearchParams({
@@ -147,6 +162,13 @@ export function Mobility({
     }
   }, [id, queryString, map]);
 
+  const previousSelection = useRef(queryString);
+  useEffect(() => {
+    if (previousSelection.current !== queryString) {
+      previousSelection.current = queryString;
+      setSelected(null);
+    }
+  }, [queryString]);
   const entities = page?.entities ?? [];
   const back = new URLSearchParams(`${qs}&${returnView}`);
   if (back.has("returnProduct")) {
@@ -425,7 +447,10 @@ export function Mobility({
                   ? `${selected.evidence.productId}:${selected.id}`
                   : undefined
               }
-              onSelect={setSelected}
+              onSelect={(e) => {
+                setSelected(e);
+                setDetailOpen(true);
+              }}
             />
           </Card>
         ) : null}
@@ -452,7 +477,10 @@ export function Mobility({
                       <button
                         type="button"
                         className="text-left font-medium hover:underline"
-                        onClick={() => setSelected(e)}
+                        onClick={() => {
+                          setSelected(e);
+                          setDetailOpen(true);
+                        }}
                       >
                         {e.name}
                       </button>
@@ -466,7 +494,7 @@ export function Mobility({
                     </td>
                     <td>
                       {e.measurements.length ? (
-                        e.measurements.slice(0, 3).map((m) => (
+                        primaryMeasurements(e).map((m) => (
                           <p key={m.name} className="text-sm">
                             {publicLabel(m.name)}:{" "}
                             <strong>
@@ -489,7 +517,7 @@ export function Mobility({
       </div>
       {selected ? (
         <Sheet
-          open={Boolean(selected)}
+          open={detailOpen}
           onOpenChange={(v) => {
             if (!v) setSelected(null);
           }}

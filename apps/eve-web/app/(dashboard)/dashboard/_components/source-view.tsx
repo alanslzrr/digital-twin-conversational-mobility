@@ -1,6 +1,8 @@
 "use client";
+import type { dashboardSourceResponse } from "@mobility/contracts";
 import Link from "next/link";
 import { useState } from "react";
+import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/src/dashboard-client";
 import { eventComponents } from "./event-copy";
@@ -43,8 +45,11 @@ function SourcesContent({ id }: { id?: string }) {
     true,
   );
   const status = useDashboard("status", 3000);
-  const data = obj(obj(q.data).data),
-    sources = list(data.sources),
+  const envelope = q.data as
+    | z.infer<typeof dashboardSourceResponse>
+    | undefined;
+  const data = obj(envelope?.data),
+    sources = envelope?.data.sources ?? [],
     metrics = obj(data.metrics);
   const selected = sources[0],
     streams = list(selected?.streams);
