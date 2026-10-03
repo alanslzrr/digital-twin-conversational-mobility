@@ -436,9 +436,9 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <h3 className="text-sm font-medium">
+                            <h2 className="text-sm font-medium">
                               {titles[String(e.kind)] ?? "Recorded event"}
-                            </h3>
+                            </h2>
                             <p className="mt-1 text-sm text-muted-foreground">
                               {states[String(e.status)] ??
                                 "State not confirmed"}
