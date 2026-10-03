@@ -155,6 +155,26 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                   </Button>
                 </p>
               ) : null}
+              <label htmlFor="conversation-turn" className="dc-meta">
+                Turn (returned page)
+              </label>
+              <select
+                id="conversation-turn"
+                value={turn}
+                onChange={(e) => {
+                  setTurn(e.target.value);
+                  setCursor(null);
+                  setPayload(null);
+                  setCall("");
+                }}
+              >
+                <option value="">All retained turns</option>
+                {turns.map((t, i) => (
+                  <option key={String(t.turnId)} value={String(t.turnId)}>
+                    Turn {i + 1} · {states[String(t.state)] ?? String(t.state)}
+                  </option>
+                ))}
+              </select>
               <Tabs.Root
                 value={tab}
                 onValueChange={(value) => {

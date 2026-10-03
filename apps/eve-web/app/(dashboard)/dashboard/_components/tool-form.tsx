@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/src/dashboard-client";
+import { Segmented } from "./primitives";
 import { publicLabel } from "./shared";
 
 const labels: Record<string, string> = {
@@ -101,7 +102,7 @@ export const toolCopy: Record<
     example: { source: "bicimad", minutesAgo: 30 },
   },
   get_source_health: {
-    title: "Examinar una fuente",
+    title: "Inspect source health",
     question:
       "Source evidence and technical signals. Active workers do not certify recent evidence.",
     example: { source: "bicimad" },
@@ -112,7 +113,7 @@ export const toolCopy: Record<
     example: { source: "emt", line: "1" },
   },
   get_network_status: {
-    title: "Examinar una red",
+    title: "Inspect network status",
     question: "Stored network evidence, not a normal-service guarantee.",
     example: { source: "emt" },
   },
@@ -401,6 +402,16 @@ export function ToolFields({
                   a known ID in advanced configuration; no fabricated location.
                 </p>
               </>
+            ) : options && options.length <= 4 ? (
+              <Segmented
+                label={labels[key] ?? publicLabel(key)}
+                value={String(value[key] ?? "")}
+                onChange={(v) => update(key, v)}
+                options={[
+                  ["", "Default"],
+                  ...options.map((o) => [o, optionNames[o] ?? o] as const),
+                ]}
+              />
             ) : options ? (
               <select
                 id={id}

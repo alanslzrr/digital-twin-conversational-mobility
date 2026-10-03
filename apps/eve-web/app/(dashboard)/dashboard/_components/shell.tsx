@@ -239,9 +239,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <dd>
                     {error
                       ? "Worker status unavailable"
-                      : status?.ingestionEnabled
-                        ? "Enabled"
-                        : "Disabled"}
+                      : !status
+                        ? "Unavailable"
+                        : status.ingestionEnabled
+                          ? "Enabled"
+                          : "Disabled"}
                   </dd>
                 </div>
                 <div>
