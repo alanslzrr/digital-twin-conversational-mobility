@@ -53,7 +53,7 @@ export async function readOverview(params: URLSearchParams) {
         await tx`SELECT CASE WHEN resource='warnings:28' THEN 'weather:warnings' WHEN resource LIKE 'daily:%' THEN 'weather:daily' ELSE 'weather:forecast' END AS id,
       count(*)::int AS total, bool_or(checked_at IS NOT NULL AND issued_at IS NOT NULL AND checked_at<=${evaluatedAt}::timestamptz+interval '30 seconds' AND issued_at<=${evaluatedAt}::timestamptz+interval '5 minutes' AND checked_at>=${evaluatedAt}::timestamptz-interval '24 hours' AND (resource='warnings:28' OR issued_at>=${evaluatedAt}::timestamptz-interval '24 hours') AND valid_to>=${evaluatedAt}::timestamptz AND error_code IS NULL AND checked_at>=${evaluatedAt}::timestamptz-CASE WHEN resource='warnings:28' THEN interval '5 minutes' ELSE interval '30 minutes' END) AS usable,
       max(issued_at) AS observed_at,max(fetched_at) AS ingested_at FROM weather_product GROUP BY 1
-      UNION ALL SELECT 'emt:arrivals',count(*)::int,bool_or(observed_at BETWEEN ${evaluatedAt}::timestamptz-interval '30 seconds' AND ${evaluatedAt}::timestamptz+interval '30 seconds'),max(observed_at),max(ingested_at) FROM emt_arrival_cache`;
+      UNION ALL SELECT 'emt:arrivals',count(observed_at)::int,bool_or(observed_at BETWEEN ${evaluatedAt}::timestamptz-interval '30 seconds' AND ${evaluatedAt}::timestamptz+interval '30 seconds'),max(observed_at),max(ingested_at) FROM emt_arrival_cache`;
       const sources = await tx`SELECT id,enabled FROM source_catalog`;
       const notices =
         await tx`WITH entries AS (SELECT m.job_id,a,m.observed_at,m.ingested_at FROM mobility_snapshot m CROSS JOIN LATERAL jsonb_array_elements(coalesce(m.payload->'alerts',m.payload->'incidents','[]'::jsonb)) a WHERE m.job_id IN ('renfe-alerts','emt-alerts','dgt-incidents') AND EXISTS(SELECT 1 FROM source_catalog WHERE id=m.source_id AND enabled)), eligible AS (
@@ -133,7 +133,7 @@ export async function readOverview(params: URLSearchParams) {
       ingestedAt: iso(r?.ingested_at ?? demand?.ingested_at),
       issue: r?.error_code
         ? "El último intento de actualización falló; la lectura guardada conserva su fecha."
-        : !r && !demand && p.mode === "demand"
+        : !r && (!demand || Number(demand.total) === 0) && p.mode === "demand"
           ? "Sin consulta previa guardada. Consulta un lugar concreto desde Consultas."
           : total === null
             ? "Sin lectura guardada."
@@ -249,15 +249,17 @@ export async function readOverview(params: URLSearchParams) {
         "Plazas libres publicadas",
         data.parking?.value ?? null,
         "plazas",
-        `Suma de una única categoría publicada (${data.code ?? "sin categoría"}) por aparcamiento, observada en los últimos cinco minutos.`,
+        `Suma de una única categoría publicada (${data.categories.find((c) => c.code === data.code)?.label ?? data.code ?? "sin categoría"}) por aparcamiento, observada en los últimos cinco minutos.`,
         "Excluye tarifas, capacidad estática, otras categorías y lecturas antiguas; las categorías no se consideran aditivas.",
-        `${data.parking?.included ?? 0} de ${data.parking?.denominator ?? 0} aparcamientos con esa categoría`,
-        "/dashboard/mobility?section=dynamic&category=parking",
+        `${data.parking?.included ?? 0} de ${data.parking?.denominator ?? 0} aparcamientos · ${data.categories.find((c) => c.code === data.code)?.label ?? data.code ?? "sin categoría"}`,
+        `/dashboard/mobility?section=dynamic&category=parking${data.code ? `&parkingCategory=${encodeURIComponent(data.code)}` : ""}`,
       ),
       metric(
         "M3",
         "Avisos vigentes publicados",
-        products.some((p) => p.category === "incidents" && p.usable)
+        products.some(
+          (p) => p.category === "incidents" && p.enabled && p.usable,
+        )
           ? data.notices
           : null,
         "avisos",
