@@ -13,6 +13,7 @@ import type { z } from "zod";
 import { parkingPrices, parkingPriceVersion } from "../catalogs/parking-prices";
 import { database } from "../database";
 import { DashboardAccessError } from "./access";
+import { coordinateSql, entityCoordinates } from "./coordinates";
 import { decodeCursor, encodeCursor } from "./cursor";
 
 const iso = (v: unknown) =>
@@ -81,18 +82,7 @@ export function projectDashboardEntity(
     e.stationIdentity && typeof e.stationIdentity === "object"
       ? (e.stationIdentity as Record<string, unknown>)
       : {};
-  const location =
-    e.location && typeof e.location === "object"
-      ? (e.location as Record<string, unknown>)
-      : {};
-  const coordinate =
-    e.coordinate && typeof e.coordinate === "object"
-      ? (e.coordinate as Record<string, unknown>)
-      : stationIdentity.location && typeof stationIdentity.location === "object"
-        ? (stationIdentity.location as Record<string, unknown>)
-        : location.start && typeof location.start === "object"
-          ? (location.start as Record<string, unknown>)
-          : {};
+  const coordinate = entityCoordinates(e);
   const fields = new Set([
     "bikes",
     "docks",
@@ -238,18 +228,7 @@ export function projectDashboardEntity(
           : typeof e.title === "string"
             ? e.title.slice(0, 300)
             : "Sin nombre publicado",
-    latitude:
-      typeof e.latitude === "number"
-        ? e.latitude
-        : typeof coordinate.latitude === "number"
-          ? coordinate.latitude
-          : null,
-    longitude:
-      typeof e.longitude === "number"
-        ? e.longitude
-        : typeof coordinate.longitude === "number"
-          ? coordinate.longitude
-          : null,
+    ...coordinate,
     evidence: {
       sourceId: source,
       productId: product,
@@ -319,6 +298,7 @@ export async function readEntities(
     category: input.category,
     section: input.section ?? null,
     product: input.product ?? null,
+    parkingCategory: input.parkingCategory ?? null,
     source: input.source ?? null,
     freshness: input.freshness ?? null,
     search: input.search ?? null,
@@ -404,15 +384,16 @@ export async function readEntities(
         item.value||jsonb_build_object('name',coalesce(w.payload->>'name',item.value->>'event','Aviso AEMET'),'_errorCode',w.error_code,'_daily',w.payload->>'product'='daily_forecast','issuedAtRaw',w.payload->>'issuedAtRaw')
         FROM weather_product w CROSS JOIN LATERAL jsonb_array_elements(coalesce(w.payload->'periods',w.payload->'records','[]'::jsonb)) WITH ORDINALITY item(value,ordinality)
         WHERE (${input.category}='environment' AND w.resource<>'warnings:28') OR (${input.category}='incidents' AND w.resource='warnings:28')
-      ), selected AS (SELECT DISTINCT ON(product_id,entity_id) *, product_id||':'||entity_id AS key FROM entries WHERE
+      ), located AS (SELECT entries.*, ${tx.unsafe(coordinateSql("latitude"))} AS latitude, ${tx.unsafe(coordinateSql("longitude"))} AS longitude FROM entries), selected AS (SELECT DISTINCT ON(product_id,entity_id) *, product_id||':'||entity_id AS key FROM located WHERE
         (${input.section ?? null}::text IS NULL OR (${input.section ?? null}='reference' AND (product_id LIKE 'catalog:%' OR product_id LIKE 'crtm:%' OR product_id LIKE 'reference:%')) OR (${input.section ?? null}='dynamic' AND ${input.category}<>'places'))
         AND (${input.product ?? null}::text IS NULL OR product_id=${input.product ?? null} OR (${input.product ?? null}='reference:places' AND (product_id LIKE 'catalog:%' OR product_id LIKE 'crtm:%')) OR (${input.product ?? null}='reference:accessibility' AND (product_id LIKE 'crtm:%' OR product_id='catalog:renfe')) OR (${input.product ?? null}='weather:forecast' AND product_id LIKE 'weather:forecast:%') OR (${input.product ?? null}='weather:daily' AND product_id LIKE 'weather:daily:%') OR (${input.product ?? null}='weather:warnings' AND product_id='weather:warnings:28'))
+        AND (${input.parkingCategory ?? null}::text IS NULL OR (${input.category}='parking' AND entity->>'category'=${input.parkingCategory ?? null}))
         AND (${input.source ?? null}::text IS NULL OR source_id=${input.source ?? null})
         AND (${input.search ?? null}::text IS NULL OR coalesce(entity->>'name',entity->>'title','') ILIKE '%'||${input.search ?? null}||'%')
         AND (${detailId ?? null}::text IS NULL OR entity_id=${detailId ?? null})
         ORDER BY product_id,entity_id)
       , classified AS (SELECT *, CASE WHEN ${input.category}='places' THEN 'static' WHEN product_id LIKE 'weather:%' THEN CASE WHEN checked_at IS NULL OR issued_at IS NULL OR valid_to<${evaluatedAt}::timestamptz OR checked_at>${evaluatedAt}::timestamptz+interval '30 seconds' OR issued_at>${evaluatedAt}::timestamptz+interval '5 minutes' OR checked_at<${evaluatedAt}::timestamptz-interval '24 hours' OR (product_id<>'weather:warnings:28' AND issued_at<${evaluatedAt}::timestamptz-interval '24 hours') THEN 'unavailable' WHEN entity->>'_errorCode' IS NULL AND ${evaluatedAt}::timestamptz-checked_at<=CASE WHEN product_id='weather:warnings:28' THEN interval '300 seconds' ELSE interval '1800 seconds' END THEN 'recently_checked' ELSE 'stale' END WHEN entity->>'observedAt' IS NULL THEN 'unavailable' WHEN (entity->>'observedAt')::timestamptz>${evaluatedAt}::timestamptz+interval '30 seconds' THEN 'unavailable' WHEN ${evaluatedAt}::timestamptz-(entity->>'observedAt')::timestamptz <= (coalesce((${thresholds}::jsonb->>product_id)::int,CASE WHEN product_id='emt:arrivals' THEN 30 ELSE 0 END))*interval '1 second' THEN 'recent' ELSE 'stale' END AS state FROM selected)
-      , filtered AS (SELECT * FROM classified WHERE (${bbox !== null}=false OR ((entity->>'longitude')::float8 BETWEEN ${bbox?.[0] ?? -180} AND ${bbox?.[2] ?? 180} AND (entity->>'latitude')::float8 BETWEEN ${bbox?.[1] ?? -90} AND ${bbox?.[3] ?? 90}))
+      , filtered AS (SELECT * FROM classified WHERE (${bbox !== null}=false OR (longitude BETWEEN ${bbox?.[0] ?? -180} AND ${bbox?.[2] ?? 180} AND latitude BETWEEN ${bbox?.[1] ?? -90} AND ${bbox?.[3] ?? 90}))
         AND (${input.freshness ?? null}::text IS NULL OR state=${input.freshness ?? null})
       ), stats AS (SELECT count(*)::int AS total, count(*) FILTER(WHERE state IN ('recent','recently_checked'))::int AS recent,count(*) FILTER(WHERE state='stale')::int AS stale,count(*) FILTER(WHERE state='static')::int AS static,count(*) FILTER(WHERE state IN ('unavailable','unknown'))::int AS unavailable,${evaluatedAt}::timestamptz AS evaluated_at FROM filtered)
       SELECT page.*,stats.total AS selection_total,stats.recent AS selection_recent,stats.stale AS selection_stale,stats.static AS selection_static,stats.unavailable AS selection_unavailable,stats.evaluated_at FROM stats LEFT JOIN LATERAL (SELECT * FROM filtered WHERE key>${after} ORDER BY product_id,entity_id LIMIT ${limit + 1}) page ON true`;

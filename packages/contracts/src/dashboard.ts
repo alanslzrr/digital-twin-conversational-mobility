@@ -76,6 +76,7 @@ export const dashboardEntityQuery = z.strictObject({
   category: dashboardCategory,
   section: z.enum(["dynamic", "reference"]).optional(),
   product: publicId.optional(),
+  parkingCategory: publicId.optional(),
   source: z
     .string()
     .min(1)
