@@ -18,72 +18,52 @@
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"sm\" class=\"inline-flex shrink-0...\">",
-          "target": [
-            ".self-start"
-          ]
+          "target": [".self-start"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters",
           "html": "<span aria-hidden=\"true\">−</span>",
-          "target": [
-            ".leaflet-control-zoom-out > span[aria-hidden=\"true\"]"
-          ]
+          "target": [".leaflet-control-zoom-out > span[aria-hidden=\"true\"]"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
           "html": "<a href=\"https://leafletjs.com\" title=\"A JavaScript library for interactive maps\">",
-          "target": [
-            "a[href$=\"leafletjs.com\"]"
-          ]
+          "target": ["a[href$=\"leafletjs.com\"]"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
           "html": "<a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap contributors</a>",
-          "target": [
-            ".leaflet-control-attribution > a:nth-child(3)"
-          ]
+          "target": [".leaflet-control-attribution > a:nth-child(3)"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<p>Lectura reciente · dato antiguo (contorno discontinuo) · sin lectura utilizable · referencia. El color no sustituye las fechas de la ficha.</p>",
-          "target": [
-            ".flex-col.p-3.gap-2 > p"
-          ]
+          "target": [".flex-col.p-3.gap-2 > p"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<span>Fondo cartográfico externo, disponible según el servicio · puntos con coordenadas publicadas · los mismos datos se pueden consultar en la tabla</span>",
-          "target": [
-            ".flex-col.p-3.gap-2 > span"
-          ]
+          "target": [".flex-col.p-3.gap-2 > span"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<th class=\"p-3 font-medium\">Entidad</th>",
-          "target": [
-            "th:nth-child(1)"
-          ]
+          "target": ["th:nth-child(1)"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<th class=\"p-3 font-medium\">Producto/fuente</th>",
-          "target": [
-            "th:nth-child(2)"
-          ]
+          "target": ["th:nth-child(2)"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<th class=\"p-3 font-medium\">Frescura</th>",
-          "target": [
-            "th:nth-child(3)"
-          ]
+          "target": ["th:nth-child(3)"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
           "html": "<th class=\"p-3 font-medium\">Observación</th>",
-          "target": [
-            "th:nth-child(4)"
-          ]
+          "target": ["th:nth-child(4)"]
         }
       ],
       "tags": [
