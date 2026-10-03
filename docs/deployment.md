@@ -33,7 +33,7 @@ La aplicación guarda raw y releases en disco y actualiza datos mediante un work
 
 Los entornos privados `.env.cloud.*.local` están ignorados y con permisos restringidos. Se cargan por separado del entorno `.env.local` de la instalación local. [Variables por componente](reference/system.md#variables-y-secretos).
 
-- [Configurador Vercel](../scripts/configure-vercel.mjs): `pnpm configure:vercel --apply` modifica configuración/secretos de proyectos; no usar para el arranque local.
+- [Configurador Vercel](../scripts/configure-vercel.mjs): **deshabilitado**, también con `--apply`. Falla antes de leer secretos, escribir archivos o contactar servicios cloud. La CLI se retiró por su dependencia sin parche `braces` (GHSA-vfj7-8cjw-p6xm). No se sustituye por una instalación global ni `pnpm dlx`.
 - [Migrador](../scripts/migrate.mjs): la operación remota requiere `--allow-remote` y el entorno cloud elegido expresamente.
 - [Probe cloud](../scripts/check-cloud.mjs): `--probe` escribe y elimina objetos de prueba.
 - [Administrador de cuentas](../scripts/evaluator.mjs): cloud exige `ALLOW_REMOTE_ADMIN=true`; sus cuentas no son las locales.
@@ -41,6 +41,8 @@ Los entornos privados `.env.cloud.*.local` están ignorados y con permisos restr
 Vercel puede devolver el marcador `[SENSITIVE]` al descargar secretos sensibles. No sobrescribas una copia privada real con ese marcador.
 
 ## Si se decide publicar en el futuro
+
+Primero debe reincorporarse una CLI con árbol auditado y validarse de nuevo el configurador bajo autorización explícita. CI comprueba que el configurador actual falla cerrado, además de auditar todas las dependencias instaladas. Los proyectos remotos y sus secretos no se modificaron al retirar la CLI.
 
 La configuración del destino debe definir el plan contratado, el almacenamiento durable, la ejecución de ingestión, el alojamiento OTP y la retención de conversaciones. Las cuotas y precios se consultan al elegir el plan.
 
