@@ -59,6 +59,12 @@ function reference(name, role = "button") {
 function click(name, role = "button") {
   b("click", reference(name, role));
 }
+function showControls() {
+  evaluate(
+    "document.querySelector('.dc-status-toggle[aria-expanded=\"false\"]')?.click() ?? true",
+  );
+  b("wait", "--fn", "!document.querySelector('#dc-header-controls[inert]')");
+}
 function inspect(name) {
   const audit = JSON.parse(b("a11y", "--json")).data;
   save(`${name}-axe.json`, audit);
@@ -105,12 +111,14 @@ try {
     evaluate("document.activeElement?.getAttribute('aria-label')") ===
       "Available bikes definition",
   );
+  showControls();
   click("Data timing");
   inspect("timing-dark");
   b("press", "Escape");
   b("set", "media", "light", "reduced-motion");
   page("");
   b("wait", "--text", "Comparison unavailable");
+  showControls();
   click("Data timing");
   inspect("timing-light");
   b("press", "Escape");
@@ -195,6 +203,7 @@ try {
   );
   b("network", "route", "**/api/dashboard/sources?*", "--abort");
   b("wait", "16000");
+  showControls();
   click("Refresh stored data");
   b("wait", "--text", "Cached source evidence");
   check("cached source evidence retained", text().includes("Source products"));
