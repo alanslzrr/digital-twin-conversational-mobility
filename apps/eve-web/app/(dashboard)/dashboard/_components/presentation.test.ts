@@ -33,9 +33,10 @@ it("explains truncated inspection results without a primary JSON wall", () => {
   expect(html).toContain("QA sintética");
   expect(html).toContain("Available bikes");
   expect(html).toContain("Stored only; no provider acquisition");
-  expect(html).toContain("<details");
+  expect(html).toContain("Sanitized technical details");
+  expect(html).not.toContain("<details");
   expect(html.indexOf("Result truncated")).toBeLessThan(
-    html.indexOf("<details"),
+    html.indexOf("Sanitized technical details"),
   );
 });
 it("does not display an uninstrumented activity interval as zero captured", () => {
@@ -61,7 +62,7 @@ it("does not display an uninstrumented activity interval as zero captured", () =
       },
     }),
   );
-  expect(html).toContain("Unknown");
+  expect(html).toContain("Unavailable");
   expect(html).not.toContain("<svg");
 });
 

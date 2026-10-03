@@ -1,12 +1,12 @@
 "use client";
 import { dashboardToolName } from "@mobility/contracts";
 import Link from "next/link";
-import { Tabs } from "radix-ui";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { number } from "./insights";
-import { Empty, Sheet } from "./primitives";
+import { Empty, Segmented, Sheet, Tabs } from "./primitives";
+import { UsagePerTurnRows } from "./refinement/UsagePerTurnRows";
 import { Instant, PageTitle, State, Technical } from "./shared";
 import { toolCopy } from "./tool-form";
 import { TracePayload } from "./trace-payload";
@@ -94,13 +94,6 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
   const data = unwrap(sessionId ? events.data : index.data),
     entries = rows(sessionId ? data.events : data.sessions);
   const picked = turns.find((r) => r.turnId === turn);
-  const max = Math.max(
-    1,
-    ...turns.flatMap((r) => [
-      Number(r.inputTokens ?? 0),
-      Number(r.outputTokens ?? 0),
-    ]),
-  );
   return (
     <>
       <PageTitle
@@ -155,26 +148,28 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                   </Button>
                 </p>
               ) : null}
-              <label htmlFor="conversation-turn" className="dc-meta">
-                Turn (returned page)
-              </label>
-              <select
-                id="conversation-turn"
-                value={turn}
-                onChange={(e) => {
-                  setTurn(e.target.value);
-                  setCursor(null);
-                  setPayload(null);
-                  setCall("");
-                }}
-              >
-                <option value="">All retained turns</option>
-                {turns.map((t, i) => (
-                  <option key={String(t.turnId)} value={String(t.turnId)}>
-                    Turn {i + 1} · {states[String(t.state)] ?? String(t.state)}
-                  </option>
-                ))}
-              </select>
+              <div className="dc-turn-selector">
+                <Segmented
+                  label="Turn (returned page)"
+                  value={turn}
+                  onChange={(v) => {
+                    setTurn(v);
+                    setCursor(null);
+                    setPayload(null);
+                    setCall("");
+                  }}
+                  options={[
+                    ["", "All returned turns"],
+                    ...turns.map(
+                      (t, i) =>
+                        [
+                          String(t.turnId),
+                          `Turn ${i + 1} · ${states[String(t.state)] ?? "Unknown"}`,
+                        ] as const,
+                    ),
+                  ]}
+                />
+              </div>
               <Tabs.Root
                 value={tab}
                 onValueChange={(value) => {
@@ -305,6 +300,30 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                       Up to 50 turns per page. Session totals cover all retained
                       attempts. Unknown is not zero.
                     </p>
+                    <UsagePerTurnRows
+                      turns={turns.map((r, i) => ({
+                        id: String(r.turnId),
+                        label: `Turn ${i + 1}`,
+                        usage: {
+                          input:
+                            typeof r.inputTokens === "number"
+                              ? r.inputTokens
+                              : null,
+                          output:
+                            typeof r.outputTokens === "number"
+                              ? r.outputTokens
+                              : null,
+                          cachedInput:
+                            typeof r.cachedInputTokens === "number"
+                              ? r.cachedInputTokens
+                              : null,
+                          reasoningOutput:
+                            typeof r.reasoningTokens === "number"
+                              ? r.reasoningTokens
+                              : null,
+                        },
+                      }))}
+                    />
                     <div className="mt-4 overflow-x-auto">
                       <table className="w-full text-left text-sm">
                         <thead>
@@ -338,27 +357,9 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                               </td>
                               <td className="p-2 tabular-nums">
                                 {number(r.inputTokens)}
-                                {r.inputTokens != null ? (
-                                  <div
-                                    className="mt-1 h-1.5 bg-primary"
-                                    style={{
-                                      width: `${(Number(r.inputTokens) / max) * 100}%`,
-                                    }}
-                                    aria-hidden="true"
-                                  />
-                                ) : null}
                               </td>
                               <td className="p-2 tabular-nums">
                                 {number(r.outputTokens)}
-                                {r.outputTokens != null ? (
-                                  <div
-                                    className="mt-1 h-1.5 bg-muted-foreground"
-                                    style={{
-                                      width: `${(Number(r.outputTokens) / max) * 100}%`,
-                                    }}
-                                    aria-hidden="true"
-                                  />
-                                ) : null}
                               </td>
                               <td className="p-2">
                                 {r.state === "running"
@@ -368,7 +369,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                                     : "No measurement"}
                               </td>
                               <td className="p-2">
-                                {number(obj(obj(r.coverage).total).reported)} de{" "}
+                                {number(obj(obj(r.coverage).total).reported)} of{" "}
                                 {number(r.attempts)} attempts with complete
                                 usage
                               </td>
@@ -534,9 +535,15 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     current access appear here; missing capture is not
                     reconstructed.
                   </p>
-                  <Link href="/s" className="dc-link">
-                    Open chat
-                  </Link>
+                  <Button asChild>
+                    <Link href="/s">Open chat</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setRetentionOpen(true)}
+                  >
+                    Capture and retention
+                  </Button>
                 </Empty>
               ) : null}
               {entries.length ? (
