@@ -195,7 +195,7 @@ export function Mobility({
     return next;
   };
   return (
-    <>
+    <div className="dc-mobility-view">
       <PageTitle
         title={id ? (entities[0]?.name ?? "Evidence detail") : "Mobility"}
         description="Explore stored measurements, reference catalogs and their evidence."
@@ -421,6 +421,19 @@ export function Mobility({
               </Button>
             </div>
           </Sheet>
+          <Segmented
+            label="Workspace view"
+            value={map ? "map" : "list"}
+            onChange={(v) => setMap(v === "map")}
+            options={[
+              ["list", "List"],
+              ["map", "Map + list"],
+            ]}
+          />
+          <span className="dc-meta">
+            List includes unmapped entities. Map reads are independently
+            viewport-scoped.
+          </span>
         </form>
       )}
       {cursor ? (
@@ -435,23 +448,16 @@ export function Mobility({
         error={q.error}
         empty={!entities.length}
       />
-      {!id ? (
-        <div className="dc-toolbar">
-          <Segmented
-            label="Workspace view"
-            value={map ? "map" : "list"}
-            onChange={(v) => setMap(v === "map")}
-            options={[
-              ["list", "List"],
-              ["map", "Map + list"],
-            ]}
-          />
-          <span className="dc-meta">
-            List includes unmapped entities. Map reads are independently
-            viewport-scoped.
-          </span>
-        </div>
+      {page?.totals &&
+      (product || ["bikes", "traffic", "parking"].includes(category)) ? (
+        <FreshnessBreakdown {...page.totals} />
+      ) : page?.totals ? (
+        <p className="text-sm text-muted-foreground">
+          This family contains different products. Select one product to see age
+          coverage without mixing units.
+        </p>
       ) : null}
+
       <div className="dc-workspace" data-view={map ? "split" : "list"}>
         {map ? (
           <Card className="dc-map-stage">
@@ -483,7 +489,14 @@ export function Mobility({
               <thead>
                 <tr>
                   <th>Entity / evidence</th>
-                  <th>Measurements</th>
+                  {category === "bikes" ? (
+                    <>
+                      <th>Bikes</th>
+                      <th>Docks</th>
+                    </>
+                  ) : (
+                    <th>Measurements</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -514,22 +527,35 @@ export function Mobility({
                         <p className="dc-meta">No published coordinates</p>
                       ) : null}
                     </td>
-                    <td>
-                      {e.measurements.length ? (
-                        primaryMeasurements(e).map((m) => (
-                          <p key={m.name} className="text-sm">
-                            {publicLabel(m.name)}:{" "}
-                            <strong>
-                              {measurementDisplay(m.name, m.value, m.unit)}
-                            </strong>
-                          </p>
-                        ))
-                      ) : (
-                        <span className="dc-meta">
-                          No published measurement
-                        </span>
-                      )}
-                    </td>
+                    {category === "bikes" ? (
+                      ["bikes", "docks"].map((key) => (
+                        <td key={key} className="numeric">
+                          {measurementDisplay(
+                            key,
+                            e.measurements.find((m) => m.name === key)?.value ??
+                              null,
+                            null,
+                          )}
+                        </td>
+                      ))
+                    ) : (
+                      <td>
+                        {e.measurements.length ? (
+                          primaryMeasurements(e).map((m) => (
+                            <p key={m.name} className="text-sm">
+                              {publicLabel(m.name)}:{" "}
+                              <strong>
+                                {measurementDisplay(m.name, m.value, m.unit)}
+                              </strong>
+                            </p>
+                          ))
+                        ) : (
+                          <span className="dc-meta">
+                            No published measurement
+                          </span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -540,9 +566,7 @@ export function Mobility({
       {selected ? (
         <Sheet
           open={detailOpen}
-          onOpenChange={(v) => {
-            if (!v) setSelected(null);
-          }}
+          onOpenChange={setDetailOpen}
           title={selected.name}
         >
           <EntityDetail entity={selected} />
@@ -584,17 +608,8 @@ export function Mobility({
           shown.
         </p>
       ) : null}
-      {page?.totals &&
-      (product || ["bikes", "traffic", "parking"].includes(category)) ? (
-        <FreshnessBreakdown {...page.totals} />
-      ) : page?.totals ? (
-        <p className="text-sm text-muted-foreground">
-          This family contains different products. Select one product to see age
-          coverage without mixing units.
-        </p>
-      ) : null}
 
       {id ? <Technical value={page} /> : null}
-    </>
+    </div>
   );
 }

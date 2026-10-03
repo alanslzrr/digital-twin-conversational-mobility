@@ -12,6 +12,7 @@ import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { unresolvedExecution } from "@/src/dashboard-presentation";
 import { InspectionResult } from "./inspection-result";
 import { Card, Segmented } from "./primitives";
+import { RefinedDisclosure } from "./refinement/RefinedDisclosure";
 import { PageTitle, State, Technical } from "./shared";
 import { effectCopy, ToolFields, toolCopy } from "./tool-form";
 
@@ -46,13 +47,13 @@ const toolInputs = {
 };
 type Tool = z.infer<typeof dashboardToolCatalog>["tools"][number];
 export function Tools({ name: routeName }: { name?: string }) {
-  const name = routeName;
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState("stored");
   const [unknownOutcome, setUnknownOutcome] = useState(false);
   const ctx = useDashboardContext();
   const q = useDashboard("tools", 0, true);
   const tools = (q.data as { tools?: Tool[] })?.tools ?? [];
+  const name = routeName ?? tools[0]?.name;
   const [input, setInput] = useState("{}"),
     [result, setResult] = useState<unknown>(null),
     [error, setError] = useState(""),
@@ -241,10 +242,7 @@ export function Tools({ name: routeName }: { name?: string }) {
                   onChange={setInput}
                 />
                 <FieldGroup>
-                  <details>
-                    <summary className="min-h-11 cursor-pointer text-sm">
-                      Advanced configuration
-                    </summary>
+                  <RefinedDisclosure title="Advanced configuration">
                     <Field>
                       <FieldLabel htmlFor="tool-input">
                         Advanced JSON · maximum 8,192 bytes
@@ -258,7 +256,7 @@ export function Tools({ name: routeName }: { name?: string }) {
                         className="font-mono text-xs"
                       />
                     </Field>
-                  </details>
+                  </RefinedDisclosure>
                   {mode === "run" ? (
                     <Field>
                       <FieldLabel>

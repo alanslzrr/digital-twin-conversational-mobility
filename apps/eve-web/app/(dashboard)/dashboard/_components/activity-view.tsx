@@ -88,6 +88,10 @@ export function Events({ id }: { id?: string }) {
     toOffset: "",
   });
   const [rangeError, setRangeError] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const publicSelection = qs.toString();
   useEffect(() => {
     if (!id)
@@ -285,7 +289,7 @@ export function Events({ id }: { id?: string }) {
           data={schemas.dashboardActivityChart.parse(value.activity)}
         />
       ) : null}
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div className="dc-event-region rounded-lg border bg-card">
         <table className="dc-table">
           <thead>
             <tr>
@@ -301,24 +305,37 @@ export function Events({ id }: { id?: string }) {
           <tbody>
             {events.map((e) => (
               <tr key={String(e.id)} className="border-b last:border-0">
-                <td className="p-3 text-xs">
+                <td className="p-2 text-xs">
                   <Link
                     href={`/dashboard/activity/${e.id}?${qs}`}
-                    className="inline-flex min-h-11 items-center"
+                    onClick={(event) => {
+                      if (
+                        !id &&
+                        event.button === 0 &&
+                        !event.metaKey &&
+                        !event.ctrlKey &&
+                        !event.shiftKey &&
+                        !event.altKey
+                      ) {
+                        event.preventDefault();
+                        setSelectedEvent(e);
+                      }
+                    }}
+                    className="inline-flex min-h-8 items-center"
                   >
                     <Instant value={e.occurredAt} />
                   </Link>
                 </td>
-                <td className="p-3">
+                <td className="p-2">
                   {eventComponents[String(e.component)] ?? "Recorded operation"}
                 </td>
-                <td className="p-3 text-xs">
+                <td className="p-2 text-xs">
                   {String(e.source)} / {String(e.job)}
                 </td>
-                <td className="p-3">
+                <td className="p-2">
                   {eventTypes[String(e.type)] ?? "Recorded operation"}
                 </td>
-                <td className="p-3">
+                <td className="p-2">
                   <Badge variant="secondary">
                     {eventOutcomes[String(e.outcome)] ?? "No outcome"}
                   </Badge>
@@ -333,6 +350,56 @@ export function Events({ id }: { id?: string }) {
           </tbody>
         </table>
       </div>
+      <Sheet
+        open={selectedEvent !== null}
+        onOpenChange={(v) => {
+          if (!v) setSelectedEvent(null);
+        }}
+        title="Recorded event"
+        description="Retained operational evidence; capture is best-effort."
+      >
+        {selectedEvent ? (
+          <>
+            <h2>
+              {eventTypes[String(selectedEvent.type)]} ·{" "}
+              {eventOutcomes[String(selectedEvent.outcome)]}
+            </h2>
+            <dl className="dc-evidence">
+              {[
+                "source",
+                "job",
+                "occurredAt",
+                "recordedAt",
+                "expiresAt",
+                "durationMs",
+                "errorCode",
+                "errorStage",
+                "operationId",
+              ].map((key) => (
+                <div key={key}>
+                  <dt>{key}</dt>
+                  <dd>
+                    {key.endsWith("At") ? (
+                      <Instant value={selectedEvent[key]} />
+                    ) : selectedEvent[key] == null ? (
+                      "Unavailable"
+                    ) : (
+                      String(selectedEvent[key])
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <Link
+              href={`/dashboard/activity/${selectedEvent.id}?${qs}`}
+              className="dc-link"
+            >
+              Open linked event
+            </Link>
+            <Technical value={selectedEvent} />
+          </>
+        ) : null}
+      </Sheet>
       {cursor ? (
         <>
           <p className="text-sm text-muted-foreground">
