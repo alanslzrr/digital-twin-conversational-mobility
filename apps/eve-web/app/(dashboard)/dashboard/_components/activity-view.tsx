@@ -324,8 +324,7 @@ export function Events({ id }: { id?: string }) {
                   </Badge>
                   {e.errorCode ? (
                     <p className="mt-1 text-xs">
-                      Hay un problema registrado; abre el detalle para consultar
-                      su evidencia.
+                      Recorded issue. Open details for evidence.
                     </p>
                   ) : null}
                 </td>

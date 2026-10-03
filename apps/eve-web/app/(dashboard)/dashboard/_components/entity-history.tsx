@@ -113,10 +113,10 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
               {data ? (
                 <>
                   <p className="mt-3 text-sm">
-                    {data.unit} · {number(data.points.length)} muestras{" "}
+                    {data.unit} · {number(data.points.length)} samples{" "}
                     {data.reduced
                       ? "(last observation retained per interval)"
-                      : "retenidas"}
+                      : "retained"}
                   </p>
                   {data.points.length ? (
                     <svg
@@ -126,6 +126,12 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                       aria-label="Observed samples without interpolation; exact times and values in the table"
                     >
                       <title>Retained observations without interpolation</title>
+                      <text x="4" y="14" fill="currentColor" fontSize="12">
+                        {number(max)} {data.unit}
+                      </text>
+                      <text x="4" y="174" fill="currentColor" fontSize="12">
+                        {number(min)} {data.unit}
+                      </text>
                       {data.points.map((p) => {
                         const x =
                             20 +
@@ -154,7 +160,7 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                     </svg>
                   ) : (
                     <p className="mt-4 text-sm">
-                      No hay muestras retenidas para esta entidad y periodo. No
+                      No hay samples retenidas para esta entidad y periodo. No
                       se fabrica una curva.
                     </p>
                   )}
@@ -163,7 +169,7 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                   </p>
                   <details className="mt-3 text-sm">
                     <summary className="min-h-11 cursor-pointer py-2">
-                      Ver muestras y procedencia
+                      Ver samples y procedencia
                     </summary>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left">

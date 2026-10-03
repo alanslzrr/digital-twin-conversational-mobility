@@ -4,6 +4,7 @@ import {
   madridLocal,
   readState,
   successfulReadAt,
+  unresolvedExecution,
 } from "./dashboard-presentation";
 
 describe("presentation reads remain distinct from evidence", () => {
@@ -50,4 +51,11 @@ describe("Europe/Madrid civil time", () => {
     );
     expect(madridLocal("2026-10-03T08:30:00Z")).toBe("2026-10-03T10:30");
   });
+});
+it("blocks repeat execution for running, missing and unknown outcomes", () => {
+  expect(unresolvedExecution({ state: "running" })).toBe(true);
+  expect(unresolvedExecution({ state: "outcome_unknown" })).toBe(true);
+  expect(unresolvedExecution({})).toBe(true);
+  for (const state of ["succeeded", "failed", "cancelled"])
+    expect(unresolvedExecution({ state })).toBe(false);
 });
