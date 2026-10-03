@@ -3,6 +3,7 @@ export async function seedDashboardFixtures(sql) {
   const [{ current_schema: schema }] = await sql`SELECT current_schema()`;
   if (!/^dashboard_qa_[a-f0-9]+$/.test(schema))
     throw new Error("Disposable QA schema required");
+  await sql`INSERT INTO routing_release(id,manifest,state,activated_at) VALUES('synthetic-qa-routing','{}'::jsonb,'active',now())`;
   const now = new Date(),
     at = (seconds) => new Date(now.getTime() + seconds * 1000).toISOString();
   await sql`UPDATE source_catalog SET enabled=true WHERE id IN ('bicimad','madrid-parking','madrid-traffic','madrid-air','aemet','emt','renfe','dgt')`;

@@ -362,6 +362,13 @@ for (const path of [
   check(`BFF ${path}`, r.ok);
   await r.body?.cancel();
 }
+const sourceResponse = await (await getData("sources")).json();
+check(
+  "Sources preserves installed routing activation time through both HTTP boundaries",
+  sourceResponse.data?.routes?.[0]?.id === "synthetic-qa-routing" &&
+    typeof sourceResponse.data?.routes?.[0]?.activatedAt === "string" &&
+    Number.isFinite(Date.parse(sourceResponse.data.routes[0].activatedAt)),
+);
 const overview = await (await getData("overview?window=24h")).json();
 check(
   "derived M1 excludes stale and disabled station readings",
