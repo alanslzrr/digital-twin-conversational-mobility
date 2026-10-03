@@ -85,10 +85,15 @@ describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
       expect(arrivals?.issue).toContain("Sin consulta previa");
     });
     it("keeps M3 unavailable when all incident products are disabled", async () => {
+      const at = new Date().toISOString();
+      await sql`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload) VALUES('dgt-incidents','dgt',${at},${at},'provisional','synthetic disabled-source regression',${sql.json({ incidents: [{ id: "disabled-fresh-dgt", title: "Synthetic retained notice" }] })}) ON CONFLICT(job_id) DO UPDATE SET observed_at=EXCLUDED.observed_at,ingested_at=EXCLUDED.ingested_at,payload=EXCLUDED.payload`;
       await sql`UPDATE source_catalog SET enabled=false`;
       const overview = await readOverview(new URLSearchParams());
       const metric = overview.metrics.find((m) => m.id === "M3");
 
+      expect(
+        overview.products.find((p) => p.id === "dgt-incidents"),
+      ).toMatchObject({ enabled: false, usable: true });
       expect(metric?.value).toBeNull();
     });
 
