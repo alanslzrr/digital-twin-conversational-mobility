@@ -3,6 +3,7 @@ import "./dashboard.css";
 import {
   Activity,
   Blocks,
+  ChevronLeft,
   Database,
   Info,
   LogOut,
@@ -18,6 +19,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -98,7 +100,6 @@ function Navigation() {
 }
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const ctx = useDashboardContext();
-  const path = usePathname();
   const [notice, setNotice] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarResolved, setSidebarResolved] = useState(false);
@@ -111,6 +112,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     const timer = window.setTimeout(() => setNotice(""), 5000);
     return () => window.clearTimeout(timer);
   }, [notice]);
+  const [controlsOpen, setControlsOpen] = useState(false);
+  useEffect(() => {
+    setControlsOpen(
+      window.localStorage.getItem("dashboard-header-controls") === "open",
+    );
+  }, []);
+  const toggleControls = (open: boolean) => {
+    setControlsOpen(open);
+    window.localStorage.setItem(
+      "dashboard-header-controls",
+      open ? "open" : "closed",
+    );
+  };
   const [timingOpen, setTimingOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const { data, error } = useDashboard("status", 3000);
@@ -157,10 +171,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       { revalidate: true, populateCache: false },
     );
   };
-  const label =
-    links.find((l) =>
-      l.href === "/dashboard" ? path === l.href : path.startsWith(l.href),
-    )?.label ?? "Mobility Core";
+  const readState = ctx.paused
+    ? "paused"
+    : ctx.viewRead?.failed
+      ? "failed"
+      : ctx.viewRead?.pending
+        ? "pending"
+        : "read";
+  const readLabel = ctx.paused
+    ? "Paused"
+    : ctx.viewRead?.failed
+      ? ctx.viewRead.readAt
+        ? "Cached · refresh failed"
+        : "Read failed"
+      : ctx.viewRead?.pending
+        ? "Reading"
+        : "Read";
   return (
     <SidebarProvider
       className="dashboard-shell"
@@ -251,122 +277,118 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <div className="dc-main-column">
         <header className="dc-header">
-          <div className="flex min-w-0 items-center gap-2">
-            <SidebarTrigger aria-label="Toggle navigation" />
-            <span className="dc-header-context">{label}</span>
-          </div>
+          <SidebarTrigger aria-label="Toggle navigation" />
           <div className="dc-header-actions">
-            {ctx.paused || ctx.viewRead?.failed ? (
-              <span className="dc-mobile-state">
-                {ctx.paused
-                  ? "Paused"
-                  : ctx.viewRead?.readAt
-                    ? "Cached · failed"
-                    : "Read failed"}
-              </span>
-            ) : null}
-            <span
-              className="dc-read-label"
-              data-state={
-                ctx.paused
-                  ? "paused"
-                  : ctx.viewRead?.failed
-                    ? "failed"
-                    : ctx.viewRead?.pending
-                      ? "pending"
-                      : "read"
-              }
+            <div
+              id="dc-header-controls"
+              className="dc-header-controls"
+              data-open={controlsOpen}
+              inert={!controlsOpen}
             >
-              {ctx.paused
-                ? "Paused"
-                : ctx.viewRead?.failed
-                  ? ctx.viewRead.readAt
-                    ? "Cached · refresh failed"
-                    : "Read failed"
-                  : ctx.viewRead?.pending
-                    ? "Reading"
-                    : "Read"}
-              {" · "}
-              {ctx.viewRead?.readAt ? (
-                <Instant value={ctx.viewRead.readAt} compact />
-              ) : (
-                "no successful read"
-              )}
-            </span>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => ctx.setPaused(!ctx.paused)}
-              aria-label={ctx.paused ? "Resume refresh" : "Pause refresh"}
-            >
-              {ctx.paused ? <Play /> : <Pause />}
-              <span className="dc-control-label">
-                {ctx.paused ? "Resume" : "Pause"}
-              </span>
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              aria-label="Refresh stored data"
-              onClick={refresh}
-            >
-              <RefreshCw />
-            </Button>
-            <Sheet
-              open={timingOpen}
-              onOpenChange={setTimingOpen}
-              title="Data timing"
-              description="Screen reads, provider observations and capture activity are separate."
-              trigger={
-                <Button size="icon" variant="ghost" aria-label="Data timing">
-                  <Info />
+              <div className="dc-header-controls-inner">
+                <span className="dc-read-label">
+                  {readLabel}
+                  {" · "}
+                  {ctx.viewRead?.readAt ? (
+                    <Instant value={ctx.viewRead.readAt} compact />
+                  ) : (
+                    "no successful read"
+                  )}
+                </span>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => ctx.setPaused(!ctx.paused)}
+                  aria-label={ctx.paused ? "Resume refresh" : "Pause refresh"}
+                >
+                  {ctx.paused ? <Play /> : <Pause />}
                 </Button>
-              }
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Refresh stored data"
+                  onClick={refresh}
+                >
+                  <RefreshCw />
+                </Button>
+                <Sheet
+                  open={timingOpen}
+                  onOpenChange={setTimingOpen}
+                  title="Data timing"
+                  description="Screen reads, provider observations and capture activity are separate."
+                  trigger={
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label="Data timing"
+                    >
+                      <Info />
+                    </Button>
+                  }
+                >
+                  <dl className="dc-stack">
+                    <div>
+                      <dt>Last successful view read</dt>
+                      <dd>
+                        <Instant value={ctx.viewRead?.readAt} />
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Screen refresh</dt>
+                      <dd>
+                        {ctx.paused
+                          ? "Paused"
+                          : ctx.visible
+                            ? "Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds"
+                            : "Suspended while hidden"}
+                        . Refresh only reads stored evidence.
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Capture activity</dt>
+                      <dd>
+                        {error
+                          ? "Worker status unavailable"
+                          : !status
+                            ? "Unavailable"
+                            : status.ingestionEnabled
+                              ? "Enabled"
+                              : "Disabled"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Activity window expires</dt>
+                      <dd>
+                        <Instant value={status?.activeUntil} />
+                      </dd>
+                    </div>
+                  </dl>
+                  <p className="dc-meta">
+                    Visible, unpaused activity renews the bounded capture window
+                    every 60 seconds. Pausing stops renewal, not an in-progress
+                    provider request. Observation and ingestion times remain
+                    attached to each record.
+                  </p>
+                </Sheet>
+                <span className="dc-header-divider" aria-hidden="true" />
+                <ThemeSwitcher />
+              </div>
+            </div>
+            <button
+              type="button"
+              className="dc-status-toggle"
+              data-state={readState}
+              aria-expanded={controlsOpen}
+              aria-controls="dc-header-controls"
+              aria-label={`${readLabel}. ${controlsOpen ? "Hide" : "Show"} refresh controls`}
+              onClick={() => toggleControls(!controlsOpen)}
             >
-              <dl className="dc-stack">
-                <div>
-                  <dt>Last successful view read</dt>
-                  <dd>
-                    <Instant value={ctx.viewRead?.readAt} />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Screen refresh</dt>
-                  <dd>
-                    {ctx.paused
-                      ? "Paused"
-                      : ctx.visible
-                        ? "Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds"
-                        : "Suspended while hidden"}
-                    . Refresh only reads stored evidence.
-                  </dd>
-                </div>
-                <div>
-                  <dt>Capture activity</dt>
-                  <dd>
-                    {error
-                      ? "Worker status unavailable"
-                      : !status
-                        ? "Unavailable"
-                        : status.ingestionEnabled
-                          ? "Enabled"
-                          : "Disabled"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Activity window expires</dt>
-                  <dd>
-                    <Instant value={status?.activeUntil} />
-                  </dd>
-                </div>
-              </dl>
-              <p className="dc-meta">
-                Visible, unpaused activity renews the bounded capture window
-                every 60 seconds. Pausing stops renewal, not an in-progress
-                provider request. Observation and ingestion times remain
-                attached to each record.
-              </p>
-            </Sheet>
+              <span className="dc-status-dot" aria-hidden="true" />
+              {readState !== "read" ? (
+                <span className="dc-status-text">{readLabel}</span>
+              ) : null}
+              <ChevronLeft className="dc-status-chevron" aria-hidden="true" />
+            </button>
           </div>
         </header>
         <p role="status" className="dc-notice" data-visible={Boolean(notice)}>
