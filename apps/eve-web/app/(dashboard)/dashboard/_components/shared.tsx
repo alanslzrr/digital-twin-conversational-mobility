@@ -1,11 +1,13 @@
 "use client";
 import { Spinner } from "@/components/ui/spinner";
+import { readState } from "@/src/dashboard-presentation";
+import { Skeleton } from "./primitives";
 export function Instant({ value }: { value: unknown }) {
   if (typeof value !== "string" || !Number.isFinite(Date.parse(value)))
-    return <span>No disponible</span>;
+    return <span>Unavailable</span>;
   return (
     <time dateTime={value} title={value}>
-      {new Date(value).toLocaleString("es-ES", {
+      {new Date(value).toLocaleString("en-GB", {
         timeZone: "Europe/Madrid",
         timeZoneName: "short",
       })}
@@ -16,7 +18,7 @@ export function Technical({ value }: { value: unknown }) {
   return (
     <details className="rounded-lg border bg-card p-4">
       <summary className="cursor-pointer text-sm font-medium">
-        Detalle técnico saneado
+        Sanitized technical details
       </summary>
       <pre className="mt-3 max-h-[32rem] overflow-auto whitespace-pre-wrap break-all font-mono text-xs leading-5">
         {JSON.stringify(value, null, 2)}
@@ -28,32 +30,34 @@ export function State({
   loading,
   error,
   empty,
+  data,
 }: {
   loading: boolean;
   error: unknown;
   empty?: boolean;
+  data?: unknown;
 }) {
+  const state = readState(data, loading, error);
   return (
     <>
-      {loading ? (
-        <div className="flex items-center gap-3 py-8 text-sm text-muted-foreground">
-          <Spinner />
-          Cargando datos almacenados…
+      {loading && !data ? (
+        <div role="status" className="dc-stack">
+          <span className="flex gap-2 items-center">
+            <Spinner />
+            Loading stored data…
+          </span>
+          <Skeleton />
         </div>
       ) : null}
       {error ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-destructive p-4 text-sm"
-        >
-          No se pudo actualizar. Los datos anteriores conservan su fecha; no se
-          consideran nuevos.
+        <p role="alert" className="dc-card dc-error">
+          {state === "cached_failure"
+            ? "Refresh failed. Previously loaded evidence remains at its original successful read time."
+            : "Unable to load stored data. This is not an empty result."}
         </p>
       ) : null}
       {!loading && !error && empty ? (
-        <p className="rounded-lg border bg-card p-8 text-sm text-muted-foreground">
-          Sin registros almacenados para esta selección.
-        </p>
+        <p className="dc-card">No stored records for this selection.</p>
       ) : null}
     </>
   );
@@ -66,8 +70,8 @@ export function PageTitle({
   description: string;
 }) {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+    <div className="dc-page-heading">
+      <h1 className="dc-page-title">{title}</h1>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
         {description}
       </p>
@@ -77,86 +81,86 @@ export function PageTitle({
 export const publicLabel = (key: string) =>
   (
     ({
-      vehiclesPerHour: "Intensidad de tráfico",
-      occupancyPercent: "Ocupación del sensor",
-      loadPercent: "Carga del sensor",
-      serviceLevel: "Nivel de servicio publicado",
-      maximumEur: "Máximo documental (EUR)",
-      publishedDate: "Documento comprobado (fecha)",
-      effectiveFrom: "Vigente desde",
-      arrivalSeconds: "Llegada del horario publicado",
-      departureSeconds: "Salida del horario publicado",
-      calendarId: "Calendario publicado",
-      wheelchair: "Accesibilidad declarada para silla de ruedas",
-      kind: "Tipo de lugar",
-      bikes: "Bicicletas disponibles",
-      docks: "Anclajes disponibles",
-      freeSpaces: "Plazas libres publicadas",
-      category: "Categoría publicada",
-      installed: "Estación instalada",
-      renting: "Alquiler habilitado",
-      returning: "Devolución habilitada",
-      temperature: "Temperatura",
-      precipitation: "Precipitación acumulada",
-      precipitation_probability: "Probabilidad de precipitación",
-      wind: "Viento",
-      gust: "Racha de viento",
-      sky: "Estado del cielo",
-      basis: "Tipo de medida",
-      period: "Periodo publicado",
-      line: "Línea",
-      destination: "Destino",
-      estimateSecondsAtObservation: "Estimación al observar (s)",
-      observedAt: "Observado",
-      startsAt: "Inicio de vigencia",
-      endsAt: "Fin de vigencia",
-      detail: "Descripción publicada",
-      road: "Carretera",
-      providerValidity: "Vigencia publicada",
-      status: "Estado",
-      components: "Componentes",
-      staticFeed: "Calendario estático",
-      staticCatalogs: "Catálogos estáticos",
-      leaseUntil: "Reserva hasta",
-      tool: "Herramienta",
-      executionMode: "Modo de consulta",
-      evaluatedAt: "Evaluado",
-      requestId: "Identificador de solicitud",
-      truncated: "Truncado",
-      input: "Entrada",
-      result: "Resultado",
-      workers: "Procesos",
-      products: "Productos",
-      streams: "Flujos",
-      sources: "Fuentes",
-      resources: "Recursos",
-      arrivals: "Llegadas EMT",
-      routes: "Versiones de routing",
-      ingestionEnabled: "Ingestión habilitada",
-      activeUntil: "Ventana de actividad",
-      captureVersion: "Versión de captura",
-      captureCoverage: "Cobertura de captura",
-      readAt: "Leído en pantalla",
-      ingestedAt: "Incorporado",
+      vehiclesPerHour: "Traffic intensity",
+      occupancyPercent: "Sensor occupancy",
+      loadPercent: "Sensor load",
+      serviceLevel: "Published service level",
+      maximumEur: "Documented maximum (EUR)",
+      publishedDate: "Document checked (date)",
+      effectiveFrom: "Effective from",
+      arrivalSeconds: "Published timetable arrival",
+      departureSeconds: "Published timetable departure",
+      calendarId: "Published calendar",
+      wheelchair: "Declared wheelchair accessibility",
+      kind: "Place kind",
+      bikes: "Available bikes",
+      docks: "Available docks",
+      freeSpaces: "Published free spaces",
+      category: "Published category",
+      installed: "Installed station",
+      renting: "Rental enabled",
+      returning: "Return enabled",
+      temperature: "Temperature",
+      precipitation: "Accumulated precipitation",
+      precipitation_probability: "Precipitation probability",
+      wind: "Wind",
+      gust: "Wind gust",
+      sky: "Sky conditions",
+      basis: "Measurement basis",
+      period: "Published period",
+      line: "Line",
+      destination: "Destination",
+      estimateSecondsAtObservation: "Estimate at observation (s)",
+      observedAt: "Observed",
+      startsAt: "Validity starts",
+      endsAt: "Validity ends",
+      detail: "Published description",
+      road: "Road",
+      providerValidity: "Published validity",
+      status: "State",
+      components: "Components",
+      staticFeed: "Static calendar",
+      staticCatalogs: "Static catalogs",
+      leaseUntil: "Lease until",
+      tool: "Tool",
+      executionMode: "Query mode",
+      evaluatedAt: "Evaluated",
+      requestId: "Request ID",
+      truncated: "Truncated",
+      input: "Input",
+      result: "Outcome",
+      workers: "Workers",
+      products: "Products",
+      streams: "Streams",
+      sources: "Sources",
+      resources: "Resources",
+      arrivals: "EMT arrivals",
+      routes: "Routing versions",
+      ingestionEnabled: "Ingestion enabled",
+      activeUntil: "Activity window",
+      captureVersion: "Capture version",
+      captureCoverage: "Capture coverage",
+      readAt: "View read",
+      ingestedAt: "Ingested",
       checkedAt: "Comprobado",
       issuedAt: "Emitido",
-      validFrom: "Válido desde",
-      validTo: "Válido hasta",
-      lastSeenAt: "Última señal",
+      validFrom: "Valid from",
+      validTo: "Valid to",
+      lastSeenAt: "Last signal",
       lastPrunedAt: "Última purga",
-      state: "Estado",
+      state: "State",
       name: "Nombre",
-      source: "Fuente",
-      sourceId: "Fuente",
+      source: "Source",
+      sourceId: "Source",
       productId: "Producto",
-      freshness: "Frescura",
-      coverage: "Cobertura",
-      version: "Versión",
-      lastAttemptAt: "Último intento",
-      lastSuccessAt: "Último éxito",
-      nextDueAt: "Próximo intento",
-      errorCode: "Código de error",
-      errorStage: "Etapa de error",
+      freshness: "Freshness",
+      coverage: "Coverage",
+      version: "Version",
+      lastAttemptAt: "Last attempt",
+      lastSuccessAt: "Last success",
+      nextDueAt: "Next eligible attempt",
+      errorCode: "Error code",
+      errorStage: "Error stage",
       reason: "Motivo",
       limitations: "Limitaciones",
       retainedBytes: "Bytes retenidos",
@@ -164,17 +168,17 @@ export const publicLabel = (key: string) =>
       knownGaps: "Huecos conocidos",
       omittedEvents: "Eventos omitidos",
       counts: "Recuentos",
-      usage: "Tokens reportados",
-      inputTokens: "Entrada",
-      outputTokens: "Salida",
-      cachedInputTokens: "Entrada en caché",
-      durationMs: "Duración (ms)",
-      warning: "Límites de interpretación",
+      usage: "Reported tokens",
+      inputTokens: "Input",
+      outputTokens: "Output",
+      cachedInputTokens: "Cached input",
+      durationMs: "Duration (ms)",
+      warning: "Interpretation limits",
       count: "Recuento",
       total: "Total",
-      fresh: "Recientes",
-      stale: "Antiguos",
-      unavailable: "No disponibles",
+      fresh: "Recents",
+      stale: "Stales",
+      unavailable: "Unavailables",
       enabled: "Habilitado",
       failures: "Fallos",
       attempts: "Intentos",
@@ -183,11 +187,11 @@ export const publicLabel = (key: string) =>
       completedAt: "Finalizado",
       isError: "Error",
       lastActivityAt: "Última actividad",
-      captureStatus: "Estado de captura",
-      captureStartedAt: "Inicio de captura",
-      firstObservedAt: "Primera señal",
-      lastObservedAt: "Última señal",
-      schemaVersion: "Versión de contrato",
+      captureStatus: "Capture state",
+      captureStartedAt: "Capture begins",
+      firstObservedAt: "First signal",
+      lastObservedAt: "Last signal",
+      schemaVersion: "Contract version",
     }) as Record<string, string>
   )[key] ?? key.replace(/([a-z])([A-Z])/g, "$1 $2");
 export function ObjectCards({ value }: { value: unknown }) {
@@ -207,10 +211,10 @@ export function ObjectCards({ value }: { value: unknown }) {
             <dt className="text-xs text-muted-foreground">{publicLabel(k)}</dt>
             <dd className="mt-2 break-words text-sm font-medium">
               {v === null ? (
-                "No disponible"
+                "Unavailable"
               ) : typeof v === "boolean" ? (
                 v ? (
-                  "Sí"
+                  "Yes"
                 ) : (
                   "No"
                 )
@@ -219,16 +223,16 @@ export function ObjectCards({ value }: { value: unknown }) {
               ) : typeof v === "string" ? (
                 ((
                   {
-                    best_effort: "Captura no exhaustiva",
+                    best_effort: "Best-effort capture",
                     partial: "Parcial",
                     unknown: "Desconocido",
-                    disabled: "Deshabilitado",
-                    running: "En curso",
-                    recent: "Reciente",
-                    stale: "Antiguo",
-                    static: "Estático/versionado",
-                    unavailable: "No disponible",
-                    not_instrumented: "Sin captura en este periodo",
+                    disabled: "Disabled",
+                    running: "Running",
+                    recent: "Recent",
+                    stale: "Stale",
+                    static: "Static/versioned",
+                    unavailable: "Unavailable",
+                    not_instrumented: "Not instrumented in this period",
                   } as Record<string, string>
                 )[v] ?? v)
               ) : (

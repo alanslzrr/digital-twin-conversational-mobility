@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Blocks,
   Database,
+  Info,
   Menu,
   MessageSquare,
   Pause,
@@ -17,66 +18,45 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
+import { Sheet } from "./primitives";
+import { Instant } from "./shared";
 
 const links = [
-  { href: "/dashboard", label: "Resumen", icon: Blocks },
-  { href: "/dashboard/mobility", label: "Movilidad", icon: Database },
-  { href: "/dashboard/tools", label: "Consultas", icon: Wrench },
-  { href: "/dashboard/sources", label: "Fuentes y actualización", icon: Radio },
-  {
-    href: "/dashboard/activity",
-    label: "Actividad del sistema",
-    icon: Activity,
-  },
+  { href: "/dashboard", label: "Overview", icon: Blocks },
+  { href: "/dashboard/mobility", label: "Mobility", icon: Database },
+  { href: "/dashboard/tools", label: "Queries", icon: Wrench },
+  { href: "/dashboard/sources", label: "Sources", icon: Radio },
+  { href: "/dashboard/activity", label: "Activity", icon: Activity },
   {
     href: "/dashboard/conversations",
-    label: "Mis conversaciones",
+    label: "My conversations",
     icon: MessageSquare,
   },
 ];
 function Navigation({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
   return (
-    <nav aria-label="Panel">
+    <nav className="dc-navigation" aria-label="Dashboard">
       {links.map(({ href, label, icon: Icon }, index) => (
         <div key={href}>
           {[0, 3, 5].includes(index) ? (
-            <p className="mb-2 mt-5 px-3 text-xs font-medium text-muted-foreground">
-              {index === 0
-                ? "Información"
-                : index === 3
-                  ? "Sistema"
-                  : "Personal"}
+            <p className="dc-nav-group">
+              {index === 0 ? "Explore" : index === 3 ? "System" : "Personal"}
             </p>
           ) : null}
           <Link
-            key={href}
-            {...(onNavigate ? { onClick: onNavigate } : {})}
             href={href}
+            {...(onNavigate ? { onClick: onNavigate } : {})}
+            className="dc-nav-link"
             aria-current={
               (href === "/dashboard" ? path === href : path.startsWith(href))
                 ? "page"
                 : undefined
             }
-            className={cn(
-              "mb-1 flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              (href === "/dashboard" ? path === href : path.startsWith(href))
-                ? "bg-accent font-medium"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground",
-            )}
           >
-            <Icon size={16} />
+            <Icon size={16} aria-hidden="true" />
             {label}
           </Link>
         </div>
@@ -86,177 +66,206 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
 }
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const ctx = useDashboardContext();
-  const [refreshNotice, setRefreshNotice] = useState("");
+  const path = usePathname();
+  const [notice, setNotice] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const [timingOpen, setTimingOpen] = useState(false);
   const { data, error } = useDashboard("status", 3000);
   const { mutate } = useSWRConfig();
-  const status = data as { activeUntil?: string; ingestionEnabled?: boolean };
+  const status = data as
+    | { activeUntil?: string; ingestionEnabled?: boolean }
+    | undefined;
   const signOut = async () => {
     ctx.clear();
-    const r = await fetch("/api/auth/sign-out", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: "{}",
-    });
-    if (r.ok) window.location.replace("/evaluation");
-    else window.alert("No se pudo cerrar sesión.");
+    try {
+      const r = await fetch("/api/auth/sign-out", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (r.ok) window.location.replace("/evaluation");
+      else setNotice("Sign out failed. Private details have been cleared.");
+    } catch {
+      setNotice("Sign out failed. Private details have been cleared.");
+    }
   };
+  const refresh = () => {
+    const now = Date.now();
+    const waits = [...ctx.eligibility]
+      .filter(([key]) => key !== "status" && ctx.activePaths.has(key))
+      .map(([, v]) =>
+        Math.max(0, 15000 - (now - v.at), (v.retryUntil ?? 0) - now),
+      );
+    const wait = Math.max(0, ...waits);
+    setNotice(
+      ctx.paused
+        ? "Refresh is paused. Resume to read stored data."
+        : wait > 0
+          ? `Stored data can be reread in ${Math.ceil(wait / 1000)} seconds.`
+          : "Stored-data refresh requested.",
+    );
+    void mutate(
+      (key) =>
+        typeof key === "string" &&
+        key.startsWith(`${ctx.identity.principalId}:`) &&
+        (key.endsWith(":status") ||
+          ctx.activePaths.has(key.slice(ctx.identity.principalId.length + 1))),
+      undefined,
+      { revalidate: true, populateCache: false },
+    );
+  };
+  const label =
+    links.find((l) =>
+      l.href === "/dashboard" ? path === l.href : path.startsWith(l.href),
+    )?.label ?? "Mobility Core";
   return (
-    <div className="dashboard-shell min-h-dvh md:grid md:grid-cols-[220px_1fr]">
-      <aside
-        aria-label="Navegación y cuenta"
-        className="hidden min-h-dvh flex-col border-r bg-card px-4 py-6 md:flex"
-      >
-        <p className="mb-7 px-3 text-sm font-semibold">Mobility Core</p>
-        <Navigation />
-        <Link
-          href="/s"
-          className="mt-8 flex items-center gap-2 px-3 text-sm text-muted-foreground"
-        >
-          <ArrowLeft size={16} />
-          Volver al chat
+    <div className="dashboard-shell" lang="en">
+      <a href="#dashboard-main" className="dc-skip">
+        Skip to content
+      </a>
+      <aside className="dc-sidebar" aria-label="Navigation and account">
+        <Link href="/dashboard" className="dc-brand">
+          Mobility Core<span className="dc-meta">Evaluation workspace</span>
         </Link>
-        <div className="mt-auto border-t pt-5">
-          <p className="px-3 text-xs text-muted-foreground">
-            Cuenta de evaluación
-          </p>
-          <p className="mt-2 break-words px-3 text-sm">{ctx.identity.label}</p>
-          <Button
-            variant="ghost"
-            className="mt-2 w-full justify-start"
-            onClick={signOut}
-          >
-            Cerrar sesión
+        <Navigation />
+        <div className="dc-account">
+          <Link href="/s" className="dc-nav-link">
+            <ArrowLeft size={16} aria-hidden="true" />
+            Open chat
+          </Link>
+          <p className="dc-meta">Evaluation account</p>
+          <p className="break-words text-sm">{ctx.identity.label}</p>
+          <Button variant="ghost" onClick={signOut}>
+            Sign out
           </Button>
         </div>
       </aside>
-      <div className="min-w-0">
-        <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b bg-card px-5 py-3 md:px-8">
-          <div className="flex items-center gap-3">
-            <div className="md:hidden">
-              <Dialog open={navigationOpen} onOpenChange={setNavigationOpen}>
-                <DialogTrigger asChild>
+      <div className="dc-main-column">
+        <header className="dc-header">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="dc-mobile-nav">
+              <Sheet
+                open={navigationOpen}
+                onOpenChange={setNavigationOpen}
+                title="Mobility Core"
+                trigger={
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Abrir navegación"
+                    aria-label="Open navigation"
                   >
                     <Menu />
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="dashboard-dialog">
-                  <DialogTitle>Mobility Core</DialogTitle>
-                  <DialogDescription>
-                    Vistas del panel privado de evaluación.
-                  </DialogDescription>
-                  <Navigation onNavigate={() => setNavigationOpen(false)} />
-                  <Link href="/s">Volver al chat</Link>
-                </DialogContent>
-              </Dialog>
+                }
+              >
+                <Navigation onNavigate={() => setNavigationOpen(false)} />
+                <Link href="/s" className="dc-nav-link">
+                  Open chat
+                </Link>
+                <Button variant="ghost" onClick={signOut}>
+                  Sign out
+                </Button>
+              </Sheet>
             </div>
-            <span className="text-sm font-medium">Panel de evaluación</span>
-            <Badge variant="secondary">Privado</Badge>
+            <span className="dc-header-context">Evaluation / {label}</span>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="hidden text-xs text-muted-foreground sm:block md:hidden">
-              {ctx.identity.label}
+          <div className="dc-header-actions">
+            <span className="dc-read-label" aria-live="polite">
+              {ctx.paused ? (
+                "Paused"
+              ) : ctx.viewRead?.failed ? (
+                "Refresh failed"
+              ) : ctx.viewRead?.pending ? (
+                "Refreshing"
+              ) : ctx.viewRead?.readAt ? (
+                <>
+                  <span>Read </span>
+                  <Instant value={ctx.viewRead.readAt} />
+                </>
+              ) : (
+                "Waiting for data"
+              )}
             </span>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => ctx.setPaused(!ctx.paused)}
+              aria-label={ctx.paused ? "Resume refresh" : "Pause refresh"}
             >
               {ctx.paused ? <Play /> : <Pause />}
-              {ctx.paused ? "Reanudar" : "Pausar actualización"}
+              <span className="dc-control-label">
+                {ctx.paused ? "Resume" : "Pause"}
+              </span>
             </Button>
             <Button
               size="icon"
               variant="ghost"
-              aria-label="Actualizar pantalla"
-              onClick={() => {
-                const now = Date.now();
-                const waits = [...ctx.eligibility]
-                  .filter(
-                    ([key]) => key !== "status" && ctx.activePaths.has(key),
-                  )
-                  .map(([, v]) =>
-                    Math.max(
-                      0,
-                      15000 - (now - v.at),
-                      (v.retryUntil ?? 0) - now,
-                    ),
-                  );
-                const wait = Math.max(0, ...waits);
-                setRefreshNotice(
-                  ctx.paused
-                    ? "La actualización está pausada; reanúdala para releer datos guardados."
-                    : wait > 0
-                      ? `Podrás releer en ${Math.ceil(wait / 1000)} segundos.`
-                      : "Relectura solicitada; cada dato conserva su fecha.",
-                );
-                void mutate(
-                  (key) =>
-                    typeof key === "string" &&
-                    key.startsWith(`${ctx.identity.principalId}:`) &&
-                    (key.endsWith(":status") ||
-                      ctx.activePaths.has(
-                        key.slice(ctx.identity.principalId.length + 1),
-                      )),
-                  undefined,
-                  { revalidate: true, populateCache: false },
-                );
-              }}
+              aria-label="Refresh stored data"
+              onClick={refresh}
             >
               <RefreshCw />
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="md:hidden"
-              onClick={signOut}
+            <Sheet
+              open={timingOpen}
+              onOpenChange={setTimingOpen}
+              title="Data timing"
+              description="Screen reads, provider observations and capture activity are separate."
+              trigger={
+                <Button size="icon" variant="ghost" aria-label="Data timing">
+                  <Info />
+                </Button>
+              }
             >
-              Salir
-            </Button>
+              <dl className="dc-stack">
+                <div>
+                  <dt>Last successful view read</dt>
+                  <dd>
+                    <Instant value={ctx.viewRead?.readAt} />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Screen refresh</dt>
+                  <dd>
+                    {ctx.paused
+                      ? "Paused"
+                      : ctx.visible
+                        ? "Every 15 seconds while visible"
+                        : "Suspended while hidden"}
+                    . Refresh only reads stored evidence.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Capture activity</dt>
+                  <dd>
+                    {error
+                      ? "Worker status unavailable"
+                      : status?.ingestionEnabled
+                        ? "Enabled"
+                        : "Disabled"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Activity window expires</dt>
+                  <dd>
+                    <Instant value={status?.activeUntil} />
+                  </dd>
+                </div>
+                <p className="dc-meta">
+                  Visible, unpaused activity renews the bounded capture window
+                  every 60 seconds. Pausing stops renewal, not an in-progress
+                  provider request. Observation and ingestion times remain
+                  attached to each record.
+                </p>
+              </dl>
+            </Sheet>
           </div>
         </header>
-        <section
-          aria-label="Estado de actualización"
-          className="flex flex-wrap gap-x-5 gap-y-1 border-b px-5 py-2 text-xs text-muted-foreground md:px-8"
-        >
-          <span>
-            Actualización de pantalla:{" "}
-            {ctx.paused ? "pausada" : ctx.visible ? "visible" : "suspendida"}
-          </span>
-          <span>
-            Actualización desde las fuentes:{" "}
-            {error
-              ? "no se pudo comprobar"
-              : !status?.ingestionEnabled
-                ? "deshabilitada"
-                : status.activeUntil
-                  ? new Date(status.activeUntil).toLocaleString("es-ES", {
-                      timeZone: "Europe/Madrid",
-                      timeZoneName: "short",
-                    })
-                  : "inactiva"}
-          </span>
-        </section>
-        <section
-          aria-label="Cómo se actualiza la información"
-          className="px-5 pt-3 text-xs leading-5 text-muted-foreground md:px-8"
-        >
-          <p>
-            Actualizar pantalla relee los datos guardados. No solicita una
-            lectura nueva a las fuentes.
+        {notice ? (
+          <p role="status" className="px-4 py-2 text-xs">
+            {notice}
           </p>
-          <p>
-            {ctx.paused
-              ? "Panel pausado; el sistema puede seguir actualizándose por otra actividad."
-              : "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."}
-          </p>
-          {refreshNotice ? <p role="status">{refreshNotice}</p> : null}
-        </section>
-        <main className="mx-auto flex max-w-[1440px] flex-col gap-6 p-5 md:p-8">
+        ) : null}
+        <main id="dashboard-main" className="dc-main" tabIndex={-1}>
           {children}
         </main>
       </div>
