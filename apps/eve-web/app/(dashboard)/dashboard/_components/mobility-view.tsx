@@ -16,7 +16,7 @@ import { sourceNames } from "./event-copy";
 import { FreshnessBreakdown } from "./insights";
 import { Card, Segmented, Sheet, Table } from "./primitives";
 import { measurementDisplay } from "./product-copy";
-import { PageTitle, publicLabel, State, Technical } from "./shared";
+import { Instant, PageTitle, publicLabel, State, Technical } from "./shared";
 
 function obj(v: unknown): Record<string, unknown> {
   return v && typeof v === "object" && !Array.isArray(v)
@@ -543,6 +543,19 @@ export function Mobility({
                         <span>
                           {sourceNames[e.evidence.sourceId] ??
                             e.evidence.sourceId}
+                        </span>
+                        <span>
+                          {e.evidence.observedAt ? (
+                            <>
+                              Observed <Instant value={e.evidence.observedAt} />
+                            </>
+                          ) : e.evidence.issuedAt ? (
+                            <>
+                              Issued <Instant value={e.evidence.issuedAt} />
+                            </>
+                          ) : (
+                            "No observation time"
+                          )}
                         </span>
                       </p>
                       {e.latitude === null ? (

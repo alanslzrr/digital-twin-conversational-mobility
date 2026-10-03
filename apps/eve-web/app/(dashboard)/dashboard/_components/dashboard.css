@@ -1358,8 +1358,7 @@
   color: var(--dash-secondary);
   font-variant-numeric: tabular-nums;
 }
-.rf-coverage,
-.rf-comparison {
+.rf-coverage {
   margin: 0;
   font-size: 12px;
   line-height: 18px;
@@ -1447,16 +1446,6 @@
   text-underline-offset: 3px;
   text-decoration-color: var(--dash-control-line);
 }
-.dc-table-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--dash-muted);
-}
-
 .dc-table-card {
   padding: 0;
   overflow: auto;
@@ -1891,6 +1880,40 @@
   align-items: center;
   gap: 2px 10px;
 }
+.dc-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dc-map-legend li {
+  --swatch: var(--dash-series);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dc-map-legend li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--swatch);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--swatch) 75%, transparent);
+}
+.dc-map-legend [data-state="stale"] {
+  --swatch: var(--dash-warning-mark);
+}
+.dc-map-legend [data-state="unavailable"] {
+  --swatch: var(--dash-muted);
+}
+.dc-map-legend [data-state="static"] {
+  --swatch: var(--dash-secondary);
+}
+.dc-map-legend :is([data-state="stale"], [data-state="unavailable"])::before {
+  border-style: dashed;
+}
 .dc-list-stage tr[data-freshness="stale"] td.numeric,
 .dc-list-stage tr[data-freshness="unavailable"] td.numeric,
 .dc-list-stage tr[data-freshness="unknown"] td.numeric {
@@ -1959,11 +1982,11 @@
   box-shadow: var(--dash-shadow-float);
 }
 .dc-map-stage .leaflet-control a,
-.dc-map-stage .leaflet-control-attribution {
+.dc-map-stage .leaflet-container .leaflet-control-attribution {
   background: var(--dash-panel);
   color: var(--dash-fg);
 }
-.dc-map-stage .leaflet-control-attribution a {
+.dc-map-stage .leaflet-container .leaflet-control-attribution a {
   color: var(--dash-secondary);
 }
 .dc-map-stage .leaflet-bar a {
@@ -2278,15 +2301,8 @@
   .dc-read-label {
     display: none;
   }
-  .dc-status-toggle {
-    height: 44px;
-  }
   .dc-header :is(button, a)[data-variant][data-size] {
     min-width: 44px;
-  }
-  .dc-header [role="group"] > button {
-    width: 40px;
-    height: 44px;
   }
   .dc-evidence {
     grid-template-columns: 1fr;
@@ -2348,6 +2364,13 @@
   .dc-list-stage .dc-table td button {
     min-height: 44px;
   }
+  .dc-status-toggle {
+    height: 44px;
+  }
+  .dc-header [role="group"] > button {
+    width: 40px;
+    height: 44px;
+  }
 }
 @container dashboard-content (max-width: 720px) {
   .dc-count-column {
@@ -2372,6 +2395,15 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  .dc-page-title,
+  .dc-page-title * {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
   .dashboard-shell *,
   .dashboard-dialog * {
     animation: none !important;

@@ -2,6 +2,7 @@
 import "leaflet/dist/leaflet.css";
 import type { DashboardEntity } from "@mobility/contracts";
 import type { CircleMarker, LayerGroup, Map as LeafletMap } from "leaflet";
+import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "@/src/dashboard-client";
 import { sourceNames } from "./event-copy";
@@ -34,6 +35,7 @@ export default function MobilityMap({
     map = useRef<LeafletMap | null>(null),
     layer = useRef<LayerGroup | null>(null);
   const markers = useRef(new Map<string, CircleMarker>());
+  const { resolvedTheme } = useTheme();
   const [bbox, setBbox] = useState("-3.9,40.25,-3.5,40.6"),
     [tileError, setTileError] = useState(false),
     [ready, setReady] = useState(false);
@@ -139,7 +141,8 @@ export default function MobilityMap({
     };
   }, []);
   useEffect(() => {
-    if (!ready) return;
+    // Marker colors resolve the theme tokens, so they must be recomputed per theme.
+    if (!ready || !resolvedTheme) return;
     let cancelled = false;
     void import("leaflet").then((L) => {
       if (cancelled || !layer.current) return;
@@ -213,7 +216,7 @@ export default function MobilityMap({
     return () => {
       cancelled = true;
     };
-  }, [features, ready, selectedKey]);
+  }, [features, ready, resolvedTheme, selectedKey]);
   return (
     <section className="overflow-hidden rounded-lg border bg-card">
       <section
@@ -226,10 +229,12 @@ export default function MobilityMap({
           Viewport records: {features ? features.entities.length : "Unknown"} ·
           map read <Instant value={features?.readAt} />
         </p>
-        <p>
-          Recent · stale (dashed outline) · unavailable · reference. Inspect
-          exact times in entity details.
-        </p>
+        <ul className="dc-map-legend" aria-label="Marker legend">
+          <li data-state="recent">Recent</li>
+          <li data-state="stale">Stale (dashed outline)</li>
+          <li data-state="unavailable">No usable evidence (dashed outline)</li>
+          <li data-state="static">Reference</li>
+        </ul>
         <span>
           External basemap · published coordinates only · list access remains
           available

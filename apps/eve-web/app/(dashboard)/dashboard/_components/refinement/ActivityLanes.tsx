@@ -87,7 +87,6 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
     <section className="rf-activity" aria-labelledby={id}>
       <div className="rf-panel-heading">
         <h2 id={id}>Recorded activity</h2>
-        <span className="rf-meta">Europe/Madrid · best-effort capture</span>
       </div>
       <div className="rf-activity-summary">
         <p>

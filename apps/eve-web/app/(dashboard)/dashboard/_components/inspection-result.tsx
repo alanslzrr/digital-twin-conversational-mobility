@@ -10,14 +10,13 @@ const obj = (v: unknown): Record<string, unknown> =>
 const statusCopy: Record<string, string> = {
   partial_coverage:
     "Stored evidence covers part of the selection, not normal operation.",
-  partial_or_unavailable:
-    "Evidencia parcial o no disponible para este componente.",
+  partial_or_unavailable: "Partial or unavailable evidence for this component.",
   not_initialized: "No stored reading for this product yet.",
-  available: "Hay evidencia guardada; comprueba su vigencia.",
+  available: "Stored evidence exists; check how recent it is.",
   unavailable: "No usable reading for this selection.",
-  stale: "Lectura antigua; conserva su fecha original.",
+  stale: "Old reading; it keeps its original time.",
   fresh: "Recent by policy, not an availability guarantee.",
-  unknown: "State not confirmed por la evidencia disponible.",
+  unknown: "State not confirmed by the available evidence.",
   outside_24h_retention:
     "Requested instant outside the retained 24-hour history.",
   no_retained_observation_at_instant:

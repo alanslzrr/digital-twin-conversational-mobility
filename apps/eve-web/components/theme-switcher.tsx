@@ -1,7 +1,7 @@
 "use client";
 
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
-import { motion } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 import { useTheme } from "next-themes";
 import type { JSX } from "react";
 import { useSyncExternalStore } from "react";
@@ -81,27 +81,29 @@ function ThemeSwitcher() {
   }
 
   return (
-    <motion.div
-      key={String(isMounted)}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="inline-flex items-center overflow-clip rounded-full bg-background inset-ring-1 inset-ring-border"
-      role="group"
-      aria-label="Theme"
-    >
-      {THEME_OPTIONS.map((option) => (
-        <ThemeOption
-          key={option.value}
-          icon={option.icon}
-          value={option.value}
-          isActive={theme === option.value}
-          onClick={(value) => {
-            if (value !== theme) withViewTransition(() => setTheme(value));
-          }}
-        />
-      ))}
-    </motion.div>
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        key={String(isMounted)}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="inline-flex items-center overflow-clip rounded-full bg-background inset-ring-1 inset-ring-border"
+        role="group"
+        aria-label="Theme"
+      >
+        {THEME_OPTIONS.map((option) => (
+          <ThemeOption
+            key={option.value}
+            icon={option.icon}
+            value={option.value}
+            isActive={theme === option.value}
+            onClick={(value) => {
+              if (value !== theme) withViewTransition(() => setTheme(value));
+            }}
+          />
+        ))}
+      </motion.div>
+    </MotionConfig>
   );
 }
 
