@@ -92,7 +92,6 @@ export function Overview() {
                           {p.total === null
                             ? "Count unavailable"
                             : `${number(p.total)} ${p.unit}`}
-                          {p.issue ? ` · ${p.issue}` : ""}
                         </span>
                       </div>
                     ))}

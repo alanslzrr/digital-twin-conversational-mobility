@@ -27,7 +27,7 @@ function MetricCard({ metric: m }: { metric: DashboardMetric }) {
   const labels: Record<string, string> = {
     M1: "Available bikes",
     M2: "Published parking spaces",
-    M3: "Recorded incidents",
+    M3: "Active published notices",
     M4: "Product readiness",
   };
   return (
@@ -38,12 +38,16 @@ function MetricCard({ metric: m }: { metric: DashboardMetric }) {
         <span className="sr-only">{m.value === null ? "Unknown" : m.unit}</span>
       </p>
       <p className="dc-meta">
-        {m.id === "M4"
-          ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} ${m.denominator.unit}`
-          : m.unit}
+        {{ M1: "bikes", M2: "spaces", M3: "notices", M4: "products" }[m.id] ??
+          m.unit}
       </p>
-      <p className="dc-meta">{m.coverage}</p>
-      {m.missingReason ? <p className="dc-meta">{m.missingReason}</p> : null}
+      <p className="dc-meta">
+        {m.id === "M1" || m.id === "M2"
+          ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} stored ${m.id === "M1" ? "stations" : "parking facilities"}`
+          : m.id === "M4"
+            ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} enabled dynamic products`
+            : "Published validity · non-exhaustive coverage"}
+      </p>
       <div className="dc-metric-actions">
         <Link href={m.detailHref} className="dc-link">
           View data
@@ -65,7 +69,10 @@ function MetricCard({ metric: m }: { metric: DashboardMetric }) {
             </div>
             <div>
               <dt>Coverage</dt>
-              <dd>{m.coverage}</dd>
+              <dd>
+                {m.coverage}
+                {m.missingReason ? ` · ${m.missingReason}` : ""}
+              </dd>
             </div>
             <div>
               <dt>Selection</dt>
@@ -268,18 +275,25 @@ export function ActivityChart({ data }: { data: DashboardActivityChart }) {
             className="dc-chart-controls"
             aria-label="Inspect count intervals"
           >
-            {data.bins.map((b, i) => (
-              <Button
-                key={b.from}
-                size="sm"
-                variant="outline"
-                aria-pressed={selected === b.from}
-                aria-label={`Inspect interval ${tick(b.from)}`}
-                onClick={() => setSelected(b.from)}
-              >
-                {i + 1}
-              </Button>
-            ))}
+            <label htmlFor="activity-bin">Inspect interval</label>
+            <input
+              id="activity-bin"
+              type="range"
+              min={0}
+              max={Math.max(0, data.bins.length - 1)}
+              value={Math.max(
+                0,
+                data.bins.findIndex((b) => b.from === selected),
+              )}
+              onChange={(e) =>
+                setSelected(data.bins[Number(e.target.value)]?.from ?? null)
+              }
+              aria-valuetext={
+                bin
+                  ? `${tick(bin.from)}: publications ${number(bin.publications)}, errors ${number(bin.errors)}`
+                  : "Select a retained interval"
+              }
+            />
           </fieldset>
           {bin ? (
             <p role="status" className="dc-meta">

@@ -665,3 +665,38 @@
     display: block;
   }
 }
+.dc-metric {
+  height: 176px;
+  min-height: 176px;
+  gap: 6px;
+}
+.dc-metric-actions button {
+  padding-inline: 8px;
+}
+.dc-workspace {
+  margin-top: -8px;
+}
+.dc-list-stage .dc-table td {
+  padding: 10px 8px;
+}
+.dc-list-stage .dc-table td:first-child {
+  width: 52%;
+}
+.dc-list-stage .dc-table td p {
+  font-size: 12px;
+  line-height: 18px;
+}
+.dc-list-stage .dc-table button {
+  min-height: 32px;
+}
+.dc-list-stage .dc-table td strong {
+  font-weight: 500;
+}
+@media (max-width: 767px) {
+  .dc-metric {
+    height: 176px;
+  }
+  .dc-list-stage .dc-table button {
+    min-height: 44px;
+  }
+}
