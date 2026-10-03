@@ -9,12 +9,12 @@ import {
 import { Instant, publicLabel } from "./shared";
 
 const states: Record<string, string> = {
-  recent: "Lectura reciente",
-  recently_checked: "Predicción comprobada",
-  stale: "Dato antiguo",
-  unavailable: "Sin lectura utilizable",
-  unknown: "Antigüedad no confirmada",
-  static: "Referencia publicada",
+  recent: "Recent reading",
+  recently_checked: "Forecast checked",
+  stale: "Stale evidence",
+  unavailable: "No usable evidence",
+  unknown: "Age unknown",
+  static: "Published reference",
 };
 export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
   const forecast = e.kind === "forecast",
@@ -42,8 +42,8 @@ export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
             {m.basis ? (
               <p className="mt-1 text-xs text-muted-foreground">
                 {m.basis === "interval"
-                  ? `Acumulada o agregada durante ${m.periodMinutes ?? "el periodo publicado"}${m.periodMinutes != null ? " minutos" : ""}`
-                  : "Valor instantáneo"}
+                  ? `Accumulated or aggregated over ${m.periodMinutes ?? "the published period"}${m.periodMinutes != null ? "  minutes" : ""}`
+                  : "Instant value"}
               </p>
             ) : null}
           </div>
@@ -51,9 +51,9 @@ export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
       </dl>
       <div className="grid gap-4 border-t p-5 text-sm sm:grid-cols-2">
         <p>
-          {forecast ? "Publicación de la predicción" : "Observación publicada"}:{" "}
+          {forecast ? "Forecast issuance" : "Published observation"}:{" "}
           {forecast && !e.evidence.issuedAt ? (
-            (e.evidence.issuedAtRaw ?? "Hora no confirmada")
+            (e.evidence.issuedAtRaw ?? "Time unknown")
           ) : (
             <Instant
               value={forecast ? e.evidence.issuedAt : e.evidence.observedAt}
@@ -61,49 +61,44 @@ export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
           )}
         </p>
         <p>
-          Incorporación al almacenamiento:{" "}
-          <Instant value={e.evidence.ingestedAt} />. No rejuvenece la
-          observación.
+          Storage ingestion: <Instant value={e.evidence.ingestedAt} />. Does not
+          renew the observation.
         </p>
         {e.evidence.checkedAt ? (
           <p>
-            Última comprobación de la fuente:{" "}
-            <Instant value={e.evidence.checkedAt} />. No equivale a nueva
-            publicación.
+            Last source check: <Instant value={e.evidence.checkedAt} />. Not a
+            new publication.
           </p>
         ) : null}
         {e.evidence.validFrom || e.evidence.validTo ? (
           <p>
-            {forecast ? "Predicción para el periodo" : "Vigencia publicada"}:{" "}
+            {forecast ? "Forecast interval" : "Published validity"}:{" "}
             <Instant value={e.evidence.validFrom} /> —{" "}
             <Instant value={e.evidence.validTo} />.
           </p>
         ) : null}
         {reference ? (
-          <p>
-            Es un catálogo de referencia. No describe disponibilidad ni llegadas
-            en directo.
-          </p>
+          <p>Reference catalog, not live availability or arrivals.</p>
         ) : null}
         <p>
           {e.latitude === null || e.longitude === null
-            ? "Sin coordenadas publicadas; no se añade un punto ficticio al mapa."
-            : "Coordenadas publicadas; una ubicación de referencia no certifica cobertura de una medida."}
+            ? "No published coordinates; no fabricated map point."
+            : "Published coordinates do not certify measurement coverage."}
         </p>
         <p>
-          Calidad declarada:{" "}
+          Declared quality:{" "}
           {e.evidence.quality === "validated"
-            ? "Validada"
+            ? "Validated"
             : e.evidence.quality === "provisional"
               ? "Provisional"
-              : "No confirmada"}
+              : "Unknown"}
           .
         </p>
         <Link
           href={`/dashboard/sources/${e.evidence.sourceId}`}
           className="inline-flex min-h-11 items-center underline"
         >
-          Consultar procedencia y actualización
+          Inspect source and refresh evidence
         </Link>
       </div>
     </section>

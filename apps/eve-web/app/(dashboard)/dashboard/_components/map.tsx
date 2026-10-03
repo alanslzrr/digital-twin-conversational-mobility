@@ -15,6 +15,7 @@ export default function MobilityMap({
   freshness,
   search,
   onSelect,
+  selectedKey,
   onViewChange,
 }: {
   category: string;
@@ -24,7 +25,8 @@ export default function MobilityMap({
   source: string;
   freshness: string;
   search: string;
-  onSelect: (id: string, product: string) => void;
+  selectedKey?: string | undefined;
+  onSelect: (entity: DashboardEntity) => void;
   onViewChange: (view: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null),
@@ -147,15 +149,15 @@ export default function MobilityMap({
         stale: "var(--muted-foreground)",
         unavailable: "var(--destructive)",
         static: "var(--foreground)",
-        unknown: "var(--destructive)",
+        unknown: "var(--muted-foreground)",
       };
       const labels = {
-        recent: "Lectura reciente",
-        recently_checked: "Predicción comprobada",
-        stale: "Dato antiguo",
-        unavailable: "Sin lectura utilizable",
-        static: "Referencia",
-        unknown: "Antigüedad desconocida",
+        recent: "Recent reading",
+        recently_checked: "Forecast checked",
+        stale: "Stale evidence",
+        unavailable: "No usable evidence",
+        static: "Reference",
+        unknown: "Age unknown",
       };
       for (const entity of features?.entities ?? []) {
         if (entity.latitude === null || entity.longitude === null) continue;
@@ -168,12 +170,11 @@ export default function MobilityMap({
             weight: 2,
             fillOpacity: 0.75,
           });
-          marker.on("click", () =>
-            select.current(entity.id, entity.evidence.productId),
-          );
           marker.addTo(layer.current);
           markers.current.set(key, marker);
         }
+        marker.off("click");
+        marker.on("click", () => select.current(entity));
         marker.setLatLng([entity.latitude, entity.longitude]);
         const state = entity.evidence.freshness;
         // Resolve semantic theme colors in the DOM; no divergent map palette.
@@ -182,6 +183,9 @@ export default function MobilityMap({
         host.current?.append(probe);
         const color = getComputedStyle(probe).color;
         probe.remove();
+        marker.setRadius(
+          `${entity.evidence.productId}:${entity.id}` === selectedKey ? 10 : 6,
+        );
         marker.setStyle({
           color,
           fillColor: color,
@@ -195,7 +199,7 @@ export default function MobilityMap({
           .slice(0, 3)
           .map((m) => `${publicLabel(m.name)}: ${m.value} ${m.unit ?? ""}`)
           .join(" · ");
-        label.textContent = `${entity.name} · ${productLabel(entity.evidence.productId)}${values ? ` · ${values}` : ""} · ${labels[state]} · ${entity.evidence.sourceId}${time ? ` · ${new Date(time).toLocaleString("es-ES", { timeZone: "Europe/Madrid", timeZoneName: "short" })}` : " · Sin fecha de observación"}`;
+        label.textContent = `${entity.name} · ${productLabel(entity.evidence.productId)}${values ? ` · ${values}` : ""} · ${labels[state]} · ${entity.evidence.sourceId}${time ? ` · ${new Date(time).toLocaleString("en-GB", { timeZone: "Europe/Madrid", timeZoneName: "short" })}` : " · No observation time"}`;
         if (marker.getTooltip()) marker.setTooltipContent(label);
         else marker.bindTooltip(label);
       }
@@ -208,36 +212,32 @@ export default function MobilityMap({
     return () => {
       cancelled = true;
     };
-  }, [features, ready]);
+  }, [features, ready, selectedKey]);
   return (
     <section className="overflow-hidden rounded-lg border bg-card">
       <section
         ref={host}
         className="h-[420px] w-full"
-        aria-label="Mapa de entidades publicadas"
+        aria-label="Published entity map"
       />
       <div className="flex flex-col gap-2 p-3 text-xs text-muted-foreground">
         <p>
-          Lectura reciente · dato antiguo (contorno discontinuo) · sin lectura
-          utilizable · referencia. El color no sustituye las fechas de la ficha.
+          Recent · stale (dashed outline) · unavailable · reference. Inspect
+          exact times in entity details.
         </p>
         <span>
-          Fondo cartográfico externo, disponible según el servicio · puntos con
-          coordenadas publicadas · los mismos datos se pueden consultar en la
-          tabla
+          External basemap · published coordinates only · list access remains
+          available
         </span>
         {tileError ? (
           <span role="status">
-            Fondo cartográfico no disponible; los datos y la tabla siguen
-            disponibles.
+            Basemap unavailable; evidence and list remain available.
           </span>
         ) : null}
         {features?.limited ? (
-          <span>
-            Acerca el mapa o filtra. Máximo 1.000 entidades devueltas.
-          </span>
+          <span>Zoom or filter. Maximum 1,000 returned map entities.</span>
         ) : null}
-        <State loading={isLoading} error={error} />
+        <State data={data} loading={isLoading} error={error} />
       </div>
     </section>
   );
