@@ -35,18 +35,19 @@ function MetricCard({ metric: m }: { metric: DashboardMetric }) {
       <h2>{labels[m.id] ?? m.label}</h2>
       <p className="dc-value">
         <AnimatedValue value={m.value} format={number} />
-        <span className="sr-only">{m.value === null ? "Unknown" : m.unit}</span>
-      </p>
-      <p className="dc-meta">
-        {{ M1: "bikes", M2: "spaces", M3: "notices", M4: "products" }[m.id] ??
-          m.unit}
+        <span className="sr-only">{m.value === null ? "Unknown" : ""}</span>
+        <span className="ml-2 text-sm font-normal tracking-normal">
+          {{ M1: "bikes", M2: "spaces", M3: "notices", M4: "dynamic products" }[
+            m.id
+          ] ?? m.unit}
+        </span>
       </p>
       <p className="dc-meta">
         {m.id === "M1" || m.id === "M2"
           ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} stored ${m.id === "M1" ? "stations" : "parking facilities"}`
           : m.id === "M4"
-            ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} enabled dynamic products`
-            : "Published validity · non-exhaustive coverage"}
+            ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} enabled products`
+            : "Non-exhaustive published coverage"}
       </p>
       <div className="dc-metric-actions">
         <Link href={m.detailHref} className="dc-link">
@@ -127,7 +128,7 @@ export function FreshnessBreakdown({
   unit: string;
 }) {
   const states = [
-    ["Lecturas recientes", recent, "bg-primary"],
+    ["Recent readings", recent, "bg-primary"],
     ["Stale evidence", stale, "bg-muted-foreground"],
     ["No usable evidence", unavailable, "bg-destructive"],
     ["Reference", reference, "bg-accent-foreground"],

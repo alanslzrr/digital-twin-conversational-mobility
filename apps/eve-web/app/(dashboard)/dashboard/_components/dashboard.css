@@ -700,3 +700,36 @@
     min-height: 44px;
   }
 }
+/* Respect constrained workspace width as well as viewport breakpoints (zoom / embedding). */
+.dc-main-column {
+  container-type: inline-size;
+  container-name: dashboard-content;
+}
+@container dashboard-content (max-width: 600px) {
+  .dc-metric-grid,
+  .dc-overview-grid,
+  .dc-inspector-layout {
+    grid-template-columns: 1fr;
+  }
+  .dc-readiness-row {
+    grid-template-columns: 1fr auto;
+  }
+  .dc-readiness-row > :last-child {
+    grid-column: 1 / -1;
+  }
+  .dc-header-context {
+    display: none;
+  }
+  .dc-read-label {
+    display: none;
+  }
+  .dc-header-actions {
+    min-width: 0;
+  }
+  .dc-workspace[data-view="split"] {
+    grid-template-columns: 1fr;
+  }
+  .dc-workspace[data-view="split"] .dc-list-stage {
+    display: none;
+  }
+}

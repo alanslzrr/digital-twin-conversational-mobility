@@ -12,7 +12,7 @@ import { Instant, publicLabel, State } from "./shared";
 export function EntityHistory({ entity }: { entity: DashboardEntity }) {
   const [open, setOpen] = useState(false),
     [window, setWindow] = useState("6h"),
-    [magnitude, setMeasuremente] = useState(
+    [magnitude, setMagnitude] = useState(
       entity.category === "bikes"
         ? "bikes"
         : entity.category === "parking"
@@ -87,7 +87,7 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                     <select
                       id="history-measure"
                       value={magnitude}
-                      onChange={(e) => setMeasuremente(e.target.value)}
+                      onChange={(e) => setMagnitude(e.target.value)}
                       className="min-h-11 rounded-md border bg-background px-3 text-sm"
                     >
                       {(entity.category === "bikes"
@@ -160,8 +160,8 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                     </svg>
                   ) : (
                     <p className="mt-4 text-sm">
-                      No hay samples retenidas para esta entidad y periodo. No
-                      se fabrica una curva.
+                      No retained samples for this entity and period. No curve
+                      is fabricated.
                     </p>
                   )}
                   <p className="mt-3 text-xs leading-5 text-muted-foreground">
@@ -169,7 +169,7 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                   </p>
                   <details className="mt-3 text-sm">
                     <summary className="min-h-11 cursor-pointer py-2">
-                      Ver samples y procedencia
+                      Exact samples and provenance
                     </summary>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left">
