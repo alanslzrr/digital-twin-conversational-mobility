@@ -170,20 +170,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="dc-header-context">Evaluation / {label}</span>
           </div>
           <div className="dc-header-actions">
-            <span className="dc-read-label" aria-live="polite">
-              {ctx.paused ? (
-                "Paused"
-              ) : ctx.viewRead?.failed ? (
-                "Refresh failed"
-              ) : ctx.viewRead?.pending ? (
-                "Refreshing"
-              ) : ctx.viewRead?.readAt ? (
-                <>
-                  <span>Read </span>
-                  <Instant value={ctx.viewRead.readAt} />
-                </>
+            <span className="dc-read-label">
+              {ctx.paused
+                ? "Paused"
+                : ctx.viewRead?.failed
+                  ? ctx.viewRead.readAt
+                    ? "Cached · refresh failed"
+                    : "Read failed"
+                  : ctx.viewRead?.pending
+                    ? "Reading"
+                    : "Read"}
+              {" · "}
+              {ctx.viewRead?.readAt ? (
+                <Instant value={ctx.viewRead.readAt} />
               ) : (
-                "Waiting for data"
+                "no successful read"
               )}
             </span>
             <Button
@@ -229,7 +230,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     {ctx.paused
                       ? "Paused"
                       : ctx.visible
-                        ? "Every 15 seconds while visible"
+                        ? "Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds"
                         : "Suspended while hidden"}
                     . Refresh only reads stored evidence.
                   </dd>
@@ -252,13 +253,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     <Instant value={status?.activeUntil} />
                   </dd>
                 </div>
-                <p className="dc-meta">
-                  Visible, unpaused activity renews the bounded capture window
-                  every 60 seconds. Pausing stops renewal, not an in-progress
-                  provider request. Observation and ingestion times remain
-                  attached to each record.
-                </p>
               </dl>
+              <p className="dc-meta">
+                Visible, unpaused activity renews the bounded capture window
+                every 60 seconds. Pausing stops renewal, not an in-progress
+                provider request. Observation and ingestion times remain
+                attached to each record.
+              </p>
             </Sheet>
           </div>
         </header>

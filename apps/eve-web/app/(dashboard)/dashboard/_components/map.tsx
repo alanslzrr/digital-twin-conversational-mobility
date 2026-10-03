@@ -5,7 +5,7 @@ import type { CircleMarker, LayerGroup, Map as LeafletMap } from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "@/src/dashboard-client";
 import { productLabel } from "./product-copy";
-import { publicLabel, State } from "./shared";
+import { Instant, publicLabel, State } from "./shared";
 export default function MobilityMap({
   category,
   section,
@@ -51,7 +51,7 @@ export default function MobilityMap({
     section === "reference" ? 0 : 15000,
   );
   const features = data as
-    | { entities: DashboardEntity[]; limited: boolean }
+    | { entities: DashboardEntity[]; limited: boolean; readAt: string }
     | undefined;
   const select = useRef(onSelect);
   select.current = onSelect;
@@ -78,7 +78,7 @@ export default function MobilityMap({
         zoom >= 5 && zoom <= 19 ? zoom : 12,
       );
       L.control
-        .zoom({ zoomInTitle: "Acercar mapa", zoomOutTitle: "Alejar mapa" })
+        .zoom({ zoomInTitle: "Zoom in", zoomOutTitle: "Zoom out" })
         .addTo(m);
       map.current = m;
       layer.current = L.layerGroup().addTo(m);
@@ -221,6 +221,10 @@ export default function MobilityMap({
         aria-label="Published entity map"
       />
       <div className="flex flex-col gap-2 p-3 text-xs text-muted-foreground">
+        <p>
+          Viewport records: {features ? features.entities.length : "Unknown"} ·
+          map read <Instant value={features?.readAt} />
+        </p>
         <p>
           Recent · stale (dashed outline) · unavailable · reference. Inspect
           exact times in entity details.
