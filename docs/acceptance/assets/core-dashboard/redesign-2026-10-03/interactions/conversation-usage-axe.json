@@ -17,16 +17,12 @@
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_97pfivb_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Data timing\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_97pfivb_\" data-state=\"closed\">",
-          "target": [
-            "button[aria-label=\"Data timing\"]"
-          ]
+          "target": ["button[aria-label=\"Data timing\"]"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_r_6_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_r_6_\" data-state=\"closed\">",
-          "target": [
-            ".self-start"
-          ]
+          "target": [".self-start"]
         }
       ],
       "tags": [

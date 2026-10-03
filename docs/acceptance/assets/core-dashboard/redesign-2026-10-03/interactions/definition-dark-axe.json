@@ -24,9 +24,7 @@
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div class=\"dashboard-shell\" lang=\"en\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            ".dashboard-shell"
-          ]
+          "target": [".dashboard-shell"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
@@ -58,16 +56,12 @@
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
           "html": "<dd>Suma de bicicletas publicadas por estaciones únicas instaladas y habilitadas para alquiler, observadas en los últimos 60 segundos.</dd>",
-          "target": [
-            "div:nth-child(1) > dd"
-          ]
+          "target": ["div:nth-child(1) > dd"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
           "html": "<dd>0 de 4 estaciones del catálogo almacenado · Sin lecturas que cumplan todos los criterios.</dd>",
-          "target": [
-            "div:nth-child(2) > dd"
-          ]
+          "target": ["div:nth-child(2) > dd"]
         }
       ],
       "tags": [

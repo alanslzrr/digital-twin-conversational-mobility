@@ -20,9 +20,7 @@
       "reported_by": null,
       "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
       "metadata": null,
-      "cves": [
-        "CVE-2026-93687"
-      ],
+      "cves": ["CVE-2026-93687"],
       "access": "public",
       "severity": "high",
       "module_name": "braces",
@@ -35,9 +33,7 @@
         "score": 7.5,
         "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
       },
-      "cwe": [
-        "CWE-674"
-      ],
+      "cwe": ["CWE-674"],
       "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
     }
   },

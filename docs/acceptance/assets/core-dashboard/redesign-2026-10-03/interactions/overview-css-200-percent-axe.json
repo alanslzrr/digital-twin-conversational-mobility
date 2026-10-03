@@ -17,37 +17,27 @@
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_97pfivb_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Data timing\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_97pfivb_\" data-state=\"closed\">",
-          "target": [
-            "button[aria-label=\"Data timing\"]"
-          ]
+          "target": ["button[aria-label=\"Data timing\"]"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_r_0_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"sm\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_r_0_\" data-state=\"closed\">",
-          "target": [
-            "button[aria-controls=\"radix-_r_0_\"]"
-          ]
+          "target": ["button[aria-controls=\"radix-_r_0_\"]"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_r_3_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"sm\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_r_3_\" data-state=\"closed\">",
-          "target": [
-            "button[aria-controls=\"radix-_r_3_\"]"
-          ]
+          "target": ["button[aria-controls=\"radix-_r_3_\"]"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_r_6_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"sm\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_r_6_\" data-state=\"closed\">",
-          "target": [
-            "button[aria-controls=\"radix-_r_6_\"]"
-          ]
+          "target": ["button[aria-controls=\"radix-_r_6_\"]"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_r_9_\"",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"sm\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_r_9_\" data-state=\"closed\">",
-          "target": [
-            "button[aria-controls=\"radix-_r_9_\"]"
-          ]
+          "target": ["button[aria-controls=\"radix-_r_9_\"]"]
         }
       ],
       "tags": [
@@ -70,44 +60,32 @@
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
           "html": "<span class=\"dc-meta\">Evaluation workspace</span>",
-          "target": [
-            ".dc-brand > .dc-meta"
-          ]
+          "target": [".dc-brand > .dc-meta"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
           "html": "<a class=\"dc-nav-link\" href=\"/dashboard/conversations\">",
-          "target": [
-            "a[href$=\"conversations\"]"
-          ]
+          "target": ["a[href$=\"conversations\"]"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
           "html": "<a class=\"dc-nav-link\" href=\"/s\">",
-          "target": [
-            "a[href=\"/s\"]"
-          ]
+          "target": ["a[href=\"/s\"]"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
           "html": "<p class=\"dc-meta\">Evaluation account</p>",
-          "target": [
-            ".dc-account > p:nth-child(2)"
-          ]
+          "target": [".dc-account > p:nth-child(2)"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
           "html": "<p class=\"break-words text-sm\">QA evaluator 1</p>",
-          "target": [
-            ".break-words"
-          ]
+          "target": [".break-words"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
           "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"default\" class=\"inline-flex shrink-0...\">",
-          "target": [
-            ".h-9"
-          ]
+          "target": [".h-9"]
         }
       ],
       "tags": [
