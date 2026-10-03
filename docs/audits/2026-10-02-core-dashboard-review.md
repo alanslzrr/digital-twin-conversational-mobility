@@ -4,7 +4,7 @@
 **Segunda verificación:** [auditoría con agent-browser del 03/10/2026](../acceptance/2026-10-03-core-dashboard-second-audit.md), nueve hallazgos adicionales corregidos y límites de revisión explícitos.
 [Índice](../index.md) · [Auditorías](index.md) · [Spec acordado](../plans/2026-10-02-core-dashboard.md) · [Acta original](../acceptance/2026-10-02-core-dashboard.md) · [Alcance](../roadmap.md)
 
-**Contraste independiente posterior:** [cinco pendientes reproducidos o contrastados el 03/10/2026](#contraste-independiente-del-03102026). CI verde no equivale a aceptación funcional completa.
+**Contraste independiente posterior:** [cinco hallazgos reproducidos o contrastados el 03/10/2026](#contraste-independiente-del-03102026). CI verde no equivale a aceptación funcional completa.
 
 ## Dictamen
 
@@ -550,7 +550,9 @@ Referencias de revisión: [spec local](../plans/2026-10-02-core-dashboard.md), E
 
 ## Contraste independiente del 03/10/2026
 
-**Dictamen actual: requiere cinco correcciones P2 antes de cerrar la aceptación.** Se conserva la segunda acta como evidencia histórica válida de sus comprobaciones; estos casos no estaban cubiertos por ellas. Revisión de HEAD `dafd69a66b99101239523617f22e63cdbd5d0af9`, con código de aplicación en `1355f1633a08294dd1bd6be45a8ad7b0498c0ca2`. La PR continúa abierta y [Quality gates terminó correctamente](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37078531070/job/111073731545).
+**Estado posterior:** R1–R5 corregidos y verificados en la [nueva acta de correcciones](../acceptance/2026-10-03-core-dashboard-independent-fixes.md). Lo que sigue conserva los resultados originales anteriores a esas correcciones.
+
+**Dictamen histórico de este contraste: requiere cinco correcciones P2 antes de cerrar la aceptación.** Se conserva la segunda acta como evidencia histórica válida de sus comprobaciones; estos casos no estaban cubiertos por ellas. Revisión de HEAD `dafd69a66b99101239523617f22e63cdbd5d0af9`, con código de aplicación en `1355f1633a08294dd1bd6be45a8ad7b0498c0ca2`. La PR continúa abierta y [Quality gates terminó correctamente](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37078531070/job/111073731545).
 
 ### Pendientes y criterios de corrección
 
