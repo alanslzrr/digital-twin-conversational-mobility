@@ -18,6 +18,27 @@ export async function seedDashboardFixtures(sql) {
   await sql`INSERT INTO crtm_stop_times(dataset_id,trip_id,sequence,stop_id,arrival_seconds,departure_seconds,pickup_type,drop_off_type,timepoint) VALUES('metro','qa-trip',1,'qa-stop',28800,28860,0,0,1)`;
   const snapshots = [
     {
+      job: "dgt-incidents",
+      source: "dgt",
+      payload: {
+        incidents: [
+          {
+            id: "qa-dgt-nested",
+            title: "QA sintética · incidencia DGT con coordenadas publicadas",
+            location: {
+              type: "point",
+              start: { latitude: 40.4, longitude: -3.7 },
+              end: null,
+            },
+            complexValidity: false,
+            providerValidity: "active",
+            startsAt: at(-3600),
+            endsAt: at(3600),
+          },
+        ],
+      },
+    },
+    {
       job: "bicimad",
       source: "bicimad",
       payload: {

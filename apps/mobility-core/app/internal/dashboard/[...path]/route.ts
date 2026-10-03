@@ -88,6 +88,7 @@ async function dispatch(request: Request, context: Context) {
                   "category",
                   "section",
                   "product",
+                  "parkingCategory",
                   "source",
                   "freshness",
                   "search",

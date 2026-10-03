@@ -370,6 +370,47 @@ check(
   "G2 derives bounded intervals in Core",
   overview.activity?.bins?.length === 24,
 );
+const selectedParking = await (
+  await getData("overview?parkingCategory=b")
+).json();
+check(
+  "M2 category B value and navigation",
+  selectedParking.parkingCategory === "b" &&
+    selectedParking.metrics?.find((m) => m.id === "M2")?.value === 2 &&
+    selectedParking.metrics
+      ?.find((m) => m.id === "M2")
+      ?.detailHref.includes("parkingCategory=b"),
+);
+for (const path of [
+  "entities?category=parking&parkingCategory=b",
+  "map?category=parking&parkingCategory=b&bbox=-4,40,-3,41",
+]) {
+  const result = await getData(path);
+  const page = await result.json();
+  check(
+    `selected parking category ${path}`,
+    result.ok &&
+      page.entities?.length === 1 &&
+      page.entities[0].id === "qa-parking:b" &&
+      page.totals?.total === 1,
+  );
+}
+const parkingDetail = await getData(
+  "entities/parking/qa-parking%3Ab?parkingCategory=b",
+);
+check("selected parking category detail", parkingDetail.ok);
+await parkingDetail.body?.cancel();
+const dgtMap = await (
+  await getData(
+    "map?category=incidents&product=dgt-incidents&search=QA&bbox=-4,40,-3,41",
+  )
+).json();
+check(
+  "DGT nested coordinates survive bbox",
+  dgtMap.entities?.length === 1 &&
+    dgtMap.entities[0].id === "qa-dgt-nested" &&
+    dgtMap.totals?.total === 1,
+);
 for (const path of [
   "conversations/qa-owned/summary",
   "conversations/qa-owned/events",
