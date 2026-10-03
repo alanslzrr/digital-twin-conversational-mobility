@@ -49,7 +49,7 @@ export function UsagePerTurnRows({
         className="rf-table-region"
         aria-label="Reported usage by returned turn"
       >
-        <Table>
+        <Table aria-label="Reported token usage by turn">
           <caption className="sr-only">
             Exact parent token counts. Incomplete or inconsistent usage is not
             plotted.

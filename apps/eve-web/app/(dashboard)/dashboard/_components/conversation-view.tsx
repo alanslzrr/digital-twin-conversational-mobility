@@ -331,7 +331,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                       }))}
                     />
                     <div className="mt-4">
-                      <Table>
+                      <Table aria-label="Turn duration and coverage">
                         <thead>
                           <tr>
                             <th scope="col">Turn</th>
