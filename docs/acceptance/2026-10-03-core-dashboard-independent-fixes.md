@@ -44,3 +44,19 @@ La cadena instalada es de desarrollo: `vercel@59.25.4 → @vercel/backends → t
 Se consultó el registro npm el 03/10/2026: `braces` continúa en 3.0.3; `micromatch@4.0.8` y `fast-glob@3.3.3` siguen dependiendo de esa cadena. Vercel 62.2.0 conserva `ts-morph@12.0.0` en sus builders. Actualizar únicamente la CLI no elimina el problema. `ts-morph@28.0.0` cambia de versión mayor y de árbol de dependencias; imponerlo a builders que fijan 12.0.0 requiere una validación específica, no una sustitución silenciosa dentro de estas correcciones.
 
 No se modificó el lockfile, no se añadieron exclusiones de advisories ni se rebajó/desactivó `pnpm audit`. **Pendiente real antes de integrar:** resolver o mitigar la dependencia y validar las funciones de la CLI afectadas; después repetir CI. El `pnpm check` local aprobado no convierte esa auditoría fallida en verde.
+
+
+## Revisión independiente posterior
+
+Contraste sobre HEAD `d39a74fd5fdadccf7d050b4b7075448b8929da60`: las correcciones R1–R5 corresponden a los defectos originales. Se revisaron extracción compartida de coordenadas, condición de disponibilidad M3, propagación de categoría en listado/mapa/detalle, rango efectivo de Eventos y distinción de caché EMT sin observación. No se detectó un nuevo bloqueo funcional en este alcance.
+
+Reejecutados en esta revisión:
+
+- `pnpm check`: 481 aprobadas / 99 omitidas; ambos builds recuperados de caché Turbo.
+- Suite dashboard SQL/unitaria: 47 aprobadas / 11 archivos, incluidas las regresiones independientes.
+- Smoke HTTP aislado sin `--preview`: 36 comprobaciones aprobadas; puertos 3002/3003 libres al terminar.
+- `pnpm audit --audit-level=high`: continúa fallando por GHSA-vfj7-8cjw-p6xm. La [CI de d39a74f](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37102217111/job/111143833374) también falla.
+
+Las 20 entradas nuevas del archivo de evidencia corresponden a la ejecución anterior; no se volvió a ejecutar agent-browser. No se declara una aceptación visual exhaustiva ni una nueva compilación del agente.
+
+**Resolución propuesta del bloqueo:** retirar la CLI de despliegue Vercel del árbol instalado mientras cloud siga deshabilitado y bloquear su configurador antes de leer o escribir secretos. Conservar `pnpm audit --audit-level=high` para todas las dependencias restantes; no mover la CLI vulnerable a `pnpm dlx`, instalación global o un trabajo sin auditoría. La alternativa es mantener la CLI y validar expresamente una actualización mayor de sus dependencias internas; un simple cambio de versión de la CLI no basta. La elección está pendiente de confirmación: esta revisión no modifica dependencias ni controles CI, ni afirma que la CI esté reparada.

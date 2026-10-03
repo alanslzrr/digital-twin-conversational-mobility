@@ -110,6 +110,13 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - La CI posterior falló en auditoría de dependencias por GHSA-vfj7-8cjw-p6xm (`braces` transitivo de Vercel, sin versión corregida). Reproducción local confirmada e investigación del árbol documentadas; aceptación global abierta. Sin excepciones de seguridad ni cambios del lockfile.
 
 
+## [2026-10-03] revisión | Verificación de las correcciones R1–R5
+
+- Contrastadas las cinco correcciones en `d39a74f` y repetidas 481 pruebas generales, 47 SQL/unitarias y 36 comprobaciones HTTP, todas correctas. Builds de check recuperados de caché; no se repitió agent-browser.
+- Reproducido el bloqueo de auditoría por braces, sin excepción ni rebaja del control. [Resultado y alternativas de resolución](acceptance/2026-10-03-core-dashboard-independent-fixes.md#revisión-independiente-posterior). La decisión sobre retirada temporal de CLI cloud o actualización interna validada está pendiente.
+- Sin cambios de aplicación, dependencias, servicios habituales, publicación ni merge.
+
+
 ## [2026-10-03] feat | Rediseño de las seis vistas del panel
 
 - T00–T09 implementados en PR #45: jerarquía, tokens locales, shell, estados veraces, mapa/lista, inspector de herramientas y conversaciones; sin alterar EVE oficial, contratos ni adquisición.
