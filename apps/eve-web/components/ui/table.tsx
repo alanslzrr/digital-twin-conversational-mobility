@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div
+    <section
+      aria-label="Scrollable data table"
       data-slot="table-container"
       className="relative w-full overflow-x-auto"
     >
@@ -14,7 +15,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
       />
-    </div>
+    </section>
   );
 }
 

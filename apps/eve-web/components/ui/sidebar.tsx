@@ -87,7 +87,7 @@ function SidebarProvider({
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }, [isMobile, setOpen, setOpenMobile]);
+  }, [isMobile, setOpen]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -119,7 +119,7 @@ function SidebarProvider({
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, toggleSidebar],
   );
 
   return (
@@ -212,14 +212,13 @@ function Sidebar({
   }
 
   return (
-    <div
+    <aside
       className="group peer hidden text-sidebar-foreground md:block"
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
-      role="complementary"
       aria-label="Navigation and account"
     >
       {/* This is what handles the sidebar gap on desktop */}
@@ -257,7 +256,7 @@ function Sidebar({
           {children}
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
 
