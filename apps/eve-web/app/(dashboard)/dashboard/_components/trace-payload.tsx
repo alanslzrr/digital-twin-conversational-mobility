@@ -9,17 +9,17 @@ import { Instant, Technical } from "./shared";
 import { toolCopy } from "./tool-form";
 
 const roles: Record<string, string> = {
-  system: "Instrucciones del sistema",
-  developer: "Instrucciones de la aplicación",
+  system: "System instructions",
+  developer: "Application instructions",
   user: "Tu mensaje",
-  assistant: "Respuesta del asistente",
-  tool: "Resultado de herramienta",
+  assistant: "Assistant response",
+  tool: "Tool result",
 };
 const kinds: Record<string, string> = {
-  model_input: "Contenido enviado realmente al modelo",
-  model_output: "Respuesta capturada del modelo",
-  tool_input: "Argumentos de la consulta",
-  tool_output: "Resultado capturado de la consulta",
+  model_input: "Content enviado realmente al modelo",
+  model_output: "Captured model response",
+  tool_input: "Query arguments",
+  tool_output: "Captured query result",
 };
 function keyed<T>(values: T[]) {
   const duplicates = new Map<number, number>();
@@ -37,8 +37,8 @@ export function TracePayload({ value }: { value: unknown }) {
   if (!parsed.success)
     return (
       <p role="status" className="text-sm">
-        Contenido no disponible, omitido o caducado. Lo que nunca se capturó no
-        se puede recuperar.
+        Content unavailable, omitted or expired. Uncaptured content cannot be
+        recovered.
       </p>
     );
   const data = parsed.data;
@@ -46,24 +46,23 @@ export function TracePayload({ value }: { value: unknown }) {
     <section className="rounded-lg border bg-card p-5">
       <h2 className="text-base font-semibold">{kinds[data.kind]}</h2>
       <p className="mt-2 text-xs text-muted-foreground">
-        Capturado: <Instant value={data.capturedAt} /> · Incorporado a la traza:{" "}
+        Captured: <Instant value={data.capturedAt} /> · Trace ingestion:{" "}
         <Instant value={data.recordedAt} />.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">
         {number(data.retainedBytes)} de {number(data.originalBytes)} bytes
         retenidos ·{" "}
         {data.redacted
-          ? "Contenido saneado con elementos eliminados"
-          : "Proyección saneada"}{" "}
+          ? "Content saneado con elementos eliminados"
+          : "Sanitized projection"}{" "}
         ·{" "}
         {data.truncated
-          ? "Truncado: no se dispone del contenido omitido"
-          : "Sujeto a los límites de captura"}{" "}
+          ? "Truncated: omitted content unavailable"
+          : "Subject to capture limits"}{" "}
         · Disponible hasta <Instant value={data.expiresAt} />.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">
-        Describe la captura del transporte, no demuestra qué información influyó
-        semánticamente en la respuesta.
+        Describes transport capture, not semantic influence on the response.
       </p>
       <div className="mt-4 divide-y">
         {keyed(data.content.messages).map(
@@ -97,8 +96,8 @@ export function TracePayload({ value }: { value: unknown }) {
                 if (part.type === "omitted")
                   return (
                     <p key={partKey} className="mt-2 text-sm">
-                      Contenido omitido por tamaño, tipo no admitido o saneado;
-                      no está disponible.
+                      Content omitted by size, unsupported type or sanitization;
+                      unavailable.
                     </p>
                   );
                 const tool =
@@ -109,8 +108,8 @@ export function TracePayload({ value }: { value: unknown }) {
                   <div key={partKey} className="mt-3 text-sm">
                     <p>
                       {part.type === "function_call"
-                        ? `Consulta a ${tool?.canonicalName ? toolCopy[tool.canonicalName].title : "descubrimiento de herramientas"}`
-                        : "Resultado de herramienta incluido en el envío al modelo"}
+                        ? `Call to ${tool?.canonicalName ? toolCopy[tool.canonicalName].title : "tool discovery"}`
+                        : "Tool result included in model transport"}
                     </p>
                     <Technical value={part} />
                   </div>
@@ -123,7 +122,7 @@ export function TracePayload({ value }: { value: unknown }) {
       {data.content.functions.length ? (
         <details className="mt-4 text-sm">
           <summary className="cursor-pointer">
-            Herramientas disponibles en este envío, no necesariamente llamadas
+            Tools available in this dispatch, not necessarily called
           </summary>
           <ul className="mt-3 space-y-2">
             {data.content.functions.map((f) => {
@@ -132,7 +131,7 @@ export function TracePayload({ value }: { value: unknown }) {
                 <li key={f.name}>
                   {tool?.canonicalName
                     ? toolCopy[tool.canonicalName].title
-                    : "Descubrimiento de herramientas"}
+                    : "Tool discovery"}
                 </li>
               );
             })}
