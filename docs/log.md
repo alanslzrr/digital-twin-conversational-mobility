@@ -90,3 +90,11 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Comprobados retorno con cámara, consulta guardada sin confirmación de ejecución, duración de turno, teclado, pausa/offline y aislamiento secuencial de dos evaluadores. No se declara carrera concurrente completa ni aceptación visual exhaustiva.
 - `pnpm check`: 479 pruebas aprobadas / 94 opt-in omitidas; suite dashboard separada: 40 pruebas / 9 archivos; build del agente y 31 comprobaciones HTTP locales correctos. La [segunda acta](acceptance/2026-10-03-core-dashboard-second-audit.md) identifica HEAD, evidencia y límites.
 - 69 páginas Markdown, 1.197 enlaces locales y 315 anclas comprobados sin errores; diff correcto. QA cerrada, esquema propio ausente y 3002/3003 libres. Sin merge, cloud, inferencia, adquisiciones nuevas ni modificación de servicios habituales.
+
+
+## [2026-10-03] revisión | Contraste independiente de PR #45
+
+- Añadidos al [spec-audit canónico](audits/2026-10-02-core-dashboard-review.md#contraste-independiente-del-03102026) cinco pendientes P2, con criterios de corrección y evidencia: mapa DGT, cero de avisos con fuentes deshabilitadas, categoría de plazas, rango temporal de Eventos y ausencia de consultas EMT.
+- Repetidos `pnpm check` (479 aprobadas / 94 omitidas), suite SQL/unitaria dashboard (40 aprobadas) y smoke HTTP (31 comprobaciones). CI verde en `dafd69a`; builds locales de check recuperados de caché.
+- Tres reproducciones PostgreSQL nuevas fallan y quedan archivadas fuera de la suite. Esquemas desechables eliminados y puertos QA libres. R3/R4 contrastados con código y capturas anteriores; matriz de 72 pantallas no repetida.
+- Solo documentación y evidencia, sin corregir código, integrar, instalar ni modificar servicios habituales.

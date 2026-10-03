@@ -13,7 +13,7 @@ Alcance vigente al **03/10/2026**.
 | R1 — Dominio acordado | **Cerrado.** Fuentes y funciones entregadas, con las exclusiones aprobadas que se enumeran abajo | [Registro de productos](sources/README.md) |
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
-| Panel de Core y telemetría propia | **Refinamiento implementado y segunda auditoría local completada; límites de aceptación exhaustiva explícitos** | [Spec original](plans/2026-10-02-core-dashboard.md) y [spec-audit vigente de PR #45](audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) |
+| Panel de Core y telemetría propia | **Refinamiento implementado; cinco correcciones pendientes en el [contraste independiente](audits/2026-10-02-core-dashboard-review.md#contraste-independiente-del-03102026)** | [Spec original](plans/2026-10-02-core-dashboard.md) y [spec-audit vigente de PR #45](audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) |
 | Publicación Vercel | Alternativa de alojamiento | [Preparación cloud](deployment.md) |
 
 ## Capacidades conservadas
