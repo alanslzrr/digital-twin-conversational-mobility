@@ -1,0 +1,142 @@
+[
+  {
+    "name": "keyboard skip link",
+    "ok": true
+  },
+  {
+    "name": "skip target main",
+    "ok": true
+  },
+  {
+    "name": "four definition actions",
+    "ok": true
+  },
+  {
+    "name": "definition-dark: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "definition restores keyboard focus",
+    "ok": true
+  },
+  {
+    "name": "timing-dark: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "timing-light: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "mobility-evidence: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "evidence restores row focus",
+    "ok": true
+  },
+  {
+    "name": "cancel does not apply source",
+    "ok": true
+  },
+  {
+    "name": "apply resets explorer cursor",
+    "ok": true
+  },
+  {
+    "name": "reject nonexistent Madrid time",
+    "ok": true
+  },
+  {
+    "name": "ambiguous offset required",
+    "ok": true
+  },
+  {
+    "name": "activity-dst: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "chart has keyboard interval inspector",
+    "ok": true
+  },
+  {
+    "name": "count interval readout",
+    "ok": true
+  },
+  {
+    "name": "navigation filters chart and map never execute tools",
+    "ok": true
+  },
+  {
+    "name": "cached source evidence retained",
+    "ok": true
+  },
+  {
+    "name": "successful read time retained after failed refresh",
+    "ok": true
+  },
+  {
+    "name": "sources-cached-failure: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "first source failure not empty groups",
+    "ok": true
+  },
+  {
+    "name": "sources-first-failure: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "worker fetch failure preserves source evidence",
+    "ok": true
+  },
+  {
+    "name": "worker-fetch-failure: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "unknown outcome prevents repeat execution",
+    "ok": true
+  },
+  {
+    "name": "unknown-execution: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "unknown recovery remains blocked",
+    "ok": true
+  },
+  {
+    "name": "conversation-usage: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "token subset labeling",
+    "ok": true
+  },
+  {
+    "name": "overview-css-200-percent: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "200 percent equivalent layout has no document overflow",
+    "ok": true
+  },
+  {
+    "name": "navigation-mobile: no axe violations",
+    "ok": true
+  },
+  {
+    "name": "revoked session removes private dashboard",
+    "ok": true
+  },
+  {
+    "name": "empty conversations offers chat next step",
+    "ok": true
+  },
+  {
+    "name": "conversations-empty-second-owner: no axe violations",
+    "ok": true
+  }
+]
