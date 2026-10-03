@@ -58,13 +58,16 @@ for (const n of (await list("infra/postgres/migrations"))
   .filter((n) => n.endsWith(".sql"))
   .sort())
   await sql.unsafe(await read(`infra/postgres/migrations/${n}`, "utf8"));
-// Copy only retained public mobility snapshots into the isolated schema, no accounts or secrets.
-await sql.unsafe(
-  "INSERT INTO mobility_snapshot SELECT * FROM public.mobility_snapshot",
-);
-await sql.unsafe(
-  "INSERT INTO source_health SELECT * FROM public.source_health ON CONFLICT(source_id) DO UPDATE SET status=excluded.status,last_attempt_at=excluded.last_attempt_at,last_success_at=excluded.last_success_at,last_observed_at=excluded.last_observed_at,error_code=excluded.error_code",
-);
+// Synthetic-only runs avoid dependence on the current installation's public evidence.
+if (!process.argv.includes("--synthetic-only")) {
+  // Copy only retained public mobility snapshots into the isolated schema, no accounts or secrets.
+  await sql.unsafe(
+    "INSERT INTO mobility_snapshot SELECT * FROM public.mobility_snapshot",
+  );
+  await sql.unsafe(
+    "INSERT INTO source_health SELECT * FROM public.source_health ON CONFLICT(source_id) DO UPDATE SET status=excluded.status,last_attempt_at=excluded.last_attempt_at,last_success_at=excluded.last_success_at,last_observed_at=excluded.last_observed_at,error_code=excluded.error_code",
+  );
+}
 const secret = randomBytes(32).toString("hex"),
   origin = "http://127.0.0.1:3002";
 const auth = betterAuth(authOptions(pool, secret, origin, true));
