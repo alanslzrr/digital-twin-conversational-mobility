@@ -91,25 +91,26 @@ try {
     evaluate("document.activeElement?.id") === "dashboard-main",
   );
   // Native CSS/browser zoom equivalence is supplemented by keyboard zoom below.
-  b("wait", "--text", "View data");
+  b("wait", "--text", "Comparison unavailable");
   const definitions = evaluate(
-    "[...document.querySelectorAll('button')].filter(b=>b.textContent==='Definition').length",
+    "[...document.querySelectorAll('button')].filter(b=>b.getAttribute('aria-label')?.endsWith(' definition')).length",
   );
   check("four definition actions", definitions === 4);
-  click("Definition");
+  click("Available bikes definition");
   b("wait", "--text", "definition");
   inspect("definition-dark");
   b("press", "Escape");
   check(
     "definition restores keyboard focus",
-    evaluate("document.activeElement?.textContent") === "Definition",
+    evaluate("document.activeElement?.getAttribute('aria-label')") ===
+      "Available bikes definition",
   );
   click("Data timing");
   inspect("timing-dark");
   b("press", "Escape");
   b("set", "media", "light", "reduced-motion");
   page("");
-  b("wait", "--text", "View data");
+  b("wait", "--text", "Comparison unavailable");
   click("Data timing");
   inspect("timing-light");
   b("press", "Escape");
@@ -178,9 +179,9 @@ try {
   check("ambiguous offset required", text().includes("choose its UTC offset"));
   inspect("activity-dst");
   click("Cancel");
-  const slider = evaluate("!!document.querySelector('#activity-bin')");
-  check("chart has keyboard interval inspector", slider);
-  b("focus", reference("Inspect interval", "slider"));
+  const lane = evaluate("!!document.querySelector('.rf-bin')");
+  check("chart has keyboard interval inspector", lane);
+  evaluate("document.querySelector('.rf-bin[tabindex=\"0\"]').focus(); true");
   b("press", "ArrowRight");
   check("count interval readout", text().includes("Publications"));
   const requests = b("network", "requests", "--method", "POST");
@@ -195,7 +196,7 @@ try {
   b("network", "route", "**/api/dashboard/sources?*", "--abort");
   b("wait", "16000");
   click("Refresh stored data");
-  b("wait", "--text", "Previously loaded evidence");
+  b("wait", "--text", "Cached source evidence");
   check("cached source evidence retained", text().includes("Source products"));
   check(
     "successful read time retained after failed refresh",
@@ -219,8 +220,7 @@ try {
   b("network", "route", "**/api/dashboard/status", "--abort");
   b("wait", "3500");
   b("scrollintoview", "#worker-signals");
-  b("click", "#worker-signals");
-  b("wait", "--text", "status read failed");
+  b("wait", "--text", "Refresh failed.");
   check(
     "worker fetch failure preserves source evidence",
     text().includes("Source products") &&
@@ -293,7 +293,7 @@ try {
   evaluate("document.documentElement.style.zoom='';true");
   b("set", "viewport", "390", "844");
   page("");
-  click("Open navigation");
+  click("Toggle navigation");
   inspect("navigation-mobile");
   b("press", "Escape");
   // Revoke only this disposable account's session through its existing authenticated path.
