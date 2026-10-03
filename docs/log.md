@@ -108,3 +108,10 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Evidencia únicamente sintética; sin adquisiciones, inferencia, herramientas ni cambios en proveedores, autenticación o EVE oficial.
 
 - La CI posterior falló en auditoría de dependencias por GHSA-vfj7-8cjw-p6xm (`braces` transitivo de Vercel, sin versión corregida). Reproducción local confirmada e investigación del árbol documentadas; aceptación global abierta. Sin excepciones de seguridad ni cambios del lockfile.
+
+
+## [2026-10-03] feat | Rediseño de las seis vistas del panel
+
+- T00–T09 implementados en PR #45: jerarquía, tokens locales, shell, estados veraces, mapa/lista, inspector de herramientas y conversaciones; sin alterar EVE oficial, contratos ni adquisición.
+- [Acta y evidencia sintética](acceptance/2026-10-03-core-dashboard-redesign.md): 491 tests generales, 26 SQL, 36 HTTP, 17 adaptadores/componentes, 35 comprobaciones de navegador y 72 capturas. T11 automatizado validado; lector de pantalla real y zoom nativo pendientes.
+- Fallo original de Sources no reproducido; corregido el defecto demostrado de renderizar fallo como vacío. T10 y remediación de Vercel diferidos; sin merge, despliegue ni declaración de aceptación global.
