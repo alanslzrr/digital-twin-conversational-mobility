@@ -6,6 +6,7 @@ Resultados ejecutados y límites de cada entrega.
 
 | Documento | Qué encontrarás |
 | --- | --- |
+| [2026-10-03-core-dashboard-refinement-v2](2026-10-03-core-dashboard-refinement-v2.md) | Neutralidad y densidad V2; gráficos existentes, comparaciones guardadas y validación sintética; límites manuales explícitos. |
 | [2026-10-03-core-dashboard-redesign](2026-10-03-core-dashboard-redesign.md) | Seis vistas rediseñadas, estados veraces y validación sintética; lector de pantalla/zoom nativo y CI pendientes. |
 | [2026-10-03-core-dashboard-independent-fixes](2026-10-03-core-dashboard-independent-fixes.md) | R1–R5 corregidos, 47 pruebas SQL/unitarias, 36 comprobaciones HTTP y 20 inspecciones nuevas con agent-browser |
 | [2026-10-03-core-dashboard-second-audit](2026-10-03-core-dashboard-second-audit.md) | Segunda auditoría con agent-browser, nueve hallazgos corregidos, 72 pantallas/formularios y límites explícitos |
