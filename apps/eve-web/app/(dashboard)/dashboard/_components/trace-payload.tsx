@@ -5,18 +5,19 @@ import {
 } from "@mobility/contracts";
 import { number } from "./insights";
 import { InspectionResult } from "./inspection-result";
+import { RefinedDisclosure } from "./refinement/RefinedDisclosure";
 import { Instant, Technical } from "./shared";
 import { toolCopy } from "./tool-form";
 
 const roles: Record<string, string> = {
   system: "System instructions",
   developer: "Application instructions",
-  user: "Tu mensaje",
+  user: "Your message",
   assistant: "Assistant response",
   tool: "Tool result",
 };
 const kinds: Record<string, string> = {
-  model_input: "Content enviado realmente al modelo",
+  model_input: "Content sent to the model",
   model_output: "Captured model response",
   tool_input: "Query arguments",
   tool_output: "Captured query result",
@@ -50,16 +51,16 @@ export function TracePayload({ value }: { value: unknown }) {
         <Instant value={data.recordedAt} />.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">
-        {number(data.retainedBytes)} de {number(data.originalBytes)} bytes
-        retenidos ·{" "}
+        {number(data.retainedBytes)} of {number(data.originalBytes)} retained
+        bytes ·{" "}
         {data.redacted
-          ? "Content saneado con elementos eliminados"
+          ? "Sanitized content with removals"
           : "Sanitized projection"}{" "}
         ·{" "}
         {data.truncated
           ? "Truncated: omitted content unavailable"
           : "Subject to capture limits"}{" "}
-        · Disponible hasta <Instant value={data.expiresAt} />.
+        · Available until <Instant value={data.expiresAt} />.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">
         Describes transport capture, not semantic influence on the response.
@@ -120,10 +121,7 @@ export function TracePayload({ value }: { value: unknown }) {
         )}
       </div>
       {data.content.functions.length ? (
-        <details className="mt-4 text-sm">
-          <summary className="cursor-pointer">
-            Tools available in this dispatch, not necessarily called
-          </summary>
+        <RefinedDisclosure title="Tools available in this dispatch, not necessarily called">
           <ul className="mt-3 space-y-2">
             {data.content.functions.map((f) => {
               const tool = resolveTelemetryTool(f.name);
@@ -136,7 +134,7 @@ export function TracePayload({ value }: { value: unknown }) {
               );
             })}
           </ul>
-        </details>
+        </RefinedDisclosure>
       ) : null}
     </section>
   );

@@ -32,12 +32,12 @@ export function AnimatedValue({ value, format, className }: Props) {
     animation.current = node.current.animate(
       [
         {
-          opacity: 0.55,
-          transform: `translateY(${valid > before ? 5 : -5}px)`,
+          opacity: 1,
+          transform: `translateY(${valid > before ? 2 : -2}px)`,
         },
         { opacity: 1, transform: "translateY(0)" },
       ],
-      { duration: 200, easing: "cubic-bezier(.2,.8,.2,1)" },
+      { duration: 180, easing: "cubic-bezier(.2,.8,.2,1)" },
     );
     const stop = () => {
       if (reduce.matches) animation.current?.cancel();
