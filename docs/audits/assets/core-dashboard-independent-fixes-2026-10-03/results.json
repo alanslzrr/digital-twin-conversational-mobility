@@ -1,0 +1,222 @@
+[
+  {
+    "name": "section-overview",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "section-mobility",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "section-tools",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "section-sources",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "section-activity",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "section-conversations",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R1-dgt-list-map",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "R3-category-selected",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R3-category-return",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R4-default-24h",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R4-relative-1h",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R4-custom-one-endpoint",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R5-no-query",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R5-empty-recent-query",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R5-old-query",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "R2-disabled-unavailable",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 0
+  },
+  {
+    "name": "responsive-overview-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "responsive-activity-390-light",
+    "layout": {
+      "light": true,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "responsive-overview-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "responsive-activity-390-dark",
+    "layout": {
+      "light": false,
+      "reduced": true,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  }
+]
