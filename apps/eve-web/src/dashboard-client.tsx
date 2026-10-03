@@ -32,6 +32,7 @@ import {
   eligibleDashboardRead,
   startVisibleHeartbeat,
 } from "./dashboard-polling";
+import { successfulReadAt } from "./dashboard-presentation";
 export class DashboardHttpError extends Error {
   constructor(
     public status: number,
@@ -41,7 +42,14 @@ export class DashboardHttpError extends Error {
   }
 }
 type Identity = { principalId: string; label: string };
+export type ViewReadStatus = {
+  readAt: string | null;
+  pending: boolean;
+  failed: boolean;
+};
 type Context = {
+  viewRead: ViewReadStatus | null;
+  setViewRead: (value: ViewReadStatus | null) => void;
   identity: Identity;
   paused: boolean;
   setPaused: (v: boolean) => void;
@@ -65,6 +73,7 @@ export function DashboardProvider({
   identity: Identity;
   children: ReactNode;
 }) {
+  const [viewRead, setViewRead] = useState<ViewReadStatus | null>(null);
   const [paused, setPaused] = useState(false),
     [visible, setVisible] = useState(true);
   const controllers = useRef(new Set<AbortController>()),
@@ -87,6 +96,7 @@ export function DashboardProvider({
     for (const c of controllers.current) c.abort();
     controllers.current.clear();
     cache.clear();
+    setViewRead(null);
     eligibility.clear();
     pending.clear();
   }, [cache, eligibility, pending]);
@@ -213,6 +223,8 @@ export function DashboardProvider({
     <DashboardContext.Provider
       value={{
         identity,
+        viewRead,
+        setViewRead,
         paused,
         setPaused,
         visible,
@@ -237,7 +249,11 @@ export function DashboardProvider({
     </DashboardContext.Provider>
   );
 }
-export function useDashboard(path: string | null, interval = 15000) {
+export function useDashboard(
+  path: string | null,
+  interval = 15000,
+  primary = false,
+) {
   const ctx = useDashboardContext();
   const last = ctx.eligibility;
   useEffect(() => {
@@ -261,7 +277,7 @@ export function useDashboard(path: string | null, interval = 15000) {
     };
   }, [ctx.paused, ctx.visible]);
   const key = path ? `${ctx.identity.principalId}:${path}` : null;
-  return useSWR(
+  const result = useSWR(
     key,
     async () => {
       if (!path) return null;
@@ -313,4 +329,19 @@ export function useDashboard(path: string | null, interval = 15000) {
       },
     },
   );
+  const readAt = successfulReadAt(result.data);
+  const { setViewRead } = ctx;
+  useEffect(() => {
+    if (primary && path)
+      setViewRead({
+        readAt,
+        pending: result.isValidating,
+        failed: Boolean(result.error),
+      });
+  }, [primary, path, readAt, result.isValidating, result.error, setViewRead]);
+  useEffect(() => {
+    if (!primary || !path) return;
+    return () => setViewRead(null);
+  }, [primary, path, setViewRead]);
+  return result;
 }
