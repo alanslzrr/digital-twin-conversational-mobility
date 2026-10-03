@@ -6,9 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { InspectionResult } from "./inspection-result";
+import { Card, Segmented } from "./primitives";
 import { PageTitle, State, Technical } from "./shared";
 import { effectCopy, ToolFields, toolCopy } from "./tool-form";
 
@@ -42,9 +44,16 @@ const toolInputs = {
   get_mobility_snapshot: schemas.mobilitySnapshotInputSchema,
 };
 type Tool = z.infer<typeof dashboardToolCatalog>["tools"][number];
-export function Tools({ name }: { name?: string }) {
+export function Tools({ name: routeName }: { name?: string }) {
+  const [selectedName, setSelectedName] = useState<string | undefined>(
+    routeName,
+  );
+  const name = routeName ?? selectedName;
+  const [search, setSearch] = useState("");
+  const [mode, setMode] = useState("stored");
+  const [unknownOutcome, setUnknownOutcome] = useState(false);
   const ctx = useDashboardContext();
-  const q = useDashboard("tools", 0);
+  const q = useDashboard("tools", 0, true);
   const tools = (q.data as { tools?: Tool[] })?.tools ?? [];
   const [input, setInput] = useState("{}"),
     [result, setResult] = useState<unknown>(null),
@@ -62,10 +71,12 @@ export function Tools({ name }: { name?: string }) {
     setPending(false);
     setConfirmed(false);
     requestId.current = null;
+    setUnknownOutcome(false);
+    setMode("stored");
   }, [name]);
   const tool = tools.find((t) => t.name === name);
   const submit = async (execute: boolean) => {
-    if (!tool) return;
+    if (!tool || (execute && unknownOutcome)) return;
     const selected = name;
     setPending(true);
     setError("");
@@ -73,11 +84,11 @@ export function Tools({ name }: { name?: string }) {
       const checked = toolInputs[tool.name].safeParse(JSON.parse(input));
       if (!checked.success)
         throw new Error(
-          "Revisa los campos obligatorios y sus valores permitidos antes de consultar.",
+          "Check required fields and allowed values before submitting.",
         );
       const parsed = checked.data;
       if (new TextEncoder().encode(input).length > 8192)
-        throw new Error("Máximo 8.192 bytes de argumentos");
+        throw new Error("Maximum 8,192 argument bytes");
       requestId.current = execute ? crypto.randomUUID() : null;
       const response = await ctx.request(
         execute ? "executions" : "inspect",
@@ -91,10 +102,15 @@ export function Tools({ name }: { name?: string }) {
             }
           : { tool: tool.name, input: parsed },
       );
-      if (selection.current === selected) setResult(unwrap(response));
+      if (selection.current === selected) {
+        setResult(unwrap(response));
+        setUnknownOutcome(false);
+      }
     } catch (e) {
+      if (execute && requestId.current && selection.current === selected)
+        setUnknownOutcome(true);
       if (selection.current === selected)
-        setError(e instanceof Error ? e.message : "No disponible");
+        setError(e instanceof Error ? e.message : "Unavailable");
     } finally {
       if (selection.current === selected) setPending(false);
     }
@@ -102,159 +118,247 @@ export function Tools({ name }: { name?: string }) {
   return (
     <>
       <PageTitle
-        title={tool ? toolCopy[tool.name].title : "Consultas"}
-        description="Consultar los datos guardados no ejecuta la herramienta ni pide una lectura nueva. Ejecutarla manualmente puede consultar fuentes y mantener su actualización."
+        title="Queries"
+        description="Discover registered tools. Inspection and execution stay separate."
       />
-      <State loading={q.isLoading} error={q.error} />
-      {!name ? (
-        <div className="grid gap-3 md:grid-cols-2">
-          {tools.map((t) => (
-            <Link
-              key={t.name}
-              href={`/dashboard/tools/${t.name}`}
-              className="rounded-lg border bg-card p-5 hover:bg-accent"
-            >
-              <h2 className="text-sm font-medium">{toolCopy[t.name].title}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {toolCopy[t.name].question}
-              </p>
-              <p className="mt-3 text-xs">
-                {t.possibleEffects.length
-                  ? `Efectos posibles: ${t.possibleEffects.map((effect) => effectCopy[effect]).join(" · ")}`
-                  : "Solo almacenamiento"}
-              </p>
-            </Link>
-          ))}
-        </div>
-      ) : tool ? (
-        <>
-          <Link href="/dashboard/tools" className="text-sm underline">
-            Volver al catálogo
-          </Link>
-          <p className="text-sm leading-6 text-muted-foreground">
-            {toolCopy[tool.name].question}
-          </p>
-          <Technical value={JSON.parse(tool.inputSchemaJson)} />
-          <form
-            className="flex flex-col gap-4 rounded-lg border bg-card p-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void submit(false);
-            }}
-          >
-            <ToolFields
-              name={tool.name}
-              schema={tool.inputSchemaJson}
-              input={input}
-              onChange={setInput}
-            />
-            <FieldGroup>
-              <details>
-                <summary className="min-h-11 cursor-pointer text-sm">
-                  Configuración avanzada
-                </summary>
-                <Field>
-                  <FieldLabel htmlFor="tool-input">
-                    Configuración avanzada JSON · máximo 8.192 bytes
-                  </FieldLabel>
-                  <Textarea
-                    id="tool-input"
-                    rows={7}
-                    maxLength={8192}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    className="font-mono text-xs"
-                  />
-                </Field>
-              </details>
-              <Field>
-                <FieldLabel>
-                  <input
-                    type="checkbox"
-                    checked={confirmed}
-                    onChange={(e) => setConfirmed(e.target.checked)}
-                  />{" "}
-                  Confirmo la ejecución manual y sus posibles efectos
-                </FieldLabel>
-                <p className="text-xs text-muted-foreground">
-                  Máximo una reserva por evaluador, seis ejecuciones/minuto y
-                  sesenta/día. No activa consentimiento externo de direcciones:
-                  allowExternal sigue requiriendo consentimiento específico.
-                </p>
-              </Field>
-            </FieldGroup>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" type="submit" disabled={pending}>
-                Consultar almacenado
-              </Button>
-              <Button
-                type="button"
-                disabled={pending || !confirmed}
-                onClick={() => void submit(true)}
-              >
-                Ejecutar herramienta
-              </Button>
-              {requestId.current ? (
-                <Button
-                  variant="ghost"
-                  type="button"
-                  disabled={pending}
-                  onClick={async () => {
-                    const selected = name;
-                    try {
-                      const response = await ctx.request(
-                        `executions/${requestId.current}`,
-                      );
-                      if (selection.current !== selected) return;
-                      setResult(unwrap(response));
-                      setError("");
-                    } catch {
-                      if (selection.current === selected)
-                        setError(
-                          "No se pudo recuperar el resultado. No se ha reejecutado.",
-                        );
-                    }
-                  }}
-                >
-                  Recuperar estado por ID
-                </Button>
-              ) : null}
-            </div>
-            {error ? (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            ) : null}
-            {pending ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => ctx.clear()}
-              >
-                Cancelar solicitud
-              </Button>
-            ) : null}
-            <p className="text-xs text-muted-foreground">
-              Inspector: hasta 256 KB. Contexto EVE: hasta 32 KB. El resultado
-              del inspector no certifica lo recibido por el modelo.
-            </p>
-            {pending ? (
-              <p role="status" className="text-sm">
-                Solicitud en curso. Cancelar la pantalla no demuestra que el
-                proveedor haya cancelado.
-              </p>
-            ) : null}
-          </form>
-          {result ? (
+      <State data={q.data} loading={q.isLoading} error={q.error} />
+      <div className="dc-inspector-layout">
+        <Card>
+          <label htmlFor="tool-search" className="sr-only">
+            Search registered tools
+          </label>
+          <Input
+            id="tool-search"
+            placeholder="Search 16 registered tools"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="dc-catalog">
+            {Object.entries({
+              Places: ["resolve_place", "resolve_address"],
+              "Journeys and timetables": [
+                "plan_journey",
+                "get_departures",
+                "get_emt_arrivals",
+                "get_crtm_timetable",
+              ],
+              "Mobility evidence": [
+                "get_incidents",
+                "get_bike_availability",
+                "get_environment",
+                "get_road_state",
+                "get_parking",
+                "get_historical_state",
+              ],
+              "System and coverage": [
+                "get_source_health",
+                "get_line_status",
+                "get_network_status",
+                "get_mobility_snapshot",
+              ],
+            }).map(([group, names]) => {
+              const matching = tools.filter(
+                (t) =>
+                  names.includes(t.name) &&
+                  `${t.name} ${toolCopy[t.name].title} ${toolCopy[t.name].question}`
+                    .toLowerCase()
+                    .includes(search.toLowerCase()),
+              );
+              return matching.length ? (
+                <div key={group}>
+                  <h2 className="dc-group-title">{group}</h2>
+                  {matching.map((t) => (
+                    <Link
+                      key={t.name}
+                      href={`/dashboard/tools/${t.name}`}
+                      className="dc-tool-row"
+                      aria-current={name === t.name ? "page" : undefined}
+                      onClick={(e) => {
+                        if (
+                          window.matchMedia("(min-width:1100px)").matches &&
+                          !routeName
+                        ) {
+                          e.preventDefault();
+                          setSelectedName(t.name);
+                        }
+                      }}
+                    >
+                      <strong>{toolCopy[t.name].title}</strong>
+                      <p>{t.name}</p>
+                    </Link>
+                  ))}
+                </div>
+              ) : null;
+            })}
+          </div>
+        </Card>
+        <div className="dc-stack">
+          {tool ? (
             <>
-              <InspectionResult value={result} />
-              <Technical value={result} />
+              <Link href="/dashboard/tools" className="text-sm underline">
+                Back to catalog
+              </Link>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {toolCopy[tool.name].question}
+              </p>
+              <Technical value={JSON.parse(tool.inputSchemaJson)} />
+              <form
+                className="dc-card dc-stack"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void submit(mode === "run");
+                }}
+              >
+                <Segmented
+                  label="Query mode"
+                  value={mode}
+                  onChange={(v) => {
+                    setMode(v);
+                    setConfirmed(false);
+                  }}
+                  options={[
+                    ["stored", "Stored evidence"],
+                    ["run", "Run query"],
+                  ]}
+                />
+                <p className="dc-meta">
+                  {mode === "stored"
+                    ? "Read stored evidence without executing this tool."
+                    : `Explicit execution. Possible effects: ${tool.possibleEffects.map((effect) => effectCopy[effect]).join(" · ") || "stored access only"}`}
+                </p>
+                <ToolFields
+                  name={tool.name}
+                  schema={tool.inputSchemaJson}
+                  input={input}
+                  onChange={setInput}
+                />
+                <FieldGroup>
+                  <details>
+                    <summary className="min-h-11 cursor-pointer text-sm">
+                      Advanced configuration
+                    </summary>
+                    <Field>
+                      <FieldLabel htmlFor="tool-input">
+                        Advanced JSON · maximum 8,192 bytes
+                      </FieldLabel>
+                      <Textarea
+                        id="tool-input"
+                        rows={7}
+                        maxLength={8192}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        className="font-mono text-xs"
+                      />
+                    </Field>
+                  </details>
+                  {mode === "run" ? (
+                    <Field>
+                      <FieldLabel>
+                        <input
+                          type="checkbox"
+                          checked={confirmed}
+                          onChange={(e) => setConfirmed(e.target.checked)}
+                        />{" "}
+                        I confirm explicit execution and its declared effects
+                      </FieldLabel>
+                      <p className="text-xs text-muted-foreground">
+                        One execution reservation per evaluator, six
+                        executions/minute and sixty/day. Address lookup still
+                        requires specific allowExternal consent.
+                      </p>
+                    </Field>
+                  ) : null}
+                </FieldGroup>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="submit"
+                    variant={mode === "stored" ? "outline" : "default"}
+                    disabled={
+                      pending ||
+                      (mode === "run" && (!confirmed || unknownOutcome))
+                    }
+                  >
+                    {mode === "stored"
+                      ? "Inspect stored evidence"
+                      : "Run query"}
+                  </Button>
+                  {unknownOutcome ? (
+                    <p role="alert">
+                      Execution outcome unknown. Recover this request by ID
+                      before another execution. Cancelling the screen does not
+                      cancel the provider.
+                    </p>
+                  ) : null}
+                  {requestId.current ? (
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      disabled={pending}
+                      onClick={async () => {
+                        const selected = name;
+                        try {
+                          const response = await ctx.request(
+                            `executions/${requestId.current}`,
+                          );
+                          if (selection.current !== selected) return;
+                          setResult(unwrap(response));
+                          setError("");
+                          setUnknownOutcome(false);
+                        } catch {
+                          if (selection.current === selected)
+                            setError(
+                              "Could not recover the result. No re-execution occurred.",
+                            );
+                        }
+                      }}
+                    >
+                      Recover status by request ID
+                    </Button>
+                  ) : null}
+                </div>
+                {error ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {error}
+                  </p>
+                ) : null}
+                {pending ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => ctx.clear()}
+                  >
+                    Cancel request
+                  </Button>
+                ) : null}
+                <p className="text-xs text-muted-foreground">
+                  Inspector limit: 256 KB. EVE context: 32 KB. Inspector
+                  evidence does not certify what the model received.
+                </p>
+                {pending ? (
+                  <p role="status" className="text-sm">
+                    Request in progress. Cancelling the screen does not prove
+                    provider cancellation.
+                  </p>
+                ) : null}
+              </form>
+              {result ? (
+                <>
+                  <InspectionResult value={result} />
+                  <Technical value={result} />
+                </>
+              ) : null}
             </>
-          ) : null}
-        </>
-      ) : (
-        <p>Herramienta no registrada.</p>
-      )}
+          ) : (
+            <Card>
+              <h2>{name ? "Tool not registered" : "Select a query"}</h2>
+              <p className="dc-meta mt-2">
+                Explore its inputs and stored evidence before choosing explicit
+                execution.
+              </p>
+            </Card>
+          )}
+        </div>
+      </div>
     </>
   );
 }

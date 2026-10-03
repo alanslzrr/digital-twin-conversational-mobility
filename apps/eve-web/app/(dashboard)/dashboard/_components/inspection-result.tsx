@@ -9,21 +9,21 @@ const obj = (v: unknown): Record<string, unknown> =>
     : {};
 const statusCopy: Record<string, string> = {
   partial_coverage:
-    "La evidencia almacenada cubre solo una parte de la selección; no certifica funcionamiento normal.",
+    "Stored evidence covers part of the selection, not normal operation.",
   partial_or_unavailable:
     "Evidencia parcial o no disponible para este componente.",
-  not_initialized: "Todavía no se ha guardado una lectura de este producto.",
+  not_initialized: "No stored reading for this product yet.",
   available: "Hay evidencia guardada; comprueba su vigencia.",
-  unavailable: "No hay una lectura utilizable para esta selección.",
+  unavailable: "No usable reading for this selection.",
   stale: "Lectura antigua; conserva su fecha original.",
-  fresh: "Lectura reciente según su política, no garantía de disponibilidad.",
-  unknown: "Estado no confirmado por la evidencia disponible.",
+  fresh: "Recent by policy, not an availability guarantee.",
+  unknown: "State not confirmed por la evidencia disponible.",
   outside_24h_retention:
-    "El instante solicitado está fuera de las 24 horas de histórico retenido.",
+    "Requested instant outside the retained 24-hour history.",
   no_retained_observation_at_instant:
-    "No hay observaciones retenidas para ese instante.",
+    "No retained observations for that instant.",
   not_materialized:
-    "Requiere ejecución explícita; no se calcula al releer almacenamiento.",
+    "Requires explicit execution; not calculated by stored reads.",
 };
 const array = (v: unknown) => (Array.isArray(v) ? v.map(obj) : []);
 export function InspectionResult({ value }: { value: unknown }) {
@@ -61,30 +61,30 @@ export function InspectionResult({ value }: { value: unknown }) {
   const availability = envelope.availability ?? envelope.state ?? root.status;
   return (
     <section className="flex flex-col gap-4 rounded-lg border bg-card p-5">
-      <h2 className="text-base font-semibold">Resultado de la consulta</h2>
+      <h2 className="text-base font-semibold">Query result</h2>
       <p className="text-sm">
         {availability === "not_materialized"
-          ? "Este resultado necesita una ejecución explícita; no se calcula al consultar almacenado."
+          ? "This result requires explicit execution, not stored inspection."
           : envelope.truncated
-            ? "Resultado incompleto por el límite de tamaño. Reduce los filtros; el contenido omitido no está disponible."
+            ? "Result truncated by size limit. Narrow filters; omitted content unavailable."
             : availability === "partial"
-              ? "Cobertura parcial para esta selección. No equivale a información completa ni a disponibilidad en directo."
+              ? "Partial selection coverage, not complete or live availability."
               : availability === "unavailable"
-                ? "Sin resultado guardado utilizable para esta selección."
+                ? "No usable stored result for this selection."
                 : availability === "running"
-                  ? "Ejecución en curso. Recupera su estado sin volver a ejecutarla."
+                  ? "Execution running. Recover status without re-execution."
                   : availability === "outcome_unknown"
-                    ? "No se conoce el resultado de la ejecución. No vuelvas a ejecutarla para recuperarlo."
-                    : "Consulta terminada. Cada dato conserva su propia fecha y cobertura."}
+                    ? "Execution outcome unknown. Recover by ID without re-execution."
+                    : "Query finished. Evidence retains its own time and coverage."}
       </p>
       <p className="text-xs text-muted-foreground">
-        Consulta evaluada:{" "}
+        Query evaluated:{" "}
         <Instant value={envelope.evaluatedAt ?? envelope.completedAt} /> ·{" "}
         {envelope.executionMode === "captured_transport"
-          ? "Contenido capturado del transporte; abrirlo no ejecuta herramientas."
+          ? "Content capturado del transporte; abrirlo no ejecuta herramientas."
           : envelope.executionMode === "stored_only"
-            ? "Solo almacenamiento; sin adquisición a fuentes."
-            : "Ejecución manual explícita."}
+            ? "Stored only; no provider acquisition."
+            : "Explicit manual execution."}
       </p>
       {typeof root.status === "string" && statusCopy[root.status] ? (
         <p className="text-sm">{statusCopy[root.status]}</p>
@@ -94,22 +94,21 @@ export function InspectionResult({ value }: { value: unknown }) {
       ) : null}
       {provenance.observedAt ? (
         <p className="text-sm">
-          Observación publicada: <Instant value={provenance.observedAt} />.
+          Published observation: <Instant value={provenance.observedAt} />.
           Incorporada: <Instant value={provenance.ingestedAt} />.
         </p>
       ) : null}
       {typeof root.warning === "string" ? (
         <p className="text-sm leading-6">
-          Este resultado tiene limitaciones de cobertura y vigencia. Comprueba
-          las fechas y consulta la procedencia; no es una garantía de servicio o
-          disponibilidad.
+          This result has coverage and validity limits. Check source evidence
+          and times; not a service or availability guarantee.
         </p>
       ) : null}
       {collections.map(({ key, rows }) => (
         <section key={key}>
           <h3 className="text-sm font-medium">
-            {publicLabel(key)} · {number(rows.length)} registros devueltos, no
-            cobertura total
+            {publicLabel(key)} · {number(rows.length)} returned records, not
+            global coverage
           </h3>
           {rows.length ? (
             <div className="mt-3 divide-y">
@@ -125,7 +124,7 @@ export function InspectionResult({ value }: { value: unknown }) {
                         r.destination ??
                         r.label ??
                         (typeof r.source === "string"
-                          ? `Información de ${r.source.toUpperCase()}`
+                          ? `Information de ${r.source.toUpperCase()}`
                           : null) ??
                         r.job ??
                         (r.kind ? publicLabel(String(r.kind)) : null) ??
@@ -141,11 +140,11 @@ export function InspectionResult({ value }: { value: unknown }) {
                     </p>
                   ) : null}
                   <p className="text-xs text-muted-foreground">
-                    Observado:{" "}
+                    Observed:{" "}
                     <Instant
                       value={r.observedAt ?? obj(r.provenance).observedAt}
                     />{" "}
-                    · Incorporado:{" "}
+                    · Ingested:{" "}
                     <Instant
                       value={obj(r.provenance).ingestedAt ?? r.ingestedAt}
                     />
@@ -180,7 +179,7 @@ export function InspectionResult({ value }: { value: unknown }) {
                             {key === "value" && r.unit
                               ? ` ${r.unit}`
                               : key === "vehiclesPerHour"
-                                ? " vehículos/h"
+                                ? " vehicles/h"
                                 : key === "occupancyPercent"
                                   ? " %"
                                   : ""}
@@ -193,18 +192,18 @@ export function InspectionResult({ value }: { value: unknown }) {
                       {publicLabel(String(m.name))}: {number(m.value)}{" "}
                       {String(m.unit ?? "")} ·{" "}
                       {m.basis === "interval"
-                        ? `Agregada o acumulada durante ${m.periodMinutes ?? "su periodo"} minutos`
-                        : "Instantánea"}
+                        ? `Agregada o acumulada durante ${m.periodMinutes ?? "its interval"}  minutes`
+                        : "Snapshot"}
                     </p>
                   ))}
                   {r.validFrom || r.validTo ? (
                     <p>
-                      Periodo publicado: <Instant value={r.validFrom} /> —{" "}
+                      Published period: <Instant value={r.validFrom} /> —{" "}
                       <Instant value={r.validTo} />.{" "}
                       {r.basis === "interval"
-                        ? "Valor acumulado o agregado durante este periodo."
+                        ? "Accumulated value o agregado durante este periodo."
                         : r.basis === "instant"
-                          ? "Valor instantáneo."
+                          ? "Instant value."
                           : ""}
                     </p>
                   ) : null}
@@ -216,16 +215,16 @@ export function InspectionResult({ value }: { value: unknown }) {
                           obj(stream.summary).count ??
                           obj(stream.summary).total,
                       )}{" "}
-                      registros de colección; no certifican frescura individual.
+                      collection records; not individual freshness evidence.
                       {statusCopy[String(stream.status)] ??
-                        "Estado no confirmado."}{" "}
-                      Observación de colección:{" "}
+                        "State not confirmed."}{" "}
+                      Collection observation:{" "}
                       <Instant
                         value={
                           stream.observedAt ?? obj(stream.provenance).observedAt
                         }
                       />{" "}
-                      · Incorporación:{" "}
+                      · Ingestion:{" "}
                       <Instant
                         value={
                           stream.ingestedAt ?? obj(stream.provenance).ingestedAt
@@ -236,14 +235,14 @@ export function InspectionResult({ value }: { value: unknown }) {
                   ))}
                   {array(r.availability).map((a) => (
                     <p key={String(a.category)}>
-                      Categoría {String(a.name ?? a.category)}:{" "}
-                      {number(a.freeSpaces)} plazas libres ·{" "}
+                      Category {String(a.name ?? a.category)}:{" "}
+                      {number(a.freeSpaces)} free spaces ·{" "}
                       <Instant value={a.observedAt} />
                     </p>
                   ))}
                   {r.startsAt || r.endsAt ? (
                     <p>
-                      Vigencia: <Instant value={r.startsAt} /> —{" "}
+                      Validity: <Instant value={r.startsAt} /> —{" "}
                       <Instant value={r.endsAt} />
                     </p>
                   ) : null}
@@ -252,17 +251,16 @@ export function InspectionResult({ value }: { value: unknown }) {
             </div>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">
-              Colección guardada vacía para esta selección. No demuestra
-              ausencia de incidencias o disponibilidad en toda la ciudad.
+              Empty stored collection for this selection, not absence of
+              incidents or citywide availability.
             </p>
           )}
         </section>
       ))}
       {!collections.length && availability !== "not_materialized" ? (
         <p className="text-sm text-muted-foreground">
-          No hay una colección de lecturas en este resultado. Su alcance se
-          describe en las limitaciones de la herramienta; los metadatos saneados
-          se pueden inspeccionar debajo.
+          No reading collection in this result. Tool limitations describe its
+          scope; inspect sanitized metadata below.
         </p>
       ) : null}
       <Technical value={value} />

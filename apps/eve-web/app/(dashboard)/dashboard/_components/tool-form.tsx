@@ -7,158 +7,152 @@ import { useDashboard } from "@/src/dashboard-client";
 import { publicLabel } from "./shared";
 
 const labels: Record<string, string> = {
-  query: "Lugar o dirección que buscas",
-  source: "Fuente de información",
-  limit: "Máximo de resultados",
-  kind: "Tipo de información",
-  network: "Red de transporte",
-  line: "Línea publicada",
-  placeId: "Lugar guardado seleccionado",
-  originId: "Lugar de origen",
-  destinationId: "Lugar de destino",
-  minutesAgo: "Hace cuántos minutos",
-  at: "Instante de consulta (ISO, con zona)",
-  mode: "Cómo interpretar el histórico",
-  allowExternal: "Autorizo consultar esta dirección al servicio externo",
-  date: "Fecha de servicio",
-  departureTime: "Hora de salida",
-  pollutant: "Contaminante publicado",
-  stationId: "Estación publicada",
-  parkingId: "Aparcamiento publicado",
-  municipality: "Municipio publicado",
-  includeDaily: "Incluir predicción diaria",
+  query: "Place or address query",
+  source: "Information source",
+  limit: "Result limit",
+  kind: "Information type",
+  network: "Transport network",
+  line: "Published line",
+  placeId: "Selected stored place",
+  originId: "Origin place",
+  destinationId: "Destination place",
+  minutesAgo: "Minutes ago",
+  at: "Query instant (ISO with offset)",
+  mode: "History interpretation",
+  allowExternal: "I authorize sending this address to the external service",
+  date: "Service date",
+  departureTime: "Departure time",
+  pollutant: "Published pollutant",
+  stationId: "Published station",
+  parkingId: "Published parking",
+  municipality: "Published municipality",
+  includeDaily: "Include daily forecast",
 };
 export const toolCopy: Record<
   DashboardToolName,
   { title: string; question: string; example: object }
 > = {
   resolve_place: {
-    title: "Encontrar un lugar guardado",
-    question: "¿Qué estaciones o lugares guardados coinciden con este nombre?",
+    title: "Find a stored place",
+    question: "Which stored places match this name?",
     example: { query: "Callao" },
   },
   resolve_address: {
-    title: "Buscar una dirección",
+    title: "Resolve an address",
     question:
-      "¿Hay una ubicación guardada para esta dirección? La búsqueda externa requiere autorización específica.",
+      "Stored address evidence. External lookup requires specific consent.",
     example: { query: "Puerta del Sol, Madrid", allowExternal: false },
   },
   plan_journey: {
-    title: "Planificar un recorrido",
+    title: "Plan a journey",
     question:
-      "¿Qué itinerarios puede calcular el sistema entre dos lugares? Requiere ejecución explícita del motor de rutas.",
+      "Calculate a journey between two places through explicit routing execution.",
     example: { departureTime: "now", modes: ["TRANSIT"], preferences: {} },
   },
   get_departures: {
-    title: "Consultar salidas",
+    title: "Get departures",
     question:
-      "¿Qué salidas puede calcular el motor para un lugar? No se reconstruyen como resultado completo desde lecturas parciales.",
+      "Departures require explicit routing execution; partial evidence is not a complete result.",
     example: {},
   },
   get_emt_arrivals: {
-    title: "Consultar llegadas EMT",
-    question:
-      "¿Qué estimaciones están guardadas para una parada? Consultar almacenado no activa nueva demanda.",
+    title: "Get EMT arrivals",
+    question: "Inspect stored stop estimates without activating new demand.",
     example: {},
   },
   get_crtm_timetable: {
-    title: "Consultar horario publicado",
-    question:
-      "¿Qué horario y calendario publicados corresponden a la selección? No son estimaciones de llegada.",
+    title: "Read published timetable",
+    question: "Published timetable and calendar, not arrival estimates.",
     example: {},
   },
   get_incidents: {
-    title: "Consultar incidencias y avisos",
+    title: "Read incidents and alerts",
     question:
-      "¿Qué avisos publicados están guardados y qué vigencia tienen? No garantiza servicio normal cuando no hay avisos.",
+      "Stored notices and validity. No notices does not guarantee normal service.",
     example: { source: "emt" },
   },
   get_bike_availability: {
-    title: "Consultar bicicletas",
-    question:
-      "¿Qué bicicletas y anclajes se publicaron para esta ubicación y cuándo se observaron?",
+    title: "Read bike availability",
+    question: "Published bikes, docks and observation times for this place.",
     example: { query: "Callao" },
   },
   get_environment: {
-    title: "Consultar aire y meteorología",
+    title: "Read air and weather",
     question:
-      "¿Qué observaciones, predicciones o avisos hay guardados? Cada tipo conserva sus fechas y unidades.",
+      "Stored observations, forecasts and warnings with distinct times and units.",
     example: { kind: "air" },
   },
   get_road_state: {
-    title: "Consultar sensores de tráfico",
+    title: "Read traffic sensors",
     question:
-      "¿Qué intensidad y ocupación publicaron los sensores? No son tiempos de viaje ni incidencias DGT.",
+      "Sensor intensity and occupancy, not journey times or DGT incidents.",
     example: { query: "Castellana" },
   },
   get_parking: {
-    title: "Consultar aparcamientos",
+    title: "Read parking",
     question:
-      "¿Qué plazas publicó un aparcamiento? Las categorías y tarifas no se suman como una disponibilidad única.",
+      "Published parking spaces. Categories and tariffs are not summed together.",
     example: { query: "Plaza Mayor" },
   },
   get_historical_state: {
-    title: "Consultar evidencia histórica",
+    title: "Read historical evidence",
     question:
-      "¿Qué revisiones permanecen guardadas para ese instante? Devuelve un índice parcial, no una reconstrucción completa.",
+      "Retained revisions for an instant: a partial index, not a reconstruction.",
     example: { source: "bicimad", minutesAgo: 30 },
   },
   get_source_health: {
     title: "Examinar una fuente",
     question:
-      "¿Qué señal técnica y evidencia guardada hay de la fuente? Un proceso activo no certifica datos recientes.",
+      "Source evidence and technical signals. Active workers do not certify recent evidence.",
     example: { source: "bicimad" },
   },
   get_line_status: {
-    title: "Examinar una línea",
-    question:
-      "¿Qué catálogo, cobertura y avisos guardados reconoce el sistema para una línea?",
+    title: "Inspect a line",
+    question: "Stored catalog coverage and alerts for a line.",
     example: { source: "emt", line: "1" },
   },
   get_network_status: {
     title: "Examinar una red",
-    question:
-      "¿Qué evidencia publicada hay guardada para esta red? No equivale a garantía de funcionamiento normal.",
+    question: "Stored network evidence, not a normal-service guarantee.",
     example: { source: "emt" },
   },
   get_mobility_snapshot: {
     title: "Consultar resumen almacenado",
-    question:
-      "¿Qué evidencia conserva el sistema por producto y cuáles son sus ausencias y límites?",
+    question: "Stored evidence, gaps and limits by product.",
     example: {},
   },
 };
 export const effectCopy: Record<string, string> = {
-  activate_window: "Mantener la ventana de actualización",
+  activate_window: "Maintain the activity window",
   acquire_provider: "Consultar al proveedor",
-  demand_weather: "Registrar demanda meteorológica",
-  write_cache: "Guardar un resultado en caché",
-  calculate_otp: "Calcular itinerarios con el motor de rutas",
+  demand_weather: "Register weather demand",
+  write_cache: "Write a cached result",
+  calculate_otp: "Calculate routing itineraries",
 };
 const record = (v: unknown): Record<string, unknown> =>
   v && typeof v === "object" && !Array.isArray(v)
     ? (v as Record<string, unknown>)
     : {};
 const optionNames: Record<string, string> = {
-  air: "Calidad del aire",
-  weather: "Meteorología",
-  observation: "Observación publicada",
-  hourly_forecast: "Predicción horaria",
-  daily_forecast: "Predicción diaria",
-  warnings: "Avisos meteorológicos",
-  event: "Observaciones con última revisión retenida",
-  knowledge: "Solo lo conocido hasta ese instante",
+  air: "Air quality",
+  weather: "Weather",
+  observation: "Published observation",
+  hourly_forecast: "Hourly forecast",
+  daily_forecast: "Daily forecast",
+  warnings: "Weather warnings",
+  event: "Observations with latest retained revision",
+  knowledge: "Only evidence known at that instant",
   metro: "Metro",
-  "light-rail": "Metro ligero",
-  interurban: "Autobuses interurbanos",
-  emt: "Autobuses EMT",
+  "light-rail": "Light rail",
+  interurban: "Interurban buses",
+  emt: "EMT buses",
   bicimad: "BiciMAD",
   renfe: "Renfe",
-  crtm: "Transporte CRTM",
-  TRANSIT: "Transporte público",
-  WALK: "Caminar",
-  BIKE: "Bicicleta (no disponible)",
-  CAR: "Coche (no disponible)",
+  crtm: "CRTM transport",
+  TRANSIT: "Public transport",
+  WALK: "Walking",
+  BIKE: "Bike (unsupported)",
+  CAR: "Car (unsupported)",
 };
 export function ToolFields({
   schema,
@@ -197,7 +191,7 @@ export function ToolFields({
   } catch {
     return (
       <p className="text-sm">
-        Corrige el JSON avanzado para continuar usando el formulario.
+        Correct advanced JSON before continuing with the form.
       </p>
     );
   }
@@ -237,7 +231,7 @@ export function ToolFields({
           )
         }
       >
-        Cargar ejemplo sin ejecutarlo
+        Load example without execution
       </Button>
       {Object.entries(properties).map(([key, raw]) => {
         const p = record(raw),
@@ -247,7 +241,7 @@ export function ToolFields({
         if (key === "departureTime")
           return (
             <Field key={key}>
-              <FieldLabel htmlFor={id}>Cuándo quieres salir</FieldLabel>
+              <FieldLabel htmlFor={id}>Departure time</FieldLabel>
               <select
                 id={id}
                 value={
@@ -267,7 +261,7 @@ export function ToolFields({
               {value[key] && value[key] !== "now" ? (
                 <Input
                   type="datetime-local"
-                  aria-label="Fecha y hora de salida, hora local del navegador"
+                  aria-label="Departure date and time, browser local time"
                   value={new Date(
                     Date.parse(String(value[key])) -
                       new Date(String(value[key])).getTimezoneOffset() * 60000,
@@ -286,11 +280,11 @@ export function ToolFields({
           return (
             <fieldset key={key} className="flex flex-wrap gap-5">
               <legend className="mb-3 text-sm font-medium">
-                Preferencias del recorrido
+                Journey preferences
               </legend>
               {[
-                ["maxWalkingMinutes", "Máximo de minutos caminando", 15, 120],
-                ["maxTransfers", "Máximo de transbordos", 2, 6],
+                ["maxWalkingMinutes", "Maximum walking minutes", 15, 120],
+                ["maxTransfers", "Maximum transfers", 2, 6],
               ].map(([field, label, fallback, max]) => (
                 <Field key={String(field)}>
                   <FieldLabel htmlFor={`preference-${field}`}>
@@ -315,7 +309,7 @@ export function ToolFields({
               ))}
               <Field>
                 <FieldLabel htmlFor="preference-wheelchair">
-                  Accesibilidad para silla de ruedas
+                  Wheelchair accessibility
                 </FieldLabel>
                 <input
                   id="preference-wheelchair"
@@ -337,7 +331,7 @@ export function ToolFields({
           return (
             <fieldset key={key}>
               <legend className="mb-3 text-sm font-medium">
-                {labels[key] ?? "Formas de desplazarse"}
+                {labels[key] ?? "Travel modes"}
               </legend>
               <div className="flex flex-wrap gap-5">
                 {itemOptions.map((option) => (
@@ -378,8 +372,8 @@ export function ToolFields({
         if (type === "object")
           return (
             <p key={key} className="text-sm text-muted-foreground">
-              {labels[key] ?? publicLabel(key)}: configuración estructurada en
-              el apartado avanzado.
+              {labels[key] ?? publicLabel(key)}: structured configuration in el
+              apartado avanzado.
             </p>
           );
         return (
@@ -395,7 +389,7 @@ export function ToolFields({
                   onChange={(e) => update(key, e.target.value)}
                   className="min-h-11 rounded-md border bg-background px-3 text-sm"
                 >
-                  <option value="">Selecciona un lugar guardado</option>
+                  <option value="">Select a stored place</option>
                   {places.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -403,9 +397,8 @@ export function ToolFields({
                   ))}
                 </select>
                 <p className="text-xs text-muted-foreground">
-                  Hasta 100 lugares de referencia guardados. Si no aparece,
-                  busca primero el lugar; puedes introducir su identificador en
-                  configuración avanzada. No se crea una ubicación ficticia.
+                  Up to 100 stored reference places. Search for a place or enter
+                  a known ID in advanced configuration; no fabricated location.
                 </p>
               </>
             ) : options ? (
@@ -415,7 +408,7 @@ export function ToolFields({
                 onChange={(e) => update(key, e.target.value)}
                 className="min-h-11 rounded-md border bg-background px-3 text-sm"
               >
-                <option value="">Usar valor por defecto</option>
+                <option value="">Use default value</option>
                 {options.map((option) => (
                   <option key={String(option)} value={String(option)}>
                     {optionNames[String(option)] ?? String(option)}
