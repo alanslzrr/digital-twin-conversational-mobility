@@ -1,63 +1,667 @@
-/* Accessible neutral tokens are scoped to the panel; EVE chat stays unchanged. */
-@media (prefers-color-scheme: light) {
+/* Scoped to the evaluation dashboard and its Radix portal surfaces. Never EVE. */
+.dashboard-shell,
+.dashboard-dialog {
+  --dash-bg: #f6f7f9;
+  --dash-panel: #fff;
+  --dash-well: #eef1f5;
+  --dash-raised: #fff;
+  --dash-fg: #171a21;
+  --dash-secondary: #4d5768;
+  --dash-muted: #586579;
+  --dash-line: #d7dce4;
+  --dash-line-soft: #e5e8ed;
+  --dash-control-line: #6b778a;
+  --dash-accent: #315d9c;
+  --dash-positive: #29654f;
+  --dash-warning: #7f561b;
+  --dash-danger: #9c363c;
+  --dash-series: #315d9c;
+  --background: var(--dash-bg);
+  --foreground: var(--dash-fg);
+  --card: var(--dash-panel);
+  --card-foreground: var(--dash-fg);
+  --muted: var(--dash-well);
+  --muted-foreground: var(--dash-muted);
+  --accent: var(--dash-well);
+  --accent-foreground: var(--dash-fg);
+  --border: var(--dash-line);
+  --input: var(--dash-control-line);
+  --ring: var(--dash-accent);
+  --primary: var(--dash-accent);
+  --primary-foreground: #fff;
+  --destructive: var(--dash-danger);
+  color: var(--dash-fg);
+  font-size: 14px;
+  line-height: 20px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
   .dashboard-shell,
   .dashboard-dialog {
-    --muted-foreground: oklch(0.5 0 0);
-    --ring: oklch(0.45 0 0);
+    --dash-bg: #0b0c0e;
+    --dash-panel: #121417;
+    --dash-well: #171a1f;
+    --dash-raised: #1b1e24;
+    --dash-fg: #f3f4f6;
+    --dash-secondary: #b5bcc7;
+    --dash-muted: #949caa;
+    --dash-line: #2a2f37;
+    --dash-line-soft: #22262d;
+    --dash-control-line: #626d7f;
+    --dash-accent: #adcaff;
+    --dash-positive: #88c8af;
+    --dash-warning: #e6bc77;
+    --dash-danger: #ee9c9c;
+    --dash-series: #abc6ef;
+    --primary-foreground: #101925;
+    color-scheme: dark;
   }
 }
-/* Dashboard-only adaptations. Official EVE chat primitives remain unchanged. */
-@media (hover: hover) and (pointer: fine) and (
-    prefers-reduced-motion: no-preference
-  ) {
-  .dashboard-shell
-    button:not([role="tab"]):not(:disabled):not(:focus-visible):active {
-    transform: scale(0.96);
-  }
-  .dashboard-shell button:not([role="tab"]):not(:disabled) {
-    transition-property: background-color, color;
-    transition-duration: 120ms;
-  }
+.dashboard-shell {
+  min-height: 100dvh;
+  background: var(--dash-bg);
+}
+.dc-sidebar {
+  display: none;
+}
+.dc-brand {
+  min-height: 64px;
+  display: block;
+  padding-block: 12px;
+  padding: 0 24px;
+  font-weight: 600;
+}
+.dc-navigation {
+  padding: 0 12px;
+}
+.dc-nav-group {
+  margin: 20px 12px 8px;
+  color: var(--dash-muted);
+  font-size: 12px;
+}
+.dc-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--dash-secondary);
+  white-space: nowrap;
+}
+.dc-nav-link[aria-current="page"],
+.dc-nav-link:hover {
+  background: var(--dash-well);
+  color: var(--dash-fg);
+}
+.dc-nav-link svg {
+  flex-shrink: 0;
+}
+.dc-account {
+  margin-top: auto;
+  padding: 20px 24px;
+  border-top: 1px solid var(--dash-line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dc-main-column {
+  min-width: 0;
+}
+.dc-header {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--dash-line);
+  background: var(--dash-panel);
+}
+.dc-header-context {
+  display: none;
+}
+.dc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.dc-read-label {
+  font-size: 12px;
+  color: var(--dash-muted);
+}
+.dc-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+  max-width: 1600px;
+  margin: auto;
+}
+.dc-page-title {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.dc-page-heading {
+  display: block;
+}
+.dc-page-heading p {
+  margin-top: 6px;
+  color: var(--dash-secondary);
+}
+.dc-card {
+  min-width: 0;
+  border: 1px solid var(--dash-line);
+  border-radius: 20px;
+  padding: 20px;
+  background: var(--dash-panel);
+}
+.dc-card h2,
+.dc-sheet-heading {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.dc-meta {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dash-muted);
+}
+.dc-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.dc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dc-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.dc-segment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  background: var(--dash-well);
+  border-radius: 10px;
+  min-width: 0;
+}
+.dc-segment label {
+  position: relative;
+  cursor: pointer;
+}
+.dc-segment input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.dc-segment span {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 7px;
+  min-height: 32px;
+  color: var(--dash-secondary);
+}
+.dc-segment input:checked + span {
+  background: var(--dash-panel);
+  color: var(--dash-fg);
+  box-shadow: inset 0 0 0 1px var(--dash-control-line);
+}
+.dc-segment input:focus-visible + span {
+  outline: 2px solid var(--dash-accent);
+  outline-offset: 2px;
+}
+.dc-metric-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.dc-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 160px;
+}
+.dc-metric h2 {
+  font-size: 14px;
+  color: var(--dash-secondary);
+}
+.dc-value {
+  font-size: 32px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+}
+.dc-metric-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;
+}
+.dc-link {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+}
+.dc-overview-grid {
+  display: grid;
+  gap: 16px;
+}
+.dc-readiness-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 120px minmax(100px, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--dash-line-soft);
+  align-items: center;
+}
+.dc-group-title {
+  font-size: 12px;
+  color: var(--dash-muted);
+  margin: 16px 0 4px;
+}
+.dc-state-positive {
+  color: var(--dash-positive);
+}
+.dc-state-warning {
+  color: var(--dash-warning);
+}
+.dc-state-danger {
+  color: var(--dash-danger);
+}
+.dc-error {
+  border-color: var(--dash-danger);
+}
+.dc-empty {
+  padding: 32px;
+}
+.dc-empty h2 {
+  margin-bottom: 8px;
+}
+.dc-empty p {
+  color: var(--dash-secondary);
+  max-width: 60ch;
+}
+.dc-skeleton {
+  height: 48px;
+  background: var(--dash-well);
+  border-radius: 10px;
+}
+.dc-table-scroll {
+  overflow: auto;
+  min-width: 0;
+}
+.dc-table {
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  border-collapse: collapse;
+}
+.dc-table th {
+  height: 40px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dash-muted);
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+.dc-table td {
+  padding: 10px 12px;
+  min-height: 48px;
+  border-top: 1px solid var(--dash-line-soft);
+  vertical-align: middle;
+}
+.dc-table tbody tr:hover {
+  background: var(--dash-well);
+}
+.dc-table td.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.dc-evidence {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 8px 16px;
+}
+.dc-evidence dt {
+  color: var(--dash-muted);
+}
+.dc-evidence dd {
+  overflow-wrap: anywhere;
+}
+.dc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
+  z-index: 1000;
+}
+.dc-sheet {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(480px, 100%);
+  background: var(--dash-raised);
+  border-left: 1px solid var(--dash-line);
+  box-shadow: 0 18px 56px rgb(0 0 0 / 0.28);
+  z-index: 1001;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dc-sheet-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.dc-sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+.dc-sheet-body fieldset {
+  min-width: 0;
+}
+.dc-filter-footer {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  bottom: 0;
+  background: var(--dash-raised);
+  padding: 12px 0;
+}
+.dc-workspace {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.dc-map-stage {
+  min-width: 0;
+}
+.dc-map-stage .leaflet-container {
+  height: 480px;
+}
+.dc-map-stage section {
+  padding: 0;
+}
+.dc-list-stage {
+  min-width: 0;
+  max-height: 560px;
+  overflow: auto;
+}
+.dc-inspector-layout {
+  display: grid;
+  gap: 16px;
+}
+.dc-catalog {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dc-tool-row {
+  padding: 12px;
+  border-radius: 10px;
+  display: block;
+  border: 1px solid transparent;
+}
+.dc-tool-row:hover,
+.dc-tool-row[aria-current="page"] {
+  background: var(--dash-well);
+  border-color: var(--dash-line);
+}
+.dc-tool-row strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.dc-tool-row p {
+  color: var(--dash-muted);
+  font-size: 12px;
+}
+.dc-chart {
+  width: 100%;
+  height: 270px;
+}
+.dc-chart text {
+  font-size: 12px;
+  fill: var(--dash-muted);
+}
+.dc-chart .dc-grid-line {
+  stroke: var(--dash-line);
+}
+.dc-skip {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 1002;
+  background: var(--dash-panel);
+  padding: 12px;
+}
+.dc-skip:focus {
+  top: 8px;
 }
 .dashboard-shell
+  :is(button, a, input, select, summary, [tabindex]):focus-visible,
+.dashboard-dialog
   :is(button, a, input, select, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid var(--dash-accent);
   outline-offset: 3px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-shell *,
-  .dashboard-shell *::before,
-  .dashboard-shell *::after {
-    animation: none;
-    transition: none;
-  }
+.dashboard-shell button,
+.dashboard-dialog button {
+  border-radius: 10px;
+  transition-property: background-color, color;
+  transition-duration: 120ms;
 }
-
-.dashboard-shell table button:not([role="tab"]):not(:disabled):active {
-  transform: none;
+.dashboard-shell input:not([type="radio"]):not([type="checkbox"]),
+.dashboard-dialog input:not([type="radio"]):not([type="checkbox"]),
+.dashboard-shell select,
+.dashboard-dialog select {
+  border-color: var(--dash-control-line);
 }
-
-.dashboard-shell :is(button, select, summary) {
-  min-height: 44px;
-}
-.dashboard-shell button {
-  min-width: 44px;
-}
-.dashboard-shell label:has(input[type="checkbox"]) {
-  min-height: 44px;
-}
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-dialog,
-  .dashboard-dialog *,
-  body:has(.dashboard-shell) [data-slot="dialog-overlay"] {
-    animation: none;
-    transition: none;
-  }
-}
-
-/* Leaflet ships 30px controls; keep the panel's 44px pointer targets. */
-.dashboard-shell .leaflet-container .leaflet-control-zoom a {
+.dashboard-shell .leaflet-control-zoom a {
   width: 44px;
   height: 44px;
   line-height: 44px;
+}
+.dc-chart-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.dc-history-plot {
+  min-height: 180px;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .dc-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dc-main {
+    padding: 24px;
+  }
+  .dc-header {
+    padding-inline: 24px;
+    min-height: 64px;
+  }
+}
+@media (min-width: 1024px) {
+  .dashboard-shell {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+  }
+  .dc-sidebar {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--dash-line);
+    background: var(--dash-panel);
+    height: 100dvh;
+    position: sticky;
+    top: 0;
+    overflow: auto;
+  }
+  .dc-mobile-navigation {
+    display: none;
+  }
+  .dc-header-context {
+    display: block;
+    color: var(--dash-secondary);
+  }
+}
+@media (min-width: 1100px) {
+  .dc-overview-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+  .dc-workspace[data-view="split"] {
+    grid-template-columns: 3fr 2fr;
+  }
+  .dc-inspector-layout {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+}
+@media (min-width: 1280px) {
+  .dc-main {
+    padding: 24px 32px;
+  }
+  .dc-header {
+    padding-inline: 32px;
+  }
+  .dc-metric-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .dc-card {
+    padding: 16px;
+  }
+  .dc-readiness-row {
+    grid-template-columns: 1fr auto;
+  }
+  .dc-readiness-row > :last-child {
+    grid-column: 1 / -1;
+  }
+  .dc-header-context,
+  .dc-read-label {
+    display: none;
+  }
+  .dc-header {
+    align-items: start;
+    min-height: 56px;
+  }
+  .dc-header-actions {
+    flex: 1;
+  }
+  .dc-header-actions button {
+    min-height: 44px;
+  }
+  .dc-segment span {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .dc-evidence {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .dc-evidence dd {
+    margin-bottom: 8px;
+  }
+  .dc-table .dc-secondary-column {
+    display: none;
+  }
+  .dc-map-stage .leaflet-container {
+    height: 400px;
+  }
+  .dc-workspace[data-view="split"] .dc-map-stage {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell *,
+  .dashboard-dialog * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.dc-control-label {
+  display: none;
+}
+.dc-brand .dc-meta {
+  display: block;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.dc-mobile-nav {
+  display: block;
+}
+@media (min-width: 768px) {
+  .dc-control-label {
+    display: inline;
+  }
+}
+@media (min-width: 1024px) {
+  .dc-mobile-nav {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .dc-read-label {
+    display: none;
+  }
+  .dashboard-shell button,
+  .dashboard-dialog button {
+    min-height: 44px;
+  }
+  .dashboard-shell input,
+  .dashboard-dialog input {
+    min-height: 44px;
+  }
+}
+.dc-conversation-workspace {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.dc-session-index {
+  display: none;
+}
+@media (min-width: 1100px) {
+  .dc-conversation-workspace:has(.dc-session-index) {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+  .dc-session-index {
+    display: block;
+  }
+}
+.dc-workspace[data-view="split"] .dc-list-stage {
+  border-radius: 20px;
+}
+@media (max-width: 1099px) {
+  .dc-workspace[data-view="split"] .dc-list-stage {
+    display: none;
+  }
+  .dc-workspace[data-view="split"] .dc-map-stage {
+    display: block;
+  }
 }
