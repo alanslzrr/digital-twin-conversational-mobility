@@ -13,7 +13,7 @@ Alcance vigente al **03/10/2026**.
 | R1 — Dominio acordado | **Cerrado.** Fuentes y funciones entregadas, con las exclusiones aprobadas que se enumeran abajo | [Registro de productos](sources/README.md) |
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
-| Panel de Core y telemetría propia | **Seis vistas rediseñadas en PR #45; validación local y sintética ejecutada, revisión de zoom nativo y nueva matriz móvil pendientes; prueba con lector de pantalla retirada del alcance por decisión del usuario. Sources y dependencias corregidos en preparación de merge; sin integrar ni desplegar** | [Preparación de merge](acceptance/2026-10-03-core-dashboard-merge-readiness.md); T10 sigue diferido |
+| Panel de Core y telemetría propia | **Seis vistas rediseñadas en PR #45; validación local y sintética ejecutada, matriz móvil completada (72 vistas y 52 estados); zoom nativo pendiente de paso manual; prueba con lector de pantalla retirada del alcance por decisión del usuario. Sources y dependencias corregidos en preparación de merge; sin integrar ni desplegar** | [Preparación de merge](acceptance/2026-10-03-core-dashboard-merge-readiness.md), [cierre móvil](acceptance/2026-10-03-core-dashboard-mobile-closure.md); T10 sigue diferido |
 | Publicación Vercel | Alternativa futura; CLI retirada y configurador bloqueado por dependencia sin parche | [Preparación cloud](deployment.md) |
 
 ## Capacidades conservadas

@@ -153,3 +153,8 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 ## [2026-10-03] alcance | Retirada de prueba con lector de pantalla
 
 - Por decisión explícita del usuario, se retira la prueba con lector de pantalla real del alcance y de los requisitos de merge de PR #45. No se registra como aprobada. Se mantienen la revisión móvil y el zoom nativo. Actualizados el roadmap y el acta vigente; las actas anteriores conservan sus resultados históricos.
+
+## [2026-10-03] corrección | Cabecera y conversaciones en móvil
+
+- Corregidos el recorte del selector de tema a 320 px, el desbordamiento de pestañas de conversación y el salto de nivel de encabezados de eventos. Añadido un recorrido reproducible que comprueba los botones visibles, no solo la anchura del documento.
+- Repetidas 72 vistas y 52 estados móviles sobre el build corregido, con ocho capturas seleccionadas. `pnpm check`: 510 pruebas correctas/100 omitidas; HTTP aislado: 37 comprobaciones correctas. [Acta móvil](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Zoom nativo pendiente de paso manual; sin merge.
