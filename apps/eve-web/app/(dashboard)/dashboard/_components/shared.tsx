@@ -2,28 +2,35 @@
 import { Spinner } from "@/components/ui/spinner";
 import { readState } from "@/src/dashboard-presentation";
 import { Skeleton } from "./primitives";
-export function Instant({ value }: { value: unknown }) {
+import { RefinedDisclosure } from "./refinement/RefinedDisclosure";
+export function Instant({
+  value,
+  compact = false,
+}: {
+  value: unknown;
+  compact?: boolean;
+}) {
   if (typeof value !== "string" || !Number.isFinite(Date.parse(value)))
     return <span>Unavailable</span>;
   return (
     <time dateTime={value} title={value}>
-      {new Date(value).toLocaleString("en-GB", {
-        timeZone: "Europe/Madrid",
-        timeZoneName: "short",
-      })}
+      {new Date(value)[compact ? "toLocaleTimeString" : "toLocaleString"](
+        "en-GB",
+        {
+          timeZone: "Europe/Madrid",
+          timeZoneName: "short",
+        },
+      )}
     </time>
   );
 }
 export function Technical({ value }: { value: unknown }) {
   return (
-    <details className="rounded-lg border bg-card p-4">
-      <summary className="cursor-pointer text-sm font-medium">
-        Sanitized technical details
-      </summary>
+    <RefinedDisclosure title="Sanitized technical details">
       <pre className="mt-3 max-h-[32rem] overflow-auto whitespace-pre-wrap break-all font-mono text-xs leading-5">
         {JSON.stringify(value, null, 2)}
       </pre>
-    </details>
+    </RefinedDisclosure>
   );
 }
 export function State({
@@ -142,17 +149,17 @@ export const publicLabel = (key: string) =>
       captureCoverage: "Capture coverage",
       readAt: "View read",
       ingestedAt: "Ingested",
-      checkedAt: "Comprobado",
-      issuedAt: "Emitido",
+      checkedAt: "Checked",
+      issuedAt: "Issued",
       validFrom: "Valid from",
       validTo: "Valid to",
       lastSeenAt: "Last signal",
-      lastPrunedAt: "Última purga",
+      lastPrunedAt: "Last pruning",
       state: "State",
-      name: "Nombre",
+      name: "Name",
       source: "Source",
       sourceId: "Source",
-      productId: "Producto",
+      productId: "Product",
       freshness: "Freshness",
       coverage: "Coverage",
       version: "Version",
@@ -161,32 +168,32 @@ export const publicLabel = (key: string) =>
       nextDueAt: "Next eligible attempt",
       errorCode: "Error code",
       errorStage: "Error stage",
-      reason: "Motivo",
-      limitations: "Limitaciones",
+      reason: "Reason",
+      limitations: "Limits",
       retainedBytes: "Retained bytes",
       eventCount: "Retained events",
-      knownGaps: "Huecos conocidos",
-      omittedEvents: "Eventos omitidos",
-      counts: "Recuentos",
+      knownGaps: "Known gaps",
+      omittedEvents: "Omitted events",
+      counts: "Counts",
       usage: "Reported tokens",
       inputTokens: "Input",
       outputTokens: "Output",
       cachedInputTokens: "Cached input",
       durationMs: "Duration (ms)",
       warning: "Interpretation limits",
-      count: "Recuento",
+      count: "Count",
       total: "Total",
-      fresh: "Recents",
-      stale: "Stales",
-      unavailable: "Unavailables",
-      enabled: "Habilitado",
-      failures: "Fallos",
-      attempts: "Intentos",
-      createdAt: "Creado",
-      expiresAt: "Caduca",
-      completedAt: "Finalizado",
+      fresh: "Recent",
+      stale: "Stale",
+      unavailable: "Unavailable",
+      enabled: "Enabled",
+      failures: "Failures",
+      attempts: "Attempts",
+      createdAt: "Created",
+      expiresAt: "Expires",
+      completedAt: "Completed",
       isError: "Error",
-      lastActivityAt: "Última actividad",
+      lastActivityAt: "Last activity",
       captureStatus: "Capture state",
       captureStartedAt: "Capture begins",
       firstObservedAt: "First signal",
@@ -224,8 +231,8 @@ export function ObjectCards({ value }: { value: unknown }) {
                 ((
                   {
                     best_effort: "Best-effort capture",
-                    partial: "Parcial",
-                    unknown: "Desconocido",
+                    partial: "Partial",
+                    unknown: "Unknown",
                     disabled: "Disabled",
                     running: "Running",
                     recent: "Recent",

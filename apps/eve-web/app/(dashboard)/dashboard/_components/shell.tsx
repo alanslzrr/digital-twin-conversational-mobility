@@ -2,23 +2,35 @@
 import "./dashboard.css";
 import {
   Activity,
-  ArrowLeft,
   Blocks,
   Database,
   Info,
-  Menu,
+  LogOut,
   MessageSquare,
   Pause,
   Play,
   Radio,
   RefreshCw,
+  UserRound,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { Sheet } from "./primitives";
 import { Instant } from "./shared";
@@ -35,32 +47,45 @@ const links = [
     icon: MessageSquare,
   },
 ];
-function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+function Navigation() {
   const path = usePathname();
+  const { setOpenMobile } = useSidebar();
   return (
-    <nav className="dc-navigation" aria-label="Dashboard">
-      {links.map(({ href, label, icon: Icon }, index) => (
-        <div key={href}>
-          {[0, 3, 5].includes(index) ? (
-            <p className="dc-nav-group">
-              {index === 0 ? "Explore" : index === 3 ? "System" : "Personal"}
-            </p>
-          ) : null}
-          <Link
-            href={href}
-            {...(onNavigate ? { onClick: onNavigate } : {})}
-            className="dc-nav-link"
-            aria-current={
-              (href === "/dashboard" ? path === href : path.startsWith(href))
-                ? "page"
-                : undefined
-            }
-          >
-            <Icon size={16} aria-hidden="true" />
-            {label}
-          </Link>
-        </div>
-      ))}
+    <nav aria-label="Dashboard">
+      <SidebarMenu>
+        {links.map(({ href, label, icon: Icon }) => (
+          <SidebarMenuItem key={href}>
+            <SidebarMenuButton
+              asChild
+              isActive={
+                href === "/dashboard" ? path === href : path.startsWith(href)
+              }
+              tooltip={{
+                children: label,
+                className: "dashboard-dialog dc-tooltip",
+              }}
+            >
+              <Link
+                href={href}
+                aria-label={label}
+                onClick={() => setOpenMobile(false)}
+                aria-current={
+                  (
+                    href === "/dashboard"
+                      ? path === href
+                      : path.startsWith(href)
+                  )
+                    ? "page"
+                    : undefined
+                }
+              >
+                <Icon aria-hidden="true" />
+                <span>{label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
     </nav>
   );
 }
@@ -68,8 +93,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const ctx = useDashboardContext();
   const path = usePathname();
   const [notice, setNotice] = useState("");
-  const [navigationOpen, setNavigationOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarResolved, setSidebarResolved] = useState(false);
+  useEffect(() => {
+    setSidebarOpen(window.matchMedia("(min-width:1280px)").matches);
+    setSidebarResolved(true);
+  }, []);
   const [timingOpen, setTimingOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const { data, error } = useDashboard("status", 3000);
   const { mutate } = useSWRConfig();
   const status = data as
@@ -119,57 +150,104 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       l.href === "/dashboard" ? path === l.href : path.startsWith(l.href),
     )?.label ?? "Mobility Core";
   return (
-    <div className="dashboard-shell" lang="en">
+    <SidebarProvider
+      className="dashboard-shell"
+      lang="en"
+      open={sidebarOpen}
+      onOpenChange={(v) => {
+        setSidebarOpen(v);
+        setSidebarResolved(true);
+      }}
+      data-resolved={sidebarResolved}
+      style={
+        {
+          "--sidebar-width": "200px",
+          "--sidebar-width-icon": "56px",
+        } as React.CSSProperties
+      }
+    >
       <a href="#dashboard-main" className="dc-skip">
         Skip to content
       </a>
-      <aside className="dc-sidebar" aria-label="Navigation and account">
-        <Link href="/dashboard" className="dc-brand">
-          Mobility Core<span className="dc-meta">Evaluation workspace</span>
-        </Link>
-        <Navigation />
-        <div className="dc-account">
-          <Link href="/s" className="dc-nav-link">
-            <ArrowLeft size={16} aria-hidden="true" />
-            Open chat
+      <Sidebar collapsible="icon" dashboardScope>
+        <SidebarHeader className="dc-brand">
+          <Link href="/dashboard" aria-label="Mobility Core">
+            <Blocks size={16} />
+            <span className="dc-brand-label">Mobility Core</span>
           </Link>
-          <p className="dc-meta">Evaluation account</p>
-          <p className="break-words text-sm">{ctx.identity.label}</p>
-          <Button variant="ghost" onClick={signOut}>
-            Sign out
-          </Button>
-        </div>
-      </aside>
+        </SidebarHeader>
+        <SidebarContent className="dc-navigation">
+          <Navigation />
+        </SidebarContent>
+        <SidebarFooter className="dc-account">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Sheet
+                open={accountOpen}
+                onOpenChange={setAccountOpen}
+                title="Current account"
+                trigger={
+                  <SidebarMenuButton
+                    tooltip={{
+                      children: ctx.identity.label,
+                      className: "dashboard-dialog dc-tooltip",
+                    }}
+                    aria-label={`Account: ${ctx.identity.label}`}
+                  >
+                    <UserRound />
+                    <span>{ctx.identity.label}</span>
+                  </SidebarMenuButton>
+                }
+              >
+                <p>{ctx.identity.label}</p>
+              </Sheet>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip={{
+                  children: "Open chat",
+                  className: "dashboard-dialog dc-tooltip",
+                }}
+              >
+                <Link href="/s" aria-label="Open chat">
+                  <MessageSquare />
+                  <span>Open chat</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={signOut}
+                aria-label="Sign out"
+                tooltip={{
+                  children: "Sign out",
+                  className: "dashboard-dialog dc-tooltip",
+                }}
+              >
+                <LogOut />
+                <span>Sign out</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
       <div className="dc-main-column">
         <header className="dc-header">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="dc-mobile-nav">
-              <Sheet
-                open={navigationOpen}
-                onOpenChange={setNavigationOpen}
-                title="Mobility Core"
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Open navigation"
-                  >
-                    <Menu />
-                  </Button>
-                }
-              >
-                <Navigation onNavigate={() => setNavigationOpen(false)} />
-                <Link href="/s" className="dc-nav-link">
-                  Open chat
-                </Link>
-                <Button variant="ghost" onClick={signOut}>
-                  Sign out
-                </Button>
-              </Sheet>
-            </div>
-            <span className="dc-header-context">Evaluation / {label}</span>
+            <SidebarTrigger aria-label="Toggle navigation" />
+            <span className="dc-header-context">{label}</span>
           </div>
           <div className="dc-header-actions">
+            {ctx.paused || ctx.viewRead?.failed ? (
+              <span className="dc-mobile-state">
+                {ctx.paused
+                  ? "Paused"
+                  : ctx.viewRead?.readAt
+                    ? "Cached · failed"
+                    : "Read failed"}
+              </span>
+            ) : null}
             <span className="dc-read-label">
               {ctx.paused
                 ? "Paused"
@@ -182,7 +260,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     : "Read"}
               {" · "}
               {ctx.viewRead?.readAt ? (
-                <Instant value={ctx.viewRead.readAt} />
+                <Instant value={ctx.viewRead.readAt} compact />
               ) : (
                 "no successful read"
               )}
@@ -272,6 +350,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
