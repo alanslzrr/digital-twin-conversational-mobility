@@ -11,6 +11,7 @@ const reads = vi.hoisted(() => ({
   statusError: null as unknown,
 }));
 vi.mock("@/src/dashboard-client", () => ({
+  useDashboardContext: () => ({ paused: false, eligibility: new Map() }),
   useDashboard: (path: string) =>
     path === "status"
       ? {
@@ -48,7 +49,7 @@ it("cached source failure retains successful data separately from workers", () =
   };
   reads.error = new Error("Synthetic refresh failure");
   const html = renderToStaticMarkup(React.createElement(Sources));
-  expect(html).toContain("Previously loaded evidence");
+  expect(html).toContain("Cached source evidence");
   expect(html).toContain("BiciMAD");
   expect(html).toContain("Unknown");
 });
@@ -74,7 +75,7 @@ it("worker fetch failure is scoped separately from a successful source read", ()
   };
   reads.statusError = new Error("Worker status unavailable");
   const html = renderToStaticMarkup(React.createElement(Sources));
-  expect(html).toContain("status read failed");
+  expect(html).toContain("Refresh failed.");
   expect(html).toContain("Source products");
   expect(html).not.toContain("Source evidence unavailable");
 });

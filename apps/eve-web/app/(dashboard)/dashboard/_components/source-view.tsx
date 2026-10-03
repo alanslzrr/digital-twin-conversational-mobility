@@ -3,12 +3,14 @@ import type { dashboardSourceResponse } from "@mobility/contracts";
 import Link from "next/link";
 import { useState } from "react";
 import type { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useDashboard } from "@/src/dashboard-client";
-import { eventComponents } from "./event-copy";
+import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { number } from "./insights";
 import { Card, Segmented } from "./primitives";
 import { productLabel } from "./product-copy";
+import type { DurationGroup } from "./refinement/core";
+import { OperationDurationRows } from "./refinement/OperationDurationRows";
 import { Instant, PageTitle, State, Technical } from "./shared";
 
 const obj = (v: unknown): Record<string, unknown> =>
@@ -45,6 +47,16 @@ function SourcesContent({ id }: { id?: string }) {
     true,
   );
   const status = useDashboard("status", 3000);
+  const ctx = useDashboardContext();
+  const read = ctx.eligibility.get(
+    `${id ? `sources/${encodeURIComponent(id)}` : "sources"}?${new URLSearchParams({ window, ...(cursor ? { cursor } : {}), ...(operation ? { operation } : {}) })}`,
+  );
+  const retryDisabled =
+    ctx.paused ||
+    q.isValidating ||
+    Boolean(
+      read && Date.now() < Math.max(read.at + 15000, read.retryUntil ?? 0),
+    );
   const envelope = q.data as
     | z.infer<typeof dashboardSourceResponse>
     | undefined;
@@ -59,25 +71,38 @@ function SourcesContent({ id }: { id?: string }) {
         title={id ? (names[id] ?? "Source detail") : "Sources"}
         description="Stored provider evidence and scoped operational signals."
       />
-      <State data={q.data} loading={q.isLoading} error={q.error} />
+      {q.error ? (
+        <Alert className="dc-error">
+          <AlertTitle>
+            {q.data
+              ? "Cached source evidence · refresh failed"
+              : "Source evidence unavailable"}
+          </AlertTitle>
+          <AlertDescription>
+            Last successful read: <Instant value={envelope?.readAt} />. Worker
+            signals are independent.
+            <Button
+              variant="outline"
+              disabled={retryDisabled}
+              onClick={() => void q.mutate()}
+            >
+              Retry source read
+            </Button>
+            <Technical
+              value={{
+                status: q.error.status,
+                readAt: envelope?.readAt ?? null,
+              }}
+            />
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <State data={q.data} loading={q.isLoading} error={null} />
+      )}
       {cursor && q.error?.status === 409 ? (
         <Button variant="outline" onClick={() => setCursor(null)}>
           Resources changed: return to first page
         </Button>
-      ) : null}
-      {!q.data ? (
-        <Card className={q.error ? "dc-error" : ""}>
-          <h2>
-            {q.error
-              ? "Source evidence unavailable"
-              : "Reading source evidence"}
-          </h2>
-          <p className="dc-meta">
-            {q.error
-              ? "The authenticated source read failed. No empty groups or issue totals can be inferred. Worker signals below are independent."
-              : "Waiting for the first successful stored-data read."}
-          </p>
-        </Card>
       ) : null}
       {q.data ? (
         <>
@@ -95,22 +120,15 @@ function SourcesContent({ id }: { id?: string }) {
                 ["7d", "7 days"],
               ]}
             />
-            <label htmlFor="source-operation">Operation</label>
-            <select
-              id="source-operation"
+            <Segmented
+              label="Operation"
               value={operation}
-              onChange={(e) => {
-                setOperation(e.target.value);
+              onChange={(v) => {
+                setOperation(v);
                 setCursor(null);
               }}
-            >
-              <option value="">All, broken down</option>
-              {Object.entries(operations).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              options={[["", "All"], ...Object.entries(operations)]}
+            />
           </div>
           <section className="grid divide-y rounded-lg border bg-card sm:grid-cols-2 sm:divide-y-0">
             <article className="p-5 sm:border-r">
@@ -311,7 +329,7 @@ function SourcesContent({ id }: { id?: string }) {
           {id ? (
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <span>
-                {number(obj(data.resourcePage).returned)} de{" "}
+                {number(obj(data.resourcePage).returned)} of{" "}
                 {number(obj(data.resourcePage).total)} resources of{" "}
                 {obj(data.resourcePage).kind === "arrivals"
                   ? "queried stops"
@@ -335,59 +353,26 @@ function SourcesContent({ id }: { id?: string }) {
               ) : null}
             </div>
           ) : null}
-          <section
-            // biome-ignore lint/a11y/noNoninteractiveTabindex: enable keyboard scrolling of the horizontal table.
-            tabIndex={0}
-            aria-label="Durations by component and operation"
-            className="overflow-x-auto rounded-lg border bg-card p-5"
-          >
-            <h2 className="text-base font-semibold">
-              Comparable operation durations
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Median with available samples by component and operation, not
-              provider HTTP latency. p95 requires at least 20 samples.
+          <Card>
+            <h2>Recorded operation durations</h2>
+            <p className="dc-meta">
+              Median with available samples; p95 with at least 20. Not provider
+              HTTP latency.
             </p>
-            <table className="mt-3 w-full text-left text-sm">
-              <thead>
-                <tr>
-                  <th className="p-2">Operation / component</th>
-                  <th className="p-2">Sample</th>
-                  <th className="p-2">Median</th>
-                  <th className="p-2">p95</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list(metrics.durations).map((r) => (
-                  <tr
-                    key={String(r.component) + String(r.operation)}
-                    className="border-t"
-                  >
-                    <td className="p-2">
-                      {operations[String(r.operation)] ?? "Recorded operation"}{" "}
-                      ·{" "}
-                      {eventComponents[String(r.component)] ??
-                        "Recorded operation"}
-                    </td>
-                    <td className="p-2 tabular-nums">{number(r.n)}</td>
-                    <td className="p-2 tabular-nums">
-                      {number(r.medianMs)} ms
-                    </td>
-                    <td className="p-2 tabular-nums">
-                      {r.p95Ms != null
-                        ? `${number(r.p95Ms)} ms`
-                        : "Insufficient samples"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!list(metrics.durations).length ? (
-              <p className="mt-3 text-sm">
-                No measured durations for this selection.
-              </p>
-            ) : null}
-          </section>
+            <OperationDurationRows
+              groups={list(metrics.durations).map(
+                (r) =>
+                  ({
+                    component: String(r.component),
+                    operation: String(r.operation),
+                    n: typeof r.n === "number" ? r.n : NaN,
+                    medianMs:
+                      typeof r.medianMs === "number" ? r.medianMs : null,
+                    p95Ms: typeof r.p95Ms === "number" ? r.p95Ms : null,
+                  }) satisfies DurationGroup,
+              )}
+            />
+          </Card>
           <p className="text-xs text-muted-foreground">
             Best-effort capture · <Instant value={metrics.from} /> —{" "}
             <Instant value={metrics.to} />
@@ -395,12 +380,10 @@ function SourcesContent({ id }: { id?: string }) {
           <Technical value={data} />
         </>
       ) : null}
-      <details className="dc-card">
-        <summary id="worker-signals" className="cursor-pointer">
-          Worker signals · independent of provider evidence
-          {status.error ? " · status read failed" : ""}
-        </summary>
-        <h2 className="text-sm font-medium">Worker signals</h2>
+      <Card>
+        <h2 id="worker-signals" className="text-sm font-medium">
+          Worker signals
+        </h2>
         <State
           data={status.data}
           loading={status.isLoading}
@@ -426,7 +409,7 @@ function SourcesContent({ id }: { id?: string }) {
             </p>
           ))}
         </div>
-      </details>
+      </Card>
     </>
   );
 }
