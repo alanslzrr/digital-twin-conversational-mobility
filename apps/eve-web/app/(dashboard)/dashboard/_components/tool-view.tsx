@@ -46,10 +46,7 @@ const toolInputs = {
 };
 type Tool = z.infer<typeof dashboardToolCatalog>["tools"][number];
 export function Tools({ name: routeName }: { name?: string }) {
-  const [selectedName, setSelectedName] = useState<string | undefined>(
-    routeName,
-  );
-  const name = routeName ?? selectedName;
+  const name = routeName;
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState("stored");
   const [unknownOutcome, setUnknownOutcome] = useState(false);
@@ -193,15 +190,6 @@ export function Tools({ name: routeName }: { name?: string }) {
                       href={`/dashboard/tools/${t.name}`}
                       className="dc-tool-row"
                       aria-current={name === t.name ? "page" : undefined}
-                      onClick={(e) => {
-                        if (
-                          window.matchMedia("(min-width:1100px)").matches &&
-                          !routeName
-                        ) {
-                          e.preventDefault();
-                          setSelectedName(t.name);
-                        }
-                      }}
                     >
                       <strong>{toolCopy[t.name].title}</strong>
                       <p>{t.name}</p>

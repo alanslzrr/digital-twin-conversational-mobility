@@ -121,6 +121,7 @@ export function Mobility({
   const [detailOpen, setDetailOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [draftSource, setDraftSource] = useState(source);
+  const [draftFreshness, setDraftFreshness] = useState(freshness);
   const qs = new URLSearchParams({
     category,
     section,
@@ -356,9 +357,12 @@ export function Mobility({
             open={filtersOpen}
             onOpenChange={(v) => {
               setFiltersOpen(v);
-              if (v) setDraftSource(source);
+              if (v) {
+                setDraftSource(source);
+                setDraftFreshness(freshness);
+              }
             }}
-            title="Source filter"
+            title="Mobility filters"
             trigger={
               <Button variant="outline" type="button">
                 Filters{source ? ` · ${source}` : ""}
@@ -378,11 +382,29 @@ export function Mobility({
                 ))}
               </select>
             </Field>
+            <Field>
+              <FieldLabel htmlFor="all-freshness">
+                Freshness (all evidence states)
+              </FieldLabel>
+              <select
+                id="all-freshness"
+                value={draftFreshness}
+                onChange={(e) => setDraftFreshness(e.target.value)}
+              >
+                <option value="">All states</option>
+                {Object.entries(freshnessLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <div className="dc-filter-footer">
               <Button
                 type="button"
                 onClick={() => {
                   setSource(draftSource);
+                  setFreshness(draftFreshness);
                   setCursor(null);
                   setSelected(null);
                   setFiltersOpen(false);

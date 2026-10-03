@@ -118,14 +118,14 @@ export const toolCopy: Record<
     example: { source: "emt" },
   },
   get_mobility_snapshot: {
-    title: "Consultar resumen almacenado",
+    title: "Read mobility snapshot",
     question: "Stored evidence, gaps and limits by product.",
     example: {},
   },
 };
 export const effectCopy: Record<string, string> = {
   activate_window: "Maintain the activity window",
-  acquire_provider: "Consultar al proveedor",
+  acquire_provider: "Query the provider",
   demand_weather: "Register weather demand",
   write_cache: "Write a cached result",
   calculate_otp: "Calculate routing itineraries",
