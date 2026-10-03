@@ -6,7 +6,11 @@ import { cn } from "@/lib/utils";
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <section
-      aria-label="Scrollable data table"
+      aria-label={
+        props["aria-label"]
+          ? `${props["aria-label"]} scroll area`
+          : "Scrollable data table"
+      }
       // biome-ignore lint/a11y/noNoninteractiveTabindex: Horizontal table scrolling requires a keyboard-focusable region.
       tabIndex={0}
       data-slot="table-container"

@@ -166,7 +166,7 @@ function SourcesContent({ id }: { id?: string }) {
                 </div>
               </div>
               {sources.length ? (
-                <Table>
+                <Table aria-label="Source products">
                   <thead>
                     <tr>
                       <th scope="col">Source</th>
@@ -221,7 +221,7 @@ function SourcesContent({ id }: { id?: string }) {
                 All sources
               </Link>
               <Card className="dc-table-card">
-                <Table>
+                <Table aria-label="Periodic product details">
                   <thead>
                     <tr>
                       <th scope="col">Periodic product</th>

@@ -53,7 +53,7 @@ export function OperationDurationRows({
               className="rf-table-region"
               aria-label={`${operation} recorded durations`}
             >
-              <Table>
+              <Table aria-label={`${operation.replaceAll("_", " ")} durations`}>
                 <caption className="sr-only">
                   Median dot and p95 square are summary statistics, not a
                   distribution or confidence interval.
