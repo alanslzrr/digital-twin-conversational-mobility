@@ -204,9 +204,12 @@ export function Tools({ name: routeName }: { name?: string }) {
         <div className="dc-stack">
           {tool ? (
             <>
-              <Link href="/dashboard/tools" className="text-sm underline">
-                Back to catalog
-              </Link>
+              <h2>{toolCopy[tool.name].title}</h2>
+              {routeName && (
+                <Link href="/dashboard/tools" className="text-sm underline">
+                  Back to catalog
+                </Link>
+              )}
               <p className="text-sm leading-6 text-muted-foreground">
                 {toolCopy[tool.name].question}
               </p>

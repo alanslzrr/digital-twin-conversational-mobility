@@ -300,13 +300,8 @@ try {
   evaluate(
     "fetch('/api/auth/sign-out',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(r=>r.ok)",
   );
-  if (
-    evaluate(
-      "!!document.querySelector('button[aria-label=\"Refresh stored data\"]')",
-    )
-  ) {
-    click("Refresh stored data");
-  }
+  // Existing authenticated polling observes revocation; a manual click races
+  // with immediate ownership cleanup and the redirect.
   b("wait", "--text", "Correo");
   check(
     "revoked session removes private dashboard",
