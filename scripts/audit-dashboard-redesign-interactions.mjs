@@ -106,6 +106,11 @@ try {
   b("wait", "--text", "definition");
   inspect("definition-dark");
   b("press", "Escape");
+  b(
+    "wait",
+    "--fn",
+    "document.activeElement?.getAttribute('aria-label') === 'Available bikes definition'",
+  );
   check(
     "definition restores keyboard focus",
     evaluate("document.activeElement?.getAttribute('aria-label')") ===
@@ -137,6 +142,11 @@ try {
   );
   inspect("mobility-evidence");
   b("press", "Escape");
+  b(
+    "wait",
+    "--fn",
+    "document.activeElement?.textContent?.includes('estación reciente')",
+  );
   check(
     "evidence restores row focus",
     evaluate(
