@@ -159,7 +159,7 @@ try {
   b("press", "Tab");
   b("wait", "300");
   save(
-    "dst-input-value.json",
+    "dst-input-value.txt",
     evaluate("document.querySelector('#event-from')?.value"),
   );
   click("Apply");
