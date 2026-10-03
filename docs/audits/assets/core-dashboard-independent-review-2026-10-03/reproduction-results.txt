@@ -1,0 +1,83 @@
+
+ RUN  v5.0.1 /Users/alansalazar/Documents/ChatGPT/digital-twin-conversational-mobility
+
+stdout | apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > keeps DGT published nested coordinates in the viewport result
+AUDIT_SCHEMA dashboard_e2e_721197db6fae470fb055f49bd2a845dc
+
+stdout | apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > keeps DGT published nested coordinates in the viewport result
+AUDIT_DGT_MAP {"list":1,"coordinates":[40.4,-3.7],"map":0}
+
+stdout | apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > does not describe a never-requested EMT cache as an old reading
+AUDIT_EMPTY_EMT {"id":"emt:arrivals","label":"Llegadas EMT","source":"emt","category":"departures","mode":"demand","enabled":true,"usable":false,"total":0,"recent":null,"stale":null,"unavailable":null,"unit":"recursos consultados","observedAt":null,"ingestedAt":null,"issue":"La última lectura no describe necesariamente el estado actual."}
+
+stdout | apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > keeps M3 unavailable when all incident products are disabled
+AUDIT_DISABLED_M3 {"value":0,"products":[{"id":"dgt-incidents","enabled":false,"usable":true},{"id":"emt-alerts","enabled":false,"usable":false},{"id":"renfe-alerts","enabled":false,"usable":false},{"id":"weather:warnings","enabled":false,"usable":false}]}
+
+ ❯ apps/mobility-core/src/observability/independent-review.temporary.test.ts (3 tests | 3 failed) 1880ms
+   ❯ dashboard end-to-end isolated PostgreSQL (3)
+     × keeps DGT published nested coordinates in the viewport result 62ms
+     × does not describe a never-requested EMT cache as an old reading 1184ms
+     × keeps M3 unavailable when all incident products are disabled 189ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > keeps DGT published nested coordinates in the viewport result
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/mobility-core/src/observability/independent-review.temporary.test.ts:148:28
+    146|       const map=await readEntities({...selection,bbox:[-4,40,-3,41]},o…
+    147|       console.log('AUDIT_DGT_MAP', JSON.stringify({list:list.entities.…
+    148|       expect(map.entities).toHaveLength(1);
+       |                            ^
+    149|     });
+    150|     it("does not describe a never-requested EMT cache as an old readin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > does not describe a never-requested EMT cache as an old reading
+AssertionError: expected 'La última lectura no describe necesar…' to contain 'Sin consulta previa'
+
+Expected: "Sin consulta previa"
+Received: "La última lectura no describe necesariamente el estado actual."
+
+ ❯ apps/mobility-core/src/observability/independent-review.temporary.test.ts:156:31
+    154|       const arrivals=overview.products.find(p=>p.id==='emt:arrivals');
+    155|       console.log('AUDIT_EMPTY_EMT', JSON.stringify(arrivals));
+    156|       expect(arrivals?.issue).toContain('Sin consulta previa');
+       |                               ^
+    157|     });
+    158|     it("keeps M3 unavailable when all incident products are disabled",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  apps/mobility-core/src/observability/independent-review.temporary.test.ts > dashboard end-to-end isolated PostgreSQL > keeps M3 unavailable when all incident products are disabled
+AssertionError: expected +0 to be null
+
+- Expected:
+null
+
++ Received:
+0
+
+ ❯ apps/mobility-core/src/observability/independent-review.temporary.test.ts:163:29
+    161|       const metric=overview.metrics.find(m=>m.id==='M3');
+    162|       console.log('AUDIT_DISABLED_M3', JSON.stringify({value:metric?.v…
+    163|       expect(metric?.value).toBeNull();
+       |                             ^
+    164|     });
+    165|   },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  07:07:18
+   Duration  2.89s (tests 67%, import 26%, transform 6%)
+

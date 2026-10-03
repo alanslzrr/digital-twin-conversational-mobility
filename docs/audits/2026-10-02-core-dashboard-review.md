@@ -4,6 +4,8 @@
 **Segunda verificación:** [auditoría con agent-browser del 03/10/2026](../acceptance/2026-10-03-core-dashboard-second-audit.md), nueve hallazgos adicionales corregidos y límites de revisión explícitos.
 [Índice](../index.md) · [Auditorías](index.md) · [Spec acordado](../plans/2026-10-02-core-dashboard.md) · [Acta original](../acceptance/2026-10-02-core-dashboard.md) · [Alcance](../roadmap.md)
 
+**Contraste independiente posterior:** [cinco pendientes reproducidos o contrastados el 03/10/2026](#contraste-independiente-del-03102026). CI verde no equivale a aceptación funcional completa.
+
 ## Dictamen
 
 **Requiere cambios antes de integrar o instalar.** La base arquitectónica es aprovechable y la CI está verde, pero se han reproducido fallos de captura y de interpretación de datos. La UI conserva los tokens de EVE, no la jerarquía de información de la referencia. No conviene añadir gráficos encima de esas discrepancias.
@@ -32,6 +34,7 @@ Esta auditoría añade documentación y evidencia, no corrige la implementación
   - [Encargo breve para el agente](#encargo-breve-para-el-agente)
 - [Pruebas y límites](#pruebas-y-límites)
 - [Orden de corrección](#orden-de-corrección)
+- [Contraste independiente del 03/10/2026](#contraste-independiente-del-03102026)
 
 ## Hallazgos funcionales
 
@@ -543,3 +546,44 @@ No se ejecutó conversación generativa, petición nueva a proveedores de movili
 6. Ejecutar check/build agente/suite SQL/smoke específico. Actualizar la evidencia de la misma PR sin reescribir el acta anterior. Pedir autorización aparte para instalar sobre 3000/3001.
 
 Referencias de revisión: [spec local](../plans/2026-10-02-core-dashboard.md), EVE 0.65 instalado, [referencia visual](https://community-agent.labs.vercel.dev/) y [Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md) consultadas el 02/10/2026. Ninguna recomendación requiere cambiar la infraestructura existente.
+
+
+## Contraste independiente del 03/10/2026
+
+**Dictamen actual: requiere cinco correcciones P2 antes de cerrar la aceptación.** Se conserva la segunda acta como evidencia histórica válida de sus comprobaciones; estos casos no estaban cubiertos por ellas. Revisión de HEAD `dafd69a66b99101239523617f22e63cdbd5d0af9`, con código de aplicación en `1355f1633a08294dd1bd6be45a8ad7b0498c0ca2`. La PR continúa abierta y [Quality gates terminó correctamente](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37078531070/job/111073731545).
+
+### Pendientes y criterios de corrección
+
+| ID / prioridad | Antes: conducta verificada | Después: corrección exigida | Por qué / evidencia |
+| --- | --- | --- | --- |
+| R1 · P2 | Una incidencia DGT con `location.start` aparece en el listado con coordenadas, pero desaparece al aplicar el rectángulo del mapa. | Compartir extracción de coordenadas entre SQL y proyección; aplicar rectángulo y totales sobre las coordenadas normalizadas antes de paginar. Probar lista y mapa con la estructura real del adaptador. | [entities.ts](../../apps/mobility-core/src/dashboard/entities.ts), línea 415, filtra solo `entity.longitude/latitude`; el [adaptador DGT](../../apps/mobility-core/src/adapters/dgt.ts) publica `location.start`. PostgreSQL reproduce listado=1, mapa=0 para un punto dentro del rectángulo. |
+| R2 · P2 | M3 devuelve **0 avisos** con todas las fuentes de incidencias deshabilitadas y una lectura DGT reciente retenida. | Exigir una fuente habilitada y utilizable para presentar un recuento disponible. Compartir universo entre condición de disponibilidad y recuento. En ausencia de evidencia utilizable habilitada, devolver no disponible, no cero. | [overview.ts](../../apps/mobility-core/src/dashboard/overview.ts), líneas 260–262: la condición comprueba `usable`, pero no `enabled`; el recuento sí filtra fuentes habilitadas. Reproducido en PostgreSQL. |
+| R3 · P2 | M2 muestra plazas «con esa categoría», sin nombrarla visiblemente ni permitir elegir otra. El servidor elige una categoría, pero la UI ignora `parkingCategory/parkingCategories`. | Mostrar etiqueta de categoría y selector cuando haya varias; incluir selección en consulta y clave de caché, y conservarla en el enlace al detalle/listado. | [overview-view.tsx](../../apps/eve-web/app/%28dashboard%29/dashboard/_components/overview-view.tsx), líneas 10–23; [insights.tsx](../../apps/eve-web/app/%28dashboard%29/dashboard/_components/insights.tsx), MetricStrip; [overview.ts](../../apps/mobility-core/src/dashboard/overview.ts), enlace M2. Contraste de código y [captura archivada](assets/core-dashboard-second-audit-2026-10-03/overview-1440-light.jpg), no nueva ejecución de navegador. El spec M2 exige categoría visible. |
+| R4 · P2 | Eventos consulta por defecto 24 horas, pero los campos Desde/Hasta muestran siete días; cambiar el periodo no sincroniza esos campos. Editar uno activa el rango personalizado con el otro extremo antiguo. | Mostrar el periodo efectivo resuelto por Core, o reservar campos para un modo personalizado explícito; inicializar ambos extremos desde el rango efectivo al entrar. Probar valor inicial, cambio a 1 h y edición de un solo extremo. | [activity-view.tsx](../../apps/eve-web/app/%28dashboard%29/dashboard/_components/activity-view.tsx), líneas 30–40, 65–75 y 175–214. La [captura archivada](assets/core-dashboard-second-audit-2026-10-03/activity-1440-light.jpg) muestra «Últimas 24 horas» junto a fechas separadas por siete días. No se repitió esta interacción en navegador. |
+| R5 · P2 | Llegadas EMT sin ninguna consulta previa se describe como «La última lectura no describe necesariamente el estado actual», aunque ambas fechas sean nulas. | Distinguir agregado vacío sin consulta de recurso consultado con respuesta vacía y de lectura antigua. Mostrar «Sin consulta previa» sin adquirir datos automáticamente. Añadir los tres casos a regresión. | [overview.ts](../../apps/mobility-core/src/dashboard/overview.ts), líneas 53–56 y 134–141: el agregado devuelve una fila incluso vacío, por lo que `!r` no detecta ausencia de consultas. Reproducido en PostgreSQL con EMT habilitado. |
+
+**Orden recomendado:** R1 y R2 (coherencia de datos), R5 (ausencia frente a antigüedad), R3 y R4 (interpretación y controles). Mantener las restricciones del spec: EVE, autenticación, propiedad, proveedores y servicios habituales sin cambios no autorizados. Corregir en la misma PR; no añadir infraestructura.
+
+La presentación del gráfico de actividad también admite una mejora concreta: ejes con escala y tiempo por intervalo y leyenda inequívoca. Hoy conserva totales, rango global y tabla desplegable; no se afirma que los datos sean inaccesibles. Esta observación visual no sustituye los cinco casos funcionales anteriores.
+
+### Reproducciones independientes
+
+Se ejecutaron tres pruebas nuevas, con datos sintéticos y migraciones en un esquema PostgreSQL desechable: R1, R5 y R2. **Las tres fallaron contra el comportamiento esperado**, con salida Vitest 1; no son tres pruebas aprobadas ni se incorporaron como suite verde. Se archivan el [test exacto ejecutado](assets/core-dashboard-independent-review-2026-10-03/repro.test.ts.txt) y su [salida](assets/core-dashboard-independent-review-2026-10-03/reproduction-results.txt).
+
+Para repetirlas, copiar temporalmente el archivo archivado a `apps/mobility-core/src/observability/independent-review.temporary.test.ts` y ejecutar, con PostgreSQL local configurado:
+
+```sh
+RUN_DASHBOARD_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/observability/independent-review.temporary.test.ts
+```
+
+Eliminar después esa copia temporal. El archivo archivado no participa en CI. El esquema se elimina con el teardown; se comprobó su ausencia tras esta ejecución.
+
+### Validación y límites del contraste
+
+- `pnpm check`: correcto, **479 pruebas aprobadas / 94 omitidas**. Los dos builds de esa tarea fueron aciertos de caché Turbo, no compilaciones nuevas.
+- Suite separada `RUN_DASHBOARD_DB_TESTS=1 ... vitest run apps/mobility-core/src/dashboard apps/mobility-core/src/observability/dashboard.integration.test.ts`: **40 pruebas aprobadas / 9 archivos**, mezcla de pruebas unitarias y SQL, no 40 pruebas SQL exclusivamente.
+- `node --env-file=.env.local scripts/test-dashboard-local.mjs`: **31 comprobaciones HTTP aprobadas**. Runtime aislado en 3002/3003, autenticación real con identidades sintéticas, adquisiciones e inferencia deshabilitadas. El arnés reutiliza instantáneas públicas de movilidad y añade fixtures; no copia conversaciones ni cuentas reales.
+- La CI del HEAD revisado incorpora la suite dashboard y el smoke HTTP autenticado. No se volvió a ejecutar `build:agent` por separado en este contraste.
+- Se inspeccionó la evidencia archivada de **72 pantallas/formularios**, con cero incidencias axe y 18 resultados indeterminados. **No se repitió agent-browser ni la matriz visual completa**. Se revisaron las capturas de Resumen y Eventos para R3/R4.
+- Siguen vigentes los límites de la [segunda acta](../acceptance/2026-10-03-core-dashboard-second-audit.md), incluidos lector de pantalla real, zoom de navegador, dispositivos táctiles físicos y carrera concurrente completa entre identidades. No se convierten en resultados aprobados.
+- Comprobados limpieza de esquemas desechables y puertos 3002/3003 libres. Esta revisión solo deja documentación y evidencia; sin cambios de implementación, merge, instalación habitual, inferencia ni peticiones nuevas a proveedores.
