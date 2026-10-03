@@ -12,6 +12,12 @@ globalThis.fetch = async (input, init) => {
   const url = new URL(
     typeof input === "string" || input instanceof URL ? input : input.url,
   );
+  // next dev asks npm for its latest version when a browser opens the dev overlay.
+  if (
+    process.env.DASHBOARD_QA_DEV === "1" &&
+    url.href === "https://registry.npmjs.org/-/package/next/dist-tags"
+  )
+    return new Response(null, { status: 503 });
   if (
     url.protocol !== "http:" ||
     url.hostname !== "127.0.0.1" ||
