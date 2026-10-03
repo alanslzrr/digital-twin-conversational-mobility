@@ -2,6 +2,8 @@
 
 [Índice](../index.md) · [Continuación V2](2026-10-03-core-dashboard-refinement-v2-continuation.md) · [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45) · [Evidencia](../audits/assets/core-dashboard-theme-header-2026-10-03/README.md)
 
+> Evidencia histórica: la resolución posterior de Sources y del bloqueo de dependencias está en la [revisión previa al merge](2026-10-03-core-dashboard-merge-readiness.md).
+
 ## Alcance
 
 Segunda revisión sobre `alanslzrr/core-dashboard` a petición del usuario: selector de tema `@ncdai/theme-switcher` con transición `@ncdai/theme-toggle-effect-circle-blur`, eliminación de acentos laterales (requisito crítico) y cabecera mínima con controles plegables. Solo presentación de `apps/eve-web`; sin cambios de contratos, lectores, endpoints, adquisición ni chat oficial. Sin despliegue ni merge.

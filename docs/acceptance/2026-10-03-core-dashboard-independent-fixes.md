@@ -2,6 +2,8 @@
 
 [Índice](../index.md) · [Actas](index.md) · [Hallazgos originales R1–R5](../audits/2026-10-02-core-dashboard-review.md#contraste-independiente-del-03102026) · [Segunda acta histórica](2026-10-03-core-dashboard-second-audit.md) · [Alcance](../roadmap.md)
 
+> Evidencia histórica: la resolución posterior de Sources y del bloqueo de dependencias está en la [revisión previa al merge](2026-10-03-core-dashboard-merge-readiness.md).
+
 ## Resultado
 
 **Aceptación global todavía abierta:** la nueva CI se detuvo en auditoría de dependencias, no en las regresiones del panel. El bloqueo se detalla en [seguridad de dependencias](#bloqueo-de-ci-por-seguridad-de-dependencias).

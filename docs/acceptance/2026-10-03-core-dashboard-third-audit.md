@@ -2,6 +2,8 @@
 
 [Índice](../index.md) · [Tema y cabecera](2026-10-03-core-dashboard-theme-header.md) · [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45) · [Evidencia](../audits/assets/core-dashboard-third-audit-2026-10-03/README.md)
 
+> Evidencia histórica: la resolución posterior de Sources y del bloqueo de dependencias está en la [revisión previa al merge](2026-10-03-core-dashboard-merge-readiness.md).
+
 ## Alcance
 
 Tercera revisión sobre `alanslzrr/core-dashboard`: revisión de código de las vistas del panel y recorrido visual en oscuro, claro y móvil. Se incorpora `text-effect` de motion-primitives (sin dependencias nuevas: `motion`, `lucide-react`, `clsx`, `tailwind-merge` y `cn` ya existían). Solo presentación de `apps/eve-web` y el arnés QA local; sin cambios de contratos, lectores, adquisición ni chat oficial. Sin despliegue ni merge.
