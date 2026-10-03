@@ -9,6 +9,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
+import { unresolvedExecution } from "@/src/dashboard-presentation";
 import { InspectionResult } from "./inspection-result";
 import { Card, Segmented } from "./primitives";
 import { PageTitle, State, Technical } from "./shared";
@@ -70,13 +71,19 @@ export function Tools({ name: routeName }: { name?: string }) {
     setError("");
     setPending(false);
     setConfirmed(false);
-    requestId.current = null;
-    setUnknownOutcome(false);
+    const recovery = name ? ctx.executionRecovery.get(name) : undefined;
+    requestId.current = recovery?.requestId ?? null;
+    setUnknownOutcome(recovery?.unresolved ?? false);
     setMode("stored");
-  }, [name]);
+  }, [name, ctx.executionRecovery]);
   const tool = tools.find((t) => t.name === name);
   const submit = async (execute: boolean) => {
-    if (!tool || (execute && unknownOutcome)) return;
+    if (
+      !tool ||
+      (execute &&
+        (unknownOutcome || ctx.executionRecovery.get(tool.name)?.unresolved))
+    )
+      return;
     const selected = name;
     setPending(true);
     setError("");
@@ -89,7 +96,13 @@ export function Tools({ name: routeName }: { name?: string }) {
       const parsed = checked.data;
       if (new TextEncoder().encode(input).length > 8192)
         throw new Error("Maximum 8,192 argument bytes");
-      requestId.current = execute ? crypto.randomUUID() : null;
+      if (execute) {
+        requestId.current = crypto.randomUUID();
+        ctx.executionRecovery.set(tool.name, {
+          requestId: requestId.current,
+          unresolved: true,
+        });
+      }
       const response = await ctx.request(
         execute ? "executions" : "inspect",
         "POST",
@@ -104,7 +117,14 @@ export function Tools({ name: routeName }: { name?: string }) {
       );
       if (selection.current === selected) {
         setResult(unwrap(response));
-        setUnknownOutcome(false);
+        if (execute && requestId.current) {
+          const unresolved = unresolvedExecution(unwrap(response));
+          setUnknownOutcome(unresolved);
+          ctx.executionRecovery.set(tool.name, {
+            requestId: requestId.current,
+            unresolved,
+          });
+        }
       }
     } catch (e) {
       if (execute && requestId.current && selection.current === selected)
@@ -290,6 +310,11 @@ export function Tools({ name: routeName }: { name?: string }) {
                     </p>
                   ) : null}
                   {requestId.current ? (
+                    <p className="dc-meta break-all">
+                      Request ID: {requestId.current}
+                    </p>
+                  ) : null}
+                  {requestId.current ? (
                     <Button
                       variant="ghost"
                       type="button"
@@ -303,7 +328,15 @@ export function Tools({ name: routeName }: { name?: string }) {
                           if (selection.current !== selected) return;
                           setResult(unwrap(response));
                           setError("");
-                          setUnknownOutcome(false);
+                          const unresolved = unresolvedExecution(
+                            unwrap(response),
+                          );
+                          setUnknownOutcome(unresolved);
+                          if (requestId.current)
+                            ctx.executionRecovery.set(tool.name, {
+                              requestId: requestId.current,
+                              unresolved,
+                            });
                         } catch {
                           if (selection.current === selected)
                             setError(
@@ -325,7 +358,7 @@ export function Tools({ name: routeName }: { name?: string }) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => ctx.clear()}
+                    onClick={() => ctx.cancelPending()}
                   >
                     Cancel request
                   </Button>

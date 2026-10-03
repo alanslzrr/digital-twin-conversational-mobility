@@ -48,6 +48,7 @@ export type ViewReadStatus = {
   failed: boolean;
 };
 type Context = {
+  executionRecovery: Map<string, { requestId: string; unresolved: boolean }>;
   viewRead: ViewReadStatus | null;
   setViewRead: (value: ViewReadStatus | null) => void;
   identity: Identity;
@@ -56,6 +57,7 @@ type Context = {
   visible: boolean;
   request: (path: string, method?: string, body?: unknown) => Promise<unknown>;
   clear: () => void;
+  cancelPending: () => void;
   activePaths: Map<string, number>;
   eligibility: Map<string, DashboardRead>;
   pending: Map<string, Promise<unknown>>;
@@ -73,6 +75,7 @@ export function DashboardProvider({
   identity: Identity;
   children: ReactNode;
 }) {
+  const [privateAccess, setPrivateAccess] = useState(true);
   const [viewRead, setViewRead] = useState<ViewReadStatus | null>(null);
   const [paused, setPaused] = useState(false),
     [visible, setVisible] = useState(true);
@@ -87,19 +90,32 @@ export function DashboardProvider({
       activePaths: new Map<string, number>(),
       eligibility: new Map<string, DashboardRead>(),
       pending: new Map<string, Promise<unknown>>(),
+      executionRecovery: new Map<
+        string,
+        { requestId: string; unresolved: boolean }
+      >(),
     }),
     [identity.principalId],
   );
-  const { activePaths, eligibility, pending } = scope;
+  const { activePaths, eligibility, pending, executionRecovery } = scope;
   const heartbeat = useRef(0);
-  const clear = useCallback(() => {
+  const cancelPending = useCallback(() => {
+    for (const c of controllers.current) c.abort();
+    controllers.current.clear();
+  }, []);
+  const dispose = useCallback(() => {
     for (const c of controllers.current) c.abort();
     controllers.current.clear();
     cache.clear();
-    setViewRead(null);
     eligibility.clear();
     pending.clear();
-  }, [cache, eligibility, pending]);
+    executionRecovery.clear();
+  }, [cache, eligibility, pending, executionRecovery]);
+  const clear = useCallback(() => {
+    dispose();
+    setViewRead(null);
+    setPrivateAccess(false);
+  }, [dispose]);
   const request = async (path: string, method = "GET", body?: unknown) => {
     const controller = new AbortController();
     controllers.current.add(controller);
@@ -199,15 +215,15 @@ export function DashboardProvider({
     window.addEventListener("offline", update);
     window.addEventListener("focus", check);
     return () => {
-      clear();
+      dispose();
       document.removeEventListener("visibilitychange", update);
       window.removeEventListener("online", check);
       window.removeEventListener("offline", update);
       window.removeEventListener("focus", check);
     };
-  }, [identity.principalId, clear]);
+  }, [identity.principalId, clear, dispose]);
   useEffect(() => {
-    if (paused || !visible) {
+    if (paused || !visible || !privateAccess) {
       for (const c of controllers.current) c.abort();
       return;
     }
@@ -218,7 +234,7 @@ export function DashboardProvider({
       },
       heartbeat,
     );
-  }, [paused, visible]);
+  }, [paused, visible, privateAccess]);
   return (
     <DashboardContext.Provider
       value={{
@@ -230,6 +246,8 @@ export function DashboardProvider({
         visible,
         request,
         clear,
+        cancelPending,
+        executionRecovery,
         eligibility,
         activePaths,
         pending,
@@ -244,7 +262,16 @@ export function DashboardProvider({
           keepPreviousData: false,
         }}
       >
-        {children}
+        {privateAccess ? (
+          children
+        ) : (
+          <main lang="en" className="p-8">
+            <p role="alert">
+              Private dashboard details cleared. Sign in to continue.
+            </p>
+            <a href="/evaluation">Return to sign in</a>
+          </main>
+        )}
       </SWRConfig>
     </DashboardContext.Provider>
   );

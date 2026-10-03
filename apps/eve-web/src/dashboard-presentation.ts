@@ -1,3 +1,4 @@
+import type { DashboardEntity } from "@mobility/contracts";
 /** Presentation-only helpers: never enrich or fabricate domain evidence. */
 export function madridLocal(instant: string): string {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -39,4 +40,40 @@ export function successfulReadAt(data: unknown): string | null {
     Number.isFinite(Date.parse(data.readAt))
     ? data.readAt
     : null;
+}
+
+export function primaryMeasurements(entity: DashboardEntity) {
+  const priority: Record<string, string[]> = {
+    bikes: ["bikes", "docks"],
+    parking: ["freeSpaces", "category"],
+    traffic: [
+      "vehiclesPerHour",
+      "occupancyPercent",
+      "loadPercent",
+      "serviceLevel",
+    ],
+    departures: [
+      "estimateSecondsAtObservation",
+      "arrivalSeconds",
+      "departureSeconds",
+    ],
+    environment: ["value", "temperature", "precipitation", "relative_humidity"],
+    incidents: ["detail", "road", "status"],
+    places: ["line", "kind", "wheelchair"],
+  };
+  const order = priority[entity.category] ?? [];
+  return [...entity.measurements]
+    .sort((a, b) => {
+      const rank = (n: string) => {
+        const i = order.indexOf(n);
+        return i < 0 ? order.length : i;
+      };
+      return rank(a.name) - rank(b.name);
+    })
+    .slice(0, 2);
+}
+
+export function unresolvedExecution(value: unknown): boolean {
+  if (!value || typeof value !== "object" || !("state" in value)) return true;
+  return !["succeeded", "failed", "cancelled"].includes(String(value.state));
 }
