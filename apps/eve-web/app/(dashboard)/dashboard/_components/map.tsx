@@ -4,6 +4,7 @@ import type { DashboardEntity } from "@mobility/contracts";
 import type { CircleMarker, LayerGroup, Map as LeafletMap } from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "@/src/dashboard-client";
+import { sourceNames } from "./event-copy";
 import { productLabel } from "./product-copy";
 import { Instant, publicLabel, State } from "./shared";
 export default function MobilityMap({
@@ -144,12 +145,12 @@ export default function MobilityMap({
       if (cancelled || !layer.current) return;
       const retained = new Set<string>();
       const colors = {
-        recent: "var(--primary)",
-        recently_checked: "var(--primary)",
-        stale: "var(--muted-foreground)",
-        unavailable: "var(--destructive)",
-        static: "var(--foreground)",
-        unknown: "var(--muted-foreground)",
+        recent: "var(--dash-series)",
+        recently_checked: "var(--dash-series)",
+        stale: "var(--dash-warning-mark)",
+        unavailable: "var(--dash-muted)",
+        static: "var(--dash-secondary)",
+        unknown: "var(--dash-muted)",
       };
       const labels = {
         recent: "Recent reading",
@@ -199,7 +200,7 @@ export default function MobilityMap({
           .slice(0, 3)
           .map((m) => `${publicLabel(m.name)}: ${m.value} ${m.unit ?? ""}`)
           .join(" · ");
-        label.textContent = `${entity.name} · ${productLabel(entity.evidence.productId)}${values ? ` · ${values}` : ""} · ${labels[state]} · ${entity.evidence.sourceId}${time ? ` · ${new Date(time).toLocaleString("en-GB", { timeZone: "Europe/Madrid", timeZoneName: "short" })}` : " · No observation time"}`;
+        label.textContent = `${entity.name} · ${productLabel(entity.evidence.productId)}${values ? ` · ${values}` : ""} · ${labels[state]} · ${sourceNames[entity.evidence.sourceId] ?? entity.evidence.sourceId}${time ? ` · ${new Date(time).toLocaleString("en-GB", { timeZone: "Europe/Madrid", timeZoneName: "short" })}` : " · No observation time"}`;
         if (marker.getTooltip()) marker.setTooltipContent(label);
         else marker.bindTooltip(label);
       }

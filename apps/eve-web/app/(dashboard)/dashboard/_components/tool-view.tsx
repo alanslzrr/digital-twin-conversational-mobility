@@ -141,7 +141,7 @@ export function Tools({ name: routeName }: { name?: string }) {
       />
       <State data={q.data} loading={q.isLoading} error={q.error} />
       <div className="dc-inspector-layout">
-        <Card>
+        <Card className="dc-catalog-card">
           <label htmlFor="tool-search" className="sr-only">
             Search registered tools
           </label>
@@ -204,15 +204,16 @@ export function Tools({ name: routeName }: { name?: string }) {
         <div className="dc-stack">
           {tool ? (
             <>
-              <h2>{toolCopy[tool.name].title}</h2>
-              {routeName && (
-                <Link href="/dashboard/tools" className="text-sm underline">
-                  Back to catalog
-                </Link>
-              )}
-              <p className="text-sm leading-6 text-muted-foreground">
-                {toolCopy[tool.name].question}
-              </p>
+              <header className="dc-inspector-heading">
+                {routeName && (
+                  <Link href="/dashboard/tools" className="dc-link">
+                    Back to catalog
+                  </Link>
+                )}
+                <h2>{toolCopy[tool.name].title}</h2>
+                <p>{toolCopy[tool.name].question}</p>
+                <code>{tool.name}</code>
+              </header>
               <Technical value={JSON.parse(tool.inputSchemaJson)} />
               <form
                 className="dc-card dc-stack"
@@ -339,7 +340,7 @@ export function Tools({ name: routeName }: { name?: string }) {
                   ) : null}
                 </div>
                 {error ? (
-                  <p role="alert" className="text-sm text-destructive">
+                  <p role="alert" className="dc-status" data-tone="danger">
                     {error}
                   </p>
                 ) : null}

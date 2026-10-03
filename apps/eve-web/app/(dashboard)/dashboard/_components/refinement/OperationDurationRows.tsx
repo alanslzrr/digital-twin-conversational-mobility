@@ -61,9 +61,9 @@ export function OperationDurationRows({
                 <TableHeader>
                   <TableRow>
                     <TableHead>Component</TableHead>
-                    <TableHead>Samples</TableHead>
-                    <TableHead>Median (ms)</TableHead>
-                    <TableHead>p95 (ms)</TableHead>
+                    <TableHead className="rf-number">Samples</TableHead>
+                    <TableHead className="rf-number">Median (ms)</TableHead>
+                    <TableHead className="rf-number">p95 (ms)</TableHead>
                     <TableHead>Summary</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -71,13 +71,13 @@ export function OperationDurationRows({
                   {rows.map((g) => (
                     <TableRow key={`${g.component}:${g.operation}`}>
                       <TableCell>{g.component}</TableCell>
-                      <TableCell>{g.n}</TableCell>
-                      <TableCell>
+                      <TableCell className="rf-number">{g.n}</TableCell>
+                      <TableCell className="rf-number">
                         {g.medianMs === null
                           ? "Unavailable"
                           : String(g.medianMs)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="rf-number">
                         {g.p95Ms === null
                           ? g.n < 20
                             ? "Unavailable: n < 20"

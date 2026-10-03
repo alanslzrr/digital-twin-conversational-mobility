@@ -47,6 +47,13 @@ const links = [
     icon: MessageSquare,
   },
 ];
+const initials = (label: string) =>
+  label
+    .split(/\s+/)
+    .filter((part) => /^\p{L}/u.test(part))
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 function Navigation() {
   const path = usePathname();
   const { setOpenMobile } = useSidebar();
@@ -99,6 +106,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setSidebarOpen(window.matchMedia("(min-width:1280px)").matches);
     setSidebarResolved(true);
   }, []);
+  useEffect(() => {
+    if (!notice || notice.startsWith("Sign out")) return;
+    const timer = window.setTimeout(() => setNotice(""), 5000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
   const [timingOpen, setTimingOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const { data, error } = useDashboard("status", 3000);
@@ -172,7 +184,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <Sidebar collapsible="icon" dashboardScope>
         <SidebarHeader className="dc-brand">
           <Link href="/dashboard" aria-label="Mobility Core">
-            <Blocks size={16} />
+            <span className="dc-brand-mark" aria-hidden="true">
+              <Blocks size={14} />
+            </span>
             <span className="dc-brand-label">Mobility Core</span>
           </Link>
         </SidebarHeader>
@@ -181,27 +195,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter className="dc-account">
           <SidebarMenu>
-            <SidebarMenuItem>
-              <Sheet
-                open={accountOpen}
-                onOpenChange={setAccountOpen}
-                title="Current account"
-                trigger={
-                  <SidebarMenuButton
-                    tooltip={{
-                      children: ctx.identity.label,
-                      className: "dashboard-dialog dc-tooltip",
-                    }}
-                    aria-label={`Account: ${ctx.identity.label}`}
-                  >
-                    <UserRound />
-                    <span>{ctx.identity.label}</span>
-                  </SidebarMenuButton>
-                }
-              >
-                <p>{ctx.identity.label}</p>
-              </Sheet>
-            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
@@ -217,6 +210,30 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
+              <Sheet
+                open={accountOpen}
+                onOpenChange={setAccountOpen}
+                title="Current account"
+                trigger={
+                  <SidebarMenuButton
+                    className="dc-identity"
+                    tooltip={{
+                      children: ctx.identity.label,
+                      className: "dashboard-dialog dc-tooltip",
+                    }}
+                    aria-label={`Account: ${ctx.identity.label}`}
+                  >
+                    <span className="dc-avatar" aria-hidden="true">
+                      {initials(ctx.identity.label) || <UserRound />}
+                    </span>
+                    <span>{ctx.identity.label}</span>
+                  </SidebarMenuButton>
+                }
+              >
+                <p>{ctx.identity.label}</p>
+              </Sheet>
+            </SidebarMenuItem>
+            <SidebarMenuItem className="dc-sign-out">
               <SidebarMenuButton
                 onClick={signOut}
                 aria-label="Sign out"
@@ -248,7 +265,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     : "Read failed"}
               </span>
             ) : null}
-            <span className="dc-read-label">
+            <span
+              className="dc-read-label"
+              data-state={
+                ctx.paused
+                  ? "paused"
+                  : ctx.viewRead?.failed
+                    ? "failed"
+                    : ctx.viewRead?.pending
+                      ? "pending"
+                      : "read"
+              }
+            >
               {ctx.paused
                 ? "Paused"
                 : ctx.viewRead?.failed
@@ -341,11 +369,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </Sheet>
           </div>
         </header>
-        {notice ? (
-          <p role="status" className="px-4 py-2 text-xs">
-            {notice}
-          </p>
-        ) : null}
+        <p role="status" className="dc-notice" data-visible={Boolean(notice)}>
+          {notice}
+        </p>
         <main id="dashboard-main" className="dc-main" tabIndex={-1}>
           {children}
         </main>

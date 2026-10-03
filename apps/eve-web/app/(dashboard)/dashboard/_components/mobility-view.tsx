@@ -12,6 +12,7 @@ import { DashboardHttpError, useDashboard } from "@/src/dashboard-client";
 import { primaryMeasurements } from "@/src/dashboard-presentation";
 import { EntityDetail } from "./entity-detail";
 import { EntityHistory } from "./entity-history";
+import { sourceNames } from "./event-copy";
 import { FreshnessBreakdown } from "./insights";
 import { Card, Segmented, Sheet, Table } from "./primitives";
 import { measurementDisplay } from "./product-copy";
@@ -45,6 +46,14 @@ const freshnessLabels: Record<string, string> = {
   unavailable: "Unavailable",
   static: "Published reference",
   unknown: "Age unknown",
+};
+const freshnessTones: Record<string, string> = {
+  recent: "neutral",
+  recently_checked: "neutral",
+  stale: "warning",
+  unavailable: "muted",
+  static: "muted",
+  unknown: "muted",
 };
 export function Mobility({
   category: initialCategory,
@@ -488,14 +497,18 @@ export function Mobility({
             <Table>
               <thead>
                 <tr>
-                  <th>Entity / evidence</th>
+                  <th scope="col">Entity / evidence</th>
                   {category === "bikes" ? (
                     <>
-                      <th>Bikes</th>
-                      <th>Docks</th>
+                      <th scope="col" className="numeric">
+                        Bikes
+                      </th>
+                      <th scope="col" className="numeric">
+                        Docks
+                      </th>
                     </>
                   ) : (
-                    <th>Measurements</th>
+                    <th scope="col">Measurements</th>
                   )}
                 </tr>
               </thead>
@@ -503,6 +516,7 @@ export function Mobility({
                 {entities.map((e) => (
                   <tr
                     key={`${e.evidence.productId}:${e.id}`}
+                    data-freshness={e.evidence.freshness}
                     aria-selected={
                       selected?.id === e.id &&
                       selected.evidence.productId === e.evidence.productId
@@ -519,9 +533,17 @@ export function Mobility({
                       >
                         {e.name}
                       </button>
-                      <p className="dc-meta">
-                        {freshnessLabels[e.evidence.freshness]} ·{" "}
-                        {e.evidence.sourceId}
+                      <p className="dc-meta dc-entity-evidence">
+                        <span
+                          className="dc-status"
+                          data-tone={freshnessTones[e.evidence.freshness]}
+                        >
+                          {freshnessLabels[e.evidence.freshness]}
+                        </span>
+                        <span>
+                          {sourceNames[e.evidence.sourceId] ??
+                            e.evidence.sourceId}
+                        </span>
                       </p>
                       {e.latitude === null ? (
                         <p className="dc-meta">No published coordinates</p>

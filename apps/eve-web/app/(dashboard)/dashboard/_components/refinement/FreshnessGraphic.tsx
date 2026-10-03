@@ -1,6 +1,48 @@
 import { type PartitionInput, partitionCounts } from "./core";
 
 const labels = { recent: "Recent", stale: "Stale", unavailable: "Unavailable" };
+/** Table-row variant: bar plus total; exact counts live in adjacent columns. */
+export function FreshnessBar({
+  unit,
+  counts,
+}: {
+  unit: string;
+  counts: PartitionInput;
+}) {
+  const partition = partitionCounts(counts);
+  const exact = `Recent ${counts.recent ?? "unknown"} · Stale ${counts.stale ?? "unknown"} · Unavailable ${counts.unavailable ?? "unknown"}`;
+  return (
+    <div className="rf-freshness-row">
+      {partition.status === "available" ? (
+        <div
+          className="rf-freshness-track"
+          role="img"
+          aria-label={`${partition.total} ${unit}: ${exact}`}
+        >
+          {partition.parts
+            .filter((p) => p.count > 0)
+            .map((p) => (
+              <span
+                key={p.id}
+                data-state={p.id}
+                style={{ width: `${p.fraction * 100}%` }}
+              />
+            ))}
+        </div>
+      ) : (
+        <div className="rf-freshness-track" data-empty="true" />
+      )}
+      <span className="rf-freshness-caption">
+        {partition.status === "available"
+          ? `${partition.total.toLocaleString("en-GB")} ${partition.total === 1 ? unit.replace(/s$/, "") : unit}`
+          : counts.total === null
+            ? "Count unavailable"
+            : partition.reason.replace(/\.$/, "")}
+      </span>
+      <span className="rf-freshness-inline">{exact}</span>
+    </div>
+  );
+}
 /** Supplied counts must form a disjoint, exhaustive partition. Check the DTO semantics first. */
 export function FreshnessGraphic({
   label,

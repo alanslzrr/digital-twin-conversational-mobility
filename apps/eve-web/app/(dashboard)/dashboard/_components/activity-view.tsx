@@ -2,7 +2,6 @@
 import * as schemas from "@mobility/contracts";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -12,11 +11,13 @@ import {
   eventComponents,
   eventOutcomes,
   eventTypes,
+  outcomeTones,
   severityCopy,
+  sourceNames,
 } from "./event-copy";
 import { ActivityChart, number } from "./insights";
 import { Segmented, Sheet } from "./primitives";
-import { Instant, PageTitle, State, Technical } from "./shared";
+import { Instant, PageTitle, publicLabel, State, Technical } from "./shared";
 
 function obj(v: unknown): Record<string, unknown> {
   return v && typeof v === "object" && !Array.isArray(v)
@@ -289,13 +290,24 @@ export function Events({ id }: { id?: string }) {
           data={schemas.dashboardActivityChart.parse(value.activity)}
         />
       ) : null}
-      <div className="dc-event-region rounded-lg border bg-card">
+      <div className="dc-event-region">
         <table className="dc-table">
+          <caption className="sr-only">
+            Recorded events on this page; capture is best-effort.
+          </caption>
           <thead>
             <tr>
               {["Instant", "Component", "Source / job", "Type", "Outcome"].map(
                 (h) => (
-                  <th key={h} className="border-b p-3">
+                  <th
+                    key={h}
+                    scope="col"
+                    className={
+                      h === "Component" || h === "Source / job"
+                        ? "dc-secondary-column"
+                        : undefined
+                    }
+                  >
                     {h}
                   </th>
                 ),
@@ -304,8 +316,8 @@ export function Events({ id }: { id?: string }) {
           </thead>
           <tbody>
             {events.map((e) => (
-              <tr key={String(e.id)} className="border-b last:border-0">
-                <td className="p-2 text-xs">
+              <tr key={String(e.id)}>
+                <td>
                   <Link
                     href={`/dashboard/activity/${e.id}?${qs}`}
                     onClick={(event) => {
@@ -321,26 +333,28 @@ export function Events({ id }: { id?: string }) {
                         setSelectedEvent(e);
                       }
                     }}
-                    className="inline-flex min-h-8 items-center"
+                    className="dc-event-time inline-flex min-h-8 items-center"
                   >
                     <Instant value={e.occurredAt} />
                   </Link>
                 </td>
-                <td className="p-2">
+                <td className="dc-secondary-column">
                   {eventComponents[String(e.component)] ?? "Recorded operation"}
                 </td>
-                <td className="p-2 text-xs">
-                  {String(e.source)} / {String(e.job)}
+                <td className="dc-secondary-column dc-meta">
+                  {sourceNames[String(e.source)] ?? String(e.source)} /{" "}
+                  {String(e.job)}
                 </td>
-                <td className="p-2">
-                  {eventTypes[String(e.type)] ?? "Recorded operation"}
-                </td>
-                <td className="p-2">
-                  <Badge variant="secondary">
+                <td>{eventTypes[String(e.type)] ?? "Recorded operation"}</td>
+                <td>
+                  <span
+                    className="dc-status"
+                    data-tone={outcomeTones[String(e.outcome)] ?? "muted"}
+                  >
                     {eventOutcomes[String(e.outcome)] ?? "No outcome"}
-                  </Badge>
+                  </span>
                   {e.errorCode ? (
-                    <p className="mt-1 text-xs">
+                    <p className="dc-meta">
                       Recorded issue. Open details for evidence.
                     </p>
                   ) : null}
@@ -377,7 +391,16 @@ export function Events({ id }: { id?: string }) {
                 "operationId",
               ].map((key) => (
                 <div key={key}>
-                  <dt>{key}</dt>
+                  <dt>
+                    {(
+                      {
+                        job: "Job",
+                        occurredAt: "Occurred",
+                        recordedAt: "Recorded",
+                        operationId: "Operation ID",
+                      } as Record<string, string>
+                    )[key] ?? publicLabel(key)}
+                  </dt>
                   <dd>
                     {key.endsWith("At") ? (
                       <Instant value={selectedEvent[key]} />

@@ -1,11 +1,12 @@
 "use client";
 import { dashboardToolName } from "@mobility/contracts";
+import { Info, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { number } from "./insights";
-import { Empty, Segmented, Sheet, Tabs } from "./primitives";
+import { Empty, Segmented, Sheet, Table, Tabs } from "./primitives";
 import { UsagePerTurnRows } from "./refinement/UsagePerTurnRows";
 import { Instant, PageTitle, State, Technical } from "./shared";
 import { toolCopy } from "./tool-form";
@@ -96,10 +97,30 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
   const picked = turns.find((r) => r.turnId === turn);
   return (
     <>
-      <PageTitle
-        title="My conversations"
-        description="Inspect your sessions, captured tool calls and reported usage."
-      />
+      <div className="dc-overview-heading">
+        <PageTitle
+          title="My conversations"
+          description="Inspect your sessions, captured tool calls and reported usage."
+        />
+        <Sheet
+          open={retentionOpen}
+          onOpenChange={setRetentionOpen}
+          title="Capture and retention"
+          trigger={
+            <Button variant="ghost" size="sm">
+              <Info aria-hidden="true" />
+              Capture and retention
+            </Button>
+          }
+        >
+          <p className="dc-meta">
+            Up to seven days. Per session: 16 MiB and 10,000 events; per
+            evaluator: 256 MiB. Model input 512 KB, output 64 KB; arguments 8 KB
+            and results 32 KB. Sanitized capture can be partial, missing or
+            expired. No cost estimates or historical reconstruction.
+          </p>
+        </Sheet>
+      </div>
       <div className="dc-conversation-workspace">
         {sessionId ? (
           <aside className="dc-session-index dc-card">
@@ -122,13 +143,15 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
         <div className="dc-stack">
           {sessionId ? (
             <>
-              <div className="flex flex-wrap gap-5 text-sm">
-                <Link href="/dashboard/conversations" className="underline">
-                  All my conversations
-                </Link>
-                <Link href={`/s/${sessionId}`} className="underline">
-                  Open chat
-                </Link>
+              <div className="dc-session-actions">
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/dashboard/conversations">
+                    All my conversations
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/s/${sessionId}`}>Open chat</Link>
+                </Button>
               </div>
               <State
                 data={summary.data}
@@ -171,6 +194,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                 />
               </div>
               <Tabs.Root
+                className="dc-tabs"
                 value={tab}
                 onValueChange={(value) => {
                   setTab(value);
@@ -179,26 +203,19 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                   setCall("");
                 }}
               >
-                <Tabs.List
-                  aria-label="Conversation detail"
-                  className="flex flex-wrap gap-2"
-                >
+                <Tabs.List aria-label="Conversation detail">
                   {["Timeline", "Tools", "Usage", "Model", "Content"].map(
                     (t) => (
-                      <Tabs.Trigger
-                        key={t}
-                        value={t}
-                        className="min-h-11 rounded-md px-4 text-sm data-[state=active]:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
-                      >
+                      <Tabs.Trigger key={t} value={t}>
                         {t}
                       </Tabs.Trigger>
                     ),
                   )}
                 </Tabs.List>
                 <Tabs.Content value="Usage" className="dc-stack mt-4">
-                  {" "}
                   <section
-                    className="grid divide-y rounded-lg border bg-card sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4"
+                    className="dc-stat-grid"
+                    data-columns="4"
                     aria-label="Conversation summary"
                   >
                     {[
@@ -229,19 +246,10 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                           : "Select a turn to inspect duration.",
                       ],
                     ].map(([label, value, help]) => (
-                      <article
-                        key={label}
-                        className="p-5 sm:border-r last:border-r-0"
-                      >
-                        <h2 className="text-sm text-muted-foreground">
-                          {label}
-                        </h2>
-                        <p className="my-3 text-2xl font-semibold tabular-nums">
-                          {value}
-                        </p>
-                        <p className="text-xs leading-5 text-muted-foreground">
-                          {help}
-                        </p>
+                      <article key={label} className="dc-stat">
+                        <h2>{label}</h2>
+                        <p className="dc-stat-value">{value}</p>
+                        <p>{help}</p>
                       </article>
                     ))}
                   </section>
@@ -249,10 +257,10 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     Input: {number(usage.inputTokens)} · Output:{" "}
                     {number(usage.outputTokens)} ·{" "}
                     {Number(counts.missing ?? 0) > 0
-                      ? `${number(counts.missing)} attempts without complete reported usage.`
+                      ? `${number(counts.missing)} ${Number(counts.missing) === 1 ? "attempt" : "attempts"} without complete reported usage.`
                       : "Usage depends on fields actually reported."}
                   </p>
-                  <dl className="flex flex-wrap gap-5 text-xs text-muted-foreground">
+                  <dl className="dc-usage-subsets">
                     {[
                       ["Input", "input", usage.inputTokens],
                       ["Output", "output", usage.outputTokens],
@@ -274,7 +282,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                           {number(
                             obj(obj(usage.coverage)[String(field)]).reported,
                           )}{" "}
-                          de{" "}
+                          of{" "}
                           {number(
                             obj(obj(usage.coverage)[String(field)]).observed,
                           )}{" "}
@@ -292,11 +300,9 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     {number(counts.toolPending)} pending in capture. Missing
                     events do not prove non-execution.
                   </p>
-                  <section className="rounded-lg border bg-card p-5">
-                    <h2 className="text-base font-semibold">
-                      Reported usage by turn
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                  <section className="dc-card">
+                    <h2>Reported usage by turn</h2>
+                    <p className="dc-meta mt-1">
                       Up to 50 turns per page. Session totals cover all retained
                       attempts. Unknown is not zero.
                     </p>
@@ -324,22 +330,27 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                         },
                       }))}
                     />
-                    <div className="mt-4 overflow-x-auto">
-                      <table className="w-full text-left text-sm">
+                    <div className="mt-4">
+                      <Table>
                         <thead>
                           <tr>
-                            <th className="p-2">Turn</th>
-                            <th className="p-2">Input</th>
-                            <th className="p-2">Output</th>
-                            <th className="p-2">Duration</th>
-                            <th className="p-2">Coverage</th>
+                            <th scope="col">Turn</th>
+                            <th scope="col" className="numeric">
+                              Input
+                            </th>
+                            <th scope="col" className="numeric">
+                              Output
+                            </th>
+                            <th scope="col">Duration</th>
+                            <th scope="col">Coverage</th>
                           </tr>
                         </thead>
                         <tbody>
                           {turns.map((r, i) => (
-                            <tr key={String(r.turnId)} className="border-t">
-                              <td className="p-2">
+                            <tr key={String(r.turnId)}>
+                              <td>
                                 <Button
+                                  size="sm"
                                   variant={
                                     turn === r.turnId ? "secondary" : "ghost"
                                   }
@@ -355,20 +366,20 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                                   Turn {i + 1}
                                 </Button>
                               </td>
-                              <td className="p-2 tabular-nums">
+                              <td className="numeric">
                                 {number(r.inputTokens)}
                               </td>
-                              <td className="p-2 tabular-nums">
+                              <td className="numeric">
                                 {number(r.outputTokens)}
                               </td>
-                              <td className="p-2">
+                              <td>
                                 {r.state === "running"
                                   ? "Running"
                                   : r.durationMs != null
                                     ? `${number(r.durationMs)} ms`
                                     : "No measurement"}
                               </td>
-                              <td className="p-2">
+                              <td className="dc-meta">
                                 {number(obj(obj(r.coverage).total).reported)} of{" "}
                                 {number(r.attempts)} attempts with complete
                                 usage
@@ -376,10 +387,10 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                             </tr>
                           ))}
                         </tbody>
-                      </table>
+                      </Table>
                     </div>
                     {!turns.length ? (
-                      <p className="py-4 text-sm">
+                      <p className="dc-meta py-4">
                         No retained instrumented turns to plot.
                       </p>
                     ) : null}
@@ -421,7 +432,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     {entries.map((e) => (
                       <article
                         key={String(e.id)}
-                        className="rounded-lg border bg-card p-4"
+                        className="dc-card dc-event-card"
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
@@ -538,45 +549,40 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                   <Button asChild>
                     <Link href="/s">Open chat</Link>
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => setRetentionOpen(true)}
-                  >
-                    Capture and retention
-                  </Button>
                 </Empty>
               ) : null}
               {entries.length ? (
-                <div className="overflow-hidden dc-card">
+                <div className="dc-card dc-session-list">
                   {entries.map((e, i) => (
                     <article
                       key={String(e.sessionId)}
-                      className="flex flex-wrap items-center justify-between gap-4 border-b p-5 last:border-b-0"
+                      className="dc-session-row"
                     >
-                      <div>
-                        <h2 className="text-sm font-medium">
-                          Conversation {i + 1}
-                        </h2>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Created: <Instant value={e.createdAt} /> ·{" "}
-                          {e.captureStatus === "not_instrumented"
-                            ? "Not instrumented"
-                            : "Best-effort capture"}
-                        </p>
+                      <div className="dc-session-main">
+                        <span className="dc-session-icon" aria-hidden="true">
+                          <MessageSquare />
+                        </span>
+                        <div>
+                          <h2>Conversation {i + 1}</h2>
+                          <p className="dc-meta">
+                            Created <Instant value={e.createdAt} /> ·{" "}
+                            {e.captureStatus === "not_instrumented"
+                              ? "Not instrumented"
+                              : "Best-effort capture"}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex gap-4 text-sm">
-                        <Link
-                          className="inline-flex min-h-11 items-center underline"
-                          href={`/s/${e.sessionId}`}
-                        >
-                          Open chat
-                        </Link>
-                        <Link
-                          className="inline-flex min-h-11 items-center underline"
-                          href={`/dashboard/conversations/${e.sessionId}`}
-                        >
-                          Inspect conversation
-                        </Link>
+                      <div className="dc-session-actions">
+                        <Button asChild variant="ghost" size="sm">
+                          <Link href={`/s/${e.sessionId}`}>Open chat</Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={`/dashboard/conversations/${e.sessionId}`}
+                          >
+                            Inspect conversation
+                          </Link>
+                        </Button>
                       </div>
                     </article>
                   ))}
@@ -607,23 +613,6 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
           </Button>
         </div>
       ) : null}
-      <Sheet
-        open={retentionOpen}
-        onOpenChange={setRetentionOpen}
-        title="Capture and retention"
-        trigger={
-          <Button variant="ghost" className="self-start">
-            Capture and retention
-          </Button>
-        }
-      >
-        <p className="dc-meta">
-          Up to seven days. Per session: 16 MiB and 10,000 events; per
-          evaluator: 256 MiB. Model input 512 KB, output 64 KB; arguments 8 KB
-          and results 32 KB. Sanitized capture can be partial, missing or
-          expired. No cost estimates or historical reconstruction.
-        </p>
-      </Sheet>
     </>
   );
 }

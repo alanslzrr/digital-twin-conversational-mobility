@@ -205,7 +205,6 @@ export function ToolFields({
   };
   return (
     <FieldGroup>
-      <p className="text-sm text-muted-foreground">{toolCopy[name].question}</p>
       <Button
         variant="outline"
         type="button"

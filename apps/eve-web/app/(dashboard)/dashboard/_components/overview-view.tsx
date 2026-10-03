@@ -3,11 +3,16 @@ import type { DashboardOverview } from "@mobility/contracts";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
-import { eventOutcomes, eventTypes } from "./event-copy";
-import { MetricStrip } from "./insights";
+import {
+  eventOutcomes,
+  eventTypes,
+  outcomeTones,
+  sourceNames,
+} from "./event-copy";
+import { ActivityPreview, MetricStrip } from "./insights";
 import { Card, Segmented } from "./primitives";
 import { productLabel, productUnit } from "./product-copy";
-import { FreshnessGraphic } from "./refinement/FreshnessGraphic";
+import { FreshnessBar } from "./refinement/FreshnessGraphic";
 import { ProductUnits } from "./refinement/ProductUnits";
 import { Instant, PageTitle, State } from "./shared";
 export function Overview() {
@@ -55,7 +60,7 @@ export function Overview() {
           description="Stored mobility evidence at a glance."
         />{" "}
         {data && data.parkingCategories.length > 1 ? (
-          <div className="dc-toolbar">
+          <div className="dc-toolbar dc-inline-field">
             <label htmlFor="overview-parking-category">Parking category</label>
             <select
               id="overview-parking-category"
@@ -88,16 +93,18 @@ export function Overview() {
             readAt={data.readAt}
           />
           <div className="dc-overview-grid">
-            <Card>
+            <Card className="dc-evidence-panel">
               <div className="dc-panel-heading">
-                <h2>Product evidence</h2>
+                <div>
+                  <h2>Product evidence</h2>
+                  <p className="dc-meta">
+                    Readiness of observed products, not citywide coverage.
+                  </p>
+                </div>
                 <Link href="/dashboard/sources" className="dc-link">
                   Sources
                 </Link>
               </div>
-              <p className="dc-meta">
-                Readiness of observed products, not citywide coverage.
-              </p>
               <ProductUnits
                 products={data.products.map((p) => ({
                   ...p,
@@ -112,74 +119,144 @@ export function Overview() {
                     .observed ?? null
                 }
               />
-              {["periodic", "demand"].map((mode) => (
-                <div key={mode}>
-                  <h3 className="dc-group-title">
-                    {mode === "periodic"
-                      ? "Periodic evidence"
-                      : "On-demand evidence"}
-                  </h3>
-                  {data.products
-                    .filter((p) => p.mode === mode)
-                    .map((p) => (
-                      <div key={p.id} className="dc-readiness-row">
-                        <Link
-                          href={`/dashboard/sources/${encodeURIComponent(p.source)}`}
-                          className="hover:underline"
-                        >
-                          {productLabel(p.id)}
-                        </Link>
-                        <span className="dc-meta">
-                          {!p.enabled
-                            ? "Disabled"
-                            : p.usable
-                              ? "Usable evidence"
-                              : "No usable evidence"}
-                        </span>
-                        <FreshnessGraphic
-                          label="Record freshness"
-                          unit={productUnit(p.unit)}
-                          counts={p}
-                        />
-                      </div>
-                    ))}
-                </div>
-              ))}
+              <div className="dc-product-table-region">
+                <table className="dc-product-table">
+                  <caption className="sr-only">
+                    Stored record freshness per product. Units differ between
+                    products and are not summed.
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col">Evidence</th>
+                      <th scope="col">Record freshness</th>
+                      <th scope="col" className="numeric dc-count-column">
+                        Recent
+                      </th>
+                      <th scope="col" className="numeric dc-count-column">
+                        Stale
+                      </th>
+                      <th scope="col" className="numeric dc-count-column">
+                        Unavailable
+                      </th>
+                    </tr>
+                  </thead>
+                  {(["periodic", "demand"] as const).map((mode) => {
+                    const rows = data.products.filter((p) => p.mode === mode);
+                    return rows.length ? (
+                      <tbody key={mode}>
+                        <tr className="dc-group-row">
+                          <th scope="colgroup" colSpan={6}>
+                            {mode === "periodic"
+                              ? "Periodic evidence"
+                              : "On-demand evidence"}
+                          </th>
+                        </tr>
+                        {rows.map((p) => (
+                          <tr key={p.id}>
+                            <th scope="row">
+                              <Link
+                                href={`/dashboard/sources/${encodeURIComponent(p.source)}`}
+                              >
+                                {productLabel(p.id)}
+                              </Link>
+                            </th>
+                            <td>
+                              <span
+                                className="dc-status"
+                                data-tone={
+                                  !p.enabled
+                                    ? "muted"
+                                    : p.usable
+                                      ? "neutral"
+                                      : "warning"
+                                }
+                              >
+                                {!p.enabled
+                                  ? "Disabled"
+                                  : p.usable
+                                    ? "Usable"
+                                    : "No usable evidence"}
+                              </span>
+                            </td>
+                            <td>
+                              <FreshnessBar
+                                unit={productUnit(p.unit)}
+                                counts={p}
+                              />
+                            </td>
+                            {(["recent", "stale", "unavailable"] as const).map(
+                              (key) => (
+                                <td
+                                  key={key}
+                                  className="numeric dc-count-column"
+                                  data-zero={p[key] === 0}
+                                >
+                                  {p[key] === null ? (
+                                    <>
+                                      <span aria-hidden="true">—</span>
+                                      <span className="sr-only">Unknown</span>
+                                    </>
+                                  ) : (
+                                    p[key]?.toLocaleString("en-GB")
+                                  )}
+                                </td>
+                              ),
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    ) : null;
+                  })}
+                </table>
+              </div>
               <Link
                 href="/dashboard/mobility?section=reference&category=places"
-                className="dc-link mt-3"
+                className="dc-link dc-panel-footer"
               >
                 Browse reference catalogs
               </Link>
             </Card>
             <div className="dc-stack">
               <Card>
-                <h2>Needs attention</h2>
+                <div className="dc-panel-heading">
+                  <h2>Needs attention</h2>
+                  {data.attention.length ? (
+                    <span className="dc-count-badge">
+                      {data.attention.length}
+                    </span>
+                  ) : null}
+                </div>
                 {data.attention.length ? (
-                  <ul className="mt-3 divide-y">
-                    {data.attention.slice(0, 3).map((a) => (
-                      <li key={a.href + a.label} className="py-3">
-                        <p>
-                          {productLabel(
-                            data.products.find((p) =>
-                              a.label.startsWith(p.label),
-                            )?.id ?? "",
-                          )}{" "}
-                          ·{" "}
-                          {data.products.find((p) =>
-                            a.label.startsWith(p.label),
-                          )?.total === null
-                            ? "No stored evidence"
-                            : "Check retained evidence"}
-                        </p>
-                        <Link href={a.href} className="dc-link">
-                          Inspect evidence
-                        </Link>
-                      </li>
-                    ))}
+                  <ul className="dc-row-list">
+                    {data.attention.slice(0, 3).map((a) => {
+                      const product = data.products.find((p) =>
+                        a.label.startsWith(p.label),
+                      );
+                      return (
+                        <li key={a.href + a.label}>
+                          <Link href={a.href} className="dc-row-link">
+                            <span
+                              className="dc-status"
+                              data-tone="warning"
+                              aria-hidden="true"
+                            />
+                            <span className="dc-row-text">
+                              <strong>{productLabel(product?.id ?? "")}</strong>
+                              <span className="dc-meta">
+                                {product?.total === null
+                                  ? "No stored evidence"
+                                  : "Check retained evidence"}
+                              </span>
+                            </span>
+                            <span className="dc-row-action">Inspect</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : (
-                  <p className="dc-meta mt-3">No attention items returned.</p>
+                  <p className="dc-meta">No attention items returned.</p>
                 )}
               </Card>
               <Card>
@@ -202,27 +279,36 @@ export function Overview() {
                     ["7d", "7 days"],
                   ]}
                 />
+                <ActivityPreview data={data.activity} />
                 {data.recentEvents.length ? (
-                  <ul className="divide-y mt-3">
+                  <ul className="dc-row-list">
                     {data.recentEvents.slice(0, 3).map((e) => (
-                      <li key={e.id} className="py-3">
+                      <li key={e.id}>
                         <Link
                           href={`/dashboard/activity/${e.id}`}
-                          className="hover:underline"
+                          className="dc-row-link"
                         >
-                          {eventTypes[e.type]} · {e.source}
+                          <span
+                            className="dc-status"
+                            data-tone={outcomeTones[e.outcome] ?? "neutral"}
+                            aria-hidden="true"
+                          />
+                          <span className="dc-row-text">
+                            <strong>
+                              {eventTypes[e.type]} ·{" "}
+                              {sourceNames[e.source] ?? e.source}
+                            </strong>
+                            <span className="dc-meta">
+                              {eventOutcomes[e.outcome]} ·{" "}
+                              <Instant value={e.occurredAt} />
+                            </span>
+                          </span>
                         </Link>
-                        <p className="dc-meta">
-                          {eventOutcomes[e.outcome]} ·{" "}
-                          <Instant value={e.occurredAt} />
-                        </p>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="dc-meta mt-3">
-                    No events captured in this period.
-                  </p>
+                  <p className="dc-meta">No events captured in this period.</p>
                 )}
               </Card>
             </div>

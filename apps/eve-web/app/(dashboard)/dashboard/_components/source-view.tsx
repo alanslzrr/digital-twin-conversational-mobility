@@ -6,8 +6,9 @@ import type { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
+import { sourceNames } from "./event-copy";
 import { number } from "./insights";
-import { Card, Segmented } from "./primitives";
+import { Card, Segmented, Table } from "./primitives";
 import { productLabel } from "./product-copy";
 import type { DurationGroup } from "./refinement/core";
 import { OperationDurationRows } from "./refinement/OperationDurationRows";
@@ -18,18 +19,7 @@ const obj = (v: unknown): Record<string, unknown> =>
     ? (v as Record<string, unknown>)
     : {};
 const list = (v: unknown) => (Array.isArray(v) ? v.map(obj) : []);
-const names: Record<string, string> = {
-  bicimad: "BiciMAD",
-  aemet: "AEMET",
-  emt: "EMT buses",
-  renfe: "Renfe",
-  crtm: "CRTM transport",
-  dgt: "Roads DGT",
-  "madrid-air": "Madrid air quality",
-  "madrid-traffic": "Madrid traffic sensors",
-  "madrid-parking": "Madrid parking",
-  osm: "OpenStreetMap geography",
-};
+const names = sourceNames;
 const operations: Record<string, string> = {
   publication: "Publication",
   refresh: "On-demand refresh",
@@ -132,31 +122,28 @@ function SourcesContent({ id }: { id?: string }) {
               options={[["", "All"], ...Object.entries(operations)]}
             />
           </div>
-          <section className="grid divide-y rounded-lg border bg-card sm:grid-cols-2 sm:divide-y-0">
-            <article className="p-5 sm:border-r">
-              <h2 className="text-sm text-muted-foreground">
-                Products with recorded current issues
-              </h2>
-              <p className="my-2 text-3xl font-semibold tabular-nums">
+          <section className="dc-stat-grid" aria-label="Source summary">
+            <article className="dc-stat">
+              <h2>Products with recorded current issues</h2>
+              <p className="dc-stat-value">
                 {Array.isArray(metrics.issueProducts)
                   ? number(metrics.issueProducts.length)
                   : "Unknown"}
+                <span className="dc-value-unit">
+                  {" "}
+                  of {number(metrics.monitoredProducts)} monitored
+                </span>
               </p>
-              <p className="text-xs leading-5 text-muted-foreground">
-                Monitored products: {number(metrics.monitoredProducts)}.
+              <p>
                 Recorded errors or missing worker signal during an active
                 window. Normal absence of demand or an inactive window is not a
                 failure.
               </p>
             </article>
-            <article className="p-5">
-              <h2 className="text-sm text-muted-foreground">
-                Recorded errors in period
-              </h2>
-              <p className="my-2 text-3xl font-semibold tabular-nums">
-                {number(metrics.errors)}
-              </p>
-              <p className="text-xs leading-5 text-muted-foreground">
+            <article className="dc-stat">
+              <h2>Recorded errors in period</h2>
+              <p className="dc-stat-value">{number(metrics.errors)}</p>
+              <p>
                 Unique retained error events, not an availability rate.{" "}
                 <Link
                   href={`/dashboard/activity?${new URLSearchParams({ window, ...(id ? { source: id } : {}), severity: "error", ...(operation ? { type: operation } : {}) })}`}
@@ -168,32 +155,62 @@ function SourcesContent({ id }: { id?: string }) {
             </article>
           </section>
           {!id ? (
-            <Card>
-              <h2>Source products</h2>
-              <p className="dc-meta mt-2">
-                Registered sources and stored product evidence. Enabled does not
-                mean recent.
-              </p>
+            <Card className="dc-table-card">
+              <div className="dc-panel-heading dc-panel-heading-inset">
+                <div>
+                  <h2>Source products</h2>
+                  <p className="dc-meta">
+                    Registered sources and their periodic and reference product
+                    counts. Enabled does not mean recent.
+                  </p>
+                </div>
+              </div>
               {sources.length ? (
-                sources.map((source) => (
-                  <div className="dc-readiness-row" key={String(source.id)}>
-                    <Link
-                      className="hover:underline"
-                      href={`/dashboard/sources/${source.id}`}
-                    >
-                      {names[String(source.id)] ?? String(source.id)}
-                    </Link>
-                    <span>{source.enabled ? "Enabled" : "Disabled"}</span>
-                    <span className="dc-meta">
-                      {list(source.streams).length} periodic ·{" "}
-                      {list(source.staticFeed).length +
-                        list(source.staticCatalogs).length}{" "}
-                      reference products
-                    </span>
-                  </div>
-                ))
+                <Table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Source</th>
+                      <th scope="col">Acquisition</th>
+                      <th scope="col" className="numeric">
+                        Periodic
+                      </th>
+                      <th scope="col" className="numeric">
+                        Reference
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sources.map((source) => (
+                      <tr key={String(source.id)}>
+                        <td>
+                          <Link
+                            className="font-medium hover:underline"
+                            href={`/dashboard/sources/${source.id}`}
+                          >
+                            {names[String(source.id)] ?? String(source.id)}
+                          </Link>
+                        </td>
+                        <td>
+                          <span
+                            className="dc-status"
+                            data-tone={source.enabled ? "neutral" : "muted"}
+                          >
+                            {source.enabled ? "Enabled" : "Disabled"}
+                          </span>
+                        </td>
+                        <td className="numeric">
+                          {list(source.streams).length}
+                        </td>
+                        <td className="numeric">
+                          {list(source.staticFeed).length +
+                            list(source.staticCatalogs).length}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
               ) : (
-                <p className="dc-meta mt-3">
+                <p className="dc-meta dc-panel-heading-inset">
                   Successful read: no registered sources returned.
                 </p>
               )}
@@ -203,23 +220,34 @@ function SourcesContent({ id }: { id?: string }) {
               <Link href="/dashboard/sources" className="text-sm underline">
                 All sources
               </Link>
-              <section className="overflow-x-auto rounded-lg border bg-card">
-                <table className="w-full text-left text-sm">
+              <Card className="dc-table-card">
+                <Table>
                   <thead>
                     <tr>
-                      <th className="p-3">Periodic product</th>
-                      <th className="p-3">Last observation</th>
-                      <th className="p-3">Last attempt</th>
-                      <th className="p-3">Last completed attempt</th>
-                      <th className="p-3">Eligible from</th>
+                      <th scope="col">Periodic product</th>
+                      <th scope="col">Last observation</th>
+                      <th scope="col">Last attempt</th>
+                      <th scope="col">Last completed attempt</th>
+                      <th scope="col">Eligible from</th>
                     </tr>
                   </thead>
                   <tbody>
                     {streams.map((s) => (
-                      <tr key={productLabel(String(s.id))} className="border-t">
-                        <td className="p-3">
-                          {productLabel(String(s.id))}
-                          <p className="mt-1 text-xs text-muted-foreground">
+                      <tr key={productLabel(String(s.id))}>
+                        <td>
+                          <span
+                            className="dc-status font-medium"
+                            data-tone={
+                              s.errorCode
+                                ? "danger"
+                                : s.state === "running"
+                                  ? "neutral"
+                                  : "muted"
+                            }
+                          >
+                            {productLabel(String(s.id))}
+                          </span>
+                          <p className="dc-meta">
                             {s.errorCode
                               ? "Last attempt failed; previous evidence retained."
                               : s.state === "running"
@@ -235,20 +263,20 @@ function SourcesContent({ id }: { id?: string }) {
                             "nextDueAt",
                           ] as const
                         ).map((field) => (
-                          <td key={field} className="p-3 text-xs">
+                          <td key={field} className="dc-meta">
                             <Instant value={s[field]} />
                           </td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </Table>
                 {!streams.length ? (
-                  <p className="p-4 text-sm">
+                  <p className="dc-meta dc-panel-heading-inset">
                     No registered periodic acquisition for this source.
                   </p>
                 ) : null}
-              </section>
+              </Card>
               <p className="text-sm leading-6 text-muted-foreground">
                 Eligibility does not promise a new observation time. Last
                 completed attempt is not last success. No ingestion restart
@@ -383,34 +411,49 @@ function SourcesContent({ id }: { id?: string }) {
         </>
       ) : null}
       <Card>
-        <h2 id="worker-signals" className="text-sm font-medium">
-          Worker signals
-        </h2>
+        <div className="dc-panel-heading">
+          <div>
+            <h2 id="worker-signals">Worker signals</h2>
+            <p className="dc-meta">
+              Not provider health or freshness evidence.
+            </p>
+          </div>
+        </div>
         <State
           data={status.data}
           loading={status.isLoading}
           error={status.error}
         />
-        <p className="mt-1 text-xs text-muted-foreground">
-          Not provider health or freshness evidence.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-5 text-sm">
+        <ul className="dc-worker-list">
           {list(obj(status.data).workers).map((w) => (
-            <p key={String(w.id)}>
-              {`Worker ${Number(w.id) + 1}`}:{" "}
-              {(
-                {
-                  running: "Active signal",
-                  disabled: "Disabled",
-                  not_seen: "No recorded signal",
-                  stopped_or_unreachable: "No recent signal",
-                  inactive_window: "Inactive window",
-                } as Record<string, string>
-              )[String(w.state)] ?? "State not confirmed"}{" "}
-              · <Instant value={w.lastSeenAt} />
-            </p>
+            <li key={String(w.id)}>
+              <span className="dc-worker-name">{`Worker ${Number(w.id) + 1}`}</span>
+              <span
+                className="dc-status"
+                data-tone={
+                  w.state === "running"
+                    ? "neutral"
+                    : w.state === "stopped_or_unreachable"
+                      ? "warning"
+                      : "muted"
+                }
+              >
+                {(
+                  {
+                    running: "Active signal",
+                    disabled: "Disabled",
+                    not_seen: "No recorded signal",
+                    stopped_or_unreachable: "No recent signal",
+                    inactive_window: "Inactive window",
+                  } as Record<string, string>
+                )[String(w.state)] ?? "State not confirmed"}
+              </span>
+              <span className="dc-meta">
+                Last signal <Instant value={w.lastSeenAt} />
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </Card>
     </>
   );

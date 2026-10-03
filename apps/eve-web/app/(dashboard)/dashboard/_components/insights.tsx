@@ -77,6 +77,21 @@ function MetricCard({
     M3: "Active published notices",
     M4: "Product readiness",
   };
+  const { included, observed } = m.denominator;
+  const ratio =
+    m.id !== "M3" &&
+    included !== null &&
+    observed !== null &&
+    observed > 0 &&
+    included <= observed
+      ? included / observed
+      : null;
+  const scope =
+    m.id === "M1" || m.id === "M2"
+      ? `${number(included)} of ${number(observed)} stored ${m.id === "M1" ? "stations" : "parking facilities"} included`
+      : m.id === "M4"
+        ? "Enabled products with usable evidence"
+        : "Non-exhaustive published coverage";
   return (
     <Card className="dc-metric">
       <div className="dc-metric-heading">
@@ -86,6 +101,7 @@ function MetricCard({
         <Button
           size="icon"
           variant="ghost"
+          className="dc-metric-info"
           aria-label={`${labels[m.id] ?? m.label} definition`}
           onClick={() => setOpen(true)}
         >
@@ -95,23 +111,23 @@ function MetricCard({
       <p className="dc-value">
         <AnimatedValue value={m.value} format={number} />
         <span className="sr-only">{m.value === null ? "Unavailable" : ""}</span>
-        {m.id === "M4" && m.value === m.denominator.included ? (
-          <span className="text-2xl"> / {number(m.denominator.observed)}</span>
+        {m.id === "M4" && m.value === included ? (
+          <span className="dc-value-denominator">/{number(observed)}</span>
         ) : null}
-        <span className="ml-2 text-sm font-normal tracking-normal">
-          {{ M1: "bikes", M2: "spaces", M3: "notices", M4: "dynamic products" }[
-            m.id
-          ] ?? m.unit}
+        <span className="dc-value-unit">
+          {{ M1: "bikes", M2: "spaces", M3: "notices", M4: "products" }[m.id] ??
+            m.unit}
         </span>
       </p>
-      <p className="dc-meta">
-        {m.id === "M1" || m.id === "M2"
-          ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} stored ${m.id === "M1" ? "stations" : "parking facilities"}`
-          : m.id === "M4"
-            ? "Enabled products with usable evidence"
-            : "Non-exhaustive published coverage"}
-      </p>
-      <p className="dc-meta">
+      <div className="dc-metric-scope">
+        {ratio !== null ? (
+          <span className="dc-meter" aria-hidden="true">
+            <span style={{ width: `${ratio * 100}%` }} />
+          </span>
+        ) : null}
+        <p>{scope}</p>
+      </div>
+      <p className="dc-metric-foot" data-state={comparison.status}>
         {comparison.status === "coverage-changed" ? (
           "Coverage changed"
         ) : comparison.status === "reading-change" ? (
@@ -206,10 +222,10 @@ export function FreshnessBreakdown({
   unit: string;
 }) {
   const states = [
-    ["Recent readings", recent, "bg-primary"],
-    ["Stale evidence", stale, "bg-muted-foreground"],
-    ["No usable evidence", unavailable, "bg-destructive"],
-    ["Reference", reference, "bg-accent-foreground"],
+    ["Recent readings", recent, "recent"],
+    ["Stale evidence", stale, "stale"],
+    ["No usable evidence", unavailable, "unavailable"],
+    ["Reference", reference, "static"],
   ] as const;
   return (
     <section
@@ -229,13 +245,15 @@ export function FreshnessBreakdown({
       </p>
       {total > 0 ? (
         <div className="dc-selection-track" aria-hidden="true">
-          {states.map(([label, n, color]) => (
-            <span
-              key={label}
-              className={color}
-              style={{ width: `${(n / total) * 100}%` }}
-            />
-          ))}
+          {states
+            .filter(([, n]) => n > 0)
+            .map(([label, n, state]) => (
+              <span
+                key={label}
+                data-state={state}
+                style={{ width: `${(n / total) * 100}%` }}
+              />
+            ))}
         </div>
       ) : null}
       <ul className="dc-selection-counts">
@@ -247,6 +265,62 @@ export function FreshnessBreakdown({
         ))}
       </ul>
     </section>
+  );
+}
+/** Summary of the overview's existing bins; the interactive explorer lives on Activity. */
+export function ActivityPreview({ data }: { data: DashboardActivityChart }) {
+  const known = (key: "publications" | "errors") =>
+    data.bins.flatMap((b) => (b[key] === null ? [] : [b[key] as number]));
+  const maxPublications = Math.max(1, ...known("publications"));
+  const unknownBins = data.bins.filter(
+    (b) => b.publications === null && b.errors === null,
+  ).length;
+  return (
+    <figure className="dc-activity-preview">
+      <div className="dc-activity-totals">
+        <p>
+          <strong>{number(data.publications)}</strong> publications
+        </p>
+        <p data-tone={data.errors ? "danger" : undefined}>
+          <strong>{number(data.errors)}</strong> errors
+        </p>
+      </div>
+      {data.bins.length ? (
+        <div
+          className="dc-activity-bars"
+          style={{
+            gridTemplateColumns: `repeat(${data.bins.length}, minmax(0, 1fr))`,
+          }}
+          aria-hidden="true"
+        >
+          {data.bins.map((b) => (
+            <span
+              key={b.from}
+              className="dc-activity-bin"
+              data-unknown={b.publications === null}
+            >
+              {b.publications !== null && b.publications > 0 ? (
+                <span
+                  className="dc-activity-bar"
+                  style={{
+                    height: `${Math.max(6, (b.publications / maxPublications) * 100)}%`,
+                  }}
+                />
+              ) : null}
+              <span
+                className="dc-activity-error"
+                data-error={b.errors !== null && b.errors > 0}
+              />
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <figcaption className="dc-meta">
+        {data.bins.length
+          ? `${unknownBins ? `${unknownBins} of ${data.bins.length} intervals not captured · ` : ""}Bars: publications per interval · red ticks: intervals with errors`
+          : "No intervals returned."}
+      </figcaption>
+    </figure>
   );
 }
 export function ActivityChart({ data }: { data: DashboardActivityChart }) {

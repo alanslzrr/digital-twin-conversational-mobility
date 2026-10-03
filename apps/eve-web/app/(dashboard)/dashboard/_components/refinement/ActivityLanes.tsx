@@ -48,6 +48,9 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
       refs.current.get(`${focusedLane.current}:${next.from}`)?.focus();
   }, [data.bins, selected]);
   const active = data.bins.find((b) => b.from === selected) ?? data.bins.at(-1);
+  const unknown = data.bins.filter(
+    (b) => b.publications === null && b.errors === null,
+  ).length;
   useEffect(() => {
     if (!active) return;
     const button = refs.current.get(`publications:${active.from}`);
@@ -84,12 +87,22 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
     <section className="rf-activity" aria-labelledby={id}>
       <div className="rf-panel-heading">
         <h2 id={id}>Recorded activity</h2>
-        <span className="rf-meta">Europe/Madrid</span>
+        <span className="rf-meta">Europe/Madrid · best-effort capture</span>
       </div>
-      <p className="rf-coverage">
-        {format(data.publications)} publications · {format(data.errors)} errors
-        · best-effort capture
-      </p>
+      <div className="rf-activity-summary">
+        <p>
+          <strong>{format(data.publications)}</strong>publications
+        </p>
+        <p data-tone={data.errors ? "danger" : undefined}>
+          <strong>{format(data.errors)}</strong>errors
+        </p>
+        {unknown > 0 ? (
+          <p>
+            <strong>{unknown}</strong>of {data.bins.length} intervals not
+            captured
+          </p>
+        ) : null}
+      </div>
       <Tabs defaultValue="chart" className="rf-tabs">
         <TabsList aria-label="Activity representation">
           <TabsTrigger value="chart">Chart</TabsTrigger>
@@ -110,13 +123,13 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
                   );
                   const max = Math.max(1, ...known);
                   return (
-                    <div className="rf-lane" key={series}>
+                    <div className="rf-lane" key={series} data-series={series}>
                       <div className="rf-lane-heading">
                         <h3>
                           {series === "errors" ? "Errors" : "Publications"}
                         </h3>
                         <span className="rf-meta">
-                          Count · own scale · 0–{format(max)}
+                          Count per interval · own scale 0–{format(max)}
                         </span>
                       </div>
                       <section
@@ -158,7 +171,7 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
                               onClick={() => setSelected(b.from)}
                               aria-label={`${time(b.from)} to ${time(b.to)}; ${series}: ${format(b[series])}`}
                             >
-                              {b[series] !== null && (
+                              {(b[series] ?? 0) > 0 && (
                                 <span
                                   className="rf-bin-bar"
                                   style={{
@@ -181,15 +194,24 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
               <div className="rf-readout" aria-live="polite" aria-atomic="true">
                 {active && (
                   <>
-                    {time(active.from)}–{time(active.to)} · Publications:{" "}
-                    {format(active.publications)} · Errors:{" "}
-                    {format(active.errors)}
+                    <span>
+                      {time(active.from)} – {time(active.to)}
+                    </span>
+                    <span>
+                      Publications:{" "}
+                      <strong>{format(active.publications)}</strong>
+                    </span>
+                    <span>
+                      Errors: <strong>{format(active.errors)}</strong>
+                    </span>
                   </>
                 )}
               </div>
-              <p className="rf-meta">
-                Striped intervals are unavailable, not zero. Heights use
-                separate count scales; compare timing, not height between lanes.
+              <p className="rf-chart-legend">
+                <span>
+                  Dotted baseline: interval not captured (unavailable, not zero)
+                </span>
+                Lanes use separate count scales; compare timing, not height.
               </p>
             </>
           )}
