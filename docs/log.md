@@ -128,3 +128,10 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Selector claro/oscuro/sistema (`@ncdai/theme-switcher`, `next-themes` 0.4.6) limitado al panel mediante `data-dashboard-theme`, con transición circle-blur solo en rutas del panel. El chat EVE oficial no cambia.
 - Eliminados los acentos laterales de selección y alertas; cabecera sin borde con lectura, pausa, refresco, tiempos y tema plegables, y estados anómalos siempre visibles en la píldora.
 - `pnpm check` correcto; capturas oscuro/claro forzado, detalle de conversación y móvil 390 px. [Acta y límites](acceptance/2026-10-03-core-dashboard-theme-header.md); sin merge ni despliegue.
+
+
+## [2026-10-03] fix | Tercera auditoría del panel
+
+- Filas de Mobility con hora observada/emitida o "No observation time"; marcadores del mapa recalculados al cambiar de tema y leyenda con muestras; atribución legible en oscuro; textos de inspección unificados y etiqueta duplicada de Activity retirada.
+- Títulos de página con `text-effect` de motion-primitives, estado final fijo con movimiento reducido y sin dependencias nuevas. Guardia QA: solo la consulta de versión de `next dev` se responde localmente en modo `--dev`.
+- `pnpm check` correcto (508 pruebas, 99 omitidas) y smoke aislado con 36 comprobaciones. [Acta y límites](acceptance/2026-10-03-core-dashboard-third-audit.md); sin merge ni despliegue.
