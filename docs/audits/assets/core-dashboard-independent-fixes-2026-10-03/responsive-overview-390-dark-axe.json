@@ -18,9 +18,7 @@
         {
           "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
           "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
-          "target": [
-            "button[data-slot=\"dialog-trigger\"]"
-          ]
+          "target": ["button[data-slot=\"dialog-trigger\"]"]
         }
       ],
       "tags": [
