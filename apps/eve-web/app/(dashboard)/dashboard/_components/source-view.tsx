@@ -79,8 +79,10 @@ function SourcesContent({ id }: { id?: string }) {
               : "Source evidence unavailable"}
           </AlertTitle>
           <AlertDescription>
-            Last successful read: <Instant value={envelope?.readAt} />. Worker
-            signals are independent.
+            <p>
+              Last successful read: <Instant value={envelope?.readAt} />. Worker
+              signals are independent.
+            </p>
             <Button
               variant="outline"
               disabled={retryDisabled}

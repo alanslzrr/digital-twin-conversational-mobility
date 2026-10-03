@@ -48,6 +48,18 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
       refs.current.get(`${focusedLane.current}:${next.from}`)?.focus();
   }, [data.bins, selected]);
   const active = data.bins.find((b) => b.from === selected) ?? data.bins.at(-1);
+  useEffect(() => {
+    if (!active) return;
+    const button = refs.current.get(`publications:${active.from}`);
+    const scroller = button?.closest<HTMLElement>(".rf-lanes-scroll");
+    if (!button || !scroller) return;
+    const item = button.getBoundingClientRect();
+    const viewport = scroller.getBoundingClientRect();
+    if (item.left < viewport.left || item.right > viewport.right) {
+      scroller.scrollLeft +=
+        item.left - viewport.left - viewport.width / 2 + item.width / 2;
+    }
+  }, [active]);
   function navigate(
     event: KeyboardEvent<HTMLButtonElement>,
     i: number,
