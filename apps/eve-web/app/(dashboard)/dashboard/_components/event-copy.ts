@@ -1,26 +1,26 @@
 export const eventTypes: Record<string, string> = {
-  publication: "Información guardada",
-  refresh: "Consulta de actualización",
-  lease_lost: "Reserva de trabajo perdida",
-  lease_recovered: "Reserva recuperada",
-  release: "Trabajo liberado",
+  publication: "Information stored",
+  refresh: "Refresh attempt",
+  lease_lost: "Worker lease lost",
+  lease_recovered: "Lease recovered",
+  release: "Work released",
 };
 export const eventOutcomes: Record<string, string> = {
-  success: "Completado",
-  historical_only: "Guardado solo en histórico",
-  error: "No completado",
-  lease_lost: "Sin reserva válida",
-  storage_error: "Error al guardar",
+  success: "Completed",
+  historical_only: "Historical only",
+  error: "Failed",
+  lease_lost: "No valid lease",
+  storage_error: "Storage error",
 };
 export const eventComponents: Record<string, string> = {
-  ingestion: "Actualización periódica",
-  weather: "Meteorología",
-  emt: "Llegadas EMT",
-  geocoder: "Búsqueda de lugares",
-  routing: "Planificación de trayectos",
+  ingestion: "Periodic capture",
+  weather: "Weather",
+  emt: "EMT arrivals",
+  geocoder: "Place lookup",
+  routing: "Journey planning",
 };
 export const severityCopy: Record<string, string> = {
-  info: "Información",
-  warning: "Advertencia",
+  info: "Information",
+  warning: "Warning",
   error: "Error",
 };

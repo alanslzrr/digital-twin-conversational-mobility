@@ -4,68 +4,104 @@ import type {
   DashboardMetric,
 } from "@mobility/contracts";
 import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { AnimatedValue } from "./animated-value";
+import { Card, Segmented, Sheet, Table } from "./primitives";
 import { Instant } from "./shared";
 export const number = (n: unknown) =>
   typeof n === "number"
-    ? new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(n)
-    : "Sin dato";
+    ? new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(n)
+    : "Unknown";
 export function MetricStrip({ metrics }: { metrics: DashboardMetric[] }) {
   return (
-    <section
-      aria-label="Indicadores de movilidad"
-      className="grid divide-y overflow-hidden rounded-lg border bg-card sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4"
-    >
+    <section aria-label="Mobility indicators" className="dc-metric-grid">
       {metrics.map((m) => (
-        <article
-          key={m.id}
-          className="flex min-w-0 flex-col gap-2 p-5 sm:border-r last:border-r-0"
-        >
-          <h2 className="text-sm font-medium text-muted-foreground">
-            {m.label}
-          </h2>
-          <p className="text-3xl font-semibold tracking-tight tabular-nums">
-            {number(m.value)}
-          </p>
-          <p className="text-sm">{m.unit}</p>
-          <p className="text-xs leading-5 text-muted-foreground">
-            {m.coverage}
-          </p>
-          {m.missingReason ? (
-            <p className="text-xs leading-5">{m.missingReason}</p>
-          ) : null}
-          <details className="mt-auto text-xs leading-5">
-            <summary className="min-h-8 cursor-pointer py-1">
-              Qué mide y qué excluye
-            </summary>
-            <p>{m.definition}</p>
-            <p className="mt-2">
-              Selección: {m.selection}. Procedencia: {m.provenance}.
-            </p>
-            <p className="mt-2">
-              Periodo de evidencia:{" "}
-              {m.period.from ? (
-                <>
-                  <Instant value={m.period.from} /> —{" "}
-                </>
-              ) : (
-                "Vigencia actual evaluada a "
-              )}
-              <Instant value={m.period.to} />.
-            </p>
-            <p className="mt-2 text-muted-foreground">{m.excludes}</p>
-            <p className="mt-2">
-              Evaluado: <Instant value={m.evaluatedAt} />
-            </p>
-          </details>
-          <Link
-            href={m.detailHref}
-            className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
-          >
-            Consultar los datos
-          </Link>
-        </article>
+        <MetricCard key={`${m.id}:${m.selection}`} metric={m} />
       ))}
     </section>
+  );
+}
+function MetricCard({ metric: m }: { metric: DashboardMetric }) {
+  const [open, setOpen] = useState(false);
+  const labels: Record<string, string> = {
+    M1: "Available bikes",
+    M2: "Published parking spaces",
+    M3: "Recorded incidents",
+    M4: "Product readiness",
+  };
+  return (
+    <Card className="dc-metric">
+      <h2>{labels[m.id] ?? m.label}</h2>
+      <p className="dc-value">
+        <AnimatedValue value={m.value} format={number} />
+        <span className="sr-only">{m.value === null ? "Unknown" : m.unit}</span>
+      </p>
+      <p className="dc-meta">
+        {m.id === "M4"
+          ? `${number(m.denominator.included)} / ${number(m.denominator.observed)} ${m.denominator.unit}`
+          : m.unit}
+      </p>
+      <p className="dc-meta">{m.coverage}</p>
+      {m.missingReason ? <p className="dc-meta">{m.missingReason}</p> : null}
+      <div className="dc-metric-actions">
+        <Link href={m.detailHref} className="dc-link">
+          View data
+        </Link>
+        <Sheet
+          open={open}
+          onOpenChange={setOpen}
+          title={`${labels[m.id] ?? m.label} definition`}
+          trigger={
+            <Button size="sm" variant="ghost">
+              Definition
+            </Button>
+          }
+        >
+          <dl className="dc-stack">
+            <div>
+              <dt>Definition</dt>
+              <dd>{m.definition}</dd>
+            </div>
+            <div>
+              <dt>Coverage</dt>
+              <dd>{m.coverage}</dd>
+            </div>
+            <div>
+              <dt>Selection</dt>
+              <dd>{m.selection}</dd>
+            </div>
+            <div>
+              <dt>Evidence period</dt>
+              <dd>
+                {m.period.from ? (
+                  <>
+                    <Instant value={m.period.from} /> —{" "}
+                  </>
+                ) : (
+                  "Current validity evaluated at "
+                )}
+                <Instant value={m.period.to} />
+              </dd>
+            </div>
+            <div>
+              <dt>Provenance</dt>
+              <dd>{m.provenance}</dd>
+            </div>
+            <div>
+              <dt>Excluded</dt>
+              <dd>{m.excludes}</dd>
+            </div>
+            <div>
+              <dt>Evaluated</dt>
+              <dd>
+                <Instant value={m.evaluatedAt} />
+              </dd>
+            </div>
+          </dl>
+        </Sheet>
+      </div>
+    </Card>
   );
 }
 export function FreshnessBreakdown({
@@ -85,20 +121,18 @@ export function FreshnessBreakdown({
 }) {
   const states = [
     ["Lecturas recientes", recent, "bg-primary"],
-    ["Datos antiguos", stale, "bg-muted-foreground"],
-    ["Sin lectura utilizable", unavailable, "bg-destructive"],
-    ["Referencia", reference, "bg-accent-foreground"],
+    ["Stale evidence", stale, "bg-muted-foreground"],
+    ["No usable evidence", unavailable, "bg-destructive"],
+    ["Reference", reference, "bg-accent-foreground"],
   ] as const;
   return (
     <section
       className="rounded-lg border bg-card p-4"
-      aria-label="Antigüedad del producto"
+      aria-label="Product age coverage"
     >
-      <h2 className="text-sm font-medium">
-        ¿Qué parte de este producto puedo usar?
-      </h2>
+      <h2 className="text-sm font-medium">Selection evidence coverage</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        {number(total)} {unit} en toda esta selección; no solo en esta página.
+        {number(total)} {unit} in the complete selection, not only this page.
       </p>
       {total > 0 ? (
         <div
@@ -126,104 +160,169 @@ export function FreshnessBreakdown({
   );
 }
 export function ActivityChart({ data }: { data: DashboardActivityChart }) {
+  const [series, setSeries] = useState("both");
+  const [selected, setSelected] = useState<string | null>(null);
   const max = Math.max(
     1,
-    ...data.bins.flatMap((b) => [b.publications ?? 0, b.errors ?? 0]),
+    ...data.bins.flatMap((b) => [
+      series !== "errors" ? (b.publications ?? 0) : 0,
+      series !== "publications" ? (b.errors ?? 0) : 0,
+    ]),
   );
+  const bin = data.bins.find((b) => b.from === selected);
+  const tick = (t: string) =>
+    new Date(t).toLocaleString("en-GB", {
+      timeZone: "Europe/Madrid",
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   return (
-    <section className="rounded-lg border bg-card p-5">
-      <h2 className="text-base font-semibold">
-        ¿Cuándo se guardó información y cuándo hubo problemas?
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Publicaciones y errores registrados. No representa evolución del tráfico
-        ni garantiza frescura.
-      </p>
-      <div className="mt-4 flex flex-wrap gap-4 text-sm">
-        <span>
-          Publicaciones:{" "}
-          <strong className="tabular-nums">{number(data.publications)}</strong>
-        </span>
-        <span>
-          Errores registrados:{" "}
-          <strong className="tabular-nums">{number(data.errors)}</strong>
-        </span>
+    <Card>
+      <div className="dc-panel-heading">
+        <h2>Recorded activity</h2>
+        <Segmented
+          label="Chart series"
+          value={series}
+          onChange={setSeries}
+          options={[
+            ["publications", "Publications"],
+            ["errors", "Errors"],
+            ["both", "Both"],
+          ]}
+        />
       </div>
+      <p className="dc-meta">
+        Publications {number(data.publications)} · Errors {number(data.errors)}{" "}
+        · Counts, not traffic or freshness
+      </p>
       {data.firstRetainedEventAt ? (
-        <svg
-          viewBox="0 0 700 160"
-          role="img"
-          aria-label="Publicaciones y errores por intervalo; datos equivalentes en la tabla"
-          className="mt-4 w-full"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <title>Publicaciones y errores por intervalo</title>
-          {data.bins.map((b, i) => {
-            const width = 680 / data.bins.length,
-              x = 10 + i * width;
-            return (
-              <g key={b.from}>
-                {b.publications !== null ? (
-                  <rect
-                    x={x}
-                    y={145 - (b.publications / max) * 130}
-                    width={width * 0.38}
-                    height={(b.publications / max) * 130}
-                    className="fill-primary"
-                  />
-                ) : null}
-                {b.errors !== null ? (
-                  <rect
-                    x={x + width * 0.4}
-                    y={145 - (b.errors / max) * 130}
-                    width={width * 0.38}
-                    height={(b.errors / max) * 130}
-                    className="fill-destructive"
-                  />
-                ) : null}
+        <>
+          <svg
+            viewBox="0 0 700 240"
+            role="img"
+            aria-label="Recorded count bars. Use the interval buttons or exact-data table for values."
+            className="dc-chart"
+          >
+            <title>Recorded publication and error counts</title>
+            {[0, 0.5, 1].map((f) => (
+              <g key={f}>
+                <line
+                  x1="40"
+                  x2="685"
+                  y1={195 - f * 160}
+                  y2={195 - f * 160}
+                  className="dc-grid-line"
+                />
+                <text x="32" y={199 - f * 160} textAnchor="end">
+                  {number(Math.round(max * f))}
+                </text>
               </g>
-            );
-          })}
-          <line x1="10" x2="690" y1="145" y2="145" className="stroke-border" />
-        </svg>
+            ))}
+            {data.bins.map((b, i) => {
+              const width = 640 / data.bins.length,
+                x = 42 + i * width;
+              return (
+                <g key={b.from}>
+                  {b.publications === null && b.errors === null ? (
+                    <rect
+                      x={x}
+                      y="35"
+                      width={width - 2}
+                      height="160"
+                      fill="var(--dash-well)"
+                      stroke="var(--dash-control-line)"
+                      strokeDasharray="3 3"
+                    />
+                  ) : null}
+                  {series !== "errors" && b.publications !== null ? (
+                    <rect
+                      x={x}
+                      y={195 - (b.publications / max) * 160}
+                      width={width * 0.38}
+                      height={(b.publications / max) * 160}
+                      fill="var(--dash-series)"
+                    />
+                  ) : null}
+                  {series !== "publications" && b.errors !== null ? (
+                    <rect
+                      x={x + width * 0.4}
+                      y={195 - (b.errors / max) * 160}
+                      width={width * 0.38}
+                      height={(b.errors / max) * 160}
+                      fill="var(--dash-danger)"
+                    />
+                  ) : null}
+                </g>
+              );
+            })}
+            <text x="40" y="224">
+              {tick(data.from)}
+            </text>
+            <text x="685" y="224" textAnchor="end">
+              {tick(data.to)}
+            </text>
+          </svg>
+          <fieldset
+            className="dc-chart-controls"
+            aria-label="Inspect count intervals"
+          >
+            {data.bins.map((b, i) => (
+              <Button
+                key={b.from}
+                size="sm"
+                variant="outline"
+                aria-pressed={selected === b.from}
+                aria-label={`Inspect interval ${tick(b.from)}`}
+                onClick={() => setSelected(b.from)}
+              >
+                {i + 1}
+              </Button>
+            ))}
+          </fieldset>
+          {bin ? (
+            <p role="status" className="dc-meta">
+              <Instant value={bin.from} /> — <Instant value={bin.to} /> ·
+              Publications {number(bin.publications)} · Errors{" "}
+              {number(bin.errors)}
+            </p>
+          ) : null}
+        </>
       ) : (
-        <p className="py-6 text-sm">
-          No hay evidencia retenida para representar una serie. No equivale a
-          cero actividad.
+        <p className="py-6">
+          No retained evidence to plot. This does not mean zero activity.
         </p>
       )}
-      <p className="mt-3 text-xs leading-5 text-muted-foreground">
-        <Instant value={data.from} /> — <Instant value={data.to} />. Captura no
-        exhaustiva. Los huecos anteriores a la primera evidencia retenida no se
-        convierten en cero.
+      <p className="dc-meta mt-3">
+        Europe/Madrid · Best-effort capture. Dashed gaps before retained
+        evidence are unknown, not zero.
       </p>
-      <details className="mt-4 text-sm">
-        <summary className="min-h-11 cursor-pointer py-2">
-          Ver intervalos y valores
+      <details className="mt-4">
+        <summary className="dc-link cursor-pointer">
+          Exact interval data
         </summary>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr>
-                <th className="p-2">Intervalo (Madrid)</th>
-                <th className="p-2">Publicaciones</th>
-                <th className="p-2">Errores</th>
+        <Table>
+          <thead>
+            <tr>
+              <th>Interval (Europe/Madrid)</th>
+              <th>Publications</th>
+              <th>Errors</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.bins.map((b) => (
+              <tr key={b.from}>
+                <td>
+                  <Instant value={b.from} /> — <Instant value={b.to} />
+                </td>
+                <td>{number(b.publications)}</td>
+                <td>{number(b.errors)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {data.bins.map((b) => (
-                <tr key={b.from} className="border-t">
-                  <td className="p-2 text-xs">
-                    <Instant value={b.from} /> — <Instant value={b.to} />
-                  </td>
-                  <td className="p-2 tabular-nums">{number(b.publications)}</td>
-                  <td className="p-2 tabular-nums">{number(b.errors)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </Table>
       </details>
-    </section>
+    </Card>
   );
 }
