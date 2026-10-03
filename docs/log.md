@@ -149,3 +149,7 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Reproducido el fallo de Sources con datos locales en modo read-only: el saneador omitía `routes[0].activatedAt` y el contrato lo exigía. Añadido el campo público a la lista permitida y regresiones con release preparada/activa; no se expone el manifiesto ni se modifica la base habitual.
 - Retirada la CLI Vercel y su árbol vulnerable; configurador cloud cerrado antes de leer/escribir secretos. `pnpm audit --audit-level=high` conserva alcance completo y devuelve cero vulnerabilidades conocidas. Sin exclusiones de advisories, ejecución global alternativa, merge ni despliegue.
 - Corregidos nombres repetidos de regiones de tablas detectados por axe; el arnés espera el cierre asíncrono antes de verificar foco. Revalidación: 510 pruebas generales, 48 SQL/unitarias, 37 HTTP y 35 aserciones de navegador; builds y auditoría de dependencias correctos. [Acta previa al merge](acceptance/2026-10-03-core-dashboard-merge-readiness.md), con límites manuales y CI remota separados.
+
+## [2026-10-03] alcance | Retirada de prueba con lector de pantalla
+
+- Por decisión explícita del usuario, se retira la prueba con lector de pantalla real del alcance y de los requisitos de merge de PR #45. No se registra como aprobada. Se mantienen la revisión móvil y el zoom nativo. Actualizados el roadmap y el acta vigente; las actas anteriores conservan sus resultados históricos.
