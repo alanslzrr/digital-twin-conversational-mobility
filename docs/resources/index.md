@@ -139,3 +139,11 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | [SWR: gestión de errores](https://swr.vercel.app/docs/error-handling) | Reintentos limitados, Retry-After y cadencia mínima adicional; deduplicación sola no impone frecuencia. |
 
 [Arquitectura](../architecture.md#panel-y-captura-de-observabilidad) → [referencia](../reference/system.md#panel-y-telemetría) → [acta](../acceptance/2026-10-02-core-dashboard.md).
+
+
+## Seguridad de dependencias · 03/10/2026
+
+| Referencia | Propósito, conclusión y uso local |
+| --- | --- |
+| [GitHub Advisory Database: GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | Aviso revisado y actualizado el 02/10/2026: `braces <=3.0.3`, agotamiento de pila, gravedad alta, sin versión corregida. Sustenta el [bloqueo de CI de PR #45](../acceptance/2026-10-03-core-dashboard-independent-fixes.md#bloqueo-de-ci-por-seguridad-de-dependencias). |
+| [Registro npm: braces](https://registry.npmjs.org/braces/latest) y [Vercel](https://registry.npmjs.org/vercel/latest) | Consultados con `pnpm view` el 03/10/2026: braces 3.0.3 y CLI 62.2.0. Los builders de la CLI mantienen ts-morph 12.0.0; una actualización de CLI sola no elimina la cadena. No se cambiaron dependencias ni se relajó la auditoría. |
