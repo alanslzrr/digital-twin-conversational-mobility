@@ -142,3 +142,10 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Filas de Mobility con hora observada/emitida o "No observation time"; marcadores del mapa recalculados al cambiar de tema y leyenda con muestras; atribución legible en oscuro; textos de inspección unificados y etiqueta duplicada de Activity retirada.
 - Títulos de página con `text-effect` de motion-primitives, estado final fijo con movimiento reducido y sin dependencias nuevas. Guardia QA: solo la consulta de versión de `next dev` se responde localmente en modo `--dev`.
 - `pnpm check` correcto (508 pruebas, 99 omitidas) y smoke aislado con 36 comprobaciones. [Acta y límites](acceptance/2026-10-03-core-dashboard-third-audit.md); sin merge ni despliegue.
+
+## [2026-10-03] corrección | Preparación de merge de PR #45
+
+- Conservados en commits los cambios locales de la revisión R1–R5 y las instrucciones de desarrollo generadas por Next, sin descartarlos.
+- Reproducido el fallo de Sources con datos locales en modo read-only: el saneador omitía `routes[0].activatedAt` y el contrato lo exigía. Añadido el campo público a la lista permitida y regresiones con release preparada/activa; no se expone el manifiesto ni se modifica la base habitual.
+- Retirada la CLI Vercel y su árbol vulnerable; configurador cloud cerrado antes de leer/escribir secretos. `pnpm audit --audit-level=high` conserva alcance completo y devuelve cero vulnerabilidades conocidas. Sin exclusiones de advisories, ejecución global alternativa, merge ni despliegue.
+- Corregidos nombres repetidos de regiones de tablas detectados por axe; el arnés espera el cierre asíncrono antes de verificar foco. Revalidación: 510 pruebas generales, 48 SQL/unitarias, 37 HTTP y 35 aserciones de navegador; builds y auditoría de dependencias correctos. [Acta previa al merge](acceptance/2026-10-03-core-dashboard-merge-readiness.md), con límites manuales y CI remota separados.
