@@ -8,6 +8,7 @@ Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las
 
 ## En esta página
 
+- [Seguridad de dependencias](#seguridad-de-dependencias--03102026)
 - [Tecnología](#tecnología)
 - [Transporte y routing](#transporte-y-routing)
 - [Meteorología y geografía](#meteorología-y-geografía)

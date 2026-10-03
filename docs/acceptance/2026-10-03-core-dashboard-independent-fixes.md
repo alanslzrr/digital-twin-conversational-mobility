@@ -18,7 +18,7 @@ Los cinco hallazgos del contraste independiente están corregidos en la misma [P
 
 ## Pruebas ejecutadas
 
-- `pnpm check`: **481 pruebas aprobadas y 99 omitidas**; lint, límites entre paquetes, tipos y builds correctos. Las omisiones incluyen cinco regresiones SQL que se ejecutaron aparte. La compilación de aplicación inicial recompiló ambos proyectos; la comprobación posterior recompiló Core y reutilizó Web.
+- `pnpm check`: **481 pruebas aprobadas y 99 omitidas**; lint, límites entre paquetes, tipos y builds correctos. Las omisiones incluyen cinco regresiones SQL que se ejecutaron aparte. La compilación de aplicación inicial recompiló ambos proyectos; la comprobación posterior recompiló Core y reutilizó Web. La comprobación final de publicación reutilizó ambos builds.
 - `RUN_DASHBOARD_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/dashboard apps/mobility-core/src/observability/dashboard.integration.test.ts`: **47 pruebas aprobadas / 11 archivos**, mezcla de SQL y pruebas unitarias. Las tres reproducciones originales se conservan como evidencia de fallos anteriores y tienen regresiones permanentes aprobadas.
 - `pnpm build:agent`: correcto, **10,7 MB / 2,42 MB comprimidos**, sin inferencia.
 - `node --env-file=.env.local scripts/test-dashboard-local.mjs --preview`: **36 comprobaciones HTTP aprobadas**, cinco adicionales para categorías y coordenadas anidadas. Better Auth real, identidades sintéticas y esquema desechable; adquisiciones e inferencia deshabilitadas.
