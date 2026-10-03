@@ -12,7 +12,7 @@ import { Instant, publicLabel, State } from "./shared";
 export function EntityHistory({ entity }: { entity: DashboardEntity }) {
   const [open, setOpen] = useState(false),
     [window, setWindow] = useState("6h"),
-    [magnitude, setMagnitude] = useState(
+    [magnitude, setMeasuremente] = useState(
       entity.category === "bikes"
         ? "bikes"
         : entity.category === "parking"
@@ -40,20 +40,17 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
     min = Math.min(0, ...(data?.points ?? []).map((p) => p.value));
   return (
     <section className="rounded-lg border bg-card p-5">
-      <h2 className="text-base font-semibold">
-        ¿Cómo cambió esta magnitud en los registros retenidos?
-      </h2>
+      <h2 className="text-base font-semibold">Retained measurement history</h2>
       {!supported ? (
         <p className="mt-3 text-sm text-muted-foreground">
-          Este producto no tiene una serie de observaciones por identidad
-          estable en el histórico retenido. Una predicción no es una observación
-          del pasado.
+          No stable-identity observation series is available for this product. A
+          forecast is not a past observation.
         </p>
       ) : (
         <>
           <p className="mt-2 text-sm text-muted-foreground">
-            Lectura del histórico existente, no consulta al proveedor. Hasta 24
-            horas; conserva observación e incorporación por punto.
+            Read retained history, not the provider. Up to 24 hours with
+            observation and ingestion time per point.
           </p>
           {!open ? (
             <Button
@@ -61,14 +58,14 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
               className="mt-3"
               onClick={() => setOpen(true)}
             >
-              Consultar histórico guardado
+              Read stored history
             </Button>
           ) : (
             <>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel htmlFor="history-period">
-                    Periodo retenido
+                    Retained period
                   </FieldLabel>
                   <select
                     id="history-period"
@@ -76,19 +73,21 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                     onChange={(e) => setWindow(e.target.value)}
                     className="min-h-11 rounded-md border bg-background px-3 text-sm"
                   >
-                    <option value="1h">Una hora</option>
-                    <option value="6h">Seis horas</option>
-                    <option value="24h">24 horas</option>
+                    <option value="1h">1 hour</option>
+                    <option value="6h">6 hours</option>
+                    <option value="24h">24 hours</option>
                   </select>
                 </Field>
                 {entity.category === "bikes" ||
                 entity.evidence.productId === "aemet" ? (
                   <Field>
-                    <FieldLabel htmlFor="history-measure">Magnitud</FieldLabel>
+                    <FieldLabel htmlFor="history-measure">
+                      Measurement
+                    </FieldLabel>
                     <select
                       id="history-measure"
                       value={magnitude}
-                      onChange={(e) => setMagnitude(e.target.value)}
+                      onChange={(e) => setMeasuremente(e.target.value)}
                       className="min-h-11 rounded-md border bg-background px-3 text-sm"
                     >
                       {(entity.category === "bikes"
@@ -110,13 +109,13 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                   </Field>
                 ) : null}
               </div>
-              <State loading={q.isLoading} error={q.error} />
+              <State data={q.data} loading={q.isLoading} error={q.error} />
               {data ? (
                 <>
                   <p className="mt-3 text-sm">
                     {data.unit} · {number(data.points.length)} muestras{" "}
                     {data.reduced
-                      ? "(reducidas a la última de cada intervalo)"
+                      ? "(last observation retained per interval)"
                       : "retenidas"}
                   </p>
                   {data.points.length ? (
@@ -124,9 +123,9 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                       viewBox="0 0 700 180"
                       className="mt-4 w-full"
                       role="img"
-                      aria-label="Muestras observadas, sin interpolación; fechas y valores en la tabla"
+                      aria-label="Observed samples without interpolation; exact times and values in the table"
                     >
-                      <title>Observaciones retenidas sin interpolación</title>
+                      <title>Retained observations without interpolation</title>
                       {data.points.map((p) => {
                         const x =
                             20 +
@@ -170,8 +169,8 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
                       <table className="w-full text-left">
                         <thead>
                           <tr>
-                            <th className="p-2">Observado</th>
-                            <th className="p-2">Incorporado</th>
+                            <th className="p-2">Observed</th>
+                            <th className="p-2">Ingested</th>
                             <th className="p-2">Valor ({data.unit})</th>
                           </tr>
                         </thead>
