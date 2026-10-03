@@ -31,7 +31,11 @@ export default function RootLayout({
   readonly children: ReactNode;
 }) {
   return (
-    <html className={cn(sans.variable, mono.variable)} lang="es">
+    <html
+      className={cn(sans.variable, mono.variable)}
+      lang="es"
+      suppressHydrationWarning
+    >
       <body>
         <TooltipProvider>{children}</TooltipProvider>
       </body>
