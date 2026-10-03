@@ -98,3 +98,11 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Repetidos `pnpm check` (479 aprobadas / 94 omitidas), suite SQL/unitaria dashboard (40 aprobadas) y smoke HTTP (31 comprobaciones). CI verde en `dafd69a`; builds locales de check recuperados de caché.
 - Tres reproducciones PostgreSQL nuevas fallan y quedan archivadas fuera de la suite. Esquemas desechables eliminados y puertos QA libres. R3/R4 contrastados con código y capturas anteriores; matriz de 72 pantallas no repetida.
 - Solo documentación y evidencia, sin corregir código, integrar, instalar ni modificar servicios habituales.
+
+
+## [2026-10-03] revisión | Correcciones del contraste independiente del panel
+
+- Conservados los cinco hallazgos y las tres reproducciones fallidas originales; añadida la [acta posterior de R1–R5](acceptance/2026-10-03-core-dashboard-independent-fixes.md) sin reescribir las pruebas anteriores.
+- Actualizados spec-audit, índices y roadmap: correcciones verificadas, misma PR abierta y sin instalar sobre el servicio habitual.
+- Registradas 481 pruebas generales, 47 SQL/unitarias, 36 comprobaciones HTTP y 20 inspecciones nuevas de agent-browser. Las 72 pantallas anteriores conservan su carácter histórico; se explicitan cinco resultados axe indeterminados y los límites no probados.
+- Evidencia únicamente sintética; sin adquisiciones, inferencia, herramientas ni cambios en proveedores, autenticación o EVE oficial.
