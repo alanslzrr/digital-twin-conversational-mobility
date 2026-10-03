@@ -106,3 +106,5 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Actualizados spec-audit, índices y roadmap: correcciones verificadas, misma PR abierta y sin instalar sobre el servicio habitual.
 - Registradas 481 pruebas generales, 47 SQL/unitarias, 36 comprobaciones HTTP y 20 inspecciones nuevas de agent-browser. Las 72 pantallas anteriores conservan su carácter histórico; se explicitan cinco resultados axe indeterminados y los límites no probados.
 - Evidencia únicamente sintética; sin adquisiciones, inferencia, herramientas ni cambios en proveedores, autenticación o EVE oficial.
+
+- La CI posterior falló en auditoría de dependencias por GHSA-vfj7-8cjw-p6xm (`braces` transitivo de Vercel, sin versión corregida). Reproducción local confirmada e investigación del árbol documentadas; aceptación global abierta. Sin excepciones de seguridad ni cambios del lockfile.

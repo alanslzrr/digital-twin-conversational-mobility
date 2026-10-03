@@ -4,6 +4,8 @@
 
 ## Resultado
 
+**Aceptación global todavía abierta:** la nueva CI se detuvo en auditoría de dependencias, no en las regresiones del panel. El bloqueo se detalla en [seguridad de dependencias](#bloqueo-de-ci-por-seguridad-de-dependencias).
+
 Los cinco hallazgos del contraste independiente están corregidos en la misma [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45), sin integrar ni instalar sobre el servicio habitual. Código de aplicación: `ac9e922`; regresiones independientes: `c43e5c2`. No se modifica EVE oficial, autenticación, propiedad de conversaciones ni configuración de proveedores.
 
 | Antes | Después | Verificación |
@@ -32,3 +34,13 @@ La evidencia usa fixtures explícitamente sintéticos y lecturas almacenadas, no
 No se repitió la matriz completa de 72 pantallas, lector de pantalla real, zoom nativo, dispositivos táctiles físicos, estrés de más de mil puntos ni la carrera concurrente completa entre identidades. La sugerencia adicional de ejes/leyenda del gráfico no forma parte de los cinco defectos funcionales corregidos; se conserva como observación visual, no como verificación ejecutada.
 
 El navegador de auditoría y los servidores aislados de 3002/3003 se cerraron; se comprobó la eliminación del esquema desechable. La instalación habitual, integración de PR y cloud siguen pendientes de autorización independiente.
+
+## Bloqueo de CI por seguridad de dependencias
+
+La [CI del HEAD `c92e773`](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37101874773) falló en `pnpm audit --audit-level=high`. El mismo comando reproduce localmente **una vulnerabilidad alta**: [GHSA-vfj7-8cjw-p6xm / CVE-2026-93687](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), agotamiento de pila por patrones de llaves anidados en `braces <=3.0.3`. El aviso, actualizado el 02/10/2026, declara que no hay versión corregida.
+
+La cadena instalada es de desarrollo: `vercel@59.25.4 → @vercel/backends → ts-morph@12.0.0 → @ts-morph/common → fast-glob → micromatch → braces@3.0.3`. No se presenta como prueba de explotación en los servicios de movilidad ni se minimiza el fallo del control de calidad.
+
+Se consultó el registro npm el 03/10/2026: `braces` continúa en 3.0.3; `micromatch@4.0.8` y `fast-glob@3.3.3` siguen dependiendo de esa cadena. Vercel 62.2.0 conserva `ts-morph@12.0.0` en sus builders. Actualizar únicamente la CLI no elimina el problema. `ts-morph@28.0.0` cambia de versión mayor y de árbol de dependencias; imponerlo a builders que fijan 12.0.0 requiere una validación específica, no una sustitución silenciosa dentro de estas correcciones.
+
+No se modificó el lockfile, no se añadieron exclusiones de advisories ni se rebajó/desactivó `pnpm audit`. **Pendiente real antes de integrar:** resolver o mitigar la dependencia y validar las funciones de la CLI afectadas; después repetir CI. El `pnpm check` local aprobado no convierte esa auditoría fallida en verde.
