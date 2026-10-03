@@ -24,9 +24,7 @@
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div data-slot=\"sidebar-wrapper\" style=\"--sidebar-width:200px;--sidebar-width-icon:56px\" class=\"group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar dashboard-shell\" lang=\"en\" data-resolved=\"true\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            ".group\\/sidebar-wrapper"
-          ]
+          "target": [".group\\/sidebar-wrapper"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
@@ -58,16 +56,12 @@
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
           "html": "<dd>No previous successful reading in this session. Global historical baselines are not exposed.</dd>",
-          "target": [
-            ".dc-stack > div:nth-child(1) > dd"
-          ]
+          "target": [".dc-stack > div:nth-child(1) > dd"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
           "html": "<dd>Suma de bicicletas publicadas por estaciones únicas instaladas y habilitadas para alquiler, observadas en los últimos 60 segundos.</dd>",
-          "target": [
-            ".dc-stack > div:nth-child(2) > dd"
-          ]
+          "target": [".dc-stack > div:nth-child(2) > dd"]
         }
       ],
       "tags": [

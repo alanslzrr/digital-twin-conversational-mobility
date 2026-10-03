@@ -24,51 +24,37 @@
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<a href=\"#dashboard-main\" class=\"dc-skip\" data-aria-hidden=\"true\" aria-hidden=\"true\">Skip to content</a>",
-          "target": [
-            ".dc-skip"
-          ]
+          "target": [".dc-skip"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<aside class=\"group peer hidden text-sidebar-foreground md:block\" data-state=\"expanded\" data-collapsible=\"\" data-variant=\"sidebar\" data-side=\"left\" data-slot=\"sidebar\" aria-label=\"Navigation and account\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            "aside"
-          ]
+          "target": ["aside"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<header class=\"dc-header\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            "header"
-          ]
+          "target": ["header"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div class=\"dc-toolbar\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            ".dc-toolbar"
-          ]
+          "target": [".dc-toolbar"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div role=\"tablist\" aria-orientation=\"horizontal\" data-slot=\"tabs-list\" data-variant=\"default\" class=\"group/tabs-list inli...\" aria-label=\"Activity representat...\" tabindex=\"0\" data-orientation=\"horizontal\" style=\"outline: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            ".group\\/tabs-list"
-          ]
+          "target": [".group\\/tabs-list"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div class=\"rf-lanes-scroll\" data-aria-hidden=\"true\" aria-hidden=\"true\" style=\"--rf-bin-count: 24;\">",
-          "target": [
-            ".rf-lanes-scroll"
-          ]
+          "target": [".rf-lanes-scroll"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div class=\"dc-event-region rounded-lg border bg-card\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            ".dc-event-region"
-          ]
+          "target": [".dc-event-region"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",

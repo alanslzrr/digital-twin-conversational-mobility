@@ -24,9 +24,7 @@
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
           "html": "<div data-slot=\"sidebar-wrapper\" style=\"--sidebar-width:200px;--sidebar-width-icon:56px\" class=\"group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar dashboard-shell\" lang=\"en\" data-resolved=\"true\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
-          "target": [
-            ".group\\/sidebar-wrapper"
-          ]
+          "target": [".group\\/sidebar-wrapper"]
         },
         {
           "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
@@ -58,16 +56,12 @@
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
           "html": "<dd>Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds. Refresh only reads stored evidence.</dd>",
-          "target": [
-            ".dc-stack > div:nth-child(2) > dd"
-          ]
+          "target": [".dc-stack > div:nth-child(2) > dd"]
         },
         {
           "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements",
           "html": "<p class=\"dc-meta\">Visible, unpaused activity renews the bounded capture window every 60 seconds. Pausing stops renewal, not an in-progress provider request. Observation and ingestion times remain attached to each record.</p>",
-          "target": [
-            ".dc-sheet-body > p"
-          ]
+          "target": [".dc-sheet-body > p"]
         }
       ],
       "tags": [
