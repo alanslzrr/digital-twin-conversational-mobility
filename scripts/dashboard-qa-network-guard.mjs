@@ -15,7 +15,9 @@ globalThis.fetch = async (input, init) => {
   if (
     url.protocol !== "http:" ||
     url.hostname !== "127.0.0.1" ||
-    !["3002", "3003"].includes(url.port)
+    // The EVE dev server listens on an ephemeral loopback port.
+    (!["3002", "3003"].includes(url.port) &&
+      process.env.DASHBOARD_QA_DEV !== "1")
   ) {
     appendFileSync(
       process.env.DASHBOARD_QA_NETWORK_GUARD_REPORT,

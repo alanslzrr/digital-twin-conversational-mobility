@@ -106,6 +106,8 @@ const common = {
   MOBILITY_MCP_URL: "http://127.0.0.1:3003/mcp",
   MOBILITY_MCP_TOKEN: token,
   OPENAI_API_KEY: "",
+  DASHBOARD_QA_DEV: process.argv.includes("--dev") ? "1" : "",
+  NEXT_TELEMETRY_DISABLED: "1",
   DASHBOARD_QA_NETWORK_GUARD_REPORT: new URL(
     "../tmp/dashboard-qa/network-guard.txt",
     import.meta.url,
@@ -120,7 +122,7 @@ for (const [app, port] of [
     "node",
     [
       "node_modules/next/dist/bin/next",
-      "start",
+      app === "eve-web" && process.argv.includes("--dev") ? "dev" : "start",
       "--hostname",
       "127.0.0.1",
       "--port",
