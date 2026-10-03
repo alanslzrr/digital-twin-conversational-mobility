@@ -7,8 +7,8 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
 
-# Vercel CLI 59.25.4 pins older transitive releases. Keep patches scoped so
-# unrelated dependency versions and majors remain unchanged.
+# Scoped security overrides retained for pinned transitive dependencies.
+# Vercel CLI is removed; these also prevent unsafe versions on reintroduction.
 overrides:
   '@tootallnate/once@2.0.0': 2.0.1
   'ajv@8.6.3': 8.20.0
