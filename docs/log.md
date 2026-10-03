@@ -115,3 +115,9 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - T00–T09 implementados en PR #45: jerarquía, tokens locales, shell, estados veraces, mapa/lista, inspector de herramientas y conversaciones; sin alterar EVE oficial, contratos ni adquisición.
 - [Acta y evidencia sintética](acceptance/2026-10-03-core-dashboard-redesign.md): 491 tests generales, 26 SQL, 36 HTTP, 17 adaptadores/componentes, 35 comprobaciones de navegador y 72 capturas. T11 automatizado validado; lector de pantalla real y zoom nativo pendientes.
 - Fallo original de Sources no reproducido; corregido el defecto demostrado de renderizar fallo como vacío. T10 y remediación de Vercel diferidos; sin merge, despliegue ni declaración de aceptación global.
+
+
+## [2026-10-03] feat | Continuación del refinamiento V2 del panel
+
+- Sistema visual aplicado a las seis vistas en `92d0d7d`: KPI con alcance y medidor solo si reconcilia, tablas de evidencia/fuentes/turnos, codificación de frescura única en barras, franja y mapa, control de retención único y modo de consulta visible. Sin cambios de contratos, lectores, dependencias ni chat oficial.
+- `pnpm check` correcto (508 tests, 99 omitidos); formato de 98 JSON de evidencia V2 con contenido idéntico. Capturas 1440×1000 oscuro/claro de las seis vistas. [Acta y límites](acceptance/2026-10-03-core-dashboard-refinement-v2-continuation.md): zoom 200 %, lector de pantalla, matriz móvil, fallo Sources habitual y braces siguen abiertos; sin merge ni despliegue.
