@@ -6,7 +6,7 @@ Resultados ejecutados y límites de cada entrega.
 
 | Documento | Qué encontrarás |
 | --- | --- |
-| [2026-10-03-core-dashboard-mobile-closure](2026-10-03-core-dashboard-mobile-closure.md) | 72 vistas y 52 estados móviles, cabecera/pestañas corregidas; zoom nativo pendiente de paso manual. |
+| [2026-10-03-core-dashboard-mobile-closure](2026-10-03-core-dashboard-mobile-closure.md) | 72 vistas y 52 estados móviles, cabecera/pestañas corregidas; zoom nativo al 200 % verificado el 4 de octubre. |
 | [2026-10-03-core-dashboard-merge-readiness](2026-10-03-core-dashboard-merge-readiness.md) | Corrección de Sources con release instalada, retirada de CLI vulnerable y validación previa al merge. |
 | [2026-10-03-core-dashboard-refinement-v2](2026-10-03-core-dashboard-refinement-v2.md) | Neutralidad y densidad V2; gráficos existentes, comparaciones guardadas y validación sintética; límites manuales explícitos. |
 | [2026-10-03-core-dashboard-redesign](2026-10-03-core-dashboard-redesign.md) | Seis vistas rediseñadas, estados veraces y validación sintética; lector de pantalla/zoom nativo y CI pendientes. |

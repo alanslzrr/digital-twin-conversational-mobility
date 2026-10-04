@@ -158,3 +158,8 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 
 - Corregidos el recorte del selector de tema a 320 px, el desbordamiento de pestañas de conversación y el salto de nivel de encabezados de eventos. Añadido un recorrido reproducible que comprueba los botones visibles, no solo la anchura del documento.
 - Repetidas 72 vistas y 52 estados móviles sobre el build corregido, con ocho capturas seleccionadas. `pnpm check`: 510 pruebas correctas/100 omitidas; HTTP aislado: 37 comprobaciones correctas. [Acta móvil](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Zoom nativo pendiente de paso manual; sin merge.
+
+## [2026-10-04] verificación | Zoom nativo del panel
+
+- Recorridas las seis vistas al 200 % aplicado por el usuario, más mapa y cinco pestañas de conversación: doce mediciones sin desbordamiento horizontal. Comprobados cabecera, navegación, entrada de formulario y filtros; tres capturas seleccionadas y medidas versionadas en el [acta móvil](acceptance/2026-10-03-core-dashboard-mobile-closure.md).
+- HTTP aislado: 37 comprobaciones correctas. No se modificó código de aplicación ni se ejecutaron modelos o herramientas desde el inspector. Cierre de zoom documentado; merge sujeto a CI final.
