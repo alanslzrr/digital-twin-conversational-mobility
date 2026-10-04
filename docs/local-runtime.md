@@ -25,7 +25,7 @@ pnpm otp:up
 pnpm start:local
 ```
 
-Abre [EVE local](http://127.0.0.1:3000/evaluation). `start:local` supervisa Core, Web, agente y worker. No arranques otro supervisor en los mismos puertos. Si ya están activos, utiliza esa instalación.
+Abre [EVE local](http://127.0.0.1:3000/evaluation) o el [panel](http://127.0.0.1:3000/dashboard) con tu cuenta existente. `start:local` supervisa Core, Web, agente y worker. No arranques otro supervisor en los mismos puertos. Si ya están activos, utiliza esa instalación.
 
 Para parar:
 
