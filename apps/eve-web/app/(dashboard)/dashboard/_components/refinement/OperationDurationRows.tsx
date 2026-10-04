@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUi } from "@/i18n/provider";
 import { type DurationGroup, validateDuration } from "./core";
 /** Present existing metrics.durations only after its authenticated read succeeds. */
 export function OperationDurationRows({
@@ -13,24 +14,29 @@ export function OperationDurationRows({
 }: {
   groups: readonly DurationGroup[];
 }) {
+  const { t } = useUi();
+
   if (groups.length === 0)
     return (
       <p className="rf-meta">
-        No recorded operation duration samples returned.
+        {t("OperationDurationRows.noRecordedOperationDurationSamplesReturned")}
       </p>
     );
   if (groups.length > 25)
     return (
       <p className="rf-meta">
-        Duration groups exceed the verified reader limit; inspect the response.
+        {t(
+          "OperationDurationRows.durationGroupsExceedTheVerifiedReaderLimitInspectThe",
+        )}
       </p>
     );
   const operations = [...new Set(groups.map((g) => g.operation))].sort();
   return (
     <div className="rf-duration-groups">
       <p className="rf-meta">
-        Filled dot: median. Outline square: p95. Recorded summaries, not a
-        distribution.
+        {t(
+          "OperationDurationRows.filledDotMedianOutlineSquareP95RecordedSummariesNot",
+        )}
       </p>
       {operations.map((operation) => {
         const rows = groups
@@ -47,7 +53,10 @@ export function OperationDurationRows({
           <section key={operation} className="rf-duration-group">
             <div className="rf-panel-heading">
               <h3>{operation.replaceAll("_", " ")}</h3>
-              <span className="rf-meta">Recorded ms · scale 0–{max}</span>
+              <span className="rf-meta">
+                {t("OperationDurationRows.recordedMsScale0")}
+                {max}
+              </span>
             </div>
             <section
               className="rf-table-region"
@@ -55,16 +64,23 @@ export function OperationDurationRows({
             >
               <Table aria-label={`${operation.replaceAll("_", " ")} durations`}>
                 <caption className="sr-only">
-                  Median dot and p95 square are summary statistics, not a
-                  distribution or confidence interval.
+                  {t(
+                    "OperationDurationRows.medianDotAndP95SquareAreSummaryStatisticsNot",
+                  )}
                 </caption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Component</TableHead>
-                    <TableHead className="rf-number">Samples</TableHead>
-                    <TableHead className="rf-number">Median (ms)</TableHead>
-                    <TableHead className="rf-number">p95 (ms)</TableHead>
-                    <TableHead>Summary</TableHead>
+                    <TableHead>{t("activityView.component")}</TableHead>
+                    <TableHead className="rf-number">
+                      {t("OperationDurationRows.samples")}
+                    </TableHead>
+                    <TableHead className="rf-number">
+                      {t("OperationDurationRows.medianMs")}
+                    </TableHead>
+                    <TableHead className="rf-number">
+                      {t("OperationDurationRows.p95Ms")}
+                    </TableHead>
+                    <TableHead>{t("OperationDurationRows.summary")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -74,14 +90,14 @@ export function OperationDurationRows({
                       <TableCell className="rf-number">{g.n}</TableCell>
                       <TableCell className="rf-number">
                         {g.medianMs === null
-                          ? "Unavailable"
+                          ? t("activityView.unavailable")
                           : String(g.medianMs)}
                       </TableCell>
                       <TableCell className="rf-number">
                         {g.p95Ms === null
                           ? g.n < 20
-                            ? "Unavailable: n < 20"
-                            : "Unavailable"
+                            ? t("OperationDurationRows.unavailableN20")
+                            : t("activityView.unavailable")
                           : String(g.p95Ms)}
                       </TableCell>
                       <TableCell>
@@ -128,7 +144,9 @@ export function OperationDurationRows({
                           </svg>
                         ) : (
                           <span className="rf-meta">
-                            Summary unavailable; inconsistent fields.
+                            {t(
+                              "OperationDurationRows.summaryUnavailableInconsistentFields",
+                            )}
                           </span>
                         )}
                       </TableCell>
