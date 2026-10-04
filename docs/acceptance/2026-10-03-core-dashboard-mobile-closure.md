@@ -42,11 +42,18 @@ La comprobación nueva de cabecera verifica geometría y punto de interacción d
 | Resumen, claro, 320 px | [Abrir](../audits/assets/core-dashboard-mobile-closure-2026-10-03/overview-light-320x720.png) |
 | Fuentes, oscuro, 390 px | [Abrir](../audits/assets/core-dashboard-mobile-closure-2026-10-03/sources-dark-390x844.png) |
 
-## Zoom nativo: pendiente de paso manual
+## Zoom nativo: verificado el 4 de octubre
 
-La automatización no pudo controlar de forma fiable la ventana nativa; el acceso al ajuste interno de Chrome fue bloqueado por la política de la herramienta. No se utilizaron mecanismos alternativos para eludir ese bloqueo.
+El usuario aplicó el 200 % en el navegador integrado. La inspección posterior registró `devicePixelRatio=4`, ancho CSS 437 y alto 427, con `zoom` CSS igual a 1; no se aplicó una emulación CSS ni un viewport artificial. La referencia anterior de DPR 2 correspondía a otra ventana, por lo que no se comparan sus anchuras.
 
-Se dejó una pestaña de QA autenticada para que el usuario aplique el 200 % desde el menú del navegador. La referencia medida antes del ajuste es `devicePixelRatio=2`, ancho CSS 1718 y `zoom` CSS igual a 1. Falta verificar el cambio nativo y recorrer las vistas ampliadas. No se registra como aprobado ni se autoriza el merge por este resultado móvil solamente.
+Se recorrieron las seis vistas mediante la navegación, el mapa, el formulario de consulta sin ejecutarlo, los filtros de actividad y las cinco pestañas de conversación. Ninguno de los doce estados medidos desbordó horizontalmente el documento. La cabecera expandida conservó sus controles; el formulario admitió escritura; los filtros mantuvieron acciones visibles y contenido desplazable. La prueba se limita a este navegador, tema oscuro y tamaño de ventana; no equivale a aceptación visual universal.
+
+- [Mediciones de doce estados](../audits/assets/core-dashboard-zoom-2026-10-04/measurements.json).
+- [Cabecera](../audits/assets/core-dashboard-zoom-2026-10-04/header-200.png).
+- [Formulario](../audits/assets/core-dashboard-zoom-2026-10-04/query-form-200.png).
+- [Uso de conversación](../audits/assets/core-dashboard-zoom-2026-10-04/conversation-usage-200.png).
+
+El entorno aislado volvió a superar 37 comprobaciones HTTP autenticadas. Datos sintéticos, sin llamadas al modelo ni ejecución manual de herramientas. Cerrada la comprobación de zoom; el merge queda sujeto a la CI del commit final.
 
 ## Reproducción y código
 
