@@ -13,7 +13,7 @@ Alcance vigente al **04/10/2026**.
 | R1 — Dominio acordado | **Cerrado.** Fuentes y funciones entregadas, con las exclusiones aprobadas que se enumeran abajo | [Registro de productos](sources/README.md) |
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
-| Panel de Core y telemetría propia | **Integrado en PR #45 el 04/10/2026. CI verde en PR y main; revisión móvil y zoom nativo al 200 % completados. Instalación habitual no ejecutada; sin despliegue cloud** | [Cierre móvil y zoom](acceptance/2026-10-03-core-dashboard-mobile-closure.md), [actualización local](local-runtime.md#actualizar-el-panel); T10 diferido y lector de pantalla fuera del alcance |
+| Panel de Core y telemetría propia | **Integrado en PR #45 el 04/10/2026. CI verde en PR y main; revisión móvil y zoom nativo al 200 % completados. Runtime habitual reconstruido y smoke correcto; revisión autenticada pendiente de login; sin despliegue cloud** | [Cierre móvil y zoom](acceptance/2026-10-03-core-dashboard-mobile-closure.md), [actualización local](local-runtime.md#actualizar-el-panel); T10 diferido y lector de pantalla fuera del alcance |
 | Publicación Vercel | Alternativa futura; CLI retirada y configurador bloqueado por dependencia sin parche | [Preparación cloud](deployment.md) |
 
 ## Capacidades conservadas
@@ -58,4 +58,4 @@ El panel de Mobility Core y la telemetría propia están integrados en [PR #45](
 
 La ampliación no reabre E2, R0/R1, R2.1 ni R2. El spec original y los refinamientos son [archivo histórico](acceptance/index.md). La [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md) registra 72 vistas, 52 estados móviles y zoom nativo. La prueba con lector de pantalla fue retirada; T10 sigue diferido.
 
-La instalación habitual aún necesita aplicar migraciones, renovar el token y reconstruir/reiniciar Web/Core siguiendo [actualizar el panel](local-runtime.md#actualizar-el-panel). El merge no realizó esos cambios ni habilitó cloud.
+El 04/10/2026 se verificaron migraciones y token ya preparados, se respaldó la instalación y se reconstruyeron Web/Core y agente. El smoke habitual pasó sin modelo; la revisión autenticada espera el login del usuario. El procedimiento de mantenimiento está en [actualizar el panel](local-runtime.md#actualizar-el-panel). Cloud sigue deshabilitado.

@@ -143,7 +143,9 @@ Raw e histórico de movilidad tienen retención objetivo de 24 horas, purgada du
 
 ## Actualizar el panel
 
-La validación del panel se realizó en puertos 3002/3003 y esquema PostgreSQL desechable. No actualizó los servicios habituales 3000/3001. Para instalarlo, el responsable debe autorizar una ventana de actualización local y seguir el procedimiento existente de copia de seguridad/parada.
+Las auditorías iniciales usaron puertos 3002/3003 y esquema desechable. En la actualización habitual del 04/10/2026 se comprobó que 0021 y los permisos internos ya estaban presentes: no fue necesario reaplicarlos. Se respaldaron base, configuración y almacenamiento EVE, se reconstruyeron las aplicaciones y se verificó el smoke productivo sin llamadas al modelo. La inspección autenticada del panel está pendiente de login del usuario.
+
+Para futuras actualizaciones, comprobar primero lo ya instalado y seguir esta secuencia:
 
 1. Conserva una copia de seguridad con el procedimiento de esta página.
 2. Detén Web/Core con el supervisor existente; no reconstruyas OTP.
