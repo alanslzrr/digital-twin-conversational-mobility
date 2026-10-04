@@ -79,6 +79,21 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
           className="fixed top-3 left-2 z-30 flex items-center gap-1"
         >
           <Conversations />
+          <Button variant="ghost" size="sm" asChild>
+            <a href="/dashboard">Panel</a>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const id = window.location.pathname.split("/")[2];
+              window.location.href = id
+                ? `/dashboard/conversations/${id}`
+                : "/dashboard/conversations";
+            }}
+          >
+            Telemetría
+          </Button>
           <Button
             variant="ghost"
             size="sm"

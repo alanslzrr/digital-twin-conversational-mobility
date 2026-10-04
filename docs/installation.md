@@ -60,7 +60,7 @@ pnpm evaluator create 1 evaluador@example.test Evaluador
 
 Sustituye el correo y el nombre del ejemplo por los de la cuenta que vas a crear. El comando guarda la contraseña en un archivo privado de `data/evaluators/`. No repitas `create` si el slot ya existe. [Gestión de cuentas](evaluation.md).
 
-Las migraciones se aplican todas, en orden (0001–0020 en esta revisión), incluidas las tablas de experimentos aunque no se utilicen. No migres durante un build.
+Las migraciones se aplican todas, en orden (0001–0021 en esta revisión), incluidas las tablas de experimentos aunque no se utilicen. No migres durante un build.
 
 ## Datos y routing
 

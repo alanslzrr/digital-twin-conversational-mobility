@@ -1,0 +1,175 @@
+- link "Skip to content" [ref=e1986]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e1987]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e1988]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e1996]
+    - link "Mobility" [ref=e1997]
+    - link "Queries" [ref=e1998]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e1999]
+    - link "Activity" [ref=e2000]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e2001]
+  - link "Open chat" [ref=e1989]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e1990]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Activity"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:48:54 CEST"
+  - button "Pause refresh" [ref=e1991]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e1992]
+  - button "Data timing" [expanded=false, ref=e1993]
+- main
+  - heading "Activity" [level=1, ref=e1994]
+  - paragraph
+    - StaticText "Recorded operational events. Missing capture is not zero activity."
+  - group "Activity period"
+    - Legend
+      - StaticText "Activity period"
+    - LabelText [ref=e2002] clickable [cursor:pointer]
+      - radio "1 hour" [checked=false, ref=e2006]
+      - StaticText "1 hour"
+    - LabelText [ref=e2003] clickable [cursor:pointer]
+      - radio "24 hours" [checked=true, ref=e2007]
+      - StaticText "24 hours"
+    - LabelText [ref=e2004] clickable [cursor:pointer]
+      - radio "7 days" [checked=false, ref=e2008]
+      - StaticText "7 days"
+  - button "Filters" [expanded=false, ref=e1995]
+  - StaticText "Europe/Madrid · Best-effort capture"
+  - generic
+    - heading "Recorded activity" [level=2, ref=e2005]
+    - group "Chart series"
+      - Legend
+        - StaticText "Chart series"
+      - LabelText [ref=e2009] clickable [cursor:pointer]
+        - radio "Publications" [checked=false, ref=e2053]
+        - StaticText "Publications"
+      - LabelText [ref=e2010] clickable [cursor:pointer]
+        - radio "Errors" [checked=false, ref=e2054]
+        - StaticText "Errors"
+      - LabelText [ref=e2011] clickable [cursor:pointer]
+        - radio "Both" [checked=true, ref=e2055]
+        - StaticText "Both"
+    - paragraph
+      - StaticText "Publications 7 · Errors 1 · Counts, not traffic or freshness"
+    - image "Recorded count bars. Use the interval buttons or exact-data table for values."
+      - StaticText "0"
+      - StaticText "2"
+      - StaticText "3"
+      - StaticText "02 Oct, 11:48"
+      - StaticText "03 Oct, 11:48"
+    - group "Inspect count intervals"
+      - LabelText
+        - StaticText "Inspect interval"
+      - slider "Inspect interval" [ref=e2012]: 0
+    - paragraph
+      - StaticText "Europe/Madrid · Best-effort capture. Dashed gaps before retained evidence are unknown, not zero."
+    - group
+      - DisclosureTriangle "Exact interval data" [expanded=false]
+  - table
+    - rowgroup
+      - row
+        - columnheader "Instant" [ref=e2056]
+        - columnheader "Component" [ref=e2057]
+        - columnheader "Source / job" [ref=e2058]
+        - columnheader "Type" [ref=e2059]
+        - columnheader "Outcome" [ref=e2060]
+    - row
+      - cell "03/10/2026, 11:28:03 CEST" [ref=e2013]
+        - link "03/10/2026, 11:28:03 CEST" [ref=e2061]
+          - time
+            - StaticText "03/10/2026, 11:28:03 CEST"
+      - cell "Periodic capture" [ref=e2014]
+      - cell "bicimad / bicimad" [ref=e2015]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2016]
+      - cell "Completed" [ref=e2017]
+    - row
+      - cell "03/10/2026, 11:13:03 CEST" [ref=e2018]
+        - link "03/10/2026, 11:13:03 CEST" [ref=e2062]
+          - time
+            - StaticText "03/10/2026, 11:13:03 CEST"
+      - cell "Periodic capture" [ref=e2019]
+      - cell "bicimad / bicimad" [ref=e2020]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2021]
+      - cell "Completed" [ref=e2022]
+    - row
+      - cell "03/10/2026, 10:58:03 CEST" [ref=e2023]
+        - link "03/10/2026, 10:58:03 CEST" [ref=e2063]
+          - time
+            - StaticText "03/10/2026, 10:58:03 CEST"
+      - cell "Periodic capture" [ref=e2024]
+      - cell "bicimad / bicimad" [ref=e2025]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2026]
+      - cell "Completed" [ref=e2027]
+    - row
+      - cell "03/10/2026, 10:43:03 CEST" [ref=e2028]
+        - link "03/10/2026, 10:43:03 CEST" [ref=e2064]
+          - time
+            - StaticText "03/10/2026, 10:43:03 CEST"
+      - cell "Periodic capture" [ref=e2029]
+      - cell "bicimad / bicimad" [ref=e2030]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2031]
+      - cell "Completed" [ref=e2032]
+    - row
+      - cell "03/10/2026, 10:28:03 CEST" [ref=e2033]
+        - link "03/10/2026, 10:28:03 CEST" [ref=e2065]
+          - time
+            - StaticText "03/10/2026, 10:28:03 CEST"
+      - cell "Periodic capture" [ref=e2034]
+      - cell "bicimad / bicimad" [ref=e2035]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2036]
+      - cell "Failed Recorded issue. Open details for evidence." [ref=e2037]
+        - StaticText "Failed"
+        - paragraph
+          - StaticText "Recorded issue. Open details for evidence."
+    - row
+      - cell "03/10/2026, 10:13:03 CEST" [ref=e2038]
+        - link "03/10/2026, 10:13:03 CEST" [ref=e2066]
+          - time
+            - StaticText "03/10/2026, 10:13:03 CEST"
+      - cell "Periodic capture" [ref=e2039]
+      - cell "bicimad / bicimad" [ref=e2040]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2041]
+      - cell "Completed" [ref=e2042]
+    - row
+      - cell "03/10/2026, 9:58:03 CEST" [ref=e2043]
+        - link "03/10/2026, 9:58:03 CEST" [ref=e2067]
+          - time
+            - StaticText "03/10/2026, 9:58:03 CEST"
+      - cell "Periodic capture" [ref=e2044]
+      - cell "bicimad / bicimad" [ref=e2045]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2046]
+      - cell "Completed" [ref=e2047]
+    - row
+      - cell "03/10/2026, 9:43:03 CEST" [ref=e2048]
+        - link "03/10/2026, 9:43:03 CEST" [ref=e2068]
+          - time
+            - StaticText "03/10/2026, 9:43:03 CEST"
+      - cell "Periodic capture" [ref=e2049]
+      - cell "bicimad / bicimad" [ref=e2050]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e2051]
+      - cell "Completed" [ref=e2052]
+- alert

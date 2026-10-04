@@ -51,3 +51,9 @@ La UI procede del Web Chat de EVE 0.65.0, con Better Auth como puerta de acceso.
 Los resultados de las comprobaciones de acceso e historial se recogen en el [índice de actas](acceptance/index.md).
 
 El historial obtiene una página de metadatos de Core cada vez que se abre o se avanza en el listado. Al seleccionar una conversación, EVE recupera sus mensajes. [Flujo de permisos](architecture.md#dos-históricos-distintos), [implementación Core](../apps/mobility-core/src/conversations.ts), [guard de canal](../apps/eve-web/src/evaluation-guard.ts) y [acta R2.1](acceptance/2026-09-28-conversation-history.md).
+
+## Telemetría del panel
+
+Cada cuenta activa puede consultar datos y operación comunes, pero solo sus conversaciones, payloads y ejecuciones. Revocar o caducar el acceso impide todas esas lecturas; no existe bypass de desarrollo. Las trazas comienzan con la nueva instrumentación y pueden ser parciales por timeout, cuota o caída del sink. No se inventa uso histórico ni se convierte `null` en cero.
+
+La retención de observabilidad es de hasta siete días, independiente de la transcripción EVE. La purga física se ejecuta en mantenimiento acotado del worker por actividad; el filtro de acceso no espera a esa purga. Véanse [límites](reference/system.md#panel-y-telemetría) y [uso](user-guide.md#panel-privado).

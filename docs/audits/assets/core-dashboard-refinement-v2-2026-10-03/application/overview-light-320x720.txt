@@ -1,0 +1,262 @@
+- link "Skip to content" [ref=e4312]
+- banner
+  - button "Toggle navigation" [ref=e4313]
+    - StaticText "Toggle Sidebar"
+  - button "Pause refresh" [ref=e4314]
+  - button "Refresh stored data" [ref=e4315]
+  - button "Data timing" [expanded=false, ref=e4316]
+- main
+  - heading "Overview" [level=1, ref=e4317]
+  - LabelText
+    - StaticText "Parking category"
+  - combobox "Parking category" [expanded=false, ref=e4318]: Categoría publicada A (a)
+    - MenuListPopup
+      - option "Categoría publicada A (a)" [selected, ref=e4364]
+      - option "Categoría publicada B (b)" [ref=e4365]
+  - region "Mobility indicators" [ref=e4319]
+    - heading "Available bikes" [level=2, ref=e4343]
+      - link "Available bikes" [ref=e4366]
+    - button "Available bikes definition" [ref=e4344]
+    - paragraph
+      - StaticText "—"
+      - StaticText "Unavailable"
+      - StaticText "bikes"
+    - paragraph
+      - StaticText "0 / 4 stored stations"
+    - paragraph
+      - StaticText "Comparison unavailable"
+    - heading "Published parking spaces" [level=2, ref=e4345]
+      - link "Published parking spaces" [ref=e4367]
+    - button "Published parking spaces definition" [ref=e4346]
+    - paragraph
+      - StaticText "3"
+      - StaticText "spaces"
+    - paragraph
+      - StaticText "1 / 1 stored parking facilities"
+    - paragraph
+      - StaticText "Comparison unavailable"
+    - heading "Active published notices" [level=2, ref=e4347]
+      - link "Active published notices" [ref=e4368]
+    - button "Active published notices definition" [ref=e4348]
+    - paragraph
+      - StaticText "2"
+      - StaticText "notices"
+    - paragraph
+      - StaticText "Non-exhaustive published coverage"
+    - paragraph
+      - StaticText "Comparison unavailable"
+    - heading "Product readiness" [level=2, ref=e4349]
+      - link "Product readiness" [ref=e4369]
+    - button "Product readiness definition" [ref=e4350]
+    - paragraph
+      - StaticText "6"
+      - StaticText " / 13dynamic products"
+    - paragraph
+      - StaticText "Enabled products with usable evidence"
+    - paragraph
+      - StaticText "Comparison unavailable"
+  - heading "Product evidence" [level=2, ref=e4320]
+  - link "Sources" [ref=e4321]
+  - paragraph
+    - StaticText "Readiness of observed products, not citywide coverage."
+  - region "6 of 13 enabled products have usable evidence. One cell per product." [ref=e4322]
+    - link "Road incidents: usable evidence" [ref=e4351]
+    - link "EMT alerts: usable evidence" [ref=e4352]
+    - link "Renfe estimates: no usable evidence" [ref=e4353]
+    - link "Renfe alerts: no usable evidence" [ref=e4354]
+    - link "BiciMAD bikes: no usable evidence" [ref=e4355]
+    - link "Air quality: usable evidence" [ref=e4356]
+    - link "Traffic sensors: usable evidence" [ref=e4357]
+    - link "Parking occupancy: usable evidence" [ref=e4358]
+    - link "Weather observations: no usable evidence" [ref=e4359]
+    - link "EMT arrivals: no usable evidence" [ref=e4360]
+    - link "Hourly forecast: usable evidence" [ref=e4361]
+    - link "Daily forecast: no usable evidence" [ref=e4362]
+    - link "Weather warnings: no usable evidence" [ref=e4363]
+  - heading "Periodic evidence" [level=3, ref=e4323]
+  - link "Road incidents" [ref=e4324]
+  - StaticText "Usable evidence"
+  - figure
+    - Figcaption
+      - StaticText "Record freshness · 1 records"
+    - DescriptionList
+      - term "Recent"
+      - definition
+        - StaticText "1"
+      - term "Stale"
+      - definition
+        - StaticText "0"
+      - term "Unavailable"
+      - definition
+        - StaticText "0"
+  - link "EMT alerts" [ref=e4325]
+  - StaticText "Usable evidence"
+  - figure
+    - Figcaption
+      - StaticText "Record freshness · 1 records"
+    - DescriptionList
+      - term "Recent"
+      - definition
+        - StaticText "1"
+      - term "Stale"
+      - definition
+        - StaticText "0"
+      - term "Unavailable"
+      - definition
+        - StaticText "0"
+  - link "Renfe estimates" [ref=e4326]
+  - StaticText "No usable evidence"
+  - generic
+    - StaticText "Count unavailable · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - link "Renfe alerts" [ref=e4327]
+  - StaticText "No usable evidence"
+  - generic
+    - StaticText "Count unavailable · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - link "BiciMAD bikes" [ref=e4328]
+  - StaticText "No usable evidence"
+  - figure
+    - Figcaption
+      - StaticText "Record freshness · 4 stations"
+    - DescriptionList
+      - term "Recent"
+      - definition
+        - StaticText "0"
+      - term "Stale"
+      - definition
+        - StaticText "3"
+      - term "Unavailable"
+      - definition
+        - StaticText "1"
+  - link "Air quality" [ref=e4329]
+  - StaticText "Usable evidence"
+  - figure
+    - Figcaption
+      - StaticText "Record freshness · 1 measurements"
+    - DescriptionList
+      - term "Recent"
+      - definition
+        - StaticText "1"
+      - term "Stale"
+      - definition
+        - StaticText "0"
+      - term "Unavailable"
+      - definition
+        - StaticText "0"
+  - link "Traffic sensors" [ref=e4330]
+  - StaticText "Usable evidence"
+  - figure
+    - Figcaption
+      - StaticText "Record freshness · 1 records"
+    - DescriptionList
+      - term "Recent"
+      - definition
+        - StaticText "1"
+      - term "Stale"
+      - definition
+        - StaticText "0"
+      - term "Unavailable"
+      - definition
+        - StaticText "0"
+  - link "Parking occupancy" [ref=e4331]
+  - StaticText "Usable evidence"
+  - figure
+    - Figcaption
+      - StaticText "Record freshness · 2 category samples"
+    - DescriptionList
+      - term "Recent"
+      - definition
+        - StaticText "2"
+      - term "Stale"
+      - definition
+        - StaticText "0"
+      - term "Unavailable"
+      - definition
+        - StaticText "0"
+  - link "Weather observations" [ref=e4332]
+  - StaticText "No usable evidence"
+  - generic
+    - StaticText "Count unavailable · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - heading "On-demand evidence" [level=3, ref=e4333]
+  - link "EMT arrivals" [ref=e4334]
+  - StaticText "No usable evidence"
+  - generic
+    - StaticText "0 queried resources · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - link "Hourly forecast" [ref=e4335]
+  - StaticText "Usable evidence"
+  - generic
+    - StaticText "1 queried resources · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - link "Daily forecast" [ref=e4336]
+  - StaticText "No usable evidence"
+  - generic
+    - StaticText "Count unavailable · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - link "Weather warnings" [ref=e4337]
+  - StaticText "No usable evidence"
+  - generic
+    - StaticText "Count unavailable · Breakdown unavailable."
+    - LineBreak "\n"
+    - StaticText "Recent unknown · Stale unknown · Unavailable unknown"
+  - link "Browse reference catalogs" [ref=e4338]
+  - heading "Needs attention" [level=2, ref=e4339]
+  - list
+    - listitem [level=1]
+      - paragraph
+        - StaticText "Weather observations · No stored evidence"
+      - link "Inspect evidence" [ref=e4370]
+    - listitem [level=1]
+      - paragraph
+        - StaticText "Renfe estimates · No stored evidence"
+      - link "Inspect evidence" [ref=e4371]
+    - listitem [level=1]
+      - paragraph
+        - StaticText "Renfe alerts · No stored evidence"
+      - link "Inspect evidence" [ref=e4372]
+  - heading "Recent activity" [level=2, ref=e4340]
+  - link "View all" [ref=e4341]
+  - radiogroup "Recent activity period" [ref=e4342] focusable [tabindex]
+    - generic
+      - radio "1 hour" [checked=false, ref=e4373]
+      - LabelText
+        - StaticText "1 hour"
+    - generic
+      - radio "24 hours" [checked=true, ref=e4374]
+      - LabelText
+        - StaticText "24 hours"
+    - generic
+      - radio "7 days" [checked=false, ref=e4375]
+      - LabelText
+        - StaticText "7 days"
+  - list
+    - listitem [level=1]
+      - link "Information stored · bicimad" [ref=e4376]
+        - StaticText "Information stored · bicimad"
+      - paragraph
+        - StaticText "Completed · "
+        - time
+          - StaticText "03/10/2026, 16:49:55 CEST"
+    - listitem [level=1]
+      - link "Information stored · bicimad" [ref=e4377]
+        - StaticText "Information stored · bicimad"
+      - paragraph
+        - StaticText "Completed · "
+        - time
+          - StaticText "03/10/2026, 16:34:55 CEST"
+    - listitem [level=1]
+      - link "Information stored · bicimad" [ref=e4378]
+        - StaticText "Information stored · bicimad"
+      - paragraph
+        - StaticText "Completed · "
+        - time
+          - StaticText "03/10/2026, 16:19:55 CEST"
+- alert

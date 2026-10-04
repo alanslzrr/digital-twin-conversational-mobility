@@ -1,0 +1,17 @@
+- link "Skip to content" [ref=e843]
+- banner
+  - button "Open navigation" [expanded=false, ref=e849]
+  - button "Pause refresh" [ref=e844]
+  - button "Refresh stored data" [ref=e845]
+  - button "Data timing" [expanded=false, ref=e846]
+- main
+  - heading "My conversations" [level=1, ref=e847]
+  - paragraph
+    - StaticText "Inspect your sessions, captured tool calls and reported usage."
+  - generic
+    - heading "No captured conversations yet" [level=2, ref=e850]
+    - paragraph
+      - StaticText "Open chat to start a conversation. Only your sessions with current access appear here; missing capture is not reconstructed."
+    - link "Open chat" [ref=e851]
+  - button "Capture and retention" [expanded=false, ref=e848]
+- alert

@@ -1,0 +1,51 @@
+- link "Skip to content" [ref=e2712]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e2713]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e2714]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e2722]
+    - link "Mobility" [ref=e2723]
+    - link "Queries" [ref=e2724]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e2725]
+    - link "Activity" [ref=e2726]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e2727]
+  - link "Open chat" [ref=e2715]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e2716]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "My conversations"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:49:15 CEST"
+  - button "Pause refresh" [ref=e2717]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e2718]
+  - button "Data timing" [expanded=false, ref=e2719]
+- main
+  - heading "My conversations" [level=1, ref=e2720]
+  - paragraph
+    - StaticText "Inspect your sessions, captured tool calls and reported usage."
+  - article
+    - heading "Conversation 1" [level=2, ref=e2728]
+      - StaticText "Conversation 1"
+    - paragraph
+      - StaticText "Created: "
+      - time
+        - StaticText "03/10/2026, 11:43:03 CEST"
+      - StaticText " · Best-effort capture"
+    - link "Open chat" [ref=e2729]
+    - link "Inspect conversation" [ref=e2730]
+  - button "Capture and retention" [expanded=false, ref=e2721]
+- alert

@@ -1,0 +1,48 @@
+- link "Skip to content" [ref=e457]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e458]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e459]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e466]
+    - link "Mobility" [ref=e467]
+    - link "Queries" [ref=e468]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e469]
+    - link "Activity" [ref=e470]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e471]
+  - link "Open chat" [ref=e460]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e461]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Sources"
+  - StaticText "Read failed"
+  - StaticText " · "
+  - StaticText "no successful read"
+  - button "Pause refresh" [ref=e462]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e463]
+  - button "Data timing" [expanded=false, ref=e464]
+- main
+  - heading "Sources" [level=1, ref=e465]
+  - paragraph
+    - StaticText "Stored provider evidence and scoped operational signals."
+  - alert
+    - StaticText "Unable to load stored data. This is not an empty result."
+  - generic
+    - heading "Source evidence unavailable" [level=2, ref=e472]
+    - paragraph
+      - StaticText "The authenticated source read failed. No empty groups or issue totals can be inferred. Worker signals below are independent."
+  - group
+    - DisclosureTriangle "Worker signals · independent of provider evidence" [expanded=false]
+      - StaticText "Worker signals · independent of provider evidence"
+- alert

@@ -1,0 +1,40 @@
+- generic
+  - dialog "Mobility Core navigation"
+    - generic
+      - heading "Mobility Core navigation" [level=2, ref=e1031]
+      - paragraph
+        - StaticText "Displays the mobile sidebar."
+    - link "Mobility Core" [ref=e1028]
+      - StaticText "Mobility Core"
+    - navigation "Dashboard" [ref=e1029]
+      - list
+        - listitem [level=1]
+          - link "Overview" [ref=e1035]
+            - StaticText "Overview"
+        - listitem [level=1]
+          - link "Mobility" [ref=e1036]
+            - StaticText "Mobility"
+        - listitem [level=1]
+          - link "Queries" [ref=e1037]
+            - StaticText "Queries"
+        - listitem [level=1]
+          - link "Sources" [ref=e1038]
+            - StaticText "Sources"
+        - listitem [level=1]
+          - link "Activity" [ref=e1039]
+            - StaticText "Activity"
+        - listitem [level=1]
+          - link "My conversations" [ref=e1040]
+            - StaticText "My conversations"
+    - list
+      - listitem [level=1]
+        - button "Account: QA evaluator 1" [expanded=false, ref=e1032]
+          - StaticText "QA evaluator 1"
+      - listitem [level=1]
+        - link "Open chat" [ref=e1033]
+          - StaticText "Open chat"
+      - listitem [level=1]
+        - button "Sign out" [ref=e1034]
+          - StaticText "Sign out"
+    - button "Close" [ref=e1030]
+      - StaticText "Close"

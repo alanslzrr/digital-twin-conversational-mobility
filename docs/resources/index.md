@@ -8,6 +8,7 @@ Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las
 
 ## En esta página
 
+- [Seguridad de dependencias](#seguridad-de-dependencias--03102026)
 - [Tecnología](#tecnología)
 - [Transporte y routing](#transporte-y-routing)
 - [Meteorología y geografía](#meteorología-y-geografía)
@@ -31,6 +32,26 @@ Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las
 | [GTFS Schedule](https://gtfs.org/documentation/schedule/reference/) | Calendarios, excepciones, horarios y frecuencias. Frecuencia no exacta no es salida exacta | [Preparador CRTM](../../scripts/prepare-crtm.py), [consulta](../../apps/mobility-core/src/crtm.ts) |
 | [GTFS Realtime](https://gtfs.org/documentation/realtime/reference/) | Viajes, paradas, estimaciones y avisos. Aplicar solo con identidad y evidencia | [Reglas RT](../../packages/domain/src/routing-realtime.ts), [routing](../routing-releases.md#tiempo-real-sobre-rutas-previstas) |
 | [GTFS accesibilidad](https://gtfs.org/getting-started/features/accessibility/) y [pathways](https://gtfs.org/getting-started/features/pathways/) | Declaraciones de vehículo/parada distintas de una ruta accesible completa | [Investigación](../research/2026-09-29-static-accessibility.md), [dominio](../../packages/domain/src/accessibility.ts), [acta](../acceptance/2026-09-29-static-accessibility.md) |
+
+### Panel especificado el 02/10/2026
+
+La [auditoría de PR #45](../audits/2026-10-02-core-dashboard-review.md) contrasta la implementación posterior con estas decisiones. La tabla siguiente conserva el estado de la especificación inicial.
+
+| Referencia | Uso acordado | Estado local |
+| --- | --- | --- |
+| [Community Agent](https://github.com/vercel-labs/community-agent-template/tree/9c9efb50f79d3211ecf8ff15ba278eb5457a2a1b) y [MIT](https://github.com/vercel-labs/community-agent-template/blob/9c9efb50f79d3211ecf8ff15ba278eb5457a2a1b/LICENSE) | Adaptar shell/sidebar/actividad al estilo EVE; no backend, OAuth, Redis ni fallbacks demo | [Spec de una PR](../plans/2026-10-02-core-dashboard.md); sin implementar |
+| [SWR](https://swr.vercel.app/docs/advanced/understanding) | Refrescar consultas almacenadas de la vista activa, separado de heartbeat y ejecución manual | Dependencia por incorporar; política detallada en el spec |
+| [Leaflet 1.9.4](https://leafletjs.com/reference.html) y [política tiles OSM](https://operations.osmfoundation.org/policies/tiles/) | Mapa de entidades con raster externo autorizado, atribución y caché HTTP, sin proveedor nuevo de movilidad | Leaflet/tipos por incorporar; sin claves ni servidor cartográfico nuevo |
+
+### Revisión visual de PR #45
+
+| Referencia | Propósito y conclusión | Fecha y uso local |
+| --- | --- | --- |
+| [Demo Community Agent](https://community-agent.labs.vercel.dev/) | Composición de indicadores, tendencia y actividad; no reutilizar métricas de Slack ni cifras demo como datos de movilidad | Consultada 02/10/2026; [spec de refinamiento](../audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente) |
+| [Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md) | Contrastar teclado, semántica, números, filtros y estados de carga; adaptar sin cambiar el chat oficial | Consultadas 02/10/2026; [auditoría visual](../audits/2026-10-02-core-dashboard-review.md#auditoría-visual) |
+| [better-ui](https://github.com/jakubkrehel/skills/tree/main/skills/better-ui) | Superficies, radios, alineación, iconos y feedback consistente; preservar componentes/tokens del proyecto | Repositorio consultado y skill local existente leída el 02/10/2026; [aplicación al panel](../audits/2026-10-02-core-dashboard-review.md#sistema-visual-e-interacción). No reinstalada ni añadida como dependencia de la app. |
+| [emil-design-eng](https://github.com/emilkowalski/skills) | Jerarquía, estados e interacción intencional; no animación ornamental o repetitiva durante polling | Repositorio consultado y skill local existente leída el 02/10/2026; [criterios de revisión](../audits/2026-10-02-core-dashboard-review.md#referencias-y-skills). No sustituye el estilo EVE. |
+| [Cuatro imágenes de inspiración del usuario](../audits/assets/core-dashboard/README.md) | KPI/gráfico coherente, lista/detalle operativo, selección clara y sidebar agrupada | Aportadas y archivadas sin editar el 02/10/2026. Datos de demo, no QA de Mobility Core; [interpretación y límites](../audits/2026-10-02-core-dashboard-review.md#referencias-y-skills). |
 
 ## Transporte y routing
 
@@ -107,3 +128,23 @@ Las altas OpenAI/EMT/AEMET, novedades AEMET, política Nominatim, EVE, Better Au
 - Las condiciones de reutilización se consultan por producto en el registro de fuentes.
 
 Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones](../log.md).
+
+## Panel privado y captura · 02/10/2026
+
+| Referencia | Propósito y uso local |
+| --- | --- |
+| [Community Agent, revisión fijada](https://github.com/vercel-labs/community-agent-template/tree/9c9efb50f79d3211ecf8ff15ba278eb5457a2a1b) | Composición sidebar/header, no backend ni métricas; adaptación MIT en vendor/community-agent. |
+| [Leaflet 1.9.4 API](https://leafletjs.com/reference.html) | Mapa diferido, círculos canvas, viewport acotado y atribución. |
+| [Política de teselas OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/) | HTTPS normal, atribución visible, sin barridos/offline/cache-busting ni identidad en URL. |
+| [PostgreSQL 17: timeouts](https://www.postgresql.org/docs/17/runtime-config-client.html) | Límites locales de sentencia, lock y transacción complementados por watchdog/checkout del pool dedicado. |
+| [SWR: gestión de errores](https://swr.vercel.app/docs/error-handling) | Reintentos limitados, Retry-After y cadencia mínima adicional; deduplicación sola no impone frecuencia. |
+
+[Arquitectura](../architecture.md#panel-y-captura-de-observabilidad) → [referencia](../reference/system.md#panel-y-telemetría) → [acta](../acceptance/2026-10-02-core-dashboard.md).
+
+
+## Seguridad de dependencias · 03/10/2026
+
+| Referencia | Propósito, conclusión y uso local |
+| --- | --- |
+| [GitHub Advisory Database: GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | Aviso revisado y actualizado el 02/10/2026: `braces <=3.0.3`, agotamiento de pila, gravedad alta, sin versión corregida. Sustenta el bloqueo histórico de CI y la posterior [retirada de la CLI vulnerable](../acceptance/2026-10-03-core-dashboard-merge-readiness.md). |
+| [Registro npm: braces](https://registry.npmjs.org/braces/latest) y [Vercel](https://registry.npmjs.org/vercel/latest) | Consultados con `pnpm view` el 03/10/2026: braces 3.0.3 y CLI 62.2.0. Los builders de la CLI mantienen ts-morph 12.0.0; una actualización de CLI sola no elimina la cadena. No se cambiaron dependencias ni se relajó la auditoría. |

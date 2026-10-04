@@ -1,0 +1,22 @@
+- link "Skip to content" [ref=e3251]
+- banner
+  - button "Open navigation" [expanded=false, ref=e3257]
+  - button "Pause refresh" [ref=e3252]
+  - button "Refresh stored data" [ref=e3253]
+  - button "Data timing" [expanded=false, ref=e3254]
+- main
+  - heading "My conversations" [level=1, ref=e3255]
+  - paragraph
+    - StaticText "Inspect your sessions, captured tool calls and reported usage."
+  - article
+    - heading "Conversation 1" [level=2, ref=e3258]
+      - StaticText "Conversation 1"
+    - paragraph
+      - StaticText "Created: "
+      - time
+        - StaticText "03/10/2026, 11:43:03 CEST"
+      - StaticText " · Best-effort capture"
+    - link "Open chat" [ref=e3259]
+    - link "Inspect conversation" [ref=e3260]
+  - button "Capture and retention" [expanded=false, ref=e3256]
+- alert

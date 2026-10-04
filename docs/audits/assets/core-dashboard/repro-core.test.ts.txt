@@ -1,0 +1,164 @@
+import { randomUUID } from "node:crypto";
+import { readdir, readFile } from "node:fs/promises";
+import postgres from "postgres";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+const fixture = vi.hoisted(() => ({
+  sql: null as ReturnType<typeof postgres> | null,
+}));
+vi.mock("../database", () => ({ database: () => fixture.sql }));
+
+import { readEntities } from "../dashboard/entities";
+import { executeManual, readExecution } from "../dashboard/executions";
+import { readSources, readTrace, readOperationalEvents } from "../dashboard/readers";
+import { boundedTransaction, observabilityPool } from "./database";
+import { pruneObservability } from "./retention";
+import { storeTelemetry } from "./telemetry";
+
+const schema = `dashboard_e2e_${randomUUID().replaceAll("-", "")}`;
+const owner = randomUUID(),
+  other = randomUUID();
+let admin: ReturnType<typeof postgres>, sql: ReturnType<typeof postgres>;
+let originalUrl: string | undefined;
+const payload = () => ({
+  schemaVersion: 1,
+  id: randomUUID(),
+  kind: "model_input",
+  capturedAt: new Date().toISOString(),
+  originalBytes: 100,
+  retainedBytes: 80,
+  redacted: false,
+  truncated: false,
+  captureStatus: "captured",
+  reason: null,
+  content: {
+    messages: [
+      { role: "user", parts: [{ type: "text", text: "synthetic message" }] },
+    ],
+    functions: [],
+  },
+});
+const event = (extra = {}) => ({
+  eventKey: randomUUID(),
+  kind: "attempt_completed",
+  occurredAt: new Date().toISOString(),
+  turnId: "turn1",
+  stepIndex: 0,
+  sequence: 1,
+  purpose: "step",
+  attemptId: randomUUID(),
+  callId: null,
+  tool: null,
+  providerResponseId: "response1",
+  status: "succeeded",
+  durationMs: 12,
+  isError: null,
+  errorCode: null,
+  usage: {
+    inputTokens: 10,
+    outputTokens: 4,
+    cachedInputTokens: 2,
+    reasoningTokens: null,
+  },
+  payloadIds: [],
+  captureStatus: "captured",
+  sentCallIds: [],
+  ...extra,
+});
+const batch = (
+  events: unknown[],
+  payloads: unknown[] = [],
+  principalId = owner,
+  sessionId = "owned",
+) => ({
+  schemaVersion: 1,
+  batchId: randomUUID(),
+  principalId,
+  sessionId,
+  events,
+  payloads,
+});
+describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
+  "dashboard end-to-end isolated PostgreSQL",
+  () => {
+    beforeAll(async () => {
+      originalUrl = process.env.DATABASE_URL;
+      if (
+        !originalUrl ||
+        !["localhost", "127.0.0.1", "[::1]"].includes(
+          new URL(originalUrl).hostname,
+        )
+      )
+        throw Error("Local DB required");
+      admin = postgres(originalUrl, { max: 1, onnotice: () => {} });
+      await admin.unsafe(`CREATE SCHEMA ${schema}`);
+      sql = postgres(originalUrl, {
+        max: 4,
+        connection: { search_path: `${schema},public` },
+        onnotice: () => {},
+      });
+      fixture.sql = sql;
+      const migrationDir = new URL(
+        "../../../../infra/postgres/migrations/",
+        import.meta.url,
+      );
+      for (const name of (await readdir(migrationDir))
+        .filter((n) => n.endsWith(".sql"))
+        .sort())
+        await sql.unsafe(await readFile(new URL(name, migrationDir), "utf8"));
+      for (const [i, id] of [owner, other].entries()) {
+        await sql`INSERT INTO auth_user(id,name,email,"emailVerified") VALUES(${id},'synthetic',${`fixture${i}@example.invalid`},false)`;
+        await sql`INSERT INTO evaluator(id,slot,label,auth_user_id) VALUES(${id},${i + 1},'synthetic',${id})`;
+      }
+      await sql`INSERT INTO evaluation_session(session_id,evaluator_id) VALUES('owned',${owner}),('foreign',${other})`;
+      const u = new URL(originalUrl);
+      u.searchParams.set("options", `-c search_path=${schema},public`);
+      process.env.DATABASE_URL = u.href;
+      process.env.MOBILITY_MCP_SECRET = "synthetic-dashboard-cursor-secret";
+    }, 20000);
+    afterAll(async () => {
+      await observabilityPool().end();
+      await sql?.end();
+      if (admin) {
+        await admin.unsafe(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);
+        await admin.end();
+      }
+      if (originalUrl) process.env.DATABASE_URL = originalUrl;
+    });
+
+    it("audit: missing usage must keep all token counters unknown", async () => {
+      await sql`INSERT INTO evaluation_session(session_id,evaluator_id) VALUES('audit-no-usage',${owner})`;
+      await storeTelemetry(batch([event({ usage: null })], [], owner, 'audit-no-usage'));
+      const summary = await readTrace(owner, 'audit-no-usage', 'summary', new URLSearchParams());
+      expect(summary).toMatchObject({usage:{inputTokens:null,outputTokens:null,cachedInputTokens:null,reasoningTokens:null}});
+    });
+    it("audit: each forecast row retains its own valid interval and variable", async () => {
+      const now=Date.now(), periodFrom=new Date(now+3600000).toISOString(), periodTo=new Date(now+7200000).toISOString();
+      const payload={name:'Madrid',periods:[{kind:'temperature',value:18,unit:'°C',validFrom:periodFrom,validTo:periodTo,basis:'interval'}]};
+      await sql`INSERT INTO weather_product(resource,payload,version,issued_at,valid_from,valid_to,fetched_at,checked_at) VALUES('forecast:28079',${sql.json(payload)},'audit1',now(),now(),now()+interval '2 days',now(),now())`;
+      const result=await readEntities({category:'environment',source:'aemet'},owner);
+      expect(result.entities[0]?.evidence.validFrom).toBe(periodFrom);
+      expect(result.entities[0]?.measurements[0]?.name).toBe('temperature');
+    });
+    it("audit: old-issued forecast is not rejuvenated by recent 304 check", async () => {
+      await sql`UPDATE weather_product SET issued_at=now()-interval '2 days',checked_at=now(),valid_to=now()+interval '1 day' WHERE resource='forecast:28079'`;
+      const result=await readEntities({category:'environment',source:'aemet'},owner);
+      expect(result.entities[0]?.evidence.freshness).toBe('unavailable');
+    });
+    it("audit: display and filter weather errors consistently with Core freshness", async () => {
+      await sql`UPDATE weather_product SET issued_at=now(),checked_at=now(),error_code='upstream_timeout' WHERE resource='forecast:28079'`;
+      const result=await readEntities({category:'environment',source:'aemet'},owner);
+      expect(result.entities[0]?.evidence.freshness).toBe('stale');
+      const filtered=await readEntities({category:'environment',source:'aemet',freshness:'stale'},owner);
+      expect(filtered.entities).toHaveLength(1);
+    });
+    it("audit control: reject cursor reuse across different time windows", async () => {
+      await sql`INSERT INTO operational_event(event_key,occurred_at,component,event_type,severity,source_id,operation_id,outcome) VALUES('audit-event1',now()-interval '1 minute','ingestion','publication','info','bicimad','audit-op1','success'),('audit-event2',now()-interval '2 minutes','ingestion','publication','info','bicimad','audit-op2','success')`;
+      const now=Date.now();
+      const q={from:new Date(now-7*86400000).toISOString(),to:new Date(now).toISOString(),limit:1};
+      const first=await readOperationalEvents(q,owner);
+      const next={...q,from:new Date(now+1-7*86400000).toISOString(),to:new Date(now+1).toISOString(),cursor:first.nextCursor};
+      await expect(readOperationalEvents(next,owner)).rejects.toMatchObject({status:400,code:'invalid_cursor'});
+    });
+  },
+);

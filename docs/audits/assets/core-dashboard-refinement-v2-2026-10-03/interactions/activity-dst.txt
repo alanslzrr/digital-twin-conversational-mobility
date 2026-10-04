@@ -1,0 +1,112 @@
+- generic
+  - main
+    - region "Recorded activity" [ref=e315]
+      - tabpanel "Chart" [ref=e320] focusable [tabindex]
+        - generic
+          - StaticText "03 Oct, 16:05 CEST–03 Oct, 17:05 CEST · Publications: 3 · Errors: 0"
+  - dialog "Activity filters"
+    - heading "Activity filters" [level=2, ref=e440]
+    - button "Close details" [ref=e441]
+    - paragraph
+      - StaticText "Custom dates are Europe/Madrid civil times; transport uses UTC instants."
+    - group
+      - LabelText
+        - StaticText "Source"
+      - combobox "Source" [expanded=false, ref=e442]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e450]
+          - option "renfe" [ref=e451]
+          - option "emt" [ref=e452]
+          - option "bicimad" [ref=e453]
+          - option "crtm" [ref=e454]
+          - option "aemet" [ref=e455]
+          - option "dgt" [ref=e456]
+          - option "madrid-air" [ref=e457]
+          - option "madrid-traffic" [ref=e458]
+          - option "madrid-parking" [ref=e459]
+          - option "osm" [ref=e460]
+    - group
+      - LabelText
+        - StaticText "Severity"
+      - combobox "Severity" [expanded=false, ref=e443]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e461]
+          - option "Information" [ref=e462]
+          - option "Warning" [ref=e463]
+          - option "Failed" [ref=e464]
+    - group
+      - LabelText
+        - StaticText "Event type"
+      - combobox "Event type" [expanded=false, ref=e444]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e465]
+          - option "Information stored" [ref=e466]
+          - option "Refresh attempt" [ref=e467]
+          - option "Worker lease lost" [ref=e468]
+          - option "Lease recovered" [ref=e469]
+          - option "Work released" [ref=e470]
+    - group
+      - LabelText
+        - StaticText "Outcome"
+      - combobox "Outcome" [expanded=false, ref=e445]: All
+        - MenuListPopup
+          - option "All" [selected, ref=e471]
+          - option "Completed" [ref=e472]
+          - option "Historical only" [ref=e473]
+          - option "Failed" [ref=e474]
+          - option "Worker lease lost" [ref=e475]
+          - option "Storage error" [ref=e476]
+    - group
+      - LabelText
+        - StaticText "From (Europe/Madrid)"
+      - DateTime "From (Europe/Madrid)": 2026-10-25T02:30
+        - generic
+          - spinbutton "Day Day" [ref=e488]: 25
+            - StaticText "25"
+          - StaticText "/"
+          - spinbutton "Month Month" [ref=e489]: 10
+            - StaticText "10"
+          - StaticText "/"
+          - spinbutton "Year Year" [ref=e490]: 2026
+            - StaticText "2026"
+          - StaticText ", "
+          - spinbutton "Hours Hours" [ref=e491]: 2
+            - StaticText "02"
+          - StaticText ":"
+          - spinbutton "Minutes Minutes" [ref=e492]: 30
+            - StaticText "30"
+        - button "Show local date and time picker" [ref=e448]
+      - radiogroup "from UTC offset (required)" [ref=e487] focusable [tabindex]
+        - generic
+          - radio "UTC+01:00" [checked=false, ref=e493]
+          - LabelText
+            - StaticText "UTC+01:00"
+        - generic
+          - radio "UTC+02:00" [checked=false, ref=e494]
+          - LabelText
+            - StaticText "UTC+02:00"
+    - group
+      - LabelText
+        - StaticText "To (Europe/Madrid)"
+      - DateTime "To (Europe/Madrid)": 2026-10-03T17:05
+        - generic
+          - spinbutton "Day Day" [ref=e482]: 3
+            - StaticText "03"
+          - StaticText "/"
+          - spinbutton "Month Month" [ref=e483]: 10
+            - StaticText "10"
+          - StaticText "/"
+          - spinbutton "Year Year" [ref=e484]: 2026
+            - StaticText "2026"
+          - StaticText ", "
+          - spinbutton "Hours Hours" [ref=e485]: 17
+            - StaticText "17"
+          - StaticText ":"
+          - spinbutton "Minutes Minutes" [ref=e486]: 5
+            - StaticText "05"
+        - button "Show local date and time picker" [ref=e449]
+    - alert
+      - StaticText "Invalid or nonexistent local time. For an ambiguous time choose its UTC offset."
+    - generic
+      - button "Apply" [ref=e446]
+      - button "Cancel" [ref=e447]

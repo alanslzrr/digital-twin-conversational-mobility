@@ -1,0 +1,166 @@
+import { randomUUID } from "node:crypto";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import postgres from "postgres";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+const fixture = vi.hoisted(() => ({
+  sql: null as ReturnType<typeof postgres> | null,
+}));
+vi.mock("../database", () => ({ database: () => fixture.sql }));
+
+import { readEntities } from "../dashboard/entities";
+import { executeManual, readExecution } from "../dashboard/executions";
+import { readOverview } from "../dashboard/overview";
+import { readSources, readTrace } from "../dashboard/readers";
+import { readEntitySeries } from "../dashboard/series";
+import { boundedTransaction, observabilityPool } from "./database";
+import { pruneObservability } from "./retention";
+import { storeTelemetry } from "./telemetry";
+
+const schema = `dashboard_e2e_${randomUUID().replaceAll("-", "")}`;
+const owner = randomUUID(),
+  other = randomUUID();
+let admin: ReturnType<typeof postgres>, sql: ReturnType<typeof postgres>;
+let originalUrl: string | undefined;
+let measuring = false;
+const measured: { query: string; parameters: unknown[] }[] = [];
+const payload = () => ({
+  schemaVersion: 1,
+  id: randomUUID(),
+  kind: "model_input",
+  capturedAt: new Date().toISOString(),
+  originalBytes: 100,
+  retainedBytes: 80,
+  redacted: false,
+  truncated: false,
+  captureStatus: "captured",
+  reason: null,
+  content: {
+    messages: [
+      { role: "user", parts: [{ type: "text", text: "synthetic message" }] },
+    ],
+    functions: [],
+  },
+});
+const event = (extra = {}) => ({
+  eventKey: randomUUID(),
+  kind: "attempt_completed",
+  occurredAt: new Date().toISOString(),
+  turnId: "turn1",
+  stepIndex: 0,
+  sequence: 1,
+  purpose: "step",
+  attemptId: randomUUID(),
+  callId: null,
+  tool: null,
+  providerResponseId: "response1",
+  status: "succeeded",
+  durationMs: 12,
+  isError: null,
+  errorCode: null,
+  usage: {
+    inputTokens: 10,
+    outputTokens: 4,
+    cachedInputTokens: 2,
+    reasoningTokens: null,
+  },
+  payloadIds: [],
+  captureStatus: "captured",
+  sentCallIds: [],
+  ...extra,
+});
+const batch = (
+  events: unknown[],
+  payloads: unknown[] = [],
+  principalId = owner,
+  sessionId = "owned",
+) => ({
+  schemaVersion: 1,
+  batchId: randomUUID(),
+  principalId,
+  sessionId,
+  events,
+  payloads,
+});
+describe.skipIf(process.env.RUN_DASHBOARD_DB_TESTS !== "1")(
+  "dashboard end-to-end isolated PostgreSQL",
+  () => {
+    beforeAll(async () => {
+      originalUrl = process.env.DATABASE_URL;
+      if (
+        !originalUrl ||
+        !["localhost", "127.0.0.1", "[::1]"].includes(
+          new URL(originalUrl).hostname,
+        )
+      )
+        throw Error("Local DB required");
+      admin = postgres(originalUrl, { max: 1, onnotice: () => {} });
+      await admin.unsafe(`CREATE SCHEMA ${schema}`);
+      sql = postgres(originalUrl, {
+        max: 4,
+        connection: { search_path: `${schema},public` },
+        debug: (_connection, query, parameters) => {
+          if (measuring && /^(SELECT|WITH)\b/i.test(query.trim()))
+            measured.push({ query, parameters });
+        },
+        onnotice: () => {},
+      });
+      fixture.sql = sql;
+      const migrationDir = new URL(
+        "../../../../infra/postgres/migrations/",
+        import.meta.url,
+      );
+      for (const name of (await readdir(migrationDir))
+        .filter((n) => n.endsWith(".sql"))
+        .sort())
+        await sql.unsafe(await readFile(new URL(name, migrationDir), "utf8"));
+      for (const [i, id] of [owner, other].entries()) {
+        await sql`INSERT INTO auth_user(id,name,email,"emailVerified") VALUES(${id},'synthetic',${`fixture${i}@example.invalid`},false)`;
+        await sql`INSERT INTO evaluator(id,slot,label,auth_user_id) VALUES(${id},${i + 1},'synthetic',${id})`;
+      }
+      await sql`INSERT INTO evaluation_session(session_id,evaluator_id) VALUES('owned',${owner}),('foreign',${other})`;
+      const u = new URL(originalUrl);
+      u.searchParams.set("options", `-c search_path=${schema},public`);
+      process.env.DATABASE_URL = u.href;
+      process.env.MOBILITY_MCP_SECRET = "synthetic-dashboard-cursor-secret";
+    }, 20000);
+    afterAll(async () => {
+      await observabilityPool().end();
+      await sql?.end();
+      if (admin) {
+        await admin.unsafe(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);
+        await admin.end();
+      }
+      if (originalUrl) process.env.DATABASE_URL = originalUrl;
+    });
+
+    it("keeps DGT published nested coordinates in the viewport result", async () => {
+      console.log("AUDIT_SCHEMA",schema);
+      await sql`UPDATE source_catalog SET enabled=true WHERE id='dgt'`;
+      const at=new Date().toISOString();
+      await sql`INSERT INTO mobility_snapshot(job_id,source_id,observed_at,ingested_at,quality,raw_reference,payload)
+      VALUES('dgt-incidents','dgt',${at},${at},'provisional','synthetic independent map audit',${sql.json({incidents:[{id:'audit-dgt',title:'Synthetic audit',location:{type:'point',start:{latitude:40.4,longitude:-3.7},end:null}}]})})`;
+      const selection={category:'incidents',product:'dgt-incidents'};
+      const list=await readEntities(selection,owner);
+      expect(list.entities[0]).toMatchObject({latitude:40.4,longitude:-3.7});
+      const map=await readEntities({...selection,bbox:[-4,40,-3,41]},owner,true);
+      console.log('AUDIT_DGT_MAP', JSON.stringify({list:list.entities.length,coordinates:[list.entities[0]?.latitude,list.entities[0]?.longitude],map:map.entities.length}));
+      expect(map.entities).toHaveLength(1);
+    });
+    it("does not describe a never-requested EMT cache as an old reading", async () => {
+      await sql`UPDATE source_catalog SET enabled=true WHERE id='emt'`;
+      await sql`DELETE FROM emt_arrival_cache`;
+      const overview=await readOverview(new URLSearchParams());
+      const arrivals=overview.products.find(p=>p.id==='emt:arrivals');
+      console.log('AUDIT_EMPTY_EMT', JSON.stringify(arrivals));
+      expect(arrivals?.issue).toContain('Sin consulta previa');
+    });
+    it("keeps M3 unavailable when all incident products are disabled", async () => {
+      await sql`UPDATE source_catalog SET enabled=false`;
+      const overview=await readOverview(new URLSearchParams());
+      const metric=overview.metrics.find(m=>m.id==='M3');
+      console.log('AUDIT_DISABLED_M3', JSON.stringify({value:metric?.value,products:overview.products.filter(p=>p.category==='incidents').map(p=>({id:p.id,enabled:p.enabled,usable:p.usable}))}));
+      expect(metric?.value).toBeNull();
+    });
+  },
+);

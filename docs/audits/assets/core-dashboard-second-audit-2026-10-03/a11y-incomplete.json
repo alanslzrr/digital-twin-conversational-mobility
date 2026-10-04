@@ -1,0 +1,619 @@
+[
+  {
+    "screen": "overview-390-dark",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "mobility-390-dark",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "tools-390-dark",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "sources-390-dark",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "activity-390-dark",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "conversations-390-dark",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "overview-390-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "mobility-390-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "tools-390-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "sources-390-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "activity-390-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "conversations-390-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "map-fallback-light",
+    "incomplete": [
+      {
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodeCount": 4,
+        "nodes": [
+          {
+            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters",
+            "html": "<span aria-hidden=\"true\">−</span>",
+            "target": [".leaflet-control-zoom-out > span[aria-hidden=\"true\"]"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+            "html": "<a href=\"https://leafletjs.com\" title=\"A JavaScript library for interactive maps\">",
+            "target": ["a[href$=\"leafletjs.com\"]"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+            "html": "<a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap contributors</a>",
+            "target": [".leaflet-control-attribution > a:nth-child(3)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+            "html": "<p>Lectura reciente · dato antiguo (contorno discontinuo) · sin lectura utilizable · referencia. El color no sustituye las fechas de la ficha.</p>",
+            "target": [".flex-col.gap-2.text-muted-foreground > p"]
+          }
+        ],
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "reference-reload-light",
+    "incomplete": [
+      {
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodeCount": 5,
+        "nodes": [
+          {
+            "failureSummary": "Fix any of the following:\n  Element content contains only non-text characters",
+            "html": "<span aria-hidden=\"true\">−</span>",
+            "target": [".leaflet-control-zoom-out > span[aria-hidden=\"true\"]"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+            "html": "<a href=\"https://leafletjs.com\" title=\"A JavaScript library for interactive maps\">",
+            "target": ["a[href$=\"leafletjs.com\"]"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+            "html": "<a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap contributors</a>",
+            "target": [".leaflet-control-attribution > a:nth-child(3)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+            "html": "<p>Lectura reciente · dato antiguo (contorno discontinuo) · sin lectura utilizable · referencia. El color no sustituye las fechas de la ficha.</p>",
+            "target": [".flex-col.p-3.gap-2 > p"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+            "html": "<span>Fondo cartográfico externo, disponible según el servicio · puntos con coordenadas publicadas · los mismos datos se pueden consultar en la tabla</span>",
+            "target": [".flex-col.p-3.gap-2 > span"]
+          }
+        ],
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "mobile-navigation-light",
+    "incomplete": [
+      {
+        "help": "ARIA hidden element must not be focusable or contain focusable elements",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-hidden-focus?application=axeAPI",
+        "id": "aria-hidden-focus",
+        "impact": "serious",
+        "nodeCount": 3,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+            "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+            "target": [
+              "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"]:nth-child(1)"
+            ]
+          },
+          {
+            "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+            "html": "<div class=\"dashboard-shell min-h-dvh md:grid md:grid-cols-[220px_1fr]\" data-aria-hidden=\"true\" aria-hidden=\"true\">",
+            "target": [".dashboard-shell"]
+          },
+          {
+            "failureSummary": "Fix all of the following:\n  Check that focusable elements are not tabbable in the current state",
+            "html": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span>",
+            "target": [
+              "span[data-radix-focus-guard=\"\"][data-aria-hidden=\"true\"]:nth-child(10)"
+            ]
+          }
+        ],
+        "tags": [
+          "cat.name-role-value",
+          "wcag2a",
+          "wcag412",
+          "TTv5",
+          "TT6.a",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-10.8.1"
+        ]
+      },
+      {
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodeCount": 10,
+        "nodes": [
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<th class=\"p-2\">Cobertura</th>",
+            "target": ["th:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(1) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(2) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(3) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(4) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(5) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">0 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(6) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(7) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(8) > td:nth-child(5)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">1 de 1 intentos con uso completo</td>",
+            "target": ["tr:nth-child(9) > td:nth-child(5)"]
+          }
+        ],
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ]
+      }
+    ]
+  },
+  {
+    "screen": "keyboard-table-light",
+    "incomplete": [
+      {
+        "help": "ARIA attributes must conform to valid values",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+        "id": "aria-valid-attr-value",
+        "impact": "critical",
+        "nodeCount": 1,
+        "nodes": [
+          {
+            "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_56pfivb_\"",
+            "html": "<button data-slot=\"dialog-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Abrir navegación\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_56pfivb_\" data-state=\"closed\">",
+            "target": ["button[data-slot=\"dialog-trigger\"]"]
+          }
+        ],
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ]
+      },
+      {
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodeCount": 4,
+        "nodes": [
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<h2 class=\"text-base font-semibold\">Duración de operaciones comparables</h2>",
+            "target": [".overflow-x-auto > .text-base"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<p class=\"mt-2 text-sm text-muted-foreground\">Mediana por componente y tipo. No es latencia HTTP del proveedor; p95 solo con al menos 20 mediciones.</p>",
+            "target": [".overflow-x-auto > .mt-2"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<th class=\"p-2\">Operación / componente</th>",
+            "target": ["th:nth-child(1)"]
+          },
+          {
+            "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element",
+            "html": "<td class=\"p-2\">Publicación · Actualización periódica</td>",
+            "target": ["td:nth-child(1)"]
+          }
+        ],
+        "tags": [
+          "cat.color",
+          "wcag2aa",
+          "wcag143",
+          "TTv5",
+          "TT13.c",
+          "EN-301-549",
+          "EN-9.1.4.3",
+          "ACT",
+          "RGAAv4",
+          "RGAA-3.2.1"
+        ]
+      }
+    ]
+  }
+]

@@ -71,7 +71,8 @@ if (!coreValues.EVALUATION_ORIGIN)
   appendFileSync(corePath, "\nEVALUATION_ORIGIN=http://127.0.0.1:3000\n");
 chmodSync(corePath, 0o600);
 const token = await new SignJWT({
-  scope: "mobility.read mobility.diagnostics.read mobility.evaluation.manage",
+  scope:
+    "mobility.read mobility.diagnostics.read mobility.evaluation.manage mobility.dashboard.read mobility.dashboard.execute mobility.dashboard.activity mobility.telemetry.write",
 })
   .setProtectedHeader({ alg: "HS256" })
   .setSubject("eve-web-local")

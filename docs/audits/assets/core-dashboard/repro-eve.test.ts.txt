@@ -1,0 +1,23 @@
+import {expect,it,vi,afterEach} from 'vitest';
+import {projectPayload} from './telemetry-projection';
+import {captureTool} from './telemetry';
+afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs()});
+it('audit: capture real EVE qualified tool name',async()=>{
+ vi.stubEnv('MOBILITY_MCP_URL','http://127.0.0.1:3999/mcp'); vi.stubEnv('MOBILITY_MCP_TOKEN','synthetic');
+ const send=vi.fn(async()=>Response.json({accepted:true}));vi.stubGlobal('fetch',send);
+ await captureTool({principalId:'synthetic',sessionId:'synthetic',turnId:'t',stepIndex:0,purpose:'step'}, {}, 'tool_requested','call_real','mobility__get_network_status');
+ expect(send).toHaveBeenCalledTimes(1);
+});
+it('audit: preserve effective qualified function definitions and calls',()=>{
+ const p=projectPayload({tools:[{type:'function',name:'mobility__get_network_status',parameters:{type:'object',properties:{}}}],input:[{type:'function_call',name:'mobility__get_network_status',call_id:'call_real',arguments:'{}'}]},'model_input');
+ expect(p.content.functions).toHaveLength(1);
+ expect(p.content.messages).toHaveLength(1);
+});
+
+it('audit: stored inspector must publish truncation instead of silently dropping result',async()=>{
+ const {safeProjection}=await import('@mobility/contracts');
+ const big={tool:'get_incidents',availability:'available',result:{incidents:Array.from({length:100},(_,i)=>({id:String(i),description:'a'.repeat(8000)}))},limitations:['stored only']};
+ const projected=safeProjection(big,240000);
+ expect(projected.truncated).toBe(true);
+ expect(projected.data).not.toHaveProperty('result');
+});

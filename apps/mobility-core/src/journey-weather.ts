@@ -7,6 +7,7 @@ import type {
 import { selectWarnings, weatherRelevance } from "@mobility/domain";
 import { weatherFreshness } from "@mobility/provenance";
 import { weatherDatabase } from "./database";
+import { boundedSignal } from "./execution-signal";
 import { readWeatherProducts, weatherProducts } from "./weather-cache";
 import { weatherQuery } from "./weather-query";
 import { chooseWeather } from "./weather-selection";
@@ -39,8 +40,9 @@ export async function journeyWeather(
   origin: Point,
   destination: Point,
   product?: "hourly_forecast" | "daily_forecast" | "warnings",
+  refresh = true,
 ) {
-  const signal = AbortSignal.timeout(2000);
+  const signal = boundedSignal(AbortSignal.timeout(2000));
   try {
     const sites: Site[] = [];
     for (const [alternative, r] of routes.entries()) {
@@ -183,9 +185,8 @@ export async function journeyWeather(
     }
     // One shared signal and one acquisition for all alternatives/products. Cached
     // products not demanded remain eligible for comparison without refreshing them.
-    const refreshed = needed.size
-      ? await weatherProducts([...needed], signal)
-      : [];
+    const refreshed =
+      refresh && needed.size ? await weatherProducts([...needed], signal) : [];
     const rows = [
       ...new Map(
         [...cached, ...refreshed].map((row) => [row.resource, row]),

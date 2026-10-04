@@ -1,0 +1,132 @@
+- link "Skip to content" [ref=e2221]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e2222]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e2223]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e2230]
+    - link "Mobility" [ref=e2231]
+    - link "Queries" [ref=e2232]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e2233]
+    - link "Activity" [ref=e2234]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e2235]
+  - link "Open chat" [ref=e2224]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e2225]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Queries"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:49:01 CEST"
+  - button "Pause refresh" [ref=e2226]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e2227]
+  - button "Data timing" [expanded=false, ref=e2228]
+- main
+  - heading "Queries" [level=1, ref=e2229]
+  - paragraph
+    - StaticText "Discover registered tools. Inspection and execution stay separate."
+  - generic
+    - LabelText
+      - StaticText "Search registered tools"
+    - textbox "Search registered tools" [ref=e2236]
+    - heading "Places" [level=2, ref=e2237]
+    - link "Find a stored place resolve_place" [ref=e2238]
+      - strong
+        - StaticText "Find a stored place"
+      - paragraph
+        - StaticText "resolve_place"
+    - link "Resolve an address resolve_address" [ref=e2239]
+      - strong
+        - StaticText "Resolve an address"
+      - paragraph
+        - StaticText "resolve_address"
+    - heading "Journeys and timetables" [level=2, ref=e2240]
+    - link "Plan a journey plan_journey" [ref=e2241]
+      - strong
+        - StaticText "Plan a journey"
+      - paragraph
+        - StaticText "plan_journey"
+    - link "Get EMT arrivals get_emt_arrivals" [ref=e2242]
+      - strong
+        - StaticText "Get EMT arrivals"
+      - paragraph
+        - StaticText "get_emt_arrivals"
+    - link "Read published timetable get_crtm_timetable" [ref=e2243]
+      - strong
+        - StaticText "Read published timetable"
+      - paragraph
+        - StaticText "get_crtm_timetable"
+    - link "Get departures get_departures" [ref=e2244]
+      - strong
+        - StaticText "Get departures"
+      - paragraph
+        - StaticText "get_departures"
+    - heading "Mobility evidence" [level=2, ref=e2245]
+    - link "Read incidents and alerts get_incidents" [ref=e2246]
+      - strong
+        - StaticText "Read incidents and alerts"
+      - paragraph
+        - StaticText "get_incidents"
+    - link "Read bike availability get_bike_availability" [ref=e2247]
+      - strong
+        - StaticText "Read bike availability"
+      - paragraph
+        - StaticText "get_bike_availability"
+    - link "Read air and weather get_environment" [ref=e2248]
+      - strong
+        - StaticText "Read air and weather"
+      - paragraph
+        - StaticText "get_environment"
+    - link "Read traffic sensors get_road_state" [ref=e2249]
+      - strong
+        - StaticText "Read traffic sensors"
+      - paragraph
+        - StaticText "get_road_state"
+    - link "Read historical evidence get_historical_state" [ref=e2250]
+      - strong
+        - StaticText "Read historical evidence"
+      - paragraph
+        - StaticText "get_historical_state"
+    - link "Read parking get_parking" [ref=e2251]
+      - strong
+        - StaticText "Read parking"
+      - paragraph
+        - StaticText "get_parking"
+    - heading "System and coverage" [level=2, ref=e2252]
+    - link "Inspect a line get_line_status" [ref=e2253]
+      - strong
+        - StaticText "Inspect a line"
+      - paragraph
+        - StaticText "get_line_status"
+    - link "Inspect network status get_network_status" [ref=e2254]
+      - strong
+        - StaticText "Inspect network status"
+      - paragraph
+        - StaticText "get_network_status"
+    - link "Read mobility snapshot get_mobility_snapshot" [ref=e2255]
+      - strong
+        - StaticText "Read mobility snapshot"
+      - paragraph
+        - StaticText "get_mobility_snapshot"
+    - link "Inspect source health get_source_health" [ref=e2256]
+      - strong
+        - StaticText "Inspect source health"
+      - paragraph
+        - StaticText "get_source_health"
+  - generic
+    - heading "Select a query" [level=2, ref=e2257]
+    - paragraph
+      - StaticText "Explore its inputs and stored evidence before choosing explicit execution."
+- alert

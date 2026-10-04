@@ -1,0 +1,21 @@
+- generic
+  - dialog "Mobility Core"
+    - heading "Mobility Core" [level=2, ref=e828]
+    - button "Close details" [ref=e829]
+    - paragraph
+      - StaticText "Mobility Core details"
+    - navigation "Dashboard" [ref=e830]
+      - paragraph
+        - StaticText "Explore"
+      - link "Overview" [ref=e833]
+      - link "Mobility" [ref=e834]
+      - link "Queries" [ref=e835]
+      - paragraph
+        - StaticText "System"
+      - link "Sources" [ref=e836]
+      - link "Activity" [ref=e837]
+      - paragraph
+        - StaticText "Personal"
+      - link "My conversations" [ref=e838]
+    - link "Open chat" [ref=e831]
+    - button "Sign out" [ref=e832]

@@ -1,0 +1,60 @@
+- link "Skip to content" [ref=e3133]
+- complementary "Navigation and account"
+  - link "Mobility Core" [ref=e3140]
+    - StaticText "Mobility Core"
+  - navigation "Dashboard" [ref=e3141]
+    - list
+      - listitem [level=1]
+        - link "Overview" [ref=e3148]
+          - StaticText "Overview"
+      - listitem [level=1]
+        - link "Mobility" [ref=e3149]
+          - StaticText "Mobility"
+      - listitem [level=1]
+        - link "Queries" [ref=e3150]
+          - StaticText "Queries"
+      - listitem [level=1]
+        - link "Sources" [ref=e3151]
+          - StaticText "Sources"
+      - listitem [level=1]
+        - link "Activity" [ref=e3152]
+          - StaticText "Activity"
+      - listitem [level=1]
+        - link "My conversations" [ref=e3153]
+          - StaticText "My conversations"
+  - list
+    - listitem [level=1]
+      - button "Account: QA evaluator 1" [expanded=false, ref=e3145]
+        - StaticText "QA evaluator 1"
+    - listitem [level=1]
+      - link "Open chat" [ref=e3146]
+        - StaticText "Open chat"
+    - listitem [level=1]
+      - button "Sign out" [ref=e3147]
+        - StaticText "Sign out"
+- banner
+  - button "Toggle navigation" [ref=e3134]
+    - StaticText "Toggle Sidebar"
+  - StaticText "My conversations"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "17:06:36 CEST"
+  - button "Pause refresh" [ref=e3135]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e3136]
+  - button "Data timing" [expanded=false, ref=e3137]
+- main
+  - heading "My conversations" [level=1, ref=e3138]
+  - article
+    - heading "Conversation 1" [level=2, ref=e3142]
+      - StaticText "Conversation 1"
+    - paragraph
+      - StaticText "Created: "
+      - time
+        - StaticText "03/10/2026, 17:04:55 CEST"
+      - StaticText " · Best-effort capture"
+    - link "Open chat" [ref=e3143]
+    - link "Inspect conversation" [ref=e3144]
+  - button "Capture and retention" [expanded=false, ref=e3139]
+- alert

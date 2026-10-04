@@ -1,0 +1,3 @@
+Application ee56a5a; isolated 3002/3003; disposable schema/account; provider/model guards disabled external execution.
+Authenticated isolated HTTP smoke passed: 36 checks
+No ordinary-installation Sources success assertion.

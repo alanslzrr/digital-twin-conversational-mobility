@@ -1,0 +1,22 @@
+- generic
+  - dialog "Data timing"
+    - heading "Data timing" [level=2, ref=e85]
+    - button "Close details" [ref=e86]
+    - paragraph
+      - StaticText "Screen reads, provider observations and capture activity are separate."
+    - DescriptionList
+      - term "Last successful view read"
+      - definition
+        - time
+          - StaticText "03/10/2026, 17:05:16 CEST"
+      - term "Screen refresh"
+      - definition
+        - StaticText "Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds. Refresh only reads stored evidence."
+      - term "Capture activity"
+      - definition
+        - StaticText "Disabled"
+      - term "Activity window expires"
+      - definition
+        - StaticText "Unavailable"
+    - paragraph
+      - StaticText "Visible, unpaused activity renews the bounded capture window every 60 seconds. Pausing stops renewal, not an in-progress provider request. Observation and ingestion times remain attached to each record."

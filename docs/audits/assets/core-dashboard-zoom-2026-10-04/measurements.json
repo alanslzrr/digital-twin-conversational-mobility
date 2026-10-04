@@ -1,0 +1,122 @@
+[
+  {
+    "label": "overview-expanded",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "OverviewOverview",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "mobility",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "MobilityMobility",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "mobility-map",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "MobilityMobility",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "queries",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "QueriesQueries",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "sources",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "SourcesSources",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "activity",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "ActivityActivity",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "conversations",
+    "clientWidth": 437,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "My conversationsMy conversations",
+    "height": 427,
+    "scrollWidth": 437,
+    "width": 437
+  },
+  {
+    "label": "conversation-Timeline",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "My conversationsMy conversations",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "conversation-Tools",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "My conversationsMy conversations",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "conversation-Usage",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "My conversationsMy conversations",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "conversation-Model",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "My conversationsMy conversations",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  },
+  {
+    "label": "conversation-Content",
+    "clientWidth": 429,
+    "cssZoom": "1",
+    "dpr": 4,
+    "heading": "My conversationsMy conversations",
+    "height": 427,
+    "scrollWidth": 429,
+    "width": 437
+  }
+]

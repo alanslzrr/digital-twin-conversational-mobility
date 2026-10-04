@@ -1,0 +1,59 @@
+{
+  "axeVersion": "4.12.1",
+  "counts": {
+    "inapplicable": 43,
+    "incomplete": 1,
+    "passes": 46,
+    "violations": 0
+  },
+  "incomplete": [
+    {
+      "help": "ARIA attributes must conform to valid values",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+      "id": "aria-valid-attr-value",
+      "impact": "critical",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_3qpfivb_\"",
+          "html": "<button data-slot=\"sheet-trigger\" data-sidebar=\"menu-button\" data-size=\"default\" data-active=\"false\" class=\"peer/menu-button fle...\" aria-label=\"Account: QA evaluato...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_3qpfivb_\" data-state=\"closed\">",
+          "target": ["button[aria-label=\"Account: QA evaluator 1\"]"]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_b7pfivb_\"",
+          "html": "<button data-slot=\"sheet-trigger\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Data timing\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_b7pfivb_\" data-state=\"closed\">",
+          "target": ["button[aria-label=\"Data timing\"]"]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_r_9_\"",
+          "html": "<button data-slot=\"sheet-trigger\" data-variant=\"ghost\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_r_9_\" data-state=\"closed\">",
+          "target": [".self-start"]
+        }
+      ],
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ]
+    }
+  ],
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 8205334907631297000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "not_configured",
+    "reused": true,
+    "saveStatus": "not_attempted"
+  },
+  "url": "http://127.0.0.1:3002/dashboard/conversations/qa-owned",
+  "violations": []
+}

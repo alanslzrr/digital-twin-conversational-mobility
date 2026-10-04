@@ -1,0 +1,670 @@
+[
+  {
+    "name": "navigation-dark-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 280,
+          "width": 280
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "map-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "filters-dark-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 320,
+          "width": 320
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "evidence-dark-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 320,
+          "width": 320
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "header-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "query-form-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "activity-filters-dark-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 320,
+          "width": 320
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-usage-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-timeline-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-tools-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-model-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-detail-dark-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "dark",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "navigation-dark-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 280,
+          "width": 280
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "map-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "filters-dark-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "evidence-dark-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "header-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "query-form-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "activity-filters-dark-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-usage-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-timeline-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-tools-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-model-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-detail-dark-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "dark",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "navigation-light-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 280,
+          "width": 280
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "map-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "filters-light-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 320,
+          "width": 320
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "evidence-light-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 320,
+          "width": 320
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "header-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "query-form-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "activity-filters-light-320",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 320,
+          "width": 320
+        }
+      ],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-usage-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-timeline-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-tools-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-model-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-detail-light-320",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 320,
+      "theme": "light",
+      "width": 320
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "navigation-light-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 280,
+          "width": 280
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "map-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "filters-light-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "evidence-light-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "header-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 3
+  },
+  {
+    "name": "query-form-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "activity-filters-light-390",
+    "layout": {
+      "dialogs": [
+        {
+          "left": 0,
+          "right": 390,
+          "width": 390
+        }
+      ],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-usage-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 2
+  },
+  {
+    "name": "conversation-timeline-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-tools-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-model-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "conversation-content-detail-light-390",
+    "layout": {
+      "dialogs": [],
+      "scrollWidth": 390,
+      "theme": "light",
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  }
+]

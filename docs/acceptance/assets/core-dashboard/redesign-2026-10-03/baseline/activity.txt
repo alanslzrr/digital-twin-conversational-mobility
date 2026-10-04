@@ -1,0 +1,250 @@
+- complementary "Navegación y cuenta"
+  - paragraph
+    - StaticText "Mobility Core"
+  - navigation "Panel" [ref=e252]
+    - paragraph
+      - StaticText "Información"
+    - link "Resumen" [ref=e259]
+    - link "Movilidad" [ref=e260]
+    - link "Consultas" [ref=e261]
+    - paragraph
+      - StaticText "Sistema"
+    - link "Fuentes y actualización" [ref=e262]
+    - link "Actividad del sistema" [ref=e263]
+    - paragraph
+      - StaticText "Personal"
+    - link "Mis conversaciones" [ref=e264]
+  - link "Volver al chat" [ref=e253]
+  - paragraph
+    - StaticText "Cuenta de evaluación"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Cerrar sesión" [ref=e254]
+- banner
+  - StaticText "Panel de evaluación"
+  - StaticText "Privado"
+  - button "Pausar actualización" [ref=e255]
+  - button "Actualizar pantalla" [ref=e256]
+- region "Estado de actualización" [ref=e250]
+  - StaticText "Actualización de pantalla:"
+  - StaticText "visible"
+  - StaticText "Actualización desde las fuentes:"
+  - StaticText "deshabilitada"
+- region "Cómo se actualiza la información" [ref=e251]
+  - paragraph
+    - StaticText "Actualizar pantalla relee los datos guardados. No solicita una lectura nueva a las fuentes."
+  - paragraph
+    - StaticText "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."
+- main
+  - heading "Actividad del sistema" [level=1, ref=e257]
+  - paragraph
+    - StaticText "Eventos registrados del sistema, sin datos personales ni contenidos privados de conversaciones. Solo incluye lo registrado desde el inicio de esta captura."
+  - group
+    - LabelText
+      - StaticText "Fuente"
+    - combobox "Fuente" [expanded=false, ref=e265]: Todas
+      - MenuListPopup
+        - option "Todas" [selected, ref=e313]
+        - option "renfe" [ref=e314]
+        - option "emt" [ref=e315]
+        - option "bicimad" [ref=e316]
+        - option "crtm" [ref=e317]
+        - option "aemet" [ref=e318]
+        - option "dgt" [ref=e319]
+        - option "madrid-air" [ref=e320]
+        - option "madrid-traffic" [ref=e321]
+        - option "madrid-parking" [ref=e322]
+        - option "osm" [ref=e323]
+  - group
+    - LabelText
+      - StaticText "Severidad"
+    - combobox "Severidad" [expanded=false, ref=e266]: Todas
+      - MenuListPopup
+        - option "Todas" [selected, ref=e324]
+        - option "Información" [ref=e325]
+        - option "Advertencia" [ref=e326]
+        - option "Error" [ref=e327]
+  - group
+    - LabelText
+      - StaticText "Tipo de evento"
+    - combobox "Tipo de evento" [expanded=false, ref=e267]: Todos
+      - MenuListPopup
+        - option "Todos" [selected, ref=e328]
+        - option "Información guardada" [ref=e329]
+        - option "Consulta de actualización" [ref=e330]
+        - option "Reserva de trabajo perdida" [ref=e331]
+        - option "Reserva recuperada" [ref=e332]
+        - option "Trabajo liberado" [ref=e333]
+  - group
+    - LabelText
+      - StaticText "Resultado"
+    - combobox "Resultado" [expanded=false, ref=e268]: Todos
+      - MenuListPopup
+        - option "Todos" [selected, ref=e334]
+        - option "Completado" [ref=e335]
+        - option "Guardado solo en histórico" [ref=e336]
+        - option "No completado" [ref=e337]
+        - option "Sin reserva válida" [ref=e338]
+        - option "Error al guardar" [ref=e339]
+  - group
+    - LabelText
+      - StaticText "Periodo"
+    - combobox "Periodo" [expanded=false, ref=e269]: Últimas 24 horas
+      - MenuListPopup
+        - option "Última hora" [ref=e340]
+        - option "Últimas 24 horas" [selected, ref=e341]
+        - option "Últimos siete días" [ref=e342]
+  - group
+    - LabelText
+      - StaticText "Desde (UTC)"
+    - DateTime "Desde (UTC)": 2026-10-02T08:31
+      - generic
+        - spinbutton "Day Day" [ref=e343]: 2
+          - StaticText "02"
+        - StaticText "/"
+        - spinbutton "Month Month" [ref=e344]: 10
+          - StaticText "10"
+        - StaticText "/"
+        - spinbutton "Year Year" [ref=e345]: 2026
+          - StaticText "2026"
+        - StaticText ", "
+        - spinbutton "Hours Hours" [ref=e346]: 8
+          - StaticText "08"
+        - StaticText ":"
+        - spinbutton "Minutes Minutes" [ref=e347]: 31
+          - StaticText "31"
+      - button "Show local date and time picker" [ref=e271]
+  - group
+    - LabelText
+      - StaticText "Hasta (UTC)"
+    - DateTime "Hasta (UTC)": 2026-10-03T08:31
+      - generic
+        - spinbutton "Day Day" [ref=e348]: 3
+          - StaticText "03"
+        - StaticText "/"
+        - spinbutton "Month Month" [ref=e349]: 10
+          - StaticText "10"
+        - StaticText "/"
+        - spinbutton "Year Year" [ref=e350]: 2026
+          - StaticText "2026"
+        - StaticText ", "
+        - spinbutton "Hours Hours" [ref=e351]: 8
+          - StaticText "08"
+        - StaticText ":"
+        - spinbutton "Minutes Minutes" [ref=e352]: 31
+          - StaticText "31"
+      - button "Show local date and time picker" [ref=e272]
+  - button "Últimos siete días" [ref=e258]
+  - generic
+    - heading "¿Cuándo se guardó información y cuándo hubo problemas?" [level=2, ref=e270]
+    - paragraph
+      - StaticText "Publicaciones y errores registrados. No representa evolución del tráfico ni garantiza frescura."
+    - StaticText "Publicaciones:"
+    - strong
+      - StaticText "7"
+    - StaticText "Errores registrados:"
+    - strong
+      - StaticText "1"
+    - image "Publicaciones y errores por intervalo; datos equivalentes en la tabla"
+    - paragraph
+      - time
+        - StaticText "2/10/2026, 10:31:47 CEST"
+      - StaticText " — "
+      - time
+        - StaticText "3/10/2026, 10:31:47 CEST"
+      - StaticText ". Captura no exhaustiva. Los huecos anteriores a la primera evidencia retenida no se convierten en cero."
+    - group
+      - DisclosureTriangle "Ver intervalos y valores" [expanded=false]
+        - StaticText "Ver intervalos y valores"
+  - table
+    - rowgroup
+      - row
+        - columnheader "Instante" [ref=e353]
+        - columnheader "Componente" [ref=e354]
+        - columnheader "Fuente / job" [ref=e355]
+        - columnheader "Tipo" [ref=e356]
+        - columnheader "Resultado" [ref=e357]
+    - row
+      - cell "3/10/2026, 10:15:51 CEST" [ref=e273]
+        - link "3/10/2026, 10:15:51 CEST" [ref=e358]
+          - time
+            - StaticText "3/10/2026, 10:15:51 CEST"
+      - cell "Actualización periódica" [ref=e274]
+      - cell "bicimad / bicimad" [ref=e275]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e276]
+      - cell "Completado" [ref=e277]
+    - row
+      - cell "3/10/2026, 10:00:51 CEST" [ref=e278]
+        - link "3/10/2026, 10:00:51 CEST" [ref=e359]
+          - time
+            - StaticText "3/10/2026, 10:00:51 CEST"
+      - cell "Actualización periódica" [ref=e279]
+      - cell "bicimad / bicimad" [ref=e280]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e281]
+      - cell "Completado" [ref=e282]
+    - row
+      - cell "3/10/2026, 9:45:51 CEST" [ref=e283]
+        - link "3/10/2026, 9:45:51 CEST" [ref=e360]
+          - time
+            - StaticText "3/10/2026, 9:45:51 CEST"
+      - cell "Actualización periódica" [ref=e284]
+      - cell "bicimad / bicimad" [ref=e285]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e286]
+      - cell "Completado" [ref=e287]
+    - row
+      - cell "3/10/2026, 9:30:51 CEST" [ref=e288]
+        - link "3/10/2026, 9:30:51 CEST" [ref=e361]
+          - time
+            - StaticText "3/10/2026, 9:30:51 CEST"
+      - cell "Actualización periódica" [ref=e289]
+      - cell "bicimad / bicimad" [ref=e290]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e291]
+      - cell "Completado" [ref=e292]
+    - row
+      - cell "3/10/2026, 9:15:51 CEST" [ref=e293]
+        - link "3/10/2026, 9:15:51 CEST" [ref=e362]
+          - time
+            - StaticText "3/10/2026, 9:15:51 CEST"
+      - cell "Actualización periódica" [ref=e294]
+      - cell "bicimad / bicimad" [ref=e295]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e296]
+      - cell "No completado Hay un problema registrado; abre el detalle para consultar su evidencia." [ref=e297]
+        - StaticText "No completado"
+        - paragraph
+          - StaticText "Hay un problema registrado; abre el detalle para consultar su evidencia."
+    - row
+      - cell "3/10/2026, 9:00:51 CEST" [ref=e298]
+        - link "3/10/2026, 9:00:51 CEST" [ref=e363]
+          - time
+            - StaticText "3/10/2026, 9:00:51 CEST"
+      - cell "Actualización periódica" [ref=e299]
+      - cell "bicimad / bicimad" [ref=e300]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e301]
+      - cell "Completado" [ref=e302]
+    - row
+      - cell "3/10/2026, 8:45:51 CEST" [ref=e303]
+        - link "3/10/2026, 8:45:51 CEST" [ref=e364]
+          - time
+            - StaticText "3/10/2026, 8:45:51 CEST"
+      - cell "Actualización periódica" [ref=e304]
+      - cell "bicimad / bicimad" [ref=e305]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e306]
+      - cell "Completado" [ref=e307]
+    - row
+      - cell "3/10/2026, 8:30:51 CEST" [ref=e308]
+        - link "3/10/2026, 8:30:51 CEST" [ref=e365]
+          - time
+            - StaticText "3/10/2026, 8:30:51 CEST"
+      - cell "Actualización periódica" [ref=e309]
+      - cell "bicimad / bicimad" [ref=e310]
+        - StaticText "bicimad / bicimad"
+      - cell "Información guardada" [ref=e311]
+      - cell "Completado" [ref=e312]
+- alert

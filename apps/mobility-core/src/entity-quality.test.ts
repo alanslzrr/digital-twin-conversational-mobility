@@ -7,7 +7,8 @@ vi.mock("./ingestion", () => ({
   ingestionEnabled: () => true,
 }));
 
-import { bikes, environment, parking, sourceHealth } from "./mobility";
+import { ingest } from "./ingestion";
+import { bikes, environment, parking, roads, sourceHealth } from "./mobility";
 
 const now = "2026-09-25T12:00:00.000Z";
 const old = "2026-09-25T08:00:00.000Z";
@@ -180,4 +181,20 @@ it("returns explicit Retiro station-time freshness from shared weather snapshot"
     ],
     coverage: { knownStations: 25, retainedStations: 1, complete: false },
   });
+});
+
+it("stored presenters bypass acquisition while retaining the same projections", async () => {
+  vi.mocked(ingest)
+    .mockClear()
+    .mockImplementation(async () => {
+      throw new Error("Acquisition forbidden");
+    });
+  payload = { stations: [], sensors: [], readings: [], parkings: [] };
+  await bikes({ limit: 5 }, false);
+  await environment({ kind: "air", limit: 5 }, false);
+  await environment({ kind: "weather", limit: 5 }, false);
+  await roads({ query: "Alcalá", limit: 5 }, false);
+  await parking({ query: "Centro", limit: 5 }, false);
+  expect(ingest).not.toHaveBeenCalled();
+  vi.mocked(ingest).mockReset();
 });

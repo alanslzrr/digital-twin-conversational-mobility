@@ -22,6 +22,8 @@ import { parseRenfe, spanishText } from "./adapters/renfe";
 import { weatherStationCatalogVersion } from "./catalogs/weather-stations";
 import { database } from "./database";
 import { publishDgt } from "./dgt-publication";
+import { recordOperationalEvent } from "./observability/events";
+import { pruneObservability } from "./observability/retention";
 import { weatherWorkerTick } from "./weather-cache";
 import {
   mergeWeatherReadings,
@@ -37,12 +39,17 @@ const rawRoot = () =>
 async function acquire(id: JobId) {
   const sql = database();
   const token = randomUUID();
-  const [job] =
-    await sql`UPDATE ingestion_job SET lease_until=now()+interval '90 seconds', lease_token=${token}, last_attempt_at=now(), last_finished_at=NULL, attempts=attempts+1, recovered_leases=recovered_leases+CASE WHEN lease_token IS NOT NULL THEN 1 ELSE 0 END
-    WHERE id=${id} AND next_due_at<=now() AND (lease_until IS NULL OR lease_until<now())
-    AND EXISTS (SELECT 1 FROM source_catalog s WHERE s.id=ingestion_job.source_id AND s.enabled)
-    AND EXISTS (SELECT 1 FROM ingestion_activity WHERE active_until>now()) RETURNING failures`;
-  return job ? { token, failures: Number(job.failures) } : null;
+  const [job] = await sql.unsafe(
+    "WITH candidate AS MATERIALIZED (SELECT id,lease_token IS NOT NULL AS recovered FROM ingestion_job WHERE id=$1 AND next_due_at<=now() AND (lease_until IS NULL OR lease_until<now()) AND EXISTS(SELECT 1 FROM source_catalog s WHERE s.id=ingestion_job.source_id AND s.enabled) AND EXISTS(SELECT 1 FROM ingestion_activity WHERE active_until>now()) FOR UPDATE SKIP LOCKED) UPDATE ingestion_job j SET lease_until=now()+interval '90 seconds',lease_token=$2,last_attempt_at=now(),last_finished_at=NULL,attempts=attempts+1,recovered_leases=recovered_leases+CASE WHEN c.recovered THEN 1 ELSE 0 END FROM candidate c WHERE j.id=c.id RETURNING j.failures,c.recovered",
+    [id, token],
+  );
+  return job
+    ? {
+        token,
+        failures: Number(job.failures),
+        recovered: job.recovered === true,
+      }
+    : null;
 }
 
 async function load(id: JobId) {
@@ -208,10 +215,21 @@ async function load(id: JobId) {
   };
 }
 
-export async function ingest(id: JobId) {
+async function ingestData(id: JobId, operationId: string) {
   if (!ingestionEnabled()) return { job: id, status: "disabled" };
   const lease = await acquire(id);
   if (!lease) return { job: id, status: "not_due_or_inactive" };
+  if (lease.recovered)
+    await recordOperationalEvent({
+      operationId,
+      component: "ingestion",
+      type: "lease_recovered",
+      source: jobPolicies[id].source,
+      job: id,
+      outcome: "success",
+      durationMs: 0,
+      errorCode: null,
+    });
   const sql = database();
   const policy = jobPolicies[id];
   let stage: "source" | "raw_storage" | "publication" = "source";
@@ -363,12 +381,41 @@ export async function ingest(id: JobId) {
   }
 }
 
+export async function ingest(id: JobId) {
+  const started = performance.now();
+  const operationId = randomUUID();
+  const result = await ingestData(id, operationId);
+  if (!["disabled", "not_due_or_inactive"].includes(result.status))
+    await recordOperationalEvent({
+      operationId,
+      component: "ingestion",
+      type: result.status === "lease_lost" ? "lease_lost" : "publication",
+      source: jobPolicies[id].source,
+      job: id,
+      outcome:
+        result.status === "error"
+          ? "error"
+          : result.status === "historical_only"
+            ? "historical_only"
+            : result.status === "lease_lost"
+              ? "lease_lost"
+              : "success",
+      durationMs: performance.now() - started,
+      errorCode:
+        "error" in result && typeof result.error === "string"
+          ? result.error
+          : null,
+    });
+  return result;
+}
+
 export async function activate() {
   if (!ingestionEnabled()) return;
   await database()`UPDATE ingestion_activity SET active_until=GREATEST(active_until,now()+interval '30 minutes')`;
 }
 
 export async function prune() {
+  await pruneObservability().catch(() => {});
   const sql = database();
   await sql`DELETE FROM mobility_history WHERE ingested_at<now()-interval '24 hours'`;
   const expired =

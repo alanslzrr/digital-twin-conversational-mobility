@@ -1,0 +1,37 @@
+- Resolving items.
+┌ shadcn add sidebar, card, sheet, tabs, radio-group, table, skeleton, empty, alert, chart (dry run)
+│
+├ Files (15) +11 new, ~4 overwrite
+│ + components/ui/card.tsx         create
+│ + components/ui/sheet.tsx        create
+│ + components/ui/tabs.tsx         create
+│ + components/ui/radio-group.tsx  create
+│ + components/ui/table.tsx        create
+│ + components/ui/skeleton.tsx     create
+│ + components/ui/empty.tsx        create
+│ + components/ui/alert.tsx        create
+│ ~ components/ui/button.tsx       overwrite
+│ ~ components/ui/separator.tsx    overwrite
+│ ~ components/ui/tooltip.tsx      overwrite
+│ ~ components/ui/input.tsx        overwrite
+│ + hooks/use-mobile.ts            create
+│ + components/ui/chart.tsx        create
+│ + components/ui/sidebar.tsx      create
+│
+├ Dependencies (5)
+│ + cn
+│ + radix-ui
+│ + recharts@3.8.0
+│ + lucide-react
+│ + class-variance-authority
+│
+├ CSS
+│ + 16 CSS variables added to app/globals.css
+│
+⚠ 4 files will be overwritten.
+│
+│ 15 files, 5 deps, 16 CSS vars
+│
+│ Run with --diff to view changes.
+│ Run with --view to view file contents.
+└ Run without --dry-run to apply.

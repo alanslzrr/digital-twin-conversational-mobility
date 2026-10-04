@@ -6,6 +6,14 @@ Resultados ejecutados y límites de cada entrega.
 
 | Documento | Qué encontrarás |
 | --- | --- |
+| [2026-10-03-core-dashboard-mobile-closure](2026-10-03-core-dashboard-mobile-closure.md) | 72 vistas y 52 estados móviles, cabecera/pestañas corregidas; zoom nativo al 200 % verificado el 4 de octubre. |
+| [2026-10-03-core-dashboard-merge-readiness](2026-10-03-core-dashboard-merge-readiness.md) | Corrección de Sources con release instalada, retirada de CLI vulnerable y validación previa al merge. |
+| [2026-10-03-core-dashboard-refinement-v2](2026-10-03-core-dashboard-refinement-v2.md) | Neutralidad y densidad V2; gráficos existentes, comparaciones guardadas y validación sintética; límites manuales explícitos. |
+| [2026-10-03-core-dashboard-redesign](2026-10-03-core-dashboard-redesign.md) | Seis vistas rediseñadas, estados veraces y validación sintética; lector de pantalla/zoom nativo y CI pendientes. |
+| [2026-10-03-core-dashboard-independent-fixes](2026-10-03-core-dashboard-independent-fixes.md) | R1–R5 corregidos, 47 pruebas SQL/unitarias, 36 comprobaciones HTTP y 20 inspecciones nuevas con agent-browser |
+| [2026-10-03-core-dashboard-second-audit](2026-10-03-core-dashboard-second-audit.md) | Segunda auditoría con agent-browser, nueve hallazgos corregidos, 72 pantallas/formularios y límites explícitos |
+| [2026-10-03-core-dashboard-refinement](2026-10-03-core-dashboard-refinement.md) | Seis vistas refinadas, métricas/gráficos y pruebas aisladas; verificaciones visuales pendientes explícitas |
+| [2026-10-02-core-dashboard](2026-10-02-core-dashboard.md) | Panel y telemetría: código completo, PostgreSQL/HTTP aislados y evidencia visual; instalación habitual pendiente. |
 | [2026-09-25-e2-closure](2026-09-25-e2-closure.md) | E2 — cierre del control conversacional |
 | [2026-09-25-emt](2026-09-25-emt.md) | E7 — Catálogo y próximas llegadas EMT |
 | [2026-09-25-functional-continuity](2026-09-25-functional-continuity.md) | E6 — Continuidad funcional de la vertical existente |

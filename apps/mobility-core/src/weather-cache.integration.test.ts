@@ -370,3 +370,11 @@ describe.skipIf(process.env.RUN_WEATHER_DB_TESTS !== "1")(
     });
   },
 );
+
+// Observer writes are tested separately with their own isolated pool/schema.
+vi.mock("./observability/events", () => ({
+  recordOperationalEvent: vi.fn(async () => {}),
+}));
+vi.mock("./observability/retention", () => ({
+  pruneObservability: vi.fn(async () => {}),
+}));

@@ -1,0 +1,194 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "path": "/dashboard",
+    "errors": [],
+    "heading": "Resumen de movilidad",
+    "scrollWidth": 1440
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "path": "/dashboard/mobility",
+    "errors": [],
+    "heading": "Movilidad",
+    "scrollWidth": 1440
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "path": "/dashboard/tools",
+    "errors": [],
+    "heading": "Consultas",
+    "scrollWidth": 1440
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "path": "/dashboard/sources",
+    "errors": [],
+    "heading": "Fuentes y actualización",
+    "scrollWidth": 1440
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "path": "/dashboard/activity",
+    "errors": [],
+    "heading": "Actividad del sistema",
+    "scrollWidth": 1440
+  },
+  {
+    "width": 1440,
+    "height": 900,
+    "path": "/dashboard/conversations",
+    "errors": [],
+    "heading": "Mis conversaciones",
+    "scrollWidth": 1440
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "path": "/dashboard",
+    "errors": [],
+    "heading": "Resumen de movilidad",
+    "scrollWidth": 1280
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "path": "/dashboard/mobility",
+    "errors": [],
+    "heading": "Movilidad",
+    "scrollWidth": 1280
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "path": "/dashboard/tools",
+    "errors": [],
+    "heading": "Consultas",
+    "scrollWidth": 1280
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "path": "/dashboard/sources",
+    "errors": [],
+    "heading": "Fuentes y actualización",
+    "scrollWidth": 1280
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "path": "/dashboard/activity",
+    "errors": [],
+    "heading": "Actividad del sistema",
+    "scrollWidth": 1280
+  },
+  {
+    "width": 1280,
+    "height": 720,
+    "path": "/dashboard/conversations",
+    "errors": [],
+    "heading": "Mis conversaciones",
+    "scrollWidth": 1280
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "path": "/dashboard",
+    "errors": [],
+    "heading": "Resumen de movilidad",
+    "scrollWidth": 768
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "path": "/dashboard/mobility",
+    "errors": [],
+    "heading": "Movilidad",
+    "scrollWidth": 768
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "path": "/dashboard/tools",
+    "errors": [],
+    "heading": "Consultas",
+    "scrollWidth": 768
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "path": "/dashboard/sources",
+    "errors": [],
+    "heading": "Fuentes y actualización",
+    "scrollWidth": 768
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "path": "/dashboard/activity",
+    "errors": [],
+    "heading": "Actividad del sistema",
+    "scrollWidth": 768
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "path": "/dashboard/conversations",
+    "errors": [],
+    "heading": "Mis conversaciones",
+    "scrollWidth": 768
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "path": "/dashboard",
+    "errors": [],
+    "heading": "Resumen de movilidad",
+    "scrollWidth": 390
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "path": "/dashboard/mobility",
+    "errors": [],
+    "heading": "Movilidad",
+    "scrollWidth": 390
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "path": "/dashboard/tools",
+    "errors": [],
+    "heading": "Consultas",
+    "scrollWidth": 390
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "path": "/dashboard/sources",
+    "errors": [],
+    "heading": "Fuentes y actualización",
+    "scrollWidth": 390
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "path": "/dashboard/activity",
+    "errors": [],
+    "heading": "Actividad del sistema",
+    "scrollWidth": 390
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "path": "/dashboard/conversations",
+    "errors": [],
+    "heading": "Mis conversaciones",
+    "scrollWidth": 390
+  }
+]

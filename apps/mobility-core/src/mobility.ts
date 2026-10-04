@@ -589,8 +589,11 @@ export async function incidents(
   };
 }
 
-export async function bikes(input: z.infer<typeof bikesInputSchema>) {
-  const state = await snapshot("bicimad");
+export async function bikes(
+  input: z.infer<typeof bikesInputSchema>,
+  refresh = true,
+) {
+  const state = await snapshot("bicimad", refresh);
   if (!state) return { status: "unavailable", reason: "no_observation" };
   const origin = input.placeId ? await routingPlace(input.placeId) : null;
   if (input.placeId && !origin)
@@ -641,6 +644,7 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number) {
 
 export async function environment(
   input: z.infer<typeof environmentInputSchema>,
+  refresh = true,
 ) {
   if (input.weatherProduct && input.weatherProduct !== "observation") {
     if (
@@ -697,6 +701,7 @@ export async function environment(
       point,
       point,
       input.weatherProduct,
+      refresh,
     );
   }
   if (input.kind === "weather") {
@@ -730,7 +735,7 @@ export async function environment(
     const place = input.placeId ? await routingPlace(input.placeId) : null;
     if (input.placeId && !place)
       return { status: "unavailable", reason: "unknown_place" };
-    const state = await snapshot("aemet");
+    const state = await snapshot("aemet", refresh);
     return observationResult(
       (state?.payload.readings ?? []) as WeatherReading[],
       state?.provenance ?? null,
@@ -747,7 +752,7 @@ export async function environment(
       },
     );
   }
-  const state = await snapshot("madrid-air");
+  const state = await snapshot("madrid-air", refresh);
   if (!state) return { status: "unavailable", reason: "no_observation" };
   const readings = state.payload.readings as ReturnType<
     typeof parseAir
@@ -773,8 +778,11 @@ export async function environment(
   };
 }
 
-export async function roads(input: z.infer<typeof roadInputSchema>) {
-  const state = await snapshot("madrid-traffic");
+export async function roads(
+  input: z.infer<typeof roadInputSchema>,
+  refresh = true,
+) {
+  const state = await snapshot("madrid-traffic", refresh);
   if (!state) return { status: "unavailable", reason: "no_observation" };
   const sensors = state.payload.sensors as ReturnType<
     typeof parseTraffic
@@ -793,8 +801,11 @@ export async function roads(input: z.infer<typeof roadInputSchema>) {
 
 export { history } from "./history";
 
-export async function parking(input: z.infer<typeof parkingInputSchema>) {
+export async function parking(
+  input: z.infer<typeof parkingInputSchema>,
+  refresh = true,
+) {
   // Occupancy/provider failure must not hide the independently documented tariff.
-  const state = await snapshot("madrid-parking").catch(() => null);
+  const state = await snapshot("madrid-parking", refresh).catch(() => null);
   return parkingResult(state, input);
 }

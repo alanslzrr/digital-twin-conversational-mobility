@@ -1,0 +1,46 @@
+[
+  {
+    "name": "overview-dark-1440x1000",
+    "layout": {
+      "lang": "en",
+      "metricY": 120,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "overview-dark-390x844",
+    "layout": {
+      "lang": "en",
+      "metricY": 124,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "overview-light-1440x1000",
+    "layout": {
+      "lang": "en",
+      "metricY": 120,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    "violations": [],
+    "incomplete": 1
+  },
+  {
+    "name": "overview-light-390x844",
+    "layout": {
+      "lang": "en",
+      "metricY": 124,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "violations": [],
+    "incomplete": 1
+  }
+]

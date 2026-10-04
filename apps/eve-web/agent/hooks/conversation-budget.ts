@@ -1,6 +1,7 @@
 import { defineHook, type HookContext } from "eve/hooks";
 import { budgetContext } from "../../src/budget-context";
 import { coreAccess } from "../../src/evaluator-auth";
+import { bindTelemetry } from "../../src/telemetry";
 
 async function bind(
   ctx: HookContext,
@@ -22,6 +23,7 @@ async function bind(
     sessionId: ctx.session.id,
   });
   if (!registered.ok) throw new Error("Evaluator session unavailable");
+  await bindTelemetry(auth.principalId, ctx.session.id);
   budgetContext.update(() => ({
     principalId: auth.principalId,
     sessionId: ctx.session.id,

@@ -164,3 +164,26 @@ flowchart LR
 | Pruebas offline sin claves | Ejecutar comprobaciones con fixtures reproducibles | [CI](../.github/workflows/ci.yml) |
 
 **Fuentes y evidencia:** [recursos técnicos](resources/index.md#tecnología), [registro de fuentes](sources/README.md), [actas por entrega](acceptance/index.md), [historia del proyecto](evolution.md).
+
+## Panel y captura de observabilidad
+
+El panel conserva la identidad y el canal Web existentes. Sus lecturas usan DTO saneados de Core, no SQL desde Web. El mapa externo es independiente de los datos de movilidad. El registro único de herramientas alimenta tanto MCP como el catálogo y la ejecución manual.
+
+```mermaid
+flowchart LR
+  P[Panel privado Web] --> B[BFF fijo con sesión Better Auth]
+  B --> C[Core: permisos, ownership y cupos]
+  C --> D[(Datos almacenados y observabilidad)]
+  P -->|visible cada 60 s| A[Actividad existente]
+  A --> W[Worker acotado si está habilitado]
+  W --> D
+  C -->|manual confirmado| T[Ejecutor compartido MCP]
+  T --> D
+  E[EVE: transporte efectivo y hooks] -->|JWT mobility.telemetry.write| S[Sink interno best-effort]
+  S --> D
+  P -->|mapa activado| O[Teselas OpenStreetMap anónimas]
+```
+
+La lectura almacenada, la renovación de actividad y la ejecución manual son caminos separados. El sink escribe mediante un pool dedicado con deadlines SQL; no comparte locks con presupuesto y falla abierto. El terminal de intento puede conservar entrada, resultado y uso aunque la preparación se haya perdido. Los resúmenes priorizan el terminal y deduplican intentos; tokens cached son subconjunto de input, no un sumando adicional.
+
+[Referencia técnica](reference/system.md#panel-y-telemetría) · [Uso](user-guide.md#panel-privado) · [Validación](acceptance/2026-10-02-core-dashboard.md).

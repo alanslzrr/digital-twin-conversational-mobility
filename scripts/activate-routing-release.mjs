@@ -277,6 +277,16 @@ async function apply(id) {
   }
   if (!ready) throw Error("OTP did not load the expected feed set");
   await sql`UPDATE routing_release SET manifest=manifest||${sql.json({ otpVerifiedAt: new Date().toISOString() })} WHERE id=${id}`;
+  // Observability follows verified activation; it cannot roll back the release.
+  await sql
+    .begin(async (tx) => {
+      await tx.unsafe(
+        "SET LOCAL transaction_timeout='150ms'; SET LOCAL statement_timeout='100ms'; SET LOCAL lock_timeout='25ms'",
+      );
+      await tx`INSERT INTO operational_event(event_key,occurred_at,component,event_type,severity,source_id,job_id,operation_id,outcome)
+      VALUES(${"routing-release:" + id + ":" + m.otpVersion},now(),'routing','release','info','routing','routing-release',${id},'success') ON CONFLICT(event_key) DO NOTHING`;
+    })
+    .catch(() => {});
   return m;
 }
 try {

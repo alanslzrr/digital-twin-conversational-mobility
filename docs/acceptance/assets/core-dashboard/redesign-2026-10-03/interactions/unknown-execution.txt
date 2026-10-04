@@ -1,0 +1,197 @@
+- link "Skip to content" [ref=e526]
+- complementary "Navigation and account"
+  - link "Mobility Core Evaluation workspace" [ref=e527]
+    - StaticText "Mobility Core"
+    - StaticText "Evaluation workspace"
+  - navigation "Dashboard" [ref=e528]
+    - paragraph
+      - StaticText "Explore"
+    - link "Overview" [ref=e536]
+    - link "Mobility" [ref=e537]
+    - link "Queries" [ref=e538]
+    - paragraph
+      - StaticText "System"
+    - link "Sources" [ref=e539]
+    - link "Activity" [ref=e540]
+    - paragraph
+      - StaticText "Personal"
+    - link "My conversations" [ref=e541]
+  - link "Open chat" [ref=e529]
+  - paragraph
+    - StaticText "Evaluation account"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Sign out" [ref=e530]
+- banner
+  - StaticText "Evaluation / "
+  - StaticText "Queries"
+  - StaticText "Read"
+  - StaticText " · "
+  - time
+    - StaticText "03/10/2026, 11:47:32 CEST"
+  - button "Pause refresh" [ref=e531]
+    - StaticText "Pause"
+  - button "Refresh stored data" [ref=e532]
+  - button "Data timing" [expanded=false, ref=e533]
+- main
+  - heading "Queries" [level=1, ref=e534]
+  - paragraph
+    - StaticText "Discover registered tools. Inspection and execution stay separate."
+  - generic
+    - LabelText
+      - StaticText "Search registered tools"
+    - textbox "Search registered tools" [ref=e542]
+    - heading "Places" [level=2, ref=e543]
+    - link "Find a stored place resolve_place" [ref=e544]
+      - strong
+        - StaticText "Find a stored place"
+      - paragraph
+        - StaticText "resolve_place"
+    - link "Resolve an address resolve_address" [ref=e545]
+      - strong
+        - StaticText "Resolve an address"
+      - paragraph
+        - StaticText "resolve_address"
+    - heading "Journeys and timetables" [level=2, ref=e546]
+    - link "Plan a journey plan_journey" [ref=e547]
+      - strong
+        - StaticText "Plan a journey"
+      - paragraph
+        - StaticText "plan_journey"
+    - link "Get EMT arrivals get_emt_arrivals" [ref=e548]
+      - strong
+        - StaticText "Get EMT arrivals"
+      - paragraph
+        - StaticText "get_emt_arrivals"
+    - link "Read published timetable get_crtm_timetable" [ref=e549]
+      - strong
+        - StaticText "Read published timetable"
+      - paragraph
+        - StaticText "get_crtm_timetable"
+    - link "Get departures get_departures" [ref=e550]
+      - strong
+        - StaticText "Get departures"
+      - paragraph
+        - StaticText "get_departures"
+    - heading "Mobility evidence" [level=2, ref=e551]
+    - link "Read incidents and alerts get_incidents" [ref=e552]
+      - strong
+        - StaticText "Read incidents and alerts"
+      - paragraph
+        - StaticText "get_incidents"
+    - link "Read bike availability get_bike_availability" [ref=e553]
+      - strong
+        - StaticText "Read bike availability"
+      - paragraph
+        - StaticText "get_bike_availability"
+    - link "Read air and weather get_environment" [ref=e554]
+      - strong
+        - StaticText "Read air and weather"
+      - paragraph
+        - StaticText "get_environment"
+    - link "Read traffic sensors get_road_state" [ref=e555]
+      - strong
+        - StaticText "Read traffic sensors"
+      - paragraph
+        - StaticText "get_road_state"
+    - link "Read historical evidence get_historical_state" [ref=e556]
+      - strong
+        - StaticText "Read historical evidence"
+      - paragraph
+        - StaticText "get_historical_state"
+    - link "Read parking get_parking" [ref=e557]
+      - strong
+        - StaticText "Read parking"
+      - paragraph
+        - StaticText "get_parking"
+    - heading "System and coverage" [level=2, ref=e558]
+    - link "Inspect a line get_line_status" [ref=e559]
+      - strong
+        - StaticText "Inspect a line"
+      - paragraph
+        - StaticText "get_line_status"
+    - link "Inspect network status get_network_status" [ref=e560]
+      - strong
+        - StaticText "Inspect network status"
+      - paragraph
+        - StaticText "get_network_status"
+    - link "Read mobility snapshot get_mobility_snapshot" [ref=e561]
+      - strong
+        - StaticText "Read mobility snapshot"
+      - paragraph
+        - StaticText "get_mobility_snapshot"
+    - link "Inspect source health get_source_health" [ref=e562]
+      - strong
+        - StaticText "Inspect source health"
+      - paragraph
+        - StaticText "get_source_health"
+  - link "Back to catalog" [ref=e535]
+  - paragraph
+    - StaticText "Published bikes, docks and observation times for this place."
+  - group
+    - DisclosureTriangle "Sanitized technical details" [expanded=false]
+      - StaticText "Sanitized technical details"
+  - form
+    - group "Query mode"
+      - Legend
+        - StaticText "Query mode"
+      - LabelText [ref=e565] clickable [cursor:pointer]
+        - radio "Stored evidence" [checked=false, ref=e570]
+        - StaticText "Stored evidence"
+      - LabelText [ref=e566] clickable [cursor:pointer]
+        - radio "Run query" [checked=true, ref=e571]
+        - StaticText "Run query"
+    - paragraph
+      - StaticText "Explicit execution. Possible effects: Maintain the activity window · Query the provider"
+    - paragraph
+      - StaticText "Published bikes, docks and observation times for this place."
+    - button "Load example without execution" [ref=e563]
+    - group
+      - LabelText
+        - StaticText "Selected stored place"
+      - combobox "Selected stored place" [expanded=false, ref=e567]: QA sintética · lugar guardado
+        - MenuListPopup
+          - option "Select a stored place" [ref=e572]
+          - option "QA sintética · lugar guardado" [selected, ref=e573]
+          - option "QA sintética · horario caducado" [ref=e574]
+      - paragraph
+        - StaticText "Up to 100 stored reference places. Search for a place or enter a known ID in advanced configuration; no fabricated location."
+    - group
+      - LabelText
+        - StaticText "Place or address query"
+      - textbox "Place or address query" [ref=e568]: Callao
+        - StaticText "Callao"
+    - group
+      - LabelText
+        - StaticText "Result limit"
+      - spinbutton "Result limit" [ref=e569]
+    - group
+      - DisclosureTriangle "Advanced configuration" [expanded=false]
+        - StaticText "Advanced configuration"
+    - group
+      - checkbox "I confirm explicit execution and its declared effects" [checked=true, ref=e575]
+      - paragraph
+        - StaticText "One execution reservation per evaluator, six executions/minute and sixty/day. Address lookup still requires specific allowExternal consent."
+    - button "Run query" [disabled, ref=e564]
+    - alert
+      - StaticText "Execution outcome unknown. Recover this request by ID before another execution. Cancelling the screen does not cancel the provider."
+    - paragraph
+      - StaticText "Request ID: 9dbf8432-f01a-4113-bc05-56651530135b"
+    - button "Recover status by request ID" [ref=e576]
+    - paragraph
+      - StaticText "Inspector limit: 256 KB. EVE context: 32 KB. Inspector evidence does not certify what the model received."
+  - generic
+    - heading "Query result" [level=2, ref=e577]
+    - paragraph
+      - StaticText "Execution outcome unknown. Recover by ID without re-execution."
+    - paragraph
+      - StaticText "Query evaluated: Unavailable · Explicit manual execution."
+    - paragraph
+      - StaticText "No reading collection in this result. Tool limitations describe its scope; inspect sanitized metadata below."
+    - group
+      - DisclosureTriangle "Sanitized technical details" [expanded=false]
+        - StaticText "Sanitized technical details"
+  - group
+    - DisclosureTriangle "Sanitized technical details" [expanded=false]
+      - StaticText "Sanitized technical details"
+- alert

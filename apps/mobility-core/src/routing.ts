@@ -9,6 +9,7 @@ import { journeyModePolicy } from "@mobility/domain";
 import { z } from "zod";
 import { journeyAccessibility } from "./accessibility";
 import { database } from "./database";
+import { boundedSignal } from "./execution-signal";
 import { journeyWeather } from "./journey-weather";
 import { enrichRouting, routingEvidence } from "./routing-evidence";
 import { coveredFeeds, routingRelease } from "./routing-release";
@@ -158,7 +159,7 @@ export async function otpQuery(
     !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)
   )
     throw new RoutingFailure("routing_not_local");
-  const signal = AbortSignal.timeout(10_000);
+  const signal = boundedSignal(AbortSignal.timeout(10_000));
   try {
     const response = await fetch(url, {
       method: "POST",

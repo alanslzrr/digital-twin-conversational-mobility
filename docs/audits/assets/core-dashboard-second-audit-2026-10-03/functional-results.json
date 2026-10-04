@@ -1,0 +1,18 @@
+{
+  "entityMouseNavigation": true,
+  "routerStatePreserved": true,
+  "history": true,
+  "returnFilters": true,
+  "mapFailureFallback": true,
+  "mapCameraReturn": true,
+  "mapHitAreas": true,
+  "referenceKeyboardAndReload": true,
+  "storedInspectionOnly": true,
+  "selectedTurn1200ms": true,
+  "traceKeyboardTabs": true,
+  "mobileEscapeFocus": true,
+  "keyboardHorizontalScroll": true,
+  "pauseAndOfflineRecovery": true,
+  "sameBrowserIdentityIsolation": true,
+  "dialogTabTrap12Presses": true
+}

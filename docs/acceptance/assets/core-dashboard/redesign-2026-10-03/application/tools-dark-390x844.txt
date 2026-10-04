@@ -1,0 +1,103 @@
+- link "Skip to content" [ref=e1344]
+- banner
+  - button "Open navigation" [expanded=false, ref=e1349]
+  - button "Pause refresh" [ref=e1345]
+  - button "Refresh stored data" [ref=e1346]
+  - button "Data timing" [expanded=false, ref=e1347]
+- main
+  - heading "Queries" [level=1, ref=e1348]
+  - paragraph
+    - StaticText "Discover registered tools. Inspection and execution stay separate."
+  - generic
+    - LabelText
+      - StaticText "Search registered tools"
+    - textbox "Search registered tools" [ref=e1350]
+    - heading "Places" [level=2, ref=e1351]
+    - link "Find a stored place resolve_place" [ref=e1352]
+      - strong
+        - StaticText "Find a stored place"
+      - paragraph
+        - StaticText "resolve_place"
+    - link "Resolve an address resolve_address" [ref=e1353]
+      - strong
+        - StaticText "Resolve an address"
+      - paragraph
+        - StaticText "resolve_address"
+    - heading "Journeys and timetables" [level=2, ref=e1354]
+    - link "Plan a journey plan_journey" [ref=e1355]
+      - strong
+        - StaticText "Plan a journey"
+      - paragraph
+        - StaticText "plan_journey"
+    - link "Get EMT arrivals get_emt_arrivals" [ref=e1356]
+      - strong
+        - StaticText "Get EMT arrivals"
+      - paragraph
+        - StaticText "get_emt_arrivals"
+    - link "Read published timetable get_crtm_timetable" [ref=e1357]
+      - strong
+        - StaticText "Read published timetable"
+      - paragraph
+        - StaticText "get_crtm_timetable"
+    - link "Get departures get_departures" [ref=e1358]
+      - strong
+        - StaticText "Get departures"
+      - paragraph
+        - StaticText "get_departures"
+    - heading "Mobility evidence" [level=2, ref=e1359]
+    - link "Read incidents and alerts get_incidents" [ref=e1360]
+      - strong
+        - StaticText "Read incidents and alerts"
+      - paragraph
+        - StaticText "get_incidents"
+    - link "Read bike availability get_bike_availability" [ref=e1361]
+      - strong
+        - StaticText "Read bike availability"
+      - paragraph
+        - StaticText "get_bike_availability"
+    - link "Read air and weather get_environment" [ref=e1362]
+      - strong
+        - StaticText "Read air and weather"
+      - paragraph
+        - StaticText "get_environment"
+    - link "Read traffic sensors get_road_state" [ref=e1363]
+      - strong
+        - StaticText "Read traffic sensors"
+      - paragraph
+        - StaticText "get_road_state"
+    - link "Read historical evidence get_historical_state" [ref=e1364]
+      - strong
+        - StaticText "Read historical evidence"
+      - paragraph
+        - StaticText "get_historical_state"
+    - link "Read parking get_parking" [ref=e1365]
+      - strong
+        - StaticText "Read parking"
+      - paragraph
+        - StaticText "get_parking"
+    - heading "System and coverage" [level=2, ref=e1366]
+    - link "Inspect a line get_line_status" [ref=e1367]
+      - strong
+        - StaticText "Inspect a line"
+      - paragraph
+        - StaticText "get_line_status"
+    - link "Inspect network status get_network_status" [ref=e1368]
+      - strong
+        - StaticText "Inspect network status"
+      - paragraph
+        - StaticText "get_network_status"
+    - link "Read mobility snapshot get_mobility_snapshot" [ref=e1369]
+      - strong
+        - StaticText "Read mobility snapshot"
+      - paragraph
+        - StaticText "get_mobility_snapshot"
+    - link "Inspect source health get_source_health" [ref=e1370]
+      - strong
+        - StaticText "Inspect source health"
+      - paragraph
+        - StaticText "get_source_health"
+  - generic
+    - heading "Select a query" [level=2, ref=e1371]
+    - paragraph
+      - StaticText "Explore its inputs and stored evidence before choosing explicit execution."
+- alert

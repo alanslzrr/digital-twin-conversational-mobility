@@ -1,0 +1,188 @@
+- link "Skip to content" [ref=e1854]
+- banner
+  - button "Toggle navigation" [ref=e1855]
+    - StaticText "Toggle Sidebar"
+  - button "Pause refresh" [ref=e1856]
+  - button "Refresh stored data" [ref=e1857]
+  - button "Data timing" [expanded=false, ref=e1858]
+- main
+  - heading "Activity" [level=1, ref=e1859]
+  - radiogroup "Activity period" [ref=e1860] focusable [tabindex]
+    - generic
+      - radio "1 hour" [checked=false, ref=e1866]
+      - LabelText
+        - StaticText "1 hour"
+    - generic
+      - radio "24 hours" [checked=true, ref=e1867]
+      - LabelText
+        - StaticText "24 hours"
+    - generic
+      - radio "7 days" [checked=false, ref=e1868]
+      - LabelText
+        - StaticText "7 days"
+  - button "Filters" [expanded=false, ref=e1861]
+  - StaticText "Europe/Madrid · Best-effort capture"
+  - region "Recorded activity" [ref=e1862]
+    - heading "Recorded activity" [level=2, ref=e1863]
+    - StaticText "Europe/Madrid"
+    - paragraph
+      - StaticText "7 publications · 1 errors · best-effort capture"
+    - tablist "Activity representation" [ref=e1864] focusable [tabindex]
+      - tab "Chart" [selected, ref=e1869]
+      - tab "Exact data" [ref=e1870]
+    - tabpanel "Chart" [ref=e1865] focusable [tabindex]
+      - generic
+        - heading "Publications" [level=3, ref=e1871]
+        - StaticText "Count · own scale · 0–"
+        - StaticText "3"
+        - region "publications. Arrow keys select an interval." [ref=e1872]
+          - button "02 Oct, 17:06 CEST to 02 Oct, 18:06 CEST; publications: Unavailable" [ref=e1915]
+          - button "02 Oct, 18:06 CEST to 02 Oct, 19:06 CEST; publications: Unavailable" [ref=e1916]
+          - button "02 Oct, 19:06 CEST to 02 Oct, 20:06 CEST; publications: Unavailable" [ref=e1917]
+          - button "02 Oct, 20:06 CEST to 02 Oct, 21:06 CEST; publications: Unavailable" [ref=e1918]
+          - button "02 Oct, 21:06 CEST to 02 Oct, 22:06 CEST; publications: Unavailable" [ref=e1919]
+          - button "02 Oct, 22:06 CEST to 02 Oct, 23:06 CEST; publications: Unavailable" [ref=e1920]
+          - button "02 Oct, 23:06 CEST to 03 Oct, 00:06 CEST; publications: Unavailable" [ref=e1921]
+          - button "03 Oct, 00:06 CEST to 03 Oct, 01:06 CEST; publications: Unavailable" [ref=e1922]
+          - button "03 Oct, 01:06 CEST to 03 Oct, 02:06 CEST; publications: Unavailable" [ref=e1923]
+          - button "03 Oct, 02:06 CEST to 03 Oct, 03:06 CEST; publications: Unavailable" [ref=e1924]
+          - button "03 Oct, 03:06 CEST to 03 Oct, 04:06 CEST; publications: Unavailable" [ref=e1925]
+          - button "03 Oct, 04:06 CEST to 03 Oct, 05:06 CEST; publications: Unavailable" [ref=e1926]
+          - button "03 Oct, 05:06 CEST to 03 Oct, 06:06 CEST; publications: Unavailable" [ref=e1927]
+          - button "03 Oct, 06:06 CEST to 03 Oct, 07:06 CEST; publications: Unavailable" [ref=e1928]
+          - button "03 Oct, 07:06 CEST to 03 Oct, 08:06 CEST; publications: Unavailable" [ref=e1929]
+          - button "03 Oct, 08:06 CEST to 03 Oct, 09:06 CEST; publications: Unavailable" [ref=e1930]
+          - button "03 Oct, 09:06 CEST to 03 Oct, 10:06 CEST; publications: Unavailable" [ref=e1931]
+          - button "03 Oct, 10:06 CEST to 03 Oct, 11:06 CEST; publications: Unavailable" [ref=e1932]
+          - button "03 Oct, 11:06 CEST to 03 Oct, 12:06 CEST; publications: Unavailable" [ref=e1933]
+          - button "03 Oct, 12:06 CEST to 03 Oct, 13:06 CEST; publications: Unavailable" [ref=e1934]
+          - button "03 Oct, 13:06 CEST to 03 Oct, 14:06 CEST; publications: Unavailable" [ref=e1935]
+          - button "03 Oct, 14:06 CEST to 03 Oct, 15:06 CEST; publications: 1" [ref=e1936]
+          - button "03 Oct, 15:06 CEST to 03 Oct, 16:06 CEST; publications: 3" [ref=e1937]
+          - button "03 Oct, 16:06 CEST to 03 Oct, 17:06 CEST; publications: 3" [ref=e1938]
+        - heading "Errors" [level=3, ref=e1873]
+        - StaticText "Count · own scale · 0–"
+        - StaticText "1"
+        - region "errors. Arrow keys select an interval." [ref=e1874]
+          - button "02 Oct, 17:06 CEST to 02 Oct, 18:06 CEST; errors: Unavailable" [ref=e1939]
+          - button "02 Oct, 18:06 CEST to 02 Oct, 19:06 CEST; errors: Unavailable" [ref=e1940]
+          - button "02 Oct, 19:06 CEST to 02 Oct, 20:06 CEST; errors: Unavailable" [ref=e1941]
+          - button "02 Oct, 20:06 CEST to 02 Oct, 21:06 CEST; errors: Unavailable" [ref=e1942]
+          - button "02 Oct, 21:06 CEST to 02 Oct, 22:06 CEST; errors: Unavailable" [ref=e1943]
+          - button "02 Oct, 22:06 CEST to 02 Oct, 23:06 CEST; errors: Unavailable" [ref=e1944]
+          - button "02 Oct, 23:06 CEST to 03 Oct, 00:06 CEST; errors: Unavailable" [ref=e1945]
+          - button "03 Oct, 00:06 CEST to 03 Oct, 01:06 CEST; errors: Unavailable" [ref=e1946]
+          - button "03 Oct, 01:06 CEST to 03 Oct, 02:06 CEST; errors: Unavailable" [ref=e1947]
+          - button "03 Oct, 02:06 CEST to 03 Oct, 03:06 CEST; errors: Unavailable" [ref=e1948]
+          - button "03 Oct, 03:06 CEST to 03 Oct, 04:06 CEST; errors: Unavailable" [ref=e1949]
+          - button "03 Oct, 04:06 CEST to 03 Oct, 05:06 CEST; errors: Unavailable" [ref=e1950]
+          - button "03 Oct, 05:06 CEST to 03 Oct, 06:06 CEST; errors: Unavailable" [ref=e1951]
+          - button "03 Oct, 06:06 CEST to 03 Oct, 07:06 CEST; errors: Unavailable" [ref=e1952]
+          - button "03 Oct, 07:06 CEST to 03 Oct, 08:06 CEST; errors: Unavailable" [ref=e1953]
+          - button "03 Oct, 08:06 CEST to 03 Oct, 09:06 CEST; errors: Unavailable" [ref=e1954]
+          - button "03 Oct, 09:06 CEST to 03 Oct, 10:06 CEST; errors: Unavailable" [ref=e1955]
+          - button "03 Oct, 10:06 CEST to 03 Oct, 11:06 CEST; errors: Unavailable" [ref=e1956]
+          - button "03 Oct, 11:06 CEST to 03 Oct, 12:06 CEST; errors: Unavailable" [ref=e1957]
+          - button "03 Oct, 12:06 CEST to 03 Oct, 13:06 CEST; errors: Unavailable" [ref=e1958]
+          - button "03 Oct, 13:06 CEST to 03 Oct, 14:06 CEST; errors: Unavailable" [ref=e1959]
+          - button "03 Oct, 14:06 CEST to 03 Oct, 15:06 CEST; errors: 0" [ref=e1960]
+          - button "03 Oct, 15:06 CEST to 03 Oct, 16:06 CEST; errors: 1" [ref=e1961]
+          - button "03 Oct, 16:06 CEST to 03 Oct, 17:06 CEST; errors: 0" [ref=e1962]
+      - StaticText "02 Oct, 17:06 CEST"
+      - StaticText "03 Oct, 17:06 CEST"
+      - generic
+        - StaticText "03 Oct, 16:06 CEST–03 Oct, 17:06 CEST · Publications: 3 · Errors: 0"
+      - paragraph
+        - StaticText "Striped intervals are unavailable, not zero. Heights use separate count scales; compare timing, not height between lanes."
+  - table
+    - rowgroup
+      - row
+        - columnheader "Instant" [ref=e1963]
+        - columnheader "Component" [ref=e1964]
+        - columnheader "Source / job" [ref=e1965]
+        - columnheader "Type" [ref=e1966]
+        - columnheader "Outcome" [ref=e1967]
+    - row
+      - cell "03/10/2026, 16:49:55 CEST" [ref=e1875]
+        - link "03/10/2026, 16:49:55 CEST" [ref=e1968]
+          - time
+            - StaticText "03/10/2026, 16:49:55 CEST"
+      - cell "Periodic capture" [ref=e1876]
+      - cell "bicimad / bicimad" [ref=e1877]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1878]
+      - cell "Completed" [ref=e1879]
+    - row
+      - cell "03/10/2026, 16:34:55 CEST" [ref=e1880]
+        - link "03/10/2026, 16:34:55 CEST" [ref=e1969]
+          - time
+            - StaticText "03/10/2026, 16:34:55 CEST"
+      - cell "Periodic capture" [ref=e1881]
+      - cell "bicimad / bicimad" [ref=e1882]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1883]
+      - cell "Completed" [ref=e1884]
+    - row
+      - cell "03/10/2026, 16:19:55 CEST" [ref=e1885]
+        - link "03/10/2026, 16:19:55 CEST" [ref=e1970]
+          - time
+            - StaticText "03/10/2026, 16:19:55 CEST"
+      - cell "Periodic capture" [ref=e1886]
+      - cell "bicimad / bicimad" [ref=e1887]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1888]
+      - cell "Completed" [ref=e1889]
+    - row
+      - cell "03/10/2026, 16:04:55 CEST" [ref=e1890]
+        - link "03/10/2026, 16:04:55 CEST" [ref=e1971]
+          - time
+            - StaticText "03/10/2026, 16:04:55 CEST"
+      - cell "Periodic capture" [ref=e1891]
+      - cell "bicimad / bicimad" [ref=e1892]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1893]
+      - cell "Completed" [ref=e1894]
+    - row
+      - cell "03/10/2026, 15:49:55 CEST" [ref=e1895]
+        - link "03/10/2026, 15:49:55 CEST" [ref=e1972]
+          - time
+            - StaticText "03/10/2026, 15:49:55 CEST"
+      - cell "Periodic capture" [ref=e1896]
+      - cell "bicimad / bicimad" [ref=e1897]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1898]
+      - cell "Failed Recorded issue. Open details for evidence." [ref=e1899]
+        - StaticText "Failed"
+        - paragraph
+          - StaticText "Recorded issue. Open details for evidence."
+    - row
+      - cell "03/10/2026, 15:34:55 CEST" [ref=e1900]
+        - link "03/10/2026, 15:34:55 CEST" [ref=e1973]
+          - time
+            - StaticText "03/10/2026, 15:34:55 CEST"
+      - cell "Periodic capture" [ref=e1901]
+      - cell "bicimad / bicimad" [ref=e1902]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1903]
+      - cell "Completed" [ref=e1904]
+    - row
+      - cell "03/10/2026, 15:19:55 CEST" [ref=e1905]
+        - link "03/10/2026, 15:19:55 CEST" [ref=e1974]
+          - time
+            - StaticText "03/10/2026, 15:19:55 CEST"
+      - cell "Periodic capture" [ref=e1906]
+      - cell "bicimad / bicimad" [ref=e1907]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1908]
+      - cell "Completed" [ref=e1909]
+    - row
+      - cell "03/10/2026, 15:04:55 CEST" [ref=e1910]
+        - link "03/10/2026, 15:04:55 CEST" [ref=e1975]
+          - time
+            - StaticText "03/10/2026, 15:04:55 CEST"
+      - cell "Periodic capture" [ref=e1911]
+      - cell "bicimad / bicimad" [ref=e1912]
+        - StaticText "bicimad / bicimad"
+      - cell "Information stored" [ref=e1913]
+      - cell "Completed" [ref=e1914]
+- alert

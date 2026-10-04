@@ -1,0 +1,229 @@
+- complementary "Navegación y cuenta"
+  - paragraph
+    - StaticText "Mobility Core"
+  - navigation "Panel" [ref=e68]
+    - paragraph
+      - StaticText "Información"
+    - link "Resumen" [ref=e78]
+    - link "Movilidad" [ref=e79]
+    - link "Consultas" [ref=e80]
+    - paragraph
+      - StaticText "Sistema"
+    - link "Fuentes y actualización" [ref=e81]
+    - link "Actividad del sistema" [ref=e82]
+    - paragraph
+      - StaticText "Personal"
+    - link "Mis conversaciones" [ref=e83]
+  - link "Volver al chat" [ref=e69]
+  - paragraph
+    - StaticText "Cuenta de evaluación"
+  - paragraph
+    - StaticText "QA evaluator 1"
+  - button "Cerrar sesión" [ref=e70]
+- banner
+  - StaticText "Panel de evaluación"
+  - StaticText "Privado"
+  - button "Pausar actualización" [ref=e71]
+  - button "Actualizar pantalla" [ref=e72]
+- region "Estado de actualización" [ref=e66]
+  - StaticText "Actualización de pantalla:"
+  - StaticText "visible"
+  - StaticText "Actualización desde las fuentes:"
+  - StaticText "deshabilitada"
+- region "Cómo se actualiza la información" [ref=e67]
+  - paragraph
+    - StaticText "Actualizar pantalla relee los datos guardados. No solicita una lectura nueva a las fuentes."
+  - paragraph
+    - StaticText "Mientras este panel está visible, mantiene la ventana de actualización existente. Cada fuente conserva su frecuencia."
+- main
+  - heading "Movilidad" [level=1, ref=e73]
+  - paragraph
+    - StaticText "Observación, incorporación y lectura son instantes distintos. Los catálogos no son tiempo real; cero no significa ausencia."
+  - tablist "Tipo de información" [ref=e74] focusable [tabindex]
+    - tab "Datos que cambian" [selected, ref=e84]
+    - tab "Catálogos de referencia" [ref=e85]
+  - tabpanel "Datos que cambian" [ref=e75] focusable [tabindex]
+    - StaticText "Lecturas, estimaciones, predicciones y avisos: cada producto conserva sus fechas y límites."
+  - region "Antigüedad del producto" [ref=e76]
+    - heading "¿Qué parte de este producto puedo usar?" [level=2, ref=e86]
+    - paragraph
+      - StaticText "4 registros del producto en toda esta selección; no solo en esta página."
+    - list
+      - listitem [level=1]
+        - StaticText "Lecturas recientes: 2"
+      - listitem [level=1]
+        - StaticText "Datos antiguos: 1"
+      - listitem [level=1]
+        - StaticText "Sin lectura utilizable: 1"
+      - listitem [level=1]
+        - StaticText "Referencia: 0"
+  - form
+    - group
+      - LabelText
+        - StaticText "Categoría"
+      - combobox "Categoría" [expanded=false, ref=e87]: BiciMAD
+        - MenuListPopup
+          - option "Salidas y llegadas" [ref=e126]
+          - option "Incidencias" [ref=e127]
+          - option "BiciMAD" [selected, ref=e128]
+          - option "Aire y meteorología" [ref=e129]
+          - option "Tráfico" [ref=e130]
+          - option "Aparcamiento" [ref=e131]
+    - group
+      - LabelText
+        - StaticText "Fuente"
+      - combobox "Fuente" [expanded=false, ref=e88]: Todas
+        - MenuListPopup
+          - option "Todas" [selected, ref=e132]
+          - option "renfe" [ref=e133]
+          - option "emt" [ref=e134]
+          - option "bicimad" [ref=e135]
+          - option "crtm" [ref=e136]
+          - option "aemet" [ref=e137]
+          - option "dgt" [ref=e138]
+          - option "madrid-air" [ref=e139]
+          - option "madrid-traffic" [ref=e140]
+          - option "madrid-parking" [ref=e141]
+          - option "osm" [ref=e142]
+    - group
+      - LabelText
+        - StaticText "Frescura"
+      - combobox "Frescura" [expanded=false, ref=e89]: Todas
+        - MenuListPopup
+          - option "Todas" [selected, ref=e143]
+          - option "Reciente" [ref=e144]
+          - option "Comprobado recientemente" [ref=e145]
+          - option "Antiguo" [ref=e146]
+          - option "No disponible" [ref=e147]
+          - option "Referencia publicada" [ref=e148]
+          - option "Antigüedad no confirmada" [ref=e149]
+    - group
+      - LabelText
+        - StaticText "Buscar entidad"
+      - textbox "Buscar entidad" [ref=e90]
+      - button "Filtrar" [ref=e91]
+  - button "Mostrar mapa" [ref=e77]
+  - table
+    - rowgroup
+      - row
+        - columnheader "Entidad" [ref=e116]
+        - columnheader "Producto/fuente" [ref=e117]
+        - columnheader "Frescura" [ref=e118]
+        - columnheader "Observación" [ref=e119]
+        - columnheader "Incorporación" [ref=e120]
+        - columnheader "Valores" [ref=e121]
+    - row
+      - cell "QA sintética · alquiler deshabilitado" [ref=e92]
+        - link "QA sintética · alquiler deshabilitado" [ref=e122]
+      - cell "Bicicletas BiciMAD bicimad" [ref=e93]
+        - StaticText "Bicicletas BiciMAD"
+        - LineBreak "\n"
+        - StaticText "bicimad"
+      - cell "Reciente Cobertura publicada parcial; no representa toda la ciudad." [ref=e94]
+        - StaticText "Reciente"
+        - paragraph
+          - StaticText "Cobertura publicada parcial; no representa toda la ciudad."
+      - cell "3/10/2026, 10:30:46 CEST" [ref=e95]
+        - time
+          - StaticText "3/10/2026, 10:30:46 CEST"
+      - cell "3/10/2026, 10:30:51 CEST" [ref=e96]
+        - time
+          - StaticText "3/10/2026, 10:30:51 CEST"
+      - cell "Bicicletas disponibles: 5 bicicletas Anclajes disponibles: 10 anclajes Alquiler habilitado: No Estación instalada: Sí Devolución habilitada: Sí" [ref=e97]
+        - generic
+          - StaticText "Bicicletas disponibles: 5 bicicletas"
+        - generic
+          - StaticText "Anclajes disponibles: 10 anclajes"
+        - generic
+          - StaticText "Alquiler habilitado: No"
+        - generic
+          - StaticText "Estación instalada: Sí"
+        - generic
+          - StaticText "Devolución habilitada: Sí"
+    - row
+      - cell "QA sintética · sin observación Sin coordenadas publicadas" [ref=e98]
+        - link "QA sintética · sin observación" [ref=e123]
+        - paragraph
+          - StaticText "Sin coordenadas publicadas"
+      - cell "Bicicletas BiciMAD bicimad" [ref=e99]
+        - StaticText "Bicicletas BiciMAD"
+        - LineBreak "\n"
+        - StaticText "bicimad"
+      - cell "No disponible La fuente no publicó una hora de observación verificable." [ref=e100]
+        - StaticText "No disponible"
+        - paragraph
+          - StaticText "La fuente no publicó una hora de observación verificable."
+      - cell "No disponible" [ref=e101]
+      - cell "3/10/2026, 10:30:51 CEST" [ref=e102]
+        - time
+          - StaticText "3/10/2026, 10:30:51 CEST"
+      - cell "Bicicletas disponibles: 0 bicicletas Anclajes disponibles: 0 anclajes Alquiler habilitado: Sí Estación instalada: Sí Devolución habilitada: Sí" [ref=e103]
+        - generic
+          - StaticText "Bicicletas disponibles: 0 bicicletas"
+        - generic
+          - StaticText "Anclajes disponibles: 0 anclajes"
+        - generic
+          - StaticText "Alquiler habilitado: Sí"
+        - generic
+          - StaticText "Estación instalada: Sí"
+        - generic
+          - StaticText "Devolución habilitada: Sí"
+    - row
+      - cell "QA sintética · estación antigua" [ref=e104]
+        - link "QA sintética · estación antigua" [ref=e124]
+      - cell "Bicicletas BiciMAD bicimad" [ref=e105]
+        - StaticText "Bicicletas BiciMAD"
+        - LineBreak "\n"
+        - StaticText "bicimad"
+      - cell "Antiguo Cobertura publicada parcial; no representa toda la ciudad." [ref=e106]
+        - StaticText "Antiguo"
+        - paragraph
+          - StaticText "Cobertura publicada parcial; no representa toda la ciudad."
+      - cell "3/10/2026, 9:30:51 CEST" [ref=e107]
+        - time
+          - StaticText "3/10/2026, 9:30:51 CEST"
+      - cell "3/10/2026, 10:30:51 CEST" [ref=e108]
+        - time
+          - StaticText "3/10/2026, 10:30:51 CEST"
+      - cell "Bicicletas disponibles: 9 bicicletas Anclajes disponibles: 3 anclajes Alquiler habilitado: Sí Estación instalada: Sí Devolución habilitada: Sí" [ref=e109]
+        - generic
+          - StaticText "Bicicletas disponibles: 9 bicicletas"
+        - generic
+          - StaticText "Anclajes disponibles: 3 anclajes"
+        - generic
+          - StaticText "Alquiler habilitado: Sí"
+        - generic
+          - StaticText "Estación instalada: Sí"
+        - generic
+          - StaticText "Devolución habilitada: Sí"
+    - row
+      - cell "QA sintética · estación reciente" [ref=e110]
+        - link "QA sintética · estación reciente" [ref=e125]
+      - cell "Bicicletas BiciMAD bicimad" [ref=e111]
+        - StaticText "Bicicletas BiciMAD"
+        - LineBreak "\n"
+        - StaticText "bicimad"
+      - cell "Reciente Cobertura publicada parcial; no representa toda la ciudad." [ref=e112]
+        - StaticText "Reciente"
+        - paragraph
+          - StaticText "Cobertura publicada parcial; no representa toda la ciudad."
+      - cell "3/10/2026, 10:30:46 CEST" [ref=e113]
+        - time
+          - StaticText "3/10/2026, 10:30:46 CEST"
+      - cell "3/10/2026, 10:30:51 CEST" [ref=e114]
+        - time
+          - StaticText "3/10/2026, 10:30:51 CEST"
+      - cell "Bicicletas disponibles: 4 bicicletas Anclajes disponibles: 8 anclajes Alquiler habilitado: Sí Estación instalada: Sí Devolución habilitada: Sí" [ref=e115]
+        - generic
+          - StaticText "Bicicletas disponibles: 4 bicicletas"
+        - generic
+          - StaticText "Anclajes disponibles: 8 anclajes"
+        - generic
+          - StaticText "Alquiler habilitado: Sí"
+        - generic
+          - StaticText "Estación instalada: Sí"
+        - generic
+          - StaticText "Devolución habilitada: Sí"
+  - StaticText "4"
+  - StaticText " filas devueltas en esta página"
+- alert

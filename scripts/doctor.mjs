@@ -27,6 +27,6 @@ console.log(
   `  GitHub: ${succeeds("gh", ["auth", "status"]) ? "authenticated" : "not configured"}`,
 );
 console.log(
-  `  Vercel: ${succeeds("vercel", ["whoami"]) ? "authenticated" : "not configured"}`,
+  "  Vercel: disabled pending an audited deployment CLI (see docs/deployment.md)",
 );
 process.exitCode = failed ? 1 : 0;

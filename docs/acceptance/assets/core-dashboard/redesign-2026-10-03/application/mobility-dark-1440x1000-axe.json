@@ -1,0 +1,114 @@
+{
+  "counts": {
+    "inapplicable": 41,
+    "incomplete": 2,
+    "passes": 48,
+    "violations": 0
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "help": "ARIA attributes must conform to valid values",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+      "id": "aria-valid-attr-value",
+      "impact": "critical",
+      "nodeCount": 2,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_97pfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Data timing\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_97pfivb_\" data-state=\"closed\">",
+          "target": ["button[aria-label=\"Data timing\"]"]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_kpbsnvpfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_kpbsnvpfivb...\" data-state=\"closed\">",
+          "target": ["button[aria-controls=\"radix-_R_kpbsnvpfivb_\"]"]
+        }
+      ],
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ]
+    },
+    {
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodeCount": 20,
+      "nodes": [
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<input data-slot=\"input\" class=\"h-9 w-full min-w-0 r...\" id=\"search\" placeholder=\"Search entities\" maxlength=\"100\" value=\"\">",
+          "target": ["#search"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"submit\">",
+          "target": ["button[type=\"submit\"]"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>All</span>",
+          "target": ["form > fieldset > label:nth-child(2) > span"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Recent</span>",
+          "target": ["form > fieldset > label:nth-child(3) > span"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Stale</span>",
+          "target": ["form > fieldset > label:nth-child(4) > span"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Unavailable</span>",
+          "target": ["form > fieldset > label:nth-child(5) > span"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_kpbsnvpfivb...\" data-state=\"closed\">",
+          "target": ["button[aria-controls=\"radix-_R_kpbsnvpfivb_\"]"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>List</span>",
+          "target": [
+            ".dc-toolbar:nth-child(4) > fieldset > label:nth-child(2) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span>Map + list</span>",
+          "target": [
+            ".dc-toolbar:nth-child(4) > fieldset > label:nth-child(3) > span"
+          ]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element",
+          "html": "<span class=\"dc-meta\">List includes unmapped entities. Map reads are independently viewport-scoped.</span>",
+          "target": [".dc-toolbar:nth-child(4) > .dc-meta"]
+        }
+      ],
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ]
+    }
+  ]
+}

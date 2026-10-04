@@ -1,0 +1,85 @@
+{
+  "counts": {
+    "inapplicable": 44,
+    "incomplete": 2,
+    "passes": 45,
+    "violations": 0
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "help": "ARIA attributes must conform to valid values",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/aria-valid-attr-value?application=axeAPI",
+      "id": "aria-valid-attr-value",
+      "impact": "critical",
+      "nodeCount": 2,
+      "nodes": [
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_97pfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"ghost\" data-size=\"icon\" class=\"inline-flex shrink-0...\" aria-label=\"Data timing\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_97pfivb_\" data-state=\"closed\">",
+          "target": ["button[aria-label=\"Data timing\"]"]
+        },
+        {
+          "failureSummary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-_R_49bsnvpfivb_\"",
+          "html": "<button data-slot=\"button\" data-variant=\"outline\" data-size=\"default\" class=\"inline-flex shrink-0...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"radix-_R_49bsnvpfivb...\" data-state=\"closed\">",
+          "target": [".bg-background"]
+        }
+      ],
+      "tags": [
+        "cat.aria",
+        "wcag2a",
+        "wcag412",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "RGAAv4",
+        "RGAA-7.1.1"
+      ]
+    },
+    {
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/color-contrast?application=axeAPI",
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodeCount": 5,
+      "nodes": [
+        {
+          "failureSummary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content",
+          "html": "<text x=\"32\" y=\"199\" text-anchor=\"end\">0</text>",
+          "target": ["text[y=\"199\"]"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content",
+          "html": "<text x=\"32\" y=\"119\" text-anchor=\"end\">2</text>",
+          "target": ["text[y=\"119\"]"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content",
+          "html": "<text x=\"32\" y=\"39\" text-anchor=\"end\">3</text>",
+          "target": ["text[y=\"39\"]"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+          "html": "<text x=\"40\" y=\"224\">02 Oct, 11:49</text>",
+          "target": ["text[x=\"40\"]"]
+        },
+        {
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node",
+          "html": "<text x=\"685\" y=\"224\" text-anchor=\"end\">03 Oct, 11:49</text>",
+          "target": ["text[x=\"685\"]"]
+        }
+      ],
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ]
+    }
+  ]
+}
