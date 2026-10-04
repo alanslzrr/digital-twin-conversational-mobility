@@ -23,6 +23,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 import { Shimmer } from "./shimmer";
@@ -149,15 +150,30 @@ export type ReasoningTriggerProps = ComponentProps<
   getThinkingMessage?: (isStreaming: boolean, duration?: number) => ReactNode;
 };
 
-const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => {
-  if (isStreaming || duration === 0) {
-    return <Shimmer duration={1}>Thinking...</Shimmer>;
-  }
-  if (duration === undefined) {
-    return <p>Thought for a few seconds</p>;
-  }
-  return <p>Thought for {duration} seconds</p>;
-};
+function ThinkingMessage({
+  isStreaming,
+  duration,
+}: {
+  isStreaming: boolean;
+  duration?: number;
+}) {
+  const { t } = useUi();
+  if (isStreaming || duration === 0)
+    return <Shimmer duration={1}>{t("presentation.thinking")}</Shimmer>;
+  return (
+    <p>
+      {duration === undefined
+        ? t("presentation.thoughtBriefly")
+        : t("presentation.thoughtSeconds", { count: duration })}
+    </p>
+  );
+}
+const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => (
+  <ThinkingMessage
+    isStreaming={isStreaming}
+    {...(duration === undefined ? {} : { duration })}
+  />
+);
 
 export const ReasoningTrigger = memo(
   ({

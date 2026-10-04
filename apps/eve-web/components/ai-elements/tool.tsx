@@ -9,6 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 import { CodeBlock } from "./code-block";
@@ -46,14 +47,24 @@ const statusLabels: Record<ToolPart["state"], string> = {
   "output-error": "Error",
 };
 
-export const getStatusIndicator = (status: ToolPart["state"]) =>
-  status === "output-available" ? null : (
+export function StatusIndicator({ status }: { status: ToolPart["state"] }) {
+  const { copy, t } = useUi();
+  const labels = {
+    "approval-requested": t("presentation.awaitingApproval"),
+    "approval-responded": t("presentation.responded"),
+    "input-streaming": t("presentation.pending"),
+    "output-denied": t("presentation.denied"),
+  };
+  return status === "output-available" ? null : (
     <span
       className={cn("text-sm", status === "output-error" && "text-destructive")}
     >
-      {statusLabels[status]}
+      {status in labels
+        ? labels[status as keyof typeof labels]
+        : copy(statusLabels[status])}
     </span>
   );
+}
 
 export const ToolHeader = ({
   className,
@@ -81,7 +92,7 @@ export const ToolHeader = ({
         <WrenchIcon className="size-4 shrink-0" />
       )}
       <span className="text-sm">{displayName}</span>
-      {getStatusIndicator(state)}
+      <StatusIndicator status={state} />
       <ChevronRightIcon className="size-3.5 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
     </CollapsibleTrigger>
   );
@@ -112,6 +123,8 @@ export const BashToolContent = ({
   errorText,
   ...props
 }: BashToolContentProps) => {
+  const { t } = useUi();
+
   const command = getRecordValue(input, "command");
   const stdout =
     getRecordValue(output, "stdout") ??
@@ -134,7 +147,7 @@ export const BashToolContent = ({
         <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 font-mono text-xs leading-relaxed">
           <code>
             <span className="mb-2 block font-sans text-[10px] text-muted-foreground uppercase tracking-wide">
-              Output
+              {t("conversationView.output2")}
             </span>
             {stdout ? (
               <span className="block">{String(stdout).trimEnd()}</span>
@@ -146,7 +159,8 @@ export const BashToolContent = ({
             ) : null}
             {typeof exitCode === "number" && exitCode !== 0 ? (
               <span className="block text-muted-foreground">
-                Exited with code {exitCode}
+                {t("tool.exitedWithCode")}
+                {exitCode}
               </span>
             ) : null}
           </code>
@@ -174,23 +188,27 @@ export type ToolInputProps = ComponentProps<"div"> & {
   input: ToolPart["input"];
 };
 
-export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
-  <div
-    className={cn("overflow-hidden rounded-md bg-muted/50", className)}
-    {...props}
-  >
-    <span className="block px-3 pt-3 font-sans text-[10px] text-muted-foreground uppercase tracking-wide">
-      Parameters
-    </span>
-    <div>
-      <CodeBlock
-        className={compactCodeBlockClassName}
-        code={JSON.stringify(input, null, 2)}
-        language="json"
-      />
+export const ToolInput = ({ className, input, ...props }: ToolInputProps) => {
+  const { t } = useUi();
+  return (
+    <div
+      className={cn("overflow-hidden rounded-md bg-muted/50", className)}
+      {...props}
+    >
+      <span className="block px-3 pt-3 font-sans text-[10px] text-muted-foreground uppercase tracking-wide">
+        {" "}
+        {t("commonFragments.Parameters")}{" "}
+      </span>
+      <div>
+        <CodeBlock
+          className={compactCodeBlockClassName}
+          code={JSON.stringify(input, null, 2)}
+          language="json"
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export type ToolOutputProps = ComponentProps<"div"> & {
   output: ToolPart["output"];
@@ -203,6 +221,8 @@ export const ToolOutput = ({
   errorText,
   ...props
 }: ToolOutputProps) => {
+  const { t } = useUi();
+
   if (!(output || errorText)) {
     return null;
   }
@@ -239,7 +259,7 @@ export const ToolOutput = ({
       {...props}
     >
       <span className="block px-3 pt-3 font-sans text-[10px] text-muted-foreground uppercase tracking-wide">
-        {errorText ? "Error" : "Result"}
+        {errorText ? t("tool.error") : t("tool.result")}
       </span>
       {errorText && <div className="px-3 pt-2 pb-3">{errorText}</div>}
       {Output}
