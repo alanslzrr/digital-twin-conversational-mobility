@@ -1,7 +1,9 @@
 "use client";
+
 import type { DashboardOverview } from "@mobility/contracts";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useUi } from "@/i18n/provider";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import {
   eventOutcomes,
@@ -16,6 +18,8 @@ import { FreshnessBar } from "./refinement/FreshnessGraphic";
 import { ProductUnits } from "./refinement/ProductUnits";
 import { Instant, PageTitle, State } from "./shared";
 export function Overview() {
+  const { t, copy, numberLocale } = useUi();
+
   const [window, setWindow] = useState("24h");
   const [parkingCategory, setParkingCategory] = useState("");
   const q = useDashboard(
@@ -56,12 +60,14 @@ export function Overview() {
     <>
       <div className="dc-overview-heading">
         <PageTitle
-          title="Overview"
-          description="Stored mobility evidence at a glance."
+          title={t("overviewView.overview")}
+          description={t("overviewView.storedMobilityEvidenceAtAGlance")}
         />{" "}
         {data && data.parkingCategories.length > 1 ? (
           <div className="dc-toolbar dc-inline-field">
-            <label htmlFor="overview-parking-category">Parking category</label>
+            <label htmlFor="overview-parking-category">
+              {t("overviewView.parkingCategory")}
+            </label>
             <select
               id="overview-parking-category"
               value={data.parkingCategory ?? ""}
@@ -73,7 +79,9 @@ export function Overview() {
                 </option>
               ))}
             </select>
-            <span className="dc-meta">Only this category is summed.</span>
+            <span className="dc-meta">
+              {t("overviewView.onlyThisCategoryIsSummed")}
+            </span>
           </div>
         ) : null}
       </div>
@@ -96,19 +104,21 @@ export function Overview() {
             <Card className="dc-evidence-panel">
               <div className="dc-panel-heading">
                 <div>
-                  <h2>Product evidence</h2>
+                  <h2>{t("overviewView.productEvidence")}</h2>
                   <p className="dc-meta">
-                    Readiness of observed products, not citywide coverage.
+                    {t(
+                      "overviewView.readinessOfObservedProductsNotCitywideCoverage",
+                    )}
                   </p>
                 </div>
                 <Link href="/dashboard/sources" className="dc-link">
-                  Sources
+                  {t("overviewView.sources")}
                 </Link>
               </div>
               <ProductUnits
                 products={data.products.map((p) => ({
                   ...p,
-                  label: productLabel(p.id),
+                  label: copy(productLabel(p.id)),
                 }))}
                 included={
                   data.metrics.find((m) => m.id === "M4")?.denominator
@@ -122,22 +132,23 @@ export function Overview() {
               <div className="dc-product-table-region">
                 <table className="dc-product-table">
                   <caption className="sr-only">
-                    Stored record freshness per product. Units differ between
-                    products and are not summed.
+                    {t(
+                      "overviewView.storedRecordFreshnessPerProductUnitsDifferBetweenProducts",
+                    )}
                   </caption>
                   <thead>
                     <tr>
-                      <th scope="col">Product</th>
-                      <th scope="col">Evidence</th>
-                      <th scope="col">Record freshness</th>
+                      <th scope="col">{t("overviewView.product")}</th>
+                      <th scope="col">{t("overviewView.evidence")}</th>
+                      <th scope="col">{t("overviewView.recordFreshness")}</th>
                       <th scope="col" className="numeric dc-count-column">
-                        Recent
+                        {t("map.recent")}
                       </th>
                       <th scope="col" className="numeric dc-count-column">
-                        Stale
+                        {t("mobilityView.stale")}
                       </th>
                       <th scope="col" className="numeric dc-count-column">
-                        Unavailable
+                        {t("activityView.unavailable")}
                       </th>
                     </tr>
                   </thead>
@@ -148,8 +159,8 @@ export function Overview() {
                         <tr className="dc-group-row">
                           <th scope="colgroup" colSpan={6}>
                             {mode === "periodic"
-                              ? "Periodic evidence"
-                              : "On-demand evidence"}
+                              ? t("overviewView.periodicEvidence")
+                              : t("overviewView.onDemandEvidence")}
                           </th>
                         </tr>
                         {rows.map((p) => (
@@ -158,7 +169,7 @@ export function Overview() {
                               <Link
                                 href={`/dashboard/sources/${encodeURIComponent(p.source)}`}
                               >
-                                {productLabel(p.id)}
+                                {copy(productLabel(p.id))}
                               </Link>
                             </th>
                             <td>
@@ -173,10 +184,10 @@ export function Overview() {
                                 }
                               >
                                 {!p.enabled
-                                  ? "Disabled"
+                                  ? t("overviewView.disabled")
                                   : p.usable
-                                    ? "Usable"
-                                    : "No usable evidence"}
+                                    ? t("overviewView.usable")
+                                    : t("insights.noUsableEvidence")}
                               </span>
                             </td>
                             <td>
@@ -195,10 +206,12 @@ export function Overview() {
                                   {p[key] === null ? (
                                     <>
                                       <span aria-hidden="true">—</span>
-                                      <span className="sr-only">Unknown</span>
+                                      <span className="sr-only">
+                                        {t("conversationView.unknown")}
+                                      </span>
                                     </>
                                   ) : (
-                                    p[key]?.toLocaleString("en-GB")
+                                    p[key]?.toLocaleString(numberLocale)
                                   )}
                                 </td>
                               ),
@@ -214,13 +227,13 @@ export function Overview() {
                 href="/dashboard/mobility?section=reference&category=places"
                 className="dc-link dc-panel-footer"
               >
-                Browse reference catalogs
+                {t("overviewView.browseReferenceCatalogs")}
               </Link>
             </Card>
             <div className="dc-stack">
               <Card>
                 <div className="dc-panel-heading">
-                  <h2>Needs attention</h2>
+                  <h2>{t("overviewView.needsAttention")}</h2>
                   {data.attention.length ? (
                     <span className="dc-count-badge">
                       {data.attention.length}
@@ -242,41 +255,47 @@ export function Overview() {
                               aria-hidden="true"
                             />
                             <span className="dc-row-text">
-                              <strong>{productLabel(product?.id ?? "")}</strong>
+                              <strong>
+                                {copy(productLabel(product?.id ?? ""))}
+                              </strong>
                               <span className="dc-meta">
                                 {product?.total === null
-                                  ? "No stored evidence"
-                                  : "Check retained evidence"}
+                                  ? t("overviewView.noStoredEvidence")
+                                  : t("overviewView.checkRetainedEvidence")}
                               </span>
                             </span>
-                            <span className="dc-row-action">Inspect</span>
+                            <span className="dc-row-action">
+                              {t("overviewView.inspect")}
+                            </span>
                           </Link>
                         </li>
                       );
                     })}
                   </ul>
                 ) : (
-                  <p className="dc-meta">No attention items returned.</p>
+                  <p className="dc-meta">
+                    {t("overviewView.noAttentionItemsReturned")}
+                  </p>
                 )}
               </Card>
               <Card>
                 <div className="dc-panel-heading">
-                  <h2>Recent activity</h2>
+                  <h2>{t("overviewView.recentActivity")}</h2>
                   <Link
                     href={`/dashboard/activity?window=${window}`}
                     className="dc-link"
                   >
-                    View all
+                    {t("overviewView.viewAll")}
                   </Link>
                 </div>
                 <Segmented
-                  label="Recent activity period"
+                  label={t("overviewView.recentActivityPeriod")}
                   value={window}
                   onChange={setWindow}
                   options={[
-                    ["1h", "1 hour"],
-                    ["24h", "24 hours"],
-                    ["7d", "7 days"],
+                    ["1h", t("commonFragments.hours1hour")],
+                    ["24h", t("commonFragments.hours24hours")],
+                    ["7d", t("presentation.days7")],
                   ]}
                 />
                 <ActivityPreview data={data.activity} />
@@ -295,11 +314,11 @@ export function Overview() {
                           />
                           <span className="dc-row-text">
                             <strong>
-                              {eventTypes[e.type]} ·{" "}
-                              {sourceNames[e.source] ?? e.source}
+                              {copy(eventTypes[e.type])} ·{" "}
+                              {copy(sourceNames[e.source]) ?? e.source}
                             </strong>
                             <span className="dc-meta">
-                              {eventOutcomes[e.outcome]} ·{" "}
+                              {copy(eventOutcomes[e.outcome])} ·{" "}
                               <Instant value={e.occurredAt} />
                             </span>
                           </span>
@@ -308,7 +327,9 @@ export function Overview() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="dc-meta">No events captured in this period.</p>
+                  <p className="dc-meta">
+                    {t("overviewView.noEventsCapturedInThisPeriod")}
+                  </p>
                 )}
               </Card>
             </div>
