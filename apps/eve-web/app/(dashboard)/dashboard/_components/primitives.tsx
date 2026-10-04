@@ -1,7 +1,9 @@
 "use client";
+
 import { X } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { useId, useRef } from "react";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
 import { Card as UICard } from "@/components/ui/card";
 import {
@@ -27,6 +29,7 @@ import {
   Tabs as TabsRoot,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 export function Card({ className, ...props }: ComponentProps<"div">) {
   return <UICard className={cn("dc-card", className)} {...props} />;
@@ -68,13 +71,15 @@ export function Sheet({
   trigger?: ReactNode;
   children: ReactNode;
 }) {
+  const { t, locale } = useUi();
+
   const previousFocus = useRef<HTMLElement | null>(null);
   return (
     <SheetRoot open={open} onOpenChange={onOpenChange}>
       {trigger ? <SheetTrigger asChild>{trigger}</SheetTrigger> : null}
       <SheetContent
         showCloseButton={false}
-        lang="en"
+        lang={locale}
         className="dashboard-dialog dc-sheet"
         onOpenAutoFocus={() => {
           previousFocus.current =
@@ -90,15 +95,20 @@ export function Sheet({
         }}
       >
         <div className="dc-sheet-heading">
-          <SheetTitle>{title}</SheetTitle>
+          <SheetTitle className="min-w-0 flex-1">{title}</SheetTitle>
+          <LocaleSwitcher />
           <SheetClose asChild>
-            <Button variant="ghost" size="icon" aria-label="Close details">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("primitives.closeDetails")}
+            >
               <X aria-hidden="true" />
             </Button>
           </SheetClose>
         </div>
         <SheetDescription className={description ? "dc-meta" : "sr-only"}>
-          {description ?? `${title} details`}
+          {description ?? t("presentation.details", { title })}
         </SheetDescription>
         <div className="dc-sheet-body">{children}</div>
       </SheetContent>
