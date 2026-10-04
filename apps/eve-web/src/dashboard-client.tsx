@@ -1,4 +1,5 @@
 "use client";
+
 import {
   dashboardActivity,
   dashboardConversationIndexResponse,
@@ -26,6 +27,7 @@ import {
   useState,
 } from "react";
 import useSWR, { type State, SWRConfig } from "swr";
+import { useUi } from "@/i18n/provider";
 import {
   type DashboardRead,
   dashboardRetryDelay,
@@ -75,6 +77,8 @@ export function DashboardProvider({
   identity: Identity;
   children: ReactNode;
 }) {
+  const { t, locale } = useUi();
+
   const [privateAccess, setPrivateAccess] = useState(true);
   const [viewRead, setViewRead] = useState<ViewReadStatus | null>(null);
   const [paused, setPaused] = useState(false),
@@ -265,11 +269,13 @@ export function DashboardProvider({
         {privateAccess ? (
           children
         ) : (
-          <main lang="en" className="p-8">
+          <main lang={locale} className="p-8">
             <p role="alert">
-              Private dashboard details cleared. Sign in to continue.
+              {t(
+                "dashboardClient.privateDashboardDetailsClearedSignInToContinue",
+              )}
             </p>
-            <a href="/evaluation">Return to sign in</a>
+            <a href="/evaluation">{t("dashboardClient.returnToSignIn")}</a>
           </main>
         )}
       </SWRConfig>

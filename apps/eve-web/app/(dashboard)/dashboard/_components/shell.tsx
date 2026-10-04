@@ -1,4 +1,6 @@
 "use client";
+import { useUi } from "@/i18n/provider";
+
 import "./dashboard.css";
 import {
   Activity,
@@ -19,6 +21,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,10 +60,12 @@ const initials = (label: string) =>
     .map((part) => part[0]?.toUpperCase())
     .join("");
 function Navigation() {
+  const { t } = useUi();
+
   const path = usePathname();
   const { setOpenMobile } = useSidebar();
   return (
-    <nav aria-label="Dashboard">
+    <nav aria-label={t("shell.dashboard")}>
       <SidebarMenu>
         {links.map(({ href, label, icon: Icon }) => (
           <SidebarMenuItem key={href}>
@@ -99,8 +104,10 @@ function Navigation() {
   );
 }
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const { t, locale, copy } = useUi();
+
   const ctx = useDashboardContext();
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<string | number>("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarResolved, setSidebarResolved] = useState(false);
   useEffect(() => {
@@ -108,7 +115,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setSidebarResolved(true);
   }, []);
   useEffect(() => {
-    if (!notice || notice.startsWith("Sign out")) return;
+    if (
+      !notice ||
+      (typeof notice === "string" && notice.startsWith("Sign out"))
+    )
+      return;
     const timer = window.setTimeout(() => setNotice(""), 5000);
     return () => window.clearTimeout(timer);
   }, [notice]);
@@ -158,8 +169,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       ctx.paused
         ? "Refresh is paused. Resume to read stored data."
         : wait > 0
-          ? `Stored data can be reread in ${Math.ceil(wait / 1000)} seconds.`
-          : "Stored-data refresh requested.",
+          ? Math.ceil(wait / 1000)
+          : "Stored data refresh requested.",
     );
     void mutate(
       (key) =>
@@ -179,18 +190,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         ? "pending"
         : "read";
   const readLabel = ctx.paused
-    ? "Paused"
+    ? t("shell.paused")
     : ctx.viewRead?.failed
       ? ctx.viewRead.readAt
-        ? "Cached · refresh failed"
-        : "Read failed"
+        ? t("shell.cachedRefreshFailed")
+        : t("shell.readFailed")
       : ctx.viewRead?.pending
-        ? "Reading"
-        : "Read";
+        ? t("insights.reading")
+        : t("shell.read");
   return (
     <SidebarProvider
       className="dashboard-shell"
-      lang="en"
+      lang={locale}
       open={sidebarOpen}
       onOpenChange={(v) => {
         setSidebarOpen(v);
@@ -205,15 +216,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       }
     >
       <a href="#dashboard-main" className="dc-skip">
-        Skip to content
+        {t("shell.skipToContent")}
       </a>
       <Sidebar collapsible="icon" dashboardScope>
         <SidebarHeader className="dc-brand">
-          <Link href="/dashboard" aria-label="Mobility Core">
+          <Link href="/dashboard" aria-label={t("shell.mobilityCore")}>
             <span className="dc-brand-mark" aria-hidden="true">
               <Blocks size={14} />
             </span>
-            <span className="dc-brand-label">Mobility Core</span>
+            <span className="dc-brand-label">{t("shell.mobilityCore")}</span>
           </Link>
         </SidebarHeader>
         <SidebarContent className="dc-navigation">
@@ -225,13 +236,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <SidebarMenuButton
                 asChild
                 tooltip={{
-                  children: "Open chat",
+                  children: t("conversationView.openChat"),
                   className: "dashboard-dialog dc-tooltip",
                 }}
               >
-                <Link href="/s" aria-label="Open chat">
+                <Link href="/s" aria-label={t("conversationView.openChat")}>
                   <MessageSquare />
-                  <span>Open chat</span>
+                  <span>{t("conversationView.openChat")}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -239,7 +250,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <Sheet
                 open={accountOpen}
                 onOpenChange={setAccountOpen}
-                title="Current account"
+                title={t("shell.currentAccount")}
                 trigger={
                   <SidebarMenuButton
                     className="dc-identity"
@@ -247,7 +258,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       children: ctx.identity.label,
                       className: "dashboard-dialog dc-tooltip",
                     }}
-                    aria-label={`Account: ${ctx.identity.label}`}
+                    aria-label={t("presentation.account", {
+                      label: ctx.identity.label,
+                    })}
                   >
                     <span className="dc-avatar" aria-hidden="true">
                       {initials(ctx.identity.label) || <UserRound />}
@@ -262,14 +275,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem className="dc-sign-out">
               <SidebarMenuButton
                 onClick={signOut}
-                aria-label="Sign out"
+                aria-label={t("shell.signOut")}
                 tooltip={{
-                  children: "Sign out",
+                  children: t("shell.signOut"),
                   className: "dashboard-dialog dc-tooltip",
                 }}
               >
                 <LogOut />
-                <span>Sign out</span>
+                <span>{t("shell.signOut")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -277,7 +290,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <div className="dc-main-column">
         <header className="dc-header">
-          <SidebarTrigger aria-label="Toggle navigation" />
+          <SidebarTrigger aria-label={t("shell.toggleNavigation")} />
           <div className="dc-header-actions">
             <div
               id="dc-header-controls"
@@ -292,21 +305,25 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   {ctx.viewRead?.readAt ? (
                     <Instant value={ctx.viewRead.readAt} compact />
                   ) : (
-                    "no successful read"
+                    t("shell.noSuccessfulRead")
                   )}
                 </span>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={() => ctx.setPaused(!ctx.paused)}
-                  aria-label={ctx.paused ? "Resume refresh" : "Pause refresh"}
+                  aria-label={
+                    ctx.paused
+                      ? t("shell.resumeRefresh")
+                      : t("shell.pauseRefresh")
+                  }
                 >
                   {ctx.paused ? <Play /> : <Pause />}
                 </Button>
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label="Refresh stored data"
+                  aria-label={t("shell.refreshStoredData")}
                   onClick={refresh}
                 >
                   <RefreshCw />
@@ -314,13 +331,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Sheet
                   open={timingOpen}
                   onOpenChange={setTimingOpen}
-                  title="Data timing"
-                  description="Screen reads, provider observations and capture activity are separate."
+                  title={t("shell.dataTiming")}
+                  description={t(
+                    "shell.screenReadsProviderObservationsAndCaptureActivityAreSeparate",
+                  )}
                   trigger={
                     <Button
                       size="icon"
                       variant="ghost"
-                      aria-label="Data timing"
+                      aria-label={t("shell.dataTiming")}
                     >
                       <Info />
                     </Button>
@@ -328,51 +347,55 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 >
                   <dl className="dc-stack">
                     <div>
-                      <dt>Last successful view read</dt>
+                      <dt>{t("shell.lastSuccessfulViewRead")}</dt>
                       <dd>
                         <Instant value={ctx.viewRead?.readAt} />
                       </dd>
                     </div>
                     <div>
-                      <dt>Screen refresh</dt>
+                      <dt>{t("shell.screenRefresh")}</dt>
                       <dd>
                         {ctx.paused
-                          ? "Paused"
+                          ? t("shell.paused")
                           : ctx.visible
-                            ? "Visible dynamic evidence reads every 15 seconds; running conversation reads every 3 seconds. Paged and reference reads are manual. Worker status reads separately every 3 seconds"
-                            : "Suspended while hidden"}
-                        . Refresh only reads stored evidence.
+                            ? t(
+                                "shell.visibleDynamicEvidenceReadsEvery15SecondsRunningConversation",
+                              )
+                            : t("shell.suspendedWhileHidden")}
+                        {". "}
+                        {t("presentation.refreshOnly")}
                       </dd>
                     </div>
                     <div>
-                      <dt>Capture activity</dt>
+                      <dt>{t("shell.captureActivity")}</dt>
                       <dd>
                         {error
-                          ? "Worker status unavailable"
+                          ? t("shell.workerStatusUnavailable")
                           : !status
-                            ? "Unavailable"
+                            ? t("activityView.unavailable")
                             : status.ingestionEnabled
-                              ? "Enabled"
-                              : "Disabled"}
+                              ? t("shell.enabled")
+                              : t("overviewView.disabled")}
                       </dd>
                     </div>
                     <div>
-                      <dt>Activity window expires</dt>
+                      <dt>{t("shell.activityWindowExpires")}</dt>
                       <dd>
                         <Instant value={status?.activeUntil} />
                       </dd>
                     </div>
                   </dl>
                   <p className="dc-meta">
-                    Visible, unpaused activity renews the bounded capture window
-                    every 60 seconds. Pausing stops renewal, not an in-progress
-                    provider request. Observation and ingestion times remain
-                    attached to each record.
+                    {t(
+                      "shell.visibleUnpausedActivityRenewsTheBoundedCaptureWindowEvery",
+                    )}
                   </p>
                 </Sheet>
-                <span className="dc-header-divider" aria-hidden="true" />
-                <ThemeSwitcher />
               </div>
+            </div>
+            <div className="dc-preferences">
+              <LocaleSwitcher />
+              <ThemeSwitcher />
             </div>
             <button
               type="button"
@@ -380,7 +403,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               data-state={readState}
               aria-expanded={controlsOpen}
               aria-controls="dc-header-controls"
-              aria-label={`${readLabel}. ${controlsOpen ? "Hide" : "Show"} refresh controls`}
+              aria-label={t("presentation.refreshControls", {
+                state: readLabel,
+                action: controlsOpen ? t("shell.hide") : t("shell.show"),
+              })}
               onClick={() => toggleControls(!controlsOpen)}
             >
               <span className="dc-status-dot" aria-hidden="true" />
@@ -392,7 +418,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <p role="status" className="dc-notice" data-visible={Boolean(notice)}>
-          {notice}
+          {typeof notice === "number"
+            ? t("presentation.refreshWaiting", { count: notice })
+            : copy(notice)}
         </p>
         <main id="dashboard-main" className="dc-main" tabIndex={-1}>
           {children}
