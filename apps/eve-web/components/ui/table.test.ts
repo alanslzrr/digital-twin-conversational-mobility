@@ -1,8 +1,11 @@
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToStaticMarkup as renderMarkup } from "react-dom/server";
 import { expect, it, vi } from "vitest";
+import { UiProvider } from "@/i18n/provider";
 import { Table } from "./table";
 
+const renderToStaticMarkup = (node: React.ReactNode) =>
+  renderMarkup(React.createElement(UiProvider, { initialLocale: "en" }, node));
 vi.stubGlobal("React", React);
 
 it("distinguishes keyboard scroll regions by their table purpose", () => {

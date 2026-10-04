@@ -1,9 +1,12 @@
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToStaticMarkup as renderMarkup } from "react-dom/server";
 import { afterEach, expect, it, vi } from "vitest";
+import { UiProvider } from "@/i18n/provider";
 import { State } from "./shared";
 import { Sources } from "./source-view";
 
+const renderToStaticMarkup = (node: React.ReactNode) =>
+  renderMarkup(React.createElement(UiProvider, { initialLocale: "en" }, node));
 vi.stubGlobal("React", React);
 const reads = vi.hoisted(() => ({
   source: undefined as unknown,

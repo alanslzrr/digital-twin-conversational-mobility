@@ -1,10 +1,13 @@
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToStaticMarkup as renderMarkup } from "react-dom/server";
 import { afterEach, expect, it, vi } from "vitest";
+import { UiProvider } from "@/i18n/provider";
 import { ActivityChart } from "./insights";
 import { InspectionResult } from "./inspection-result";
 import { TracePayload } from "./trace-payload";
 
+const renderToStaticMarkup = (node: React.ReactNode) =>
+  renderMarkup(React.createElement(UiProvider, { initialLocale: "en" }, node));
 vi.stubGlobal("React", React);
 afterEach(() => vi.clearAllMocks());
 it("explains truncated inspection results without a primary JSON wall", () => {
