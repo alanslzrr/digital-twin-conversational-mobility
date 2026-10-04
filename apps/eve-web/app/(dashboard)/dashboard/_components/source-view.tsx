@@ -1,10 +1,12 @@
 "use client";
+
 import type { dashboardSourceResponse } from "@mobility/contracts";
 import Link from "next/link";
 import { useState } from "react";
 import type { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useUi } from "@/i18n/provider";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { sourceNames } from "./event-copy";
 import { number } from "./insights";
@@ -28,6 +30,8 @@ const operations: Record<string, string> = {
   lease_recovered: "Lease recovered",
 };
 function SourcesContent({ id }: { id?: string }) {
+  const { t, copy, numberLocale } = useUi();
+
   const [cursor, setCursor] = useState<string | null>(null);
   const [window, setWindow] = useState("24h"),
     [operation, setOperation] = useState("");
@@ -58,27 +62,30 @@ function SourcesContent({ id }: { id?: string }) {
   return (
     <>
       <PageTitle
-        title={id ? (names[id] ?? "Source detail") : "Sources"}
-        description="Stored provider evidence and scoped operational signals."
+        title={id ? (names[id] ?? "Source detail") : t("overviewView.sources")}
+        description={t(
+          "sourceView.storedProviderEvidenceAndScopedOperationalSignals",
+        )}
       />
       {q.error ? (
         <Alert className="dc-error">
           <AlertTitle>
             {q.data
-              ? "Cached source evidence · refresh failed"
-              : "Source evidence unavailable"}
+              ? t("sourceView.cachedSourceEvidenceRefreshFailed")
+              : t("sourceView.sourceEvidenceUnavailable")}
           </AlertTitle>
           <AlertDescription>
             <p>
-              Last successful read: <Instant value={envelope?.readAt} />. Worker
-              signals are independent.
+              {t("sourceView.lastSuccessfulRead")}
+              <Instant value={envelope?.readAt} />. Worker signals are
+              independent.
             </p>
             <Button
               variant="outline"
               disabled={retryDisabled}
               onClick={() => void q.mutate()}
             >
-              Retry source read
+              {t("sourceView.retrySourceRead")}
             </Button>
             <Technical
               value={{
@@ -93,63 +100,73 @@ function SourcesContent({ id }: { id?: string }) {
       )}
       {cursor && q.error?.status === 409 ? (
         <Button variant="outline" onClick={() => setCursor(null)}>
-          Resources changed: return to first page
+          {t("sourceView.resourcesChangedReturnToFirstPage")}
         </Button>
       ) : null}
       {q.data ? (
         <>
           <div className="dc-toolbar">
             <Segmented
-              label="Operation period"
+              label={t("sourceView.operationPeriod")}
               value={window}
               onChange={(v) => {
                 setWindow(v);
                 setCursor(null);
               }}
               options={[
-                ["1h", "1 hour"],
-                ["24h", "24 hours"],
-                ["7d", "7 days"],
+                ["1h", t("commonFragments.hours1hour")],
+                ["24h", t("commonFragments.hours24hours")],
+                ["7d", t("presentation.days7")],
               ]}
             />
             <Segmented
-              label="Operation"
+              label={t("sourceView.operation")}
               value={operation}
               onChange={(v) => {
                 setOperation(v);
                 setCursor(null);
               }}
-              options={[["", "All"], ...Object.entries(operations)]}
+              options={[
+                ["", t("activityView.all")],
+                ...Object.entries(operations),
+              ]}
             />
           </div>
-          <section className="dc-stat-grid" aria-label="Source summary">
+          <section
+            className="dc-stat-grid"
+            aria-label={t("sourceView.sourceSummary")}
+          >
             <article className="dc-stat">
-              <h2>Products with recorded current issues</h2>
+              <h2>{t("sourceView.productsWithRecordedCurrentIssues")}</h2>
               <p className="dc-stat-value">
                 {Array.isArray(metrics.issueProducts)
-                  ? number(metrics.issueProducts.length)
-                  : "Unknown"}
+                  ? number(metrics.issueProducts.length, numberLocale)
+                  : t("conversationView.unknown")}
                 <span className="dc-value-unit">
                   {" "}
-                  of {number(metrics.monitoredProducts)} monitored
+                  {t("commonFragments.of")}{" "}
+                  {number(metrics.monitoredProducts, numberLocale)}{" "}
+                  {t("commonFragments.monitored")}{" "}
                 </span>
               </p>
               <p>
-                Recorded errors or missing worker signal during an active
-                window. Normal absence of demand or an inactive window is not a
-                failure.
+                {t(
+                  "sourceView.recordedErrorsOrMissingWorkerSignalDuringAnActive",
+                )}
               </p>
             </article>
             <article className="dc-stat">
-              <h2>Recorded errors in period</h2>
-              <p className="dc-stat-value">{number(metrics.errors)}</p>
+              <h2>{t("sourceView.recordedErrorsInPeriod")}</h2>
+              <p className="dc-stat-value">
+                {number(metrics.errors, numberLocale)}
+              </p>
               <p>
-                Unique retained error events, not an availability rate.{" "}
+                {t("sourceView.uniqueRetainedErrorEventsNotAnAvailabilityRate")}{" "}
                 <Link
                   href={`/dashboard/activity?${new URLSearchParams({ window, ...(id ? { source: id } : {}), severity: "error", ...(operation ? { type: operation } : {}) })}`}
                   className="underline"
                 >
-                  Inspect activity
+                  {t("sourceView.inspectActivity")}
                 </Link>
               </p>
             </article>
@@ -158,24 +175,25 @@ function SourcesContent({ id }: { id?: string }) {
             <Card className="dc-table-card">
               <div className="dc-panel-heading dc-panel-heading-inset">
                 <div>
-                  <h2>Source products</h2>
+                  <h2>{t("sourceView.sourceProducts")}</h2>
                   <p className="dc-meta">
-                    Registered sources and their periodic and reference product
-                    counts. Enabled does not mean recent.
+                    {t(
+                      "sourceView.registeredSourcesAndTheirPeriodicAndReferenceProductCounts",
+                    )}
                   </p>
                 </div>
               </div>
               {sources.length ? (
-                <Table aria-label="Source products">
+                <Table aria-label={t("sourceView.sourceProducts")}>
                   <thead>
                     <tr>
-                      <th scope="col">Source</th>
-                      <th scope="col">Acquisition</th>
+                      <th scope="col">{t("activityView.source")}</th>
+                      <th scope="col">{t("sourceView.acquisition")}</th>
                       <th scope="col" className="numeric">
-                        Periodic
+                        {t("sourceView.periodic")}
                       </th>
                       <th scope="col" className="numeric">
-                        Reference
+                        {t("insights.reference")}
                       </th>
                     </tr>
                   </thead>
@@ -195,7 +213,9 @@ function SourcesContent({ id }: { id?: string }) {
                             className="dc-status"
                             data-tone={source.enabled ? "neutral" : "muted"}
                           >
-                            {source.enabled ? "Enabled" : "Disabled"}
+                            {source.enabled
+                              ? t("shell.enabled")
+                              : t("overviewView.disabled")}
                           </span>
                         </td>
                         <td className="numeric">
@@ -211,29 +231,31 @@ function SourcesContent({ id }: { id?: string }) {
                 </Table>
               ) : (
                 <p className="dc-meta dc-panel-heading-inset">
-                  Successful read: no registered sources returned.
+                  {t("sourceView.successfulReadNoRegisteredSourcesReturned")}
                 </p>
               )}
             </Card>
           ) : (
             <>
               <Link href="/dashboard/sources" className="text-sm underline">
-                All sources
+                {t("mobilityView.allSources")}
               </Link>
               <Card className="dc-table-card">
-                <Table aria-label="Periodic product details">
+                <Table aria-label={t("sourceView.periodicProductDetails")}>
                   <thead>
                     <tr>
-                      <th scope="col">Periodic product</th>
-                      <th scope="col">Last observation</th>
-                      <th scope="col">Last attempt</th>
-                      <th scope="col">Last completed attempt</th>
-                      <th scope="col">Eligible from</th>
+                      <th scope="col">{t("sourceView.periodicProduct")}</th>
+                      <th scope="col">{t("sourceView.lastObservation")}</th>
+                      <th scope="col">{t("sourceView.lastAttempt")}</th>
+                      <th scope="col">
+                        {t("sourceView.lastCompletedAttempt")}
+                      </th>
+                      <th scope="col">{t("sourceView.eligibleFrom")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {streams.map((s) => (
-                      <tr key={productLabel(String(s.id))}>
+                      <tr key={String(s.id)}>
                         <td>
                           <span
                             className="dc-status font-medium"
@@ -245,14 +267,18 @@ function SourcesContent({ id }: { id?: string }) {
                                   : "muted"
                             }
                           >
-                            {productLabel(String(s.id))}
+                            {copy(productLabel(String(s.id)))}
                           </span>
                           <p className="dc-meta">
                             {s.errorCode
-                              ? "Last attempt failed; previous evidence retained."
+                              ? t(
+                                  "sourceView.lastAttemptFailedPreviousEvidenceRetained",
+                                )
                               : s.state === "running"
-                                ? "Operation in progress"
-                                : "Subject to cadence and activity window"}
+                                ? t("sourceView.operationInProgress")
+                                : t(
+                                    "sourceView.subjectToCadenceAndActivityWindow",
+                                  )}
                           </p>
                         </td>
                         {(
@@ -273,34 +299,38 @@ function SourcesContent({ id }: { id?: string }) {
                 </Table>
                 {!streams.length ? (
                   <p className="dc-meta dc-panel-heading-inset">
-                    No registered periodic acquisition for this source.
+                    {t(
+                      "sourceView.noRegisteredPeriodicAcquisitionForThisSource",
+                    )}
                   </p>
                 ) : null}
               </Card>
               <p className="text-sm leading-6 text-muted-foreground">
-                Eligibility does not promise a new observation time. Last
-                completed attempt is not last success. No ingestion restart
-                controls are exposed.
+                {t(
+                  "sourceView.eligibilityDoesNotPromiseANewObservationTimeLast",
+                )}
               </p>
               {[
-                ["On-demand weather resources", list(data.resources)],
-                ["Queried EMT stops", list(data.arrivals)],
                 [
-                  "Reference catalogs",
+                  t("sourceView.onDemandWeatherResources"),
+                  list(data.resources),
+                ],
+                [t("sourceView.queriedEmtStops"), list(data.arrivals)],
+                [
+                  t("sourceView.referenceCatalogs"),
                   [
                     ...list(selected?.staticFeed),
                     ...list(selected?.staticCatalogs),
                   ],
                 ],
-              ].map(([label, items]) => (
+              ].map(([label, items], groupIndex) => (
                 <section
-                  key={String(label)}
+                  key={["weather", "transport", "reference"][groupIndex]}
                   className="rounded-lg border bg-card p-5"
                 >
                   <h2 className="text-base font-semibold">{String(label)}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Up to 50 resources per page, not a global total or
-                    territorial coverage guarantee.
+                    {t("sourceView.upTo50ResourcesPerPageNotAGlobal")}
                   </p>
                   {(items as Record<string, unknown>[]).length ? (
                     <div className="mt-4 flex flex-col divide-y">
@@ -311,13 +341,13 @@ function SourcesContent({ id }: { id?: string }) {
                               r.label ??
                                 (obj(data.resourcePage).kind === "arrivals"
                                   ? `EMT stop ${r.id}`
-                                  : "Published catalog"),
+                                  : t("sourceView.publishedCatalog")),
                             )}
                           </p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            Published/observed:{" "}
-                            <Instant value={r.issuedAt ?? r.observedAt} /> ·
-                            Ingested:{" "}
+                            {t("sourceView.publishedObserved")}{" "}
+                            <Instant value={r.issuedAt ?? r.observedAt} />{" "}
+                            {t("inspectionResult.ingested")}{" "}
                             <Instant
                               value={
                                 r.importedAt ?? r.fetchedAt ?? r.ingestedAt
@@ -326,30 +356,34 @@ function SourcesContent({ id }: { id?: string }) {
                           </p>
                           {r.ageBasis ? (
                             <p className="mt-1 text-xs text-muted-foreground">
-                              Daily age evaluation basis:{" "}
+                              {t("sourceView.dailyAgeEvaluationBasis")}{" "}
                               <Instant value={r.ageBasis} />. Not a verified
                               publication time.
                             </p>
                           ) : null}
                           {r.checkedAt ? (
                             <p className="mt-1 text-xs text-muted-foreground">
-                              Checked: <Instant value={r.checkedAt} />.
-                              Validity: <Instant value={r.validFrom} /> —{" "}
+                              {t("sourceView.checked")}
+                              <Instant value={r.checkedAt} />. Validity:{" "}
+                              <Instant value={r.validFrom} /> —{" "}
                               <Instant value={r.validTo} />.
                             </p>
                           ) : null}
                           <p className="mt-1 text-xs">
                             {r.errorCode
-                              ? "Last attempt failed; inspect activity and times."
-                              : "Published validity and limits preserved."}
+                              ? t(
+                                  "sourceView.lastAttemptFailedInspectActivityAndTimes",
+                                )
+                              : t(
+                                  "sourceView.publishedValidityAndLimitsPreserved",
+                                )}
                           </p>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <p className="mt-3 text-sm text-muted-foreground">
-                      No stored resources in this group. This does not imply a
-                      provider outage.
+                      {t("sourceView.noStoredResourcesInThisGroupThisDoesNot")}
                     </p>
                   )}
                 </section>
@@ -359,10 +393,12 @@ function SourcesContent({ id }: { id?: string }) {
           {id ? (
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <span>
-                {number(obj(data.resourcePage).returned)} of{" "}
-                {number(obj(data.resourcePage).total)} resources of{" "}
+                {number(obj(data.resourcePage).returned, numberLocale)}{" "}
+                {t("commonFragments.of")}{" "}
+                {number(obj(data.resourcePage).total, numberLocale)}{" "}
+                {t("sourceView.resourcesOf")}{" "}
                 {obj(data.resourcePage).kind === "arrivals"
-                  ? "queried stops"
+                  ? t("sourceView.queriedStops")
                   : "weather"}
                 .
               </span>
@@ -373,21 +409,20 @@ function SourcesContent({ id }: { id?: string }) {
                     setCursor(String(obj(data.resourcePage).nextCursor))
                   }
                 >
-                  Next resource page
+                  {t("sourceView.nextResourcePage")}
                 </Button>
               ) : null}
               {cursor ? (
                 <Button variant="ghost" onClick={() => setCursor(null)}>
-                  First resource page
+                  {t("sourceView.firstResourcePage")}
                 </Button>
               ) : null}
             </div>
           ) : null}
           <Card>
-            <h2>Recorded operation durations</h2>
+            <h2>{t("sourceView.recordedOperationDurations")}</h2>
             <p className="dc-meta">
-              Median with available samples; p95 with at least 20. Not provider
-              HTTP latency.
+              {t("sourceView.medianWithAvailableSamplesP95WithAtLeast20")}
             </p>
             <OperationDurationRows
               groups={list(metrics.durations).map(
@@ -404,8 +439,8 @@ function SourcesContent({ id }: { id?: string }) {
             />
           </Card>
           <p className="text-xs text-muted-foreground">
-            Best-effort capture · <Instant value={metrics.from} /> —{" "}
-            <Instant value={metrics.to} />
+            {t("sourceView.bestEffortCapture")}
+            <Instant value={metrics.from} /> — <Instant value={metrics.to} />
           </p>
           <Technical value={data} />
         </>
@@ -413,9 +448,9 @@ function SourcesContent({ id }: { id?: string }) {
       <Card>
         <div className="dc-panel-heading">
           <div>
-            <h2 id="worker-signals">Worker signals</h2>
+            <h2 id="worker-signals">{t("sourceView.workerSignals")}</h2>
             <p className="dc-meta">
-              Not provider health or freshness evidence.
+              {t("sourceView.notProviderHealthOrFreshnessEvidence")}
             </p>
           </div>
         </div>
@@ -440,16 +475,17 @@ function SourcesContent({ id }: { id?: string }) {
               >
                 {(
                   {
-                    running: "Active signal",
-                    disabled: "Disabled",
-                    not_seen: "No recorded signal",
-                    stopped_or_unreachable: "No recent signal",
-                    inactive_window: "Inactive window",
+                    running: t("sourceView.activeSignal"),
+                    disabled: t("overviewView.disabled"),
+                    not_seen: t("sourceView.noRecordedSignal"),
+                    stopped_or_unreachable: t("sourceView.noRecentSignal"),
+                    inactive_window: t("sourceView.inactiveWindow"),
                   } as Record<string, string>
                 )[String(w.state)] ?? "State not confirmed"}
               </span>
               <span className="dc-meta">
-                Last signal <Instant value={w.lastSeenAt} />
+                {t("sourceView.lastSignal")}
+                <Instant value={w.lastSeenAt} />
               </span>
             </li>
           ))}

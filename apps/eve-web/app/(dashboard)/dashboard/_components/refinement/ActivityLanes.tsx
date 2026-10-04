@@ -1,4 +1,5 @@
 "use client";
+
 import type { DashboardActivityChart } from "@mobility/contracts";
 import {
   type CSSProperties,
@@ -17,11 +18,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { messages } from "@/i18n/messages";
+import { useUi } from "@/i18n/provider";
 
-const format = (v: number | null) =>
-  v === null ? "Unavailable" : new Intl.NumberFormat("en-GB").format(v);
-const time = (v: string) =>
-  new Intl.DateTimeFormat("en-GB", {
+const format = (v: number | null, numberLocale = "en-GB") =>
+  v === null
+    ? messages[numberLocale === "es-ES" ? "es" : "en"].activityView.unavailable
+    : new Intl.NumberFormat(numberLocale).format(v);
+const time = (v: string, numberLocale = "en-GB") =>
+  new Intl.DateTimeFormat(numberLocale, {
     timeZone: "Europe/Madrid",
     day: "2-digit",
     month: "short",
@@ -32,6 +37,8 @@ const time = (v: string) =>
 
 /** Local plot rendering; shadcn provides tabs/table. No extra data requests. */
 export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
+  const { t, numberLocale } = useUi();
+
   const id = useId();
   const [selected, setSelected] = useState<string | null>(null);
   const refs = useRef(new Map<string, HTMLButtonElement>());
@@ -86,30 +93,34 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
   return (
     <section className="rf-activity" aria-labelledby={id}>
       <div className="rf-panel-heading">
-        <h2 id={id}>Recorded activity</h2>
+        <h2 id={id}>{t("ActivityLanes.recordedActivity")}</h2>
       </div>
       <div className="rf-activity-summary">
         <p>
-          <strong>{format(data.publications)}</strong>publications
+          <strong>{format(data.publications, numberLocale)}</strong>{" "}
+          {t("presentation.publicationUnit", {
+            count: data.publications ?? 0,
+          })}{" "}
         </p>
         <p data-tone={data.errors ? "danger" : undefined}>
-          <strong>{format(data.errors)}</strong>errors
+          <strong>{format(data.errors, numberLocale)}</strong>{" "}
+          {t("presentation.errorUnit", { count: data.errors ?? 0 })}{" "}
         </p>
         {unknown > 0 ? (
           <p>
-            <strong>{unknown}</strong>of {data.bins.length} intervals not
-            captured
+            <strong>{unknown}</strong> {t("commonFragments.of")}{" "}
+            {data.bins.length} {t("ActivityLanes.intervalsNotCaptured")}
           </p>
         ) : null}
       </div>
       <Tabs defaultValue="chart" className="rf-tabs">
-        <TabsList aria-label="Activity representation">
-          <TabsTrigger value="chart">Chart</TabsTrigger>
-          <TabsTrigger value="data">Exact data</TabsTrigger>
+        <TabsList aria-label={t("ActivityLanes.activityRepresentation")}>
+          <TabsTrigger value="chart">{t("ActivityLanes.chart")}</TabsTrigger>
+          <TabsTrigger value="data">{t("ActivityLanes.exactData")}</TabsTrigger>
         </TabsList>
         <TabsContent value="chart">
           {!data.bins.length ? (
-            <p className="rf-meta">No intervals returned.</p>
+            <p className="rf-meta">{t("insights.noIntervalsReturned")}</p>
           ) : (
             <>
               <div
@@ -125,18 +136,26 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
                     <div className="rf-lane" key={series} data-series={series}>
                       <div className="rf-lane-heading">
                         <h3>
-                          {series === "errors" ? "Errors" : "Publications"}
+                          {series === "errors"
+                            ? t("ActivityLanes.errors")
+                            : t("ActivityLanes.publications")}
                         </h3>
                         <span className="rf-meta">
-                          Count per interval · own scale 0–{format(max)}
+                          {t("ActivityLanes.countPerIntervalOwnScale0")}
+                          {format(max, numberLocale)}
                         </span>
                       </div>
                       <section
                         className="rf-lane-columns"
-                        aria-label={`${series}. Arrow keys select an interval.`}
+                        aria-label={t("presentation.arrowIntervals", {
+                          series:
+                            series === "errors"
+                              ? t("ActivityLanes.errors")
+                              : t("ActivityLanes.publications"),
+                        })}
                       >
                         <div className="rf-lane-axis" aria-hidden="true">
-                          <span>{format(max)}</span>
+                          <span>{format(max, numberLocale)}</span>
                           <span>0</span>
                         </div>
                         <div
@@ -168,7 +187,15 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
                               }}
                               onKeyDown={(e) => navigate(e, i, series)}
                               onClick={() => setSelected(b.from)}
-                              aria-label={`${time(b.from)} to ${time(b.to)}; ${series}: ${format(b[series])}`}
+                              aria-label={t("presentation.intervalSeries", {
+                                from: time(b.from, numberLocale),
+                                to: time(b.to, numberLocale),
+                                series:
+                                  series === "errors"
+                                    ? t("ActivityLanes.errors")
+                                    : t("ActivityLanes.publications"),
+                                value: format(b[series], numberLocale),
+                              })}
                             >
                               {(b[series] ?? 0) > 0 && (
                                 <span
@@ -187,30 +214,38 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
                 })}
               </div>
               <div className="rf-axis-ends">
-                <span>{time(data.from)}</span>
-                <span>{time(data.to)}</span>
+                <span>{time(data.from, numberLocale)}</span>
+                <span>{time(data.to, numberLocale)}</span>
               </div>
               <div className="rf-readout" aria-live="polite" aria-atomic="true">
                 {active && (
                   <>
                     <span>
-                      {time(active.from)} – {time(active.to)}
+                      {time(active.from, numberLocale)} –{" "}
+                      {time(active.to, numberLocale)}
                     </span>
                     <span>
-                      Publications:{" "}
-                      <strong>{format(active.publications)}</strong>
+                      {t("ActivityLanes.publications2")}{" "}
+                      <strong>
+                        {format(active.publications, numberLocale)}
+                      </strong>
                     </span>
                     <span>
-                      Errors: <strong>{format(active.errors)}</strong>
+                      {t("ActivityLanes.errors2")}{" "}
+                      <strong>{format(active.errors, numberLocale)}</strong>
                     </span>
                   </>
                 )}
               </div>
               <p className="rf-chart-legend">
                 <span>
-                  Dotted baseline: interval not captured (unavailable, not zero)
+                  {t(
+                    "ActivityLanes.dottedBaselineIntervalNotCapturedUnavailableNotZero",
+                  )}
                 </span>
-                Lanes use separate count scales; compare timing, not height.
+                {t(
+                  "ActivityLanes.lanesUseSeparateCountScalesCompareTimingNotHeight",
+                )}
               </p>
             </>
           )}
@@ -218,27 +253,29 @@ export function ActivityLanes({ data }: { data: DashboardActivityChart }) {
         <TabsContent value="data">
           <section
             className="rf-table-region"
-            aria-label="Exact activity counts"
+            aria-label={t("ActivityLanes.exactActivityCounts")}
           >
-            <Table aria-label="Activity intervals">
+            <Table aria-label={t("ActivityLanes.activityIntervals")}>
               <caption className="sr-only">
-                Returned activity bins. Capture is best-effort.
+                {t("ActivityLanes.returnedActivityBinsCaptureIsBestEffort")}
               </caption>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Interval</TableHead>
-                  <TableHead>Publications</TableHead>
-                  <TableHead>Errors</TableHead>
+                  <TableHead>{t("ActivityLanes.interval")}</TableHead>
+                  <TableHead>{t("ActivityLanes.publications")}</TableHead>
+                  <TableHead>{t("ActivityLanes.errors")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.bins.map((b) => (
                   <TableRow key={b.from}>
                     <TableCell>
-                      {time(b.from)}–{time(b.to)}
+                      {time(b.from, numberLocale)}–{time(b.to, numberLocale)}
                     </TableCell>
-                    <TableCell>{format(b.publications)}</TableCell>
-                    <TableCell>{format(b.errors)}</TableCell>
+                    <TableCell>
+                      {format(b.publications, numberLocale)}
+                    </TableCell>
+                    <TableCell>{format(b.errors, numberLocale)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
