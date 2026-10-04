@@ -43,3 +43,5 @@ Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twi
 ## Guías y archivo
 
 Las guías describen el funcionamiento actual. Las actas, auditorías, planes e investigaciones conservan los resultados y decisiones de cada fecha. Consulta el [roadmap](roadmap.md) para conocer el alcance vigente.
+
+- [Idioma global de interfaz ES/EN](./ui-i18n.md): arquitectura, límites y validación aislada del selector.
