@@ -24,7 +24,7 @@ export function FreshnessBar({
         <div
           className="rf-freshness-track"
           role="img"
-          aria-label={`${partition.total} ${unit}: ${exact}`}
+          aria-label={`${partition.total.toLocaleString(numberLocale)} ${copy(unit)}: ${exact}`}
         >
           {partition.parts
             .filter((p) => p.count > 0)
@@ -78,13 +78,15 @@ export function FreshnessGraphic({
       <div className="rf-meta">
         {counts.total === null
           ? t("FreshnessGraphic.countUnavailable")
-          : `${counts.total} ${unit}`}{" "}
+          : `${counts.total.toLocaleString(numberLocale)} ${copy(unit)}`}{" "}
         · {copy(partition.reason)}
         <br />
         {t("map.recent")}
-        {counts.recent ?? "unknown"} {t("FreshnessGraphic.stale")}
-        {counts.stale ?? "unknown"} {t("FreshnessGraphic.unavailable")}
-        {counts.unavailable ?? "unknown"}
+        {counts.recent ?? t("conversationView.unknown")}{" "}
+        {t("FreshnessGraphic.stale")}
+        {counts.stale ?? t("conversationView.unknown")}{" "}
+        {t("FreshnessGraphic.unavailable")}
+        {counts.unavailable ?? t("conversationView.unknown")}
       </div>
     );
   return (
@@ -92,7 +94,7 @@ export function FreshnessGraphic({
       <figcaption>
         {label}{" "}
         <span className="rf-meta">
-          · {partition.total.toLocaleString(numberLocale)} {unit}
+          · {partition.total.toLocaleString(numberLocale)} {copy(unit)}
         </span>
       </figcaption>
       <div className="rf-freshness-track" aria-hidden="true">

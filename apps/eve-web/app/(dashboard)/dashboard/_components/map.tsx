@@ -148,10 +148,10 @@ export default function MobilityMap({
     for (const [selector, label] of [
       [".leaflet-control-zoom-in", t("map.zoomIn")],
       [".leaflet-control-zoom-out", t("map.zoomOut")],
-    ]) {
-      const button = host.current?.querySelector(selector!);
-      button?.setAttribute("title", label!);
-      button?.setAttribute("aria-label", label!);
+    ] as const) {
+      const button = host.current?.querySelector(selector);
+      button?.setAttribute("title", label);
+      button?.setAttribute("aria-label", label);
     }
   }, [ready, t]);
   useEffect(() => {

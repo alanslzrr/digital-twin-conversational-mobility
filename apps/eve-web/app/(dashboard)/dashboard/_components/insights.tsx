@@ -319,7 +319,7 @@ export function FreshnessBreakdown({
         <div className="dc-selection-track" aria-hidden="true">
           {states
             .filter(([, n]) => n > 0)
-            .map(([label, n, state]) => (
+            .map(([, n, state]) => (
               <span
                 key={state}
                 data-state={state}
