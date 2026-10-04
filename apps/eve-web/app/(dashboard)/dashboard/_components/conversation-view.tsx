@@ -1,9 +1,11 @@
 "use client";
+
 import { dashboardToolName } from "@mobility/contracts";
 import { Info, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useUi } from "@/i18n/provider";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { number } from "./insights";
 import { Empty, Segmented, Sheet, Table, Tabs } from "./primitives";
@@ -47,6 +49,8 @@ const states: Record<string, string> = {
   incomplete: "Incomplete",
 };
 export function Conversations({ sessionId }: { sessionId?: string }) {
+  const { t, copy, numberLocale } = useUi();
+
   const ctx = useDashboardContext();
   const [cursor, setCursor] = useState<string | null>(null),
     [tab, setTab] = useState("Timeline"),
@@ -99,32 +103,31 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
     <>
       <div className="dc-overview-heading">
         <PageTitle
-          title="My conversations"
-          description="Inspect your sessions, captured tool calls and reported usage."
+          title={t("conversationView.myConversations")}
+          description={t(
+            "conversationView.inspectYourSessionsCapturedToolCallsAndReportedUsage",
+          )}
         />
         <Sheet
           open={retentionOpen}
           onOpenChange={setRetentionOpen}
-          title="Capture and retention"
+          title={t("conversationView.captureAndRetention")}
           trigger={
             <Button variant="ghost" size="sm">
               <Info aria-hidden="true" />
-              Capture and retention
+              {t("conversationView.captureAndRetention")}
             </Button>
           }
         >
           <p className="dc-meta">
-            Up to seven days. Per session: 16 MiB and 10,000 events; per
-            evaluator: 256 MiB. Model input 512 KB, output 64 KB; arguments 8 KB
-            and results 32 KB. Sanitized capture can be partial, missing or
-            expired. No cost estimates or historical reconstruction.
+            {t("conversationView.upToSevenDaysPerSession16MibAnd")}
           </p>
         </Sheet>
       </div>
       <div className="dc-conversation-workspace">
         {sessionId ? (
           <aside className="dc-session-index dc-card">
-            <h2>Sessions on this page</h2>
+            <h2>{t("conversationView.sessionsOnThisPage")}</h2>
             {rows(unwrap(index.data).sessions).map((e) => (
               <Link
                 key={String(e.sessionId)}
@@ -132,7 +135,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                 className="dc-tool-row"
                 aria-current={e.sessionId === sessionId ? "page" : undefined}
               >
-                <strong>Conversation</strong>
+                <strong>{t("conversationView.conversation")}</strong>
                 <p>
                   <Instant value={e.createdAt} />
                 </p>
@@ -146,11 +149,13 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
               <div className="dc-session-actions">
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/dashboard/conversations">
-                    All my conversations
+                    {t("conversationView.allMyConversations")}
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                  <Link href={`/s/${sessionId}`}>Open chat</Link>
+                  <Link href={`/s/${sessionId}`}>
+                    {t("conversationView.openChat")}
+                  </Link>
                 </Button>
               </div>
               <State
@@ -160,20 +165,24 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
               />
               {turnCursor && summary.error?.status === 409 ? (
                 <Button variant="outline" onClick={() => setTurnCursor(null)}>
-                  Capture revision changed: return to first turn page
+                  {t(
+                    "conversationView.captureRevisionChangedReturnToFirstTurnPage",
+                  )}
                 </Button>
               ) : null}
               {call ? (
                 <p className="text-sm">
-                  Showing the call linked to model-transport content.{" "}
+                  {t(
+                    "conversationView.showingTheCallLinkedToModelTransportContent",
+                  )}{" "}
                   <Button variant="ghost" onClick={() => setCall("")}>
-                    View all calls
+                    {t("conversationView.viewAllCalls")}
                   </Button>
                 </p>
               ) : null}
               <div className="dc-turn-selector">
                 <Segmented
-                  label="Turn (returned page)"
+                  label={t("conversationView.turnReturnedPage")}
                   value={turn}
                   onChange={(v) => {
                     setTurn(v);
@@ -182,12 +191,12 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     setCall("");
                   }}
                   options={[
-                    ["", "All returned turns"],
+                    ["", t("conversationView.allReturnedTurns")],
                     ...turns.map(
-                      (t, i) =>
+                      (turnRow, i) =>
                         [
-                          String(t.turnId),
-                          `Turn ${i + 1} · ${states[String(t.state)] ?? "Unknown"}`,
+                          String(turnRow.turnId),
+                          `${t("presentation.turn", { count: i + 1 })} · ${copy(states[String(turnRow.state)]) ?? copy("Unknown")}`,
                         ] as const,
                     ),
                   ]}
@@ -203,11 +212,13 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                   setCall("");
                 }}
               >
-                <Tabs.List aria-label="Conversation detail">
+                <Tabs.List
+                  aria-label={t("conversationView.conversationDetail")}
+                >
                   {["Timeline", "Tools", "Usage", "Model", "Content"].map(
-                    (t) => (
-                      <Tabs.Trigger key={t} value={t}>
-                        {t}
+                    (item) => (
+                      <Tabs.Trigger key={item} value={item}>
+                        {copy(item)}
                       </Tabs.Trigger>
                     ),
                   )}
@@ -216,37 +227,52 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                   <section
                     className="dc-stat-grid"
                     data-columns="4"
-                    aria-label="Conversation summary"
+                    aria-label={t("conversationView.conversationSummary")}
                   >
                     {[
                       [
-                        "Reported tokens",
-                        number(usage.totalTokens),
-                        "Only attempts with known input and output. Cache and reasoning subsets are not added again.",
+                        t("conversationView.reportedTokens"),
+                        number(usage.totalTokens, numberLocale),
+                        t(
+                          "conversationView.onlyAttemptsWithKnownInputAndOutputCacheAnd",
+                        ),
                       ],
                       [
-                        "Tool calls",
-                        number(counts.tools),
-                        "Each call counted once, even across multiple events. Excludes discovery and manual executions.",
+                        t("conversationView.toolCalls"),
+                        number(counts.tools, numberLocale),
+                        t(
+                          "conversationView.eachCallCountedOnceEvenAcrossMultipleEventsExcludes",
+                        ),
                       ],
                       [
-                        "Dispatched model attempts",
-                        number(counts.dispatched),
-                        "Observed dispatches; retries and compactions are distinct attempts.",
+                        t("conversationView.dispatchedModelAttempts"),
+                        number(counts.dispatched, numberLocale),
+                        t(
+                          "conversationView.observedDispatchesRetriesAndCompactionsAreDistinctAttempts",
+                        ),
                       ],
                       [
-                        "Turn duration",
+                        t("conversationView.turnDuration"),
                         picked?.state === "running"
-                          ? "Running"
+                          ? t("conversationView.running")
                           : picked?.durationMs != null
-                            ? `${number(picked.durationMs)} ms`
-                            : "Unknown",
+                            ? `${number(picked.durationMs, numberLocale)} ms`
+                            : t("conversationView.unknown"),
                         turn
-                          ? "Instrumented start to terminal, not a sum of attempts."
-                          : "Select a turn to inspect duration.",
+                          ? t(
+                              "conversationView.instrumentedStartToTerminalNotASumOfAttempts",
+                            )
+                          : t("conversationView.selectATurnToInspectDuration"),
                       ],
-                    ].map(([label, value, help]) => (
-                      <article key={label} className="dc-stat">
+                    ].map(([label, value, help], statIndex) => (
+                      <article
+                        key={
+                          ["tokens", "tools", "dispatches", "duration"][
+                            statIndex
+                          ]
+                        }
+                        className="dc-stat"
+                      >
                         <h2>{label}</h2>
                         <p className="dc-stat-value">{value}</p>
                         <p>{help}</p>
@@ -254,23 +280,35 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     ))}
                   </section>
                   <p className="text-sm text-muted-foreground">
-                    Input: {number(usage.inputTokens)} · Output:{" "}
-                    {number(usage.outputTokens)} ·{" "}
+                    {t("conversationView.input")}
+                    {number(usage.inputTokens, numberLocale)}{" "}
+                    {t("conversationView.output")}{" "}
+                    {number(usage.outputTokens, numberLocale)} ·{" "}
                     {Number(counts.missing ?? 0) > 0
-                      ? `${number(counts.missing)} ${Number(counts.missing) === 1 ? "attempt" : "attempts"} without complete reported usage.`
-                      : "Usage depends on fields actually reported."}
+                      ? `${number(counts.missing, numberLocale)} ${Number(counts.missing) === 1 ? "attempt" : "attempts"} without complete reported usage.`
+                      : t(
+                          "conversationView.usageDependsOnFieldsActuallyReported",
+                        )}
                   </p>
                   <dl className="dc-usage-subsets">
                     {[
-                      ["Input", "input", usage.inputTokens],
-                      ["Output", "output", usage.outputTokens],
                       [
-                        "Cache (input subset)",
+                        t("conversationView.input2"),
+                        "input",
+                        usage.inputTokens,
+                      ],
+                      [
+                        t("conversationView.output2"),
+                        "output",
+                        usage.outputTokens,
+                      ],
+                      [
+                        t("conversationView.cacheInputSubset"),
                         "cache",
                         usage.cachedInputTokens,
                       ],
                       [
-                        "Reported reasoning (subset, no content)",
+                        t("conversationView.reportedReasoningSubsetNoContent"),
                         "reasoning",
                         usage.reasoningTokens,
                       ],
@@ -278,38 +316,50 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                       <div key={String(field)}>
                         <dt>{String(label)}</dt>
                         <dd>
-                          {number(value)} · reported in{" "}
+                          {number(value, numberLocale)}{" "}
+                          {t("conversationView.reportedIn")}{" "}
                           {number(
                             obj(obj(usage.coverage)[String(field)]).reported,
+                            numberLocale,
                           )}{" "}
-                          of{" "}
+                          {t("commonFragments.of")}{" "}
                           {number(
                             obj(obj(usage.coverage)[String(field)]).observed,
+                            numberLocale,
                           )}{" "}
-                          retained attempts
+                          {t("conversationView.retainedAttempts")}
                         </dd>
                       </div>
                     ))}
                   </dl>
                   <p className="text-xs text-muted-foreground">
-                    Tools: {number(counts.toolRequested)} requested ·{" "}
-                    {number(counts.toolExecuted)} with result ·{" "}
-                    {number(counts.toolFailed)} failed ·{" "}
-                    {number(counts.toolRejected)} rejected ·{" "}
-                    {number(counts.toolCancelled)} cancelled ·{" "}
-                    {number(counts.toolPending)} pending in capture. Missing
-                    events do not prove non-execution.
+                    {t("conversationView.tools2")}
+                    {number(counts.toolRequested, numberLocale)}{" "}
+                    {t("conversationView.requested")}{" "}
+                    {number(counts.toolExecuted, numberLocale)}{" "}
+                    {t("conversationView.withResult")}{" "}
+                    {number(counts.toolFailed, numberLocale)}{" "}
+                    {t("conversationView.failed")}{" "}
+                    {number(counts.toolRejected, numberLocale)}{" "}
+                    {t("conversationView.rejected")}{" "}
+                    {number(counts.toolCancelled, numberLocale)}{" "}
+                    {t("conversationView.cancelled")}{" "}
+                    {number(counts.toolPending, numberLocale)}{" "}
+                    {t(
+                      "conversationView.pendingInCaptureMissingEventsDoNotProveNon",
+                    )}
                   </p>
                   <section className="dc-card">
-                    <h2>Reported usage by turn</h2>
+                    <h2>{t("conversationView.reportedUsageByTurn")}</h2>
                     <p className="dc-meta mt-1">
-                      Up to 50 turns per page. Session totals cover all retained
-                      attempts. Unknown is not zero.
+                      {t(
+                        "conversationView.upTo50TurnsPerPageSessionTotalsCover",
+                      )}
                     </p>
                     <UsagePerTurnRows
                       turns={turns.map((r, i) => ({
                         id: String(r.turnId),
-                        label: `Turn ${i + 1}`,
+                        label: t("presentation.turn", { count: i + 1 }),
                         usage: {
                           input:
                             typeof r.inputTokens === "number"
@@ -331,18 +381,26 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                       }))}
                     />
                     <div className="mt-4">
-                      <Table aria-label="Turn duration and coverage">
+                      <Table
+                        aria-label={t(
+                          "conversationView.turnDurationAndCoverage",
+                        )}
+                      >
                         <thead>
                           <tr>
-                            <th scope="col">Turn</th>
+                            <th scope="col">{t("conversationView.turn")}</th>
                             <th scope="col" className="numeric">
-                              Input
+                              {t("conversationView.input2")}
                             </th>
                             <th scope="col" className="numeric">
-                              Output
+                              {t("conversationView.output2")}
                             </th>
-                            <th scope="col">Duration</th>
-                            <th scope="col">Coverage</th>
+                            <th scope="col">
+                              {t("conversationView.duration")}
+                            </th>
+                            <th scope="col">
+                              {t("conversationView.coverage")}
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -363,26 +421,33 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                                   }}
                                   aria-pressed={turn === r.turnId}
                                 >
-                                  Turn {i + 1}
+                                  {t("conversationView.turn")}
+                                  {i + 1}
                                 </Button>
                               </td>
                               <td className="numeric">
-                                {number(r.inputTokens)}
+                                {number(r.inputTokens, numberLocale)}
                               </td>
                               <td className="numeric">
-                                {number(r.outputTokens)}
+                                {number(r.outputTokens, numberLocale)}
                               </td>
                               <td>
                                 {r.state === "running"
-                                  ? "Running"
+                                  ? t("conversationView.running")
                                   : r.durationMs != null
-                                    ? `${number(r.durationMs)} ms`
-                                    : "No measurement"}
+                                    ? `${number(r.durationMs, numberLocale)} ms`
+                                    : t("conversationView.noMeasurement")}
                               </td>
                               <td className="dc-meta">
-                                {number(obj(obj(r.coverage).total).reported)} of{" "}
-                                {number(r.attempts)} attempts with complete
-                                usage
+                                {number(
+                                  obj(obj(r.coverage).total).reported,
+                                  numberLocale,
+                                )}{" "}
+                                {t("commonFragments.of")}{" "}
+                                {number(r.attempts, numberLocale)}{" "}
+                                {t(
+                                  "conversationView.attemptsWithCompleteUsage",
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -391,13 +456,17 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     </div>
                     {!turns.length ? (
                       <p className="dc-meta py-4">
-                        No retained instrumented turns to plot.
+                        {t(
+                          "conversationView.noRetainedInstrumentedTurnsToPlot",
+                        )}
                       </p>
                     ) : null}
                   </section>
                   <p className="text-xs text-muted-foreground">
-                    {number(s.totalTurns)} turns with retained evidence. Up to
-                    50 per page; session totals include all retained attempts.
+                    {number(s.totalTurns, numberLocale)}{" "}
+                    {t(
+                      "conversationView.turnsWithRetainedEvidenceUpTo50PerPage",
+                    )}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {typeof s.nextTurnCursor === "string" ? (
@@ -405,7 +474,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                         variant="outline"
                         onClick={() => setTurnCursor(String(s.nextTurnCursor))}
                       >
-                        Next turn page
+                        {t("conversationView.nextTurnPage")}
                       </Button>
                     ) : null}
                     {turnCursor ? (
@@ -413,7 +482,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                         variant="ghost"
                         onClick={() => setTurnCursor(null)}
                       >
-                        First turn page
+                        {t("conversationView.firstTurnPage")}
                       </Button>
                     ) : null}
                   </div>
@@ -437,13 +506,13 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <h2 className="text-sm font-medium">
-                              {titles[String(e.kind)] ?? "Recorded event"}
+                              {copy(titles[String(e.kind)]) ?? "Recorded event"}
                             </h2>
                             <p className="mt-1 text-sm text-muted-foreground">
-                              {states[String(e.status)] ??
+                              {copy(states[String(e.status)]) ??
                                 "State not confirmed"}
                               {e.tool
-                                ? ` · ${obj(e.toolIdentity).family === "discovery" ? "Tool discovery" : dashboardToolName.safeParse(obj(e.toolIdentity).canonicalName).success ? toolCopy[dashboardToolName.parse(obj(e.toolIdentity).canonicalName)].title : "Registered tool"}`
+                                ? ` · ${obj(e.toolIdentity).family === "discovery" ? t("conversationView.toolDiscovery") : dashboardToolName.safeParse(obj(e.toolIdentity).canonicalName).success ? copy(toolCopy[dashboardToolName.parse(obj(e.toolIdentity).canonicalName)].title) : t("conversationView.registeredTool")}`
                                 : ""}
                             </p>
                           </div>
@@ -453,22 +522,31 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                         </div>
                         {e.durationMs != null ? (
                           <p className="mt-2 text-sm tabular-nums">
-                            Recorded duration: {number(e.durationMs)} ms
+                            {t("conversationView.recordedDuration")}
+                            {number(e.durationMs, numberLocale)} ms
                           </p>
                         ) : null}
                         {e.kind && String(e.kind).startsWith("attempt_") ? (
                           <p className="mt-2 text-sm">
-                            Reported tokens: {number(e.inputTokens)} input /{" "}
-                            {number(e.outputTokens)} output. Cannot infer which
-                            evidence influenced the response.
+                            {t("conversationView.reportedTokens2")}
+                            {number(e.inputTokens, numberLocale)}{" "}
+                            {t("conversationView.input3")}{" "}
+                            {number(e.outputTokens, numberLocale)}{" "}
+                            {t(
+                              "conversationView.outputCannotInferWhichEvidenceInfluencedTheResponse",
+                            )}
                           </p>
                         ) : null}
                         <p className="mt-2 text-xs text-muted-foreground">
                           {e.captureStatus === "captured"
-                            ? "Captured sanitized content"
+                            ? t("conversationView.capturedSanitizedContent")
                             : e.captureStatus === "partial"
-                              ? "Partial capture; content may be missing"
-                              : "Content not recorded or omitted; uncaptured content cannot be recovered."}
+                              ? t(
+                                  "conversationView.partialCaptureContentMayBeMissing",
+                                )
+                              : t(
+                                  "conversationView.contentNotRecordedOrOmittedUncapturedContentCannotBe",
+                                )}
                         </p>
                         {Array.isArray(e.sentCallIds) &&
                         e.sentCallIds.length ? (
@@ -486,7 +564,10 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                                   setPayload(null);
                                 }}
                               >
-                                Inspect tool result sent to model {i + 1}
+                                {t(
+                                  "conversationView.inspectToolResultSentToModel",
+                                )}
+                                {i + 1}
                               </Button>
                             ))}
                           </div>
@@ -511,13 +592,14 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                                 } catch {
                                   if (requestSelection.current === requested)
                                     setPayload({
-                                      warning:
-                                        "Content expired or unavailable.",
+                                      warning: t(
+                                        "conversationView.contentExpiredOrUnavailable",
+                                      ),
                                     });
                                 }
                               }}
                             >
-                              Open sanitized content
+                              {t("conversationView.openSanitizedContent")}
                             </Button>
                           ))}
                         </div>
@@ -540,14 +622,14 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                 empty={false}
               />
               {!index.isLoading && !index.error && !entries.length ? (
-                <Empty title="No captured conversations yet">
+                <Empty title={t("conversationView.noCapturedConversationsYet")}>
                   <p>
-                    Open chat to start a conversation. Only your sessions with
-                    current access appear here; missing capture is not
-                    reconstructed.
+                    {t(
+                      "conversationView.openChatToStartAConversationOnlyYourSessions",
+                    )}
                   </p>
                   <Button asChild>
-                    <Link href="/s">Open chat</Link>
+                    <Link href="/s">{t("conversationView.openChat")}</Link>
                   </Button>
                 </Empty>
               ) : null}
@@ -563,24 +645,30 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                           <MessageSquare />
                         </span>
                         <div>
-                          <h2>Conversation {i + 1}</h2>
+                          <h2>
+                            {t("conversationView.conversation")}
+                            {i + 1}
+                          </h2>
                           <p className="dc-meta">
-                            Created <Instant value={e.createdAt} /> ·{" "}
+                            {t("conversationView.created")}
+                            <Instant value={e.createdAt} /> ·{" "}
                             {e.captureStatus === "not_instrumented"
-                              ? "Not instrumented"
-                              : "Best-effort capture"}
+                              ? t("conversationView.notInstrumented")
+                              : t("conversationView.bestEffortCapture")}
                           </p>
                         </div>
                       </div>
                       <div className="dc-session-actions">
                         <Button asChild variant="ghost" size="sm">
-                          <Link href={`/s/${e.sessionId}`}>Open chat</Link>
+                          <Link href={`/s/${e.sessionId}`}>
+                            {t("conversationView.openChat")}
+                          </Link>
                         </Button>
                         <Button asChild variant="outline" size="sm">
                           <Link
                             href={`/dashboard/conversations/${e.sessionId}`}
                           >
-                            Inspect conversation
+                            {t("conversationView.inspectConversation")}
                           </Link>
                         </Button>
                       </div>
@@ -598,7 +686,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
           className="self-start"
           onClick={() => setCursor(String(data.nextCursor))}
         >
-          Next page
+          {t("activityView.nextPage")}
         </Button>
       ) : null}
       {payload ? (
@@ -609,7 +697,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
             className="mt-3"
             onClick={() => setPayload(null)}
           >
-            Close content
+            {t("conversationView.closeContent")}
           </Button>
         </div>
       ) : null}

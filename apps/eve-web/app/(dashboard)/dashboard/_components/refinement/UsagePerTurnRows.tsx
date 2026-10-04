@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUi } from "@/i18n/provider";
 import { summarizeUsage, type UsageInput } from "./core";
 /** Presentation type, not a new Core DTO. Map only actually reported source fields. */
 export interface TurnUsageRow {
@@ -24,8 +25,14 @@ export function UsagePerTurnRows({
 }: {
   turns: readonly TurnUsageRow[];
 }) {
+  const { t } = useUi();
+
   if (turns.length === 0)
-    return <p className="rf-meta">No retained turns on this page.</p>;
+    return (
+      <p className="rf-meta">
+        {t("UsagePerTurnRows.noRetainedTurnsOnThisPage")}
+      </p>
+    );
   const rows = turns.map((turn) => ({
     turn,
     result: summarizeUsage(turn.usage),
@@ -39,28 +46,28 @@ export function UsagePerTurnRows({
   return (
     <section>
       <p className="rf-coverage">
-        Reported input and output · returned turn page only
+        {t("UsagePerTurnRows.reportedInputAndOutputReturnedTurnPageOnly")}
       </p>
       <p className="rf-meta">
-        Solid: input. Striped: output. Bars include the two parent totals once.
-        Cache and reasoning are subsets, not additional segments.
+        {t("UsagePerTurnRows.solidInputStripedOutputBarsIncludeTheTwoParent")}
       </p>
       <section
         className="rf-table-region"
-        aria-label="Reported usage by returned turn"
+        aria-label={t("UsagePerTurnRows.reportedUsageByReturnedTurn")}
       >
-        <Table aria-label="Reported token usage by turn">
+        <Table aria-label={t("UsagePerTurnRows.reportedTokenUsageByTurn")}>
           <caption className="sr-only">
-            Exact parent token counts. Incomplete or inconsistent usage is not
-            plotted.
+            {t(
+              "UsagePerTurnRows.exactParentTokenCountsIncompleteOrInconsistentUsageIs",
+            )}
           </caption>
           <TableHeader>
             <TableRow>
-              <TableHead>Turn</TableHead>
-              <TableHead>Input</TableHead>
-              <TableHead>Output</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Reported volume</TableHead>
+              <TableHead>{t("conversationView.turn")}</TableHead>
+              <TableHead>{t("conversationView.input2")}</TableHead>
+              <TableHead>{t("conversationView.output2")}</TableHead>
+              <TableHead>{t("UsagePerTurnRows.total")}</TableHead>
+              <TableHead>{t("UsagePerTurnRows.reportedVolume")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,7 +79,7 @@ export function UsagePerTurnRows({
                 <TableCell>
                   {result.status === "valid"
                     ? exact(result.total)
-                    : "Inconsistent"}
+                    : t("UsagePerTurnRows.inconsistent")}
                 </TableCell>
                 <TableCell>
                   {result.status === "valid" && result.total !== null ? (
@@ -94,7 +101,7 @@ export function UsagePerTurnRows({
                     <span className="rf-meta">
                       {result.status === "invalid"
                         ? result.reason
-                        : "Incomplete reporting"}
+                        : t("UsagePerTurnRows.incompleteReporting")}
                     </span>
                   )}
                 </TableCell>
