@@ -1,4 +1,5 @@
 "use client";
+
 import type { DashboardEntity } from "@mobility/contracts";
 import * as schemas from "@mobility/contracts";
 import dynamic from "next/dynamic";
@@ -8,6 +9,7 @@ import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useUi } from "@/i18n/provider";
 import { DashboardHttpError, useDashboard } from "@/src/dashboard-client";
 import { primaryMeasurements } from "@/src/dashboard-presentation";
 import { EntityDetail } from "./entity-detail";
@@ -62,6 +64,8 @@ export function Mobility({
   category?: string;
   id?: string;
 }) {
+  const { t, locale, copy } = useUi();
+
   const [section, setSection] = useState(
     initialCategory === "places" ? "reference" : "dynamic",
   );
@@ -206,13 +210,19 @@ export function Mobility({
   return (
     <div className="dc-mobility-view">
       <PageTitle
-        title={id ? (entities[0]?.name ?? "Evidence detail") : "Mobility"}
-        description="Explore stored measurements, reference catalogs and their evidence."
+        title={
+          id
+            ? (entities[0]?.name ?? copy("Evidence detail"))
+            : t("mobilityView.mobility")
+        }
+        description={t(
+          "mobilityView.exploreStoredMeasurementsReferenceCatalogsAndTheirEvidence",
+        )}
       />
       {!id ? (
         <div className="dc-toolbar">
           <Segmented
-            label="Evidence family"
+            label={t("mobilityView.evidenceFamily")}
             value={section}
             onChange={(v) => {
               setSection(v);
@@ -222,13 +232,13 @@ export function Mobility({
               setSelected(null);
             }}
             options={[
-              ["dynamic", "Dynamic"],
-              ["reference", "Reference"],
+              ["dynamic", t("mobilityView.dynamic")],
+              ["reference", t("insights.reference")],
             ]}
           />
           {section === "dynamic" ? (
             <Segmented
-              label="Product family"
+              label={t("mobilityView.productFamily")}
               value={category}
               onChange={(v) => {
                 setCategory(v);
@@ -245,7 +255,9 @@ export function Mobility({
       ) : null}
       {!id && section === "reference" ? (
         <Field className="max-w-md">
-          <FieldLabel htmlFor="reference-product">Reference catalog</FieldLabel>
+          <FieldLabel htmlFor="reference-product">
+            {t("mobilityView.referenceCatalog")}
+          </FieldLabel>
           <select
             id="reference-product"
             value={product || "reference:places"}
@@ -256,15 +268,21 @@ export function Mobility({
             className="min-h-11 rounded-md border bg-background px-3 text-sm"
           >
             {[
-              ["reference:places", "Places, stations and connections"],
-              ["reference:lines", "Published lines"],
+              [
+                "reference:places",
+                t("mobilityView.placesStationsAndConnections"),
+              ],
+              ["reference:lines", t("mobilityView.publishedLines")],
               [
                 "reference:timetables",
-                "Published timetables (calendar required)",
+                t("mobilityView.publishedTimetablesCalendarRequired"),
               ],
-              ["reference:accessibility", "Declared stop accessibility"],
-              ["reference:tariffs", "Documentary fares"],
-              ["reference:geography", "Installed geography"],
+              [
+                "reference:accessibility",
+                t("mobilityView.declaredStopAccessibility"),
+              ],
+              ["reference:tariffs", t("mobilityView.documentaryFares")],
+              ["reference:geography", t("mobilityView.installedGeography")],
             ].map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -278,7 +296,7 @@ export function Mobility({
       ["environment", "incidents"].includes(category) ? (
         <Field className="max-w-md">
           <FieldLabel htmlFor="dynamic-product">
-            Product and evidence type
+            {t("mobilityView.productAndEvidenceType")}
           </FieldLabel>
           <select
             id="dynamic-product"
@@ -289,19 +307,21 @@ export function Mobility({
             }}
             className="min-h-11 rounded-md border bg-background px-3 text-sm"
           >
-            <option value="">All products in this family</option>
+            <option value="">
+              {t("mobilityView.allProductsInThisFamily")}
+            </option>
             {(category === "environment"
               ? [
-                  ["madrid-air", "Air observations"],
-                  ["aemet", "Weather observations"],
-                  ["weather:forecast", "Hourly forecast"],
-                  ["weather:daily", "Daily forecast"],
+                  ["madrid-air", t("mobilityView.airObservations")],
+                  ["aemet", t("mobilityView.weatherObservations")],
+                  ["weather:forecast", t("mobilityView.hourlyForecast")],
+                  ["weather:daily", t("mobilityView.dailyForecast")],
                 ]
               : [
-                  ["renfe-alerts", "Renfe alerts"],
-                  ["emt-alerts", "EMT alerts"],
-                  ["dgt-incidents", "DGT incidents"],
-                  ["weather:warnings", "Weather warnings CAP"],
+                  ["renfe-alerts", t("mobilityView.renfeAlerts")],
+                  ["emt-alerts", t("mobilityView.emtAlerts")],
+                  ["dgt-incidents", t("mobilityView.dgtIncidents")],
+                  ["weather:warnings", t("mobilityView.weatherWarningsCap")],
                 ]
             ).map(([value, label]) => (
               <option key={value} value={value}>
@@ -313,7 +333,7 @@ export function Mobility({
       ) : null}
       {q.error instanceof DashboardHttpError && q.error.status === 409 ? (
         <Button variant="outline" onClick={() => setCursor(null)}>
-          Revision changed. Return to first page
+          {t("mobilityView.revisionChangedReturnToFirstPage")}
         </Button>
       ) : null}
       {id ? (
@@ -321,7 +341,7 @@ export function Mobility({
           className="text-sm underline"
           href={`/dashboard/mobility?${back}`}
         >
-          Back to explorer
+          {t("mobilityView.backToExplorer")}
         </Link>
       ) : (
         <form
@@ -334,21 +354,21 @@ export function Mobility({
           }}
         >
           <label className="sr-only" htmlFor="search">
-            Search entity
+            {t("mobilityView.searchEntity")}
           </label>
           <Input
             id="search"
-            placeholder="Search entities"
+            placeholder={t("mobilityView.searchEntities")}
             maxLength={100}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-64"
           />
           <Button type="submit" variant="outline">
-            Search
+            {t("mobilityView.search")}
           </Button>
           <Segmented
-            label="Freshness"
+            label={t("mobilityView.freshness")}
             value={freshness}
             onChange={(v) => {
               setFreshness(v);
@@ -356,10 +376,10 @@ export function Mobility({
               setSelected(null);
             }}
             options={[
-              ["", "All"],
-              ["recent", "Recent"],
-              ["stale", "Stale"],
-              ["unavailable", "Unavailable"],
+              ["", t("activityView.all")],
+              ["recent", t("map.recent")],
+              ["stale", t("mobilityView.stale")],
+              ["unavailable", t("activityView.unavailable")],
             ]}
           />
           <Sheet
@@ -371,21 +391,24 @@ export function Mobility({
                 setDraftFreshness(freshness);
               }
             }}
-            title="Mobility filters"
+            title={t("mobilityView.mobilityFilters")}
             trigger={
               <Button variant="outline" type="button">
-                Filters{source ? ` · ${source}` : ""}
+                {t("activityView.filters")}
+                {source ? ` · ${source}` : ""}
               </Button>
             }
           >
             <Field>
-              <FieldLabel htmlFor="source">Source</FieldLabel>
+              <FieldLabel htmlFor="source">
+                {t("activityView.source")}
+              </FieldLabel>
               <select
                 id="source"
                 value={draftSource}
                 onChange={(e) => setDraftSource(e.target.value)}
               >
-                <option value="">All sources</option>
+                <option value="">{t("mobilityView.allSources")}</option>
                 {schemas.sourceIdSchema.options.map((s) => (
                   <option key={s}>{s}</option>
                 ))}
@@ -393,14 +416,14 @@ export function Mobility({
             </Field>
             <Field>
               <FieldLabel htmlFor="all-freshness">
-                Freshness (all evidence states)
+                {t("mobilityView.freshnessAllEvidenceStates")}
               </FieldLabel>
               <select
                 id="all-freshness"
                 value={draftFreshness}
                 onChange={(e) => setDraftFreshness(e.target.value)}
               >
-                <option value="">All states</option>
+                <option value="">{t("mobilityView.allStates")}</option>
                 {Object.entries(freshnessLabels).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -419,36 +442,38 @@ export function Mobility({
                   setFiltersOpen(false);
                 }}
               >
-                Apply
+                {t("activityView.apply")}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setFiltersOpen(false)}
               >
-                Cancel
+                {t("activityView.cancel")}
               </Button>
             </div>
           </Sheet>
           <Segmented
-            label="Workspace view"
+            label={t("mobilityView.workspaceView")}
             value={map ? "map" : "list"}
             onChange={(v) => setMap(v === "map")}
             options={[
-              ["list", "List"],
-              ["map", "Map + list"],
+              ["list", t("mobilityView.list")],
+              ["map", t("mobilityView.mapList")],
             ]}
           />
           <span className="dc-meta">
-            List includes unmapped entities. Map reads are independently
-            viewport-scoped.
+            {t(
+              "mobilityView.listIncludesUnmappedEntitiesMapReadsAreIndependentlyViewport",
+            )}
           </span>
         </form>
       )}
       {cursor ? (
         <p className="text-sm text-muted-foreground">
-          Historical page: freshness retains its evaluation time. Return to the
-          first page for the current selection.
+          {t(
+            "mobilityView.historicalPageFreshnessRetainsItsEvaluationTimeReturnTo",
+          )}
         </p>
       ) : null}
       <State
@@ -462,8 +487,9 @@ export function Mobility({
         <FreshnessBreakdown {...page.totals} />
       ) : page?.totals ? (
         <p className="text-sm text-muted-foreground">
-          This family contains different products. Select one product to see age
-          coverage without mixing units.
+          {t(
+            "mobilityView.thisFamilyContainsDifferentProductsSelectOneProductTo",
+          )}
         </p>
       ) : null}
 
@@ -494,21 +520,21 @@ export function Mobility({
         {id && entities[0] ? <EntityDetail entity={entities[0]} /> : null}
         {!id && entities.length ? (
           <Card className="dc-list-stage">
-            <Table aria-label="Mobility entities">
+            <Table aria-label={t("mobilityView.mobilityEntities")}>
               <thead>
                 <tr>
-                  <th scope="col">Entity / evidence</th>
+                  <th scope="col">{t("mobilityView.entityEvidence")}</th>
                   {category === "bikes" ? (
                     <>
                       <th scope="col" className="numeric">
-                        Bikes
+                        {t("mobilityView.bikes")}
                       </th>
                       <th scope="col" className="numeric">
-                        Docks
+                        {t("mobilityView.docks")}
                       </th>
                     </>
                   ) : (
-                    <th scope="col">Measurements</th>
+                    <th scope="col">{t("mobilityView.measurements")}</th>
                   )}
                 </tr>
               </thead>
@@ -541,25 +567,29 @@ export function Mobility({
                           {freshnessLabels[e.evidence.freshness]}
                         </span>
                         <span>
-                          {sourceNames[e.evidence.sourceId] ??
+                          {copy(sourceNames[e.evidence.sourceId]) ??
                             e.evidence.sourceId}
                         </span>
                         <span>
                           {e.evidence.observedAt ? (
                             <>
-                              Observed <Instant value={e.evidence.observedAt} />
+                              {t("mobilityView.observed")}
+                              <Instant value={e.evidence.observedAt} />
                             </>
                           ) : e.evidence.issuedAt ? (
                             <>
-                              Issued <Instant value={e.evidence.issuedAt} />
+                              {t("mobilityView.issued")}
+                              <Instant value={e.evidence.issuedAt} />
                             </>
                           ) : (
-                            "No observation time"
+                            t("mobilityView.noObservationTime")
                           )}
                         </span>
                       </p>
                       {e.latitude === null ? (
-                        <p className="dc-meta">No published coordinates</p>
+                        <p className="dc-meta">
+                          {t("mobilityView.noPublishedCoordinates")}
+                        </p>
                       ) : null}
                     </td>
                     {category === "bikes" ? (
@@ -570,6 +600,7 @@ export function Mobility({
                             e.measurements.find((m) => m.name === key)?.value ??
                               null,
                             null,
+                            locale,
                           )}
                         </td>
                       ))
@@ -578,15 +609,20 @@ export function Mobility({
                         {e.measurements.length ? (
                           primaryMeasurements(e).map((m) => (
                             <p key={m.name} className="text-sm">
-                              {publicLabel(m.name)}:{" "}
+                              {copy(publicLabel(m.name))}:{" "}
                               <strong>
-                                {measurementDisplay(m.name, m.value, m.unit)}
+                                {measurementDisplay(
+                                  m.name,
+                                  m.value,
+                                  m.unit,
+                                  locale,
+                                )}
                               </strong>
                             </p>
                           ))
                         ) : (
                           <span className="dc-meta">
-                            No published measurement
+                            {t("mobilityView.noPublishedMeasurement")}
                           </span>
                         )}
                       </td>
@@ -610,19 +646,19 @@ export function Mobility({
             className="dc-link"
             href={`/dashboard/mobility/${category}/${encodeURIComponent(selected.id)}?${detailParameters(selected.evidence.productId)}`}
           >
-            Open linked detail
+            {t("mobilityView.openLinkedDetail")}
           </Link>
         </Sheet>
       ) : null}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
-          {entities.length} rows returned on this page{" "}
-          {page?.limited ? "· limited result" : ""}
+          {entities.length} {t("mobilityView.rowsReturnedOnThisPage")}{" "}
+          {page?.limited ? t("mobilityView.limitedResult") : ""}
         </span>
         <div className="flex gap-2">
           {cursor ? (
             <Button size="sm" variant="outline" onClick={() => setCursor(null)}>
-              First page
+              {t("mobilityView.firstPage")}
             </Button>
           ) : null}
           {page?.nextCursor ? (
@@ -631,7 +667,7 @@ export function Mobility({
               variant="outline"
               onClick={() => setCursor(page.nextCursor ?? null)}
             >
-              Next
+              {t("mobilityView.next")}
             </Button>
           ) : null}
         </div>
@@ -639,8 +675,8 @@ export function Mobility({
       {id && entities[0] ? <EntityHistory entity={entities[0]} /> : null}
       {category === "parking" && parkingCategory ? (
         <p className="text-sm text-muted-foreground">
-          Selected parking category: {parkingCategory}. Only this category is
-          shown.
+          {t("mobilityView.selectedParkingCategory")}
+          {parkingCategory}. Only this category is shown.
         </p>
       ) : null}
 

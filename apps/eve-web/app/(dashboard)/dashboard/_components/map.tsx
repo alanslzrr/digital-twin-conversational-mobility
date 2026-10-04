@@ -1,4 +1,6 @@
 "use client";
+import { useUi } from "@/i18n/provider";
+
 import "leaflet/dist/leaflet.css";
 import type { DashboardEntity } from "@mobility/contracts";
 import type { CircleMarker, LayerGroup, Map as LeafletMap } from "leaflet";
@@ -6,8 +8,8 @@ import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "@/src/dashboard-client";
 import { sourceNames } from "./event-copy";
-import { productLabel } from "./product-copy";
-import { Instant, publicLabel, State } from "./shared";
+import { measurementDisplay, productLabel } from "./product-copy";
+import { Instant, State } from "./shared";
 export default function MobilityMap({
   category,
   section,
@@ -31,6 +33,8 @@ export default function MobilityMap({
   onSelect: (entity: DashboardEntity) => void;
   onViewChange: (view: string) => void;
 }) {
+  const { t, locale, copy, numberLocale } = useUi();
+
   const host = useRef<HTMLDivElement>(null),
     map = useRef<LeafletMap | null>(null),
     layer = useRef<LayerGroup | null>(null);
@@ -80,9 +84,7 @@ export default function MobilityMap({
         valid ? [center[0] as number, center[1] as number] : [40.4168, -3.7038],
         zoom >= 5 && zoom <= 19 ? zoom : 12,
       );
-      L.control
-        .zoom({ zoomInTitle: "Zoom in", zoomOutTitle: "Zoom out" })
-        .addTo(m);
+      L.control.zoom().addTo(m);
       map.current = m;
       layer.current = L.layerGroup().addTo(m);
       setReady(true);
@@ -141,6 +143,18 @@ export default function MobilityMap({
     };
   }, []);
   useEffect(() => {
+    if (!ready) return;
+    // Update owned Leaflet controls without recreating the map or its viewport.
+    for (const [selector, label] of [
+      [".leaflet-control-zoom-in", t("map.zoomIn")],
+      [".leaflet-control-zoom-out", t("map.zoomOut")],
+    ]) {
+      const button = host.current?.querySelector(selector!);
+      button?.setAttribute("title", label!);
+      button?.setAttribute("aria-label", label!);
+    }
+  }, [ready, t]);
+  useEffect(() => {
     // Marker colors resolve the theme tokens, so they must be recomputed per theme.
     if (!ready || !resolvedTheme) return;
     let cancelled = false;
@@ -156,12 +170,12 @@ export default function MobilityMap({
         unknown: "var(--dash-muted)",
       };
       const labels = {
-        recent: "Recent reading",
-        recently_checked: "Forecast checked",
-        stale: "Stale evidence",
-        unavailable: "No usable evidence",
-        static: "Reference",
-        unknown: "Age unknown",
+        recent: t("map.recentReading"),
+        recently_checked: t("map.forecastChecked"),
+        stale: t("insights.staleEvidence"),
+        unavailable: t("insights.noUsableEvidence"),
+        static: t("insights.reference"),
+        unknown: t("map.ageUnknown"),
       };
       for (const entity of features?.entities ?? []) {
         if (entity.latitude === null || entity.longitude === null) continue;
@@ -201,9 +215,9 @@ export default function MobilityMap({
         const values = entity.measurements
           .filter((m) => typeof m.value === "number")
           .slice(0, 3)
-          .map((m) => `${publicLabel(m.name)}: ${m.value} ${m.unit ?? ""}`)
+          .map((m) => measurementDisplay(m.name, m.value, m.unit, locale))
           .join(" · ");
-        label.textContent = `${entity.name} · ${productLabel(entity.evidence.productId)}${values ? ` · ${values}` : ""} · ${labels[state]} · ${sourceNames[entity.evidence.sourceId] ?? entity.evidence.sourceId}${time ? ` · ${new Date(time).toLocaleString("en-GB", { timeZone: "Europe/Madrid", timeZoneName: "short" })}` : " · No observation time"}`;
+        label.textContent = `${entity.name} · ${copy(productLabel(entity.evidence.productId))}${values ? ` · ${values}` : ""} · ${copy(labels[state])} · ${copy(sourceNames[entity.evidence.sourceId]) ?? entity.evidence.sourceId}${time ? ` · ${new Date(time).toLocaleString(numberLocale, { timeZone: "Europe/Madrid", timeZoneName: "short" })}` : t("map.noObservationTime")}`;
         if (marker.getTooltip()) marker.setTooltipContent(label);
         else marker.bindTooltip(label);
       }
@@ -216,36 +230,50 @@ export default function MobilityMap({
     return () => {
       cancelled = true;
     };
-  }, [features, ready, resolvedTheme, selectedKey]);
+  }, [
+    features,
+    ready,
+    resolvedTheme,
+    selectedKey,
+    t,
+    copy,
+    numberLocale,
+    locale,
+  ]);
   return (
     <section className="overflow-hidden rounded-lg border bg-card">
       <section
         ref={host}
         className="h-[420px] w-full"
-        aria-label="Published entity map"
+        aria-label={t("map.publishedEntityMap")}
       />
       <div className="flex flex-col gap-2 p-3 text-xs text-muted-foreground">
         <p>
-          Viewport records: {features ? features.entities.length : "Unknown"} ·
-          map read <Instant value={features?.readAt} />
+          {t("map.viewportRecords")}
+          {features ? features.entities.length : t("conversationView.unknown")}{" "}
+          {t("map.mapRead")}
+          <Instant value={features?.readAt} />
         </p>
-        <ul className="dc-map-legend" aria-label="Marker legend">
-          <li data-state="recent">Recent</li>
-          <li data-state="stale">Stale (dashed outline)</li>
-          <li data-state="unavailable">No usable evidence (dashed outline)</li>
-          <li data-state="static">Reference</li>
+        <ul className="dc-map-legend" aria-label={t("map.markerLegend")}>
+          <li data-state="recent">{t("map.recent")}</li>
+          <li data-state="stale">{t("map.staleDashedOutline")}</li>
+          <li data-state="unavailable">
+            {t("map.noUsableEvidenceDashedOutline")}
+          </li>
+          <li data-state="static">{t("insights.reference")}</li>
         </ul>
         <span>
-          External basemap · published coordinates only · list access remains
-          available
+          {t(
+            "map.externalBasemapPublishedCoordinatesOnlyListAccessRemainsAvailable",
+          )}
         </span>
         {tileError ? (
           <span role="status">
-            Basemap unavailable; evidence and list remain available.
+            {t("map.basemapUnavailableEvidenceAndListRemainAvailable")}
           </span>
         ) : null}
         {features?.limited ? (
-          <span>Zoom or filter. Maximum 1,000 returned map entities.</span>
+          <span>{t("map.zoomOrFilterMaximum1000ReturnedMapEntities")}</span>
         ) : null}
         <State data={data} loading={isLoading} error={error} />
       </div>
