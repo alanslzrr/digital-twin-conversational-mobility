@@ -28,7 +28,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twi
 | Diagnóstico | [Problemas frecuentes](troubleshooting.md): qué revisar ante cada síntoma |
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
-| Panel | Seis vistas integradas en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45): datos, consultas, fuentes, actividad y telemetría propia. [Operación y actualización](local-runtime.md#actualizar-el-panel) · [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md). El historial de refinamientos permanece en [Actas](acceptance/index.md) |
+| Panel | Seis vistas integradas en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45): datos, consultas, fuentes, actividad y telemetría propia. [Operación y actualización](local-runtime.md#actualizar-el-panel) · [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Runtime habitual reconstruido y smoke correcto; inspección autenticada pendiente. El historial de refinamientos permanece en [Actas](acceptance/index.md) |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
 | Fuentes | [CRTM](sources/crtm.md), [DGT](sources/dgt.md), [geocodificación](sources/geocoding.md): semántica específica |
 | Recursos | [Catálogo de referencias](resources/index.md): investigación, documentación oficial y aplicación en el código |
