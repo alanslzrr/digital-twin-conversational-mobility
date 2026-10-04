@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import type { JSX } from "react";
 import { useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
+import { useUi } from "@/i18n/provider";
 
 // Pairs with the circle-blur view-transition styles in the consuming stylesheet.
 function withViewTransition(update: () => void) {
@@ -30,13 +31,20 @@ function ThemeOption({
   isActive?: boolean;
   onClick: (value: string) => void;
 }) {
+  const { t } = useUi();
   return (
     <button
       type="button"
       data-active={isActive}
       className="relative flex size-8 items-center justify-center rounded-full text-muted-foreground transition-[color] hover:text-foreground data-[active=true]:text-foreground [&_svg]:size-4"
       aria-pressed={isActive}
-      aria-label={`Switch to ${value} theme`}
+      aria-label={
+        value === "light"
+          ? t("locale.light")
+          : value === "dark"
+            ? t("locale.dark")
+            : t("locale.system")
+      }
       onClick={() => onClick(value)}
     >
       {icon}
@@ -69,6 +77,7 @@ const THEME_OPTIONS = [
 
 function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
+  const { t } = useUi();
 
   const isMounted = useSyncExternalStore(
     () => () => {},
@@ -89,7 +98,7 @@ function ThemeSwitcher() {
         transition={{ duration: 0.3 }}
         className="inline-flex items-center overflow-clip rounded-full bg-background inset-ring-1 inset-ring-border"
         role="group"
-        aria-label="Theme"
+        aria-label={t("locale.theme")}
       >
         {THEME_OPTIONS.map((option) => (
           <ThemeOption

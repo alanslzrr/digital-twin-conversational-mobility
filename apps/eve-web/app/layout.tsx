@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UiProvider } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -25,19 +27,22 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   readonly children: ReactNode;
 }) {
+  const locale = await getLocale();
   return (
     <html
       className={cn(sans.variable, mono.variable)}
-      lang="es"
+      lang={locale}
       suppressHydrationWarning
     >
       <body>
-        <TooltipProvider>{children}</TooltipProvider>
+        <UiProvider initialLocale={locale}>
+          <TooltipProvider>{children}</TooltipProvider>
+        </UiProvider>
       </body>
     </html>
   );
