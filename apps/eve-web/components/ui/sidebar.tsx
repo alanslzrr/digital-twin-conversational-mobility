@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_WIDTH = "16rem";
@@ -161,6 +162,8 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
 }) {
+  const { t, locale } = useUi();
+
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
   if (collapsible === "none") {
@@ -185,7 +188,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          lang={dashboardScope ? "en" : undefined}
+          lang={dashboardScope ? locale : undefined}
           className={cn(
             "w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground",
             dashboardScope && "dashboard-dialog dc-mobile-sheet",
@@ -201,9 +204,13 @@ function Sidebar({
         >
           <SheetHeader className="sr-only">
             <SheetTitle>
-              {dashboardScope ? "Mobility Core navigation" : "Sidebar"}
+              {dashboardScope
+                ? t("sidebar.mobilityCoreNavigation")
+                : t("sidebar.sidebar")}
             </SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+            <SheetDescription>
+              {t("sidebar.displaysTheMobileSidebar")}
+            </SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -219,7 +226,7 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
-      aria-label="Navigation and account"
+      aria-label={t("sidebar.navigationAndAccount")}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -265,6 +272,8 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
+  const { t } = useUi();
+
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -281,22 +290,24 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t("sidebar.toggleSidebar")}</span>
     </Button>
   );
 }
 
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
+  const { t } = useUi();
+
   const { toggleSidebar } = useSidebar();
 
   return (
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label="Toggle Sidebar"
+      aria-label={t("sidebar.toggleSidebar")}
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      title={t("sidebar.toggleSidebar")}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

@@ -1,15 +1,18 @@
 "use client";
 
 import type * as React from "react";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+  const { t } = useUi();
+
   return (
     <section
       aria-label={
         props["aria-label"]
-          ? `${props["aria-label"]} scroll area`
-          : "Scrollable data table"
+          ? t("presentation.scrollArea", { label: props["aria-label"] })
+          : t("table.scrollableDataTable")
       }
       // biome-ignore lint/a11y/noNoninteractiveTabindex: Horizontal table scrolling requires a keyboard-focusable region.
       tabIndex={0}
