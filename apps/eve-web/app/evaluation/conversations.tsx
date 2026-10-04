@@ -11,23 +11,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useUi } from "@/i18n/provider";
 
 export function Conversations() {
+  const { t } = useUi();
+
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
-          Mis conversaciones
+          {t("conversations.misConversaciones")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Mis conversaciones</DialogTitle>
+          <DialogTitle>{t("conversations.misConversaciones")}</DialogTitle>
           <DialogDescription>
-            Solo conversaciones con acceso vigente. Fecha de creación, no de
-            última actividad. El acceso caduca normalmente a los siete días; los
-            mensajes dependen del almacenamiento de EVE.
+            {t(
+              "conversations.soloConversacionesConAccesoVigenteFechaDeCreacionNo",
+            )}
           </DialogDescription>
         </DialogHeader>
         {open ? <ConversationList /> : null}
@@ -37,6 +40,8 @@ export function Conversations() {
 }
 
 function ConversationList() {
+  const { t, numberLocale } = useUi();
+
   const [page, setPage] = useState<ConversationPage>({
     sessions: [],
     nextCursor: null,
@@ -88,36 +93,40 @@ function ConversationList() {
   return (
     <div className="flex flex-col gap-3">
       <Button asChild variant="outline">
-        <a href="/s">Nuevo chat</a>
+        <a href="/s">{t("agentChat.nuevoChat")}</a>
       </Button>
       <ul className="flex flex-col gap-2">
         {page.sessions.map((session) => (
           <li key={session.sessionId}>
             <Button asChild variant="ghost" className="w-full justify-start">
               <a href={`/s/${encodeURIComponent(session.sessionId)}`}>
-                Conversación ·{" "}
+                {t("conversations.conversacion")}{" "}
                 <time dateTime={session.createdAt}>
-                  {new Date(session.createdAt).toLocaleString("es-ES")}
+                  {new Date(session.createdAt).toLocaleString(numberLocale, {
+                    timeZone: "Europe/Madrid",
+                  })}
                 </time>
               </a>
             </Button>
           </li>
         ))}
       </ul>
-      {loading ? <p role="status">Cargando conversaciones…</p> : null}
+      {loading ? (
+        <p role="status">{t("conversations.cargandoConversaciones")}</p>
+      ) : null}
       {error ? (
         <div role="alert">
-          <p>No se pudieron cargar las conversaciones.</p>
+          <p>{t("conversations.noSePudieronCargarLasConversaciones")}</p>
           <Button
             variant="outline"
             onClick={() => void load(loaded ? page.nextCursor : null)}
           >
-            Reintentar
+            {t("agentChat.reintentar")}
           </Button>
         </div>
       ) : null}
       {loaded && !loading && !error && page.sessions.length === 0 ? (
-        <p>No tienes conversaciones con acceso vigente.</p>
+        <p>{t("conversations.noTienesConversacionesConAccesoVigente")}</p>
       ) : null}
       {!error && page.nextCursor ? (
         <Button
@@ -125,7 +134,7 @@ function ConversationList() {
           variant="outline"
           onClick={() => void load(page.nextCursor)}
         >
-          Cargar más
+          {t("conversations.cargarMas")}
         </Button>
       ) : null}
     </div>
