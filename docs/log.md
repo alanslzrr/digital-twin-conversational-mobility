@@ -175,3 +175,22 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Confirmados checksums de las 21 migraciones, incluida 0021, y token válido con permisos del panel; no se modificaron esquema ni credenciales. Detenido únicamente el supervisor identificado; PostgreSQL y OTP conservados.
 - Respaldo privado en data/backups/dashboard-install-20261004-164039: dump legible, archivo de configuración/EVE y checksums verificados. Configuración sin cambios y 10.128 archivos persistentes de workflow idénticos tras el build; excluidos metadatos AppleDouble generados por tar.
 - Instalación frozen-lockfile, pnpm check (510 correctas/100 omitidas), build del agente y auditoría sin vulnerabilidades conocidos correctos. Arranque sin worker en 3000/3001/4274 y smoke productivo correcto, sin modelo. Inspección autenticada pendiente de login; todavía no se declara cierre.
+
+## [2026-10-05] identidad | mobai
+
+- Adoptado el nombre **mobai** en la presentación del repositorio, portadas documentales, acceso, bienvenida y cabecera del chat, sidebar/cabecera del panel y metadatos/favicon.
+- Integrados los dos SVG del usuario, monocromáticos y transparentes. Los originales se conservan en la raíz; los assets locales de `apps/eve-web/public/brand/` solo ajustan el viewport para eliminar el margen excesivo.
+- El componente `MobaiBrand` usa 48px en acceso, 64px en bienvenida y 28px en navegación. Sigue el tema del sistema en EVE y el selector explícito en el panel; no añade fondos ni cambia trazados o colores.
+- Conservados EVE oficial, controles, autenticación y alcance de evaluación. Adaptación registrada en `apps/eve-web/vendor/eve/README.md`.
+- Validación: `pnpm check` aprobado (514 pruebas, 100 omitidas, build correcto); `git diff --check` sin errores. Login del build comprobado en navegador, símbolo de 48px cargado y viewport efectivo de 390×844 sin desbordamiento. Sin revisión visual autenticada del chat/panel ni comprobación visual del modo oscuro; estos estados se revisaron en código. La instancia temporal se detuvo; no hubo llamadas al modelo, altas ni cambios de datos.
+
+- Ajuste visual posterior: la identidad del panel queda exclusivamente en la sidebar; retirada la repetición de logo/nombre en la cabecera, conservando su control de navegación.
+- Fluidez de la sidebar: restauradas las transiciones de ancho/alto/padding de botones que el CSS del panel sobrescribía; marca recortada sin cambio brusco de display/padding y contenedor sin encogimiento ni overflow durante la transición. Build Web aprobado; comprobación visual autenticada de cierre/apertura pendiente.
+
+## [2026-10-05] sincronización | PR #46 y marca local
+
+- Confirmado squash merge de PR #46 en `eba66c5`; `main` actualizado por fast-forward y rama de trabajo `alanslzrr/mobai-branding` basada en ese mismo commit.
+- Reaplicados los cambios locales de marca con resolución de cinco conflictos; conservados selector ES/EN, proveedor global, traducciones y controles de acceso. Respaldo previo conservado en stash.
+- Eliminadas `alanslzrr/ui-i18n` (árbol idéntico al squash) y `alanslzrr/post-merge-housekeeping` (documentación incorporada en main, con adiciones de i18n). Remota ui-i18n ya eliminada en GitHub; referencias podadas.
+- Tests de marca independientes de los SVG sueltos de la raíz, que ya no estaban presentes: geometría fijada con SHA-256 y assets locales versionables.
+- Instalación frozen-lockfile y `pnpm check` correctos: 528 pruebas aprobadas, 100 omitidas y builds correctos. Sin archivos sin resolver ni marcadores de conflicto; `git diff --check` limpio. Auditoría de navegador ES/EN no ejecutada: falta `AGENT_BROWSER_BIN`. Sin llamadas al modelo, migraciones ni cambios de datos.
