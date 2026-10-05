@@ -1,8 +1,8 @@
-# Madrid Mobility Twin · Documentación
+# mobai · Documentación
 
 [Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twin. Actualizado el **4 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **5 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 

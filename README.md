@@ -1,12 +1,32 @@
-# Madrid Mobility Twin
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="apps/eve-web/public/brand/logo-dark.svg">
+    <img src="apps/eve-web/public/brand/logo-light.svg" width="112" height="112" alt="Símbolo de mobai">
+  </picture>
+</p>
 
-**La movilidad de Madrid, explicada en una conversación.**
+<h1 align="center">mobai</h1>
 
-Planifica desplazamientos, consulta llegadas y avisos, y añade el contexto que importa para viajar: meteorología, accesibilidad declarada, bicicletas y aparcamiento. El sistema reúne fuentes oficiales y explica de dónde sale cada resultado y a qué momento corresponde.
+<p align="center">
+  <strong>La movilidad de Madrid, explicada en una conversación.</strong>
+</p>
 
-El chat de **EVE** coordina la conversación. **Mobility Core** reúne y consulta los datos de los operadores. **OpenTripPlanner** calcula las rutas. Esta separación permite actualizar las fuentes y las reglas de movilidad sin modificar la interfaz de conversación.
+<p align="center">
+  Planifica desplazamientos, consulta llegadas y avisos, y añade el contexto que importa para viajar: meteorología, accesibilidad declarada, bicicletas y aparcamiento. El sistema reúne fuentes oficiales y explica de dónde sale cada resultado y a qué momento corresponde.
+</p>
 
-[**Documentación**](docs/README.md) · [**Guía de uso**](docs/user-guide.md) · [**Instalación**](docs/installation.md) · [**Arquitectura**](docs/architecture.md)
+<p align="center">
+  El chat de <strong>EVE</strong> coordina la conversación. <strong>Mobility Core</strong> reúne y consulta los datos de los operadores. <strong>OpenTripPlanner</strong> calcula las rutas. Esta separación permite actualizar las fuentes y las reglas de movilidad sin modificar la interfaz de conversación.
+</p>
+
+<p align="center">
+  <a href="docs/README.md"><strong>Documentación</strong></a> &nbsp;·&nbsp;
+  <a href="docs/user-guide.md"><strong>Guía de uso</strong></a> &nbsp;·&nbsp;
+  <a href="docs/installation.md"><strong>Instalación</strong></a> &nbsp;·&nbsp;
+  <a href="docs/architecture.md"><strong>Arquitectura</strong></a>
+</p>
+
+---
 
 ## Contenido
 
@@ -21,7 +41,7 @@ El chat de **EVE** coordina la conversación. **Mobility Core** reúne y consult
 
 ## Qué resuelve
 
-Preparar un viaje suele exigir consultar varias aplicaciones: una para la ruta, otra para saber cuándo llega el autobús, otra para incidencias y otra para el tiempo. Madrid Mobility Twin conecta esas consultas en el mismo diálogo.
+Preparar un viaje suele exigir consultar varias aplicaciones: una para la ruta, otra para saber cuándo llega el autobús, otra para incidencias y otra para el tiempo. mobai conecta esas consultas en el mismo diálogo.
 
 Puedes empezar con un desplazamiento y continuar preguntando por sus alternativas o su contexto. El modelo interpreta la petición y explica los resultados. Para responder, utiliza **herramientas del servidor que consultan datos y calculan rutas**.
 
