@@ -22,7 +22,9 @@ const mono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Madrid Mobility",
+  title: "mobai",
+  applicationName: "mobai",
+  icons: { icon: "/brand/favicon.svg" },
   description: "Evaluación privada de movilidad de Madrid.",
   robots: { index: false, follow: false },
 };

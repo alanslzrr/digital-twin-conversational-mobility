@@ -5,7 +5,7 @@ The chat, message renderers, UI primitives and global theme were extracted from 
 Upstream: https://github.com/vercel/eve — see the included Apache-2.0 LICENSE and NOTICE. Original generated paths are preserved under `app/_components`, `components`, `lib/utils.ts`, and `app/globals.css`.
 
 Local adaptations:
-- Replace the app-name placeholder with Madrid Mobility; retain upstream layout, theme, composer, Markdown, tool output and session URL behavior.
+- Replace the app-name placeholder with mobai and use the user-approved transparent monochrome mark in the existing welcome heading and header; retain upstream layout, theme, composer, Markdown, tool output and session URL behavior.
 - Mount the official chat behind the existing Better Auth gate at `/`, `/evaluation`, `/s` and `/s/[sessionId]`. Never copy upstream placeholder/local-development authorization.
 - Disable attachments and retain the evaluation text-length limit, matching the protected backend.
 - Preserve strict TypeScript settings with conditional optional properties and checked array access; format with the repository tooling.
@@ -42,3 +42,5 @@ Original messages, Markdown, tool inputs/outputs, provider instructions and ordi
 agent-authored questions/options remain untouched. Native continuation keeps the
 original request IDs and `continue`/`stop` option IDs. Language never becomes a
 model parameter and never keys or reconstructs EVE, authentication or data providers.
+
+Product identity uses `components/mobai-brand.tsx` and local `public/brand/` SVGs. The marks derive from the user-provided `logo_light.svg` and `logo_dark.svg`; shipped assets retain every path and fill (geometry pinned by a SHA-256 regression), with only the viewport tightened to `360 341 534 534` for optical sizing. Login uses a 48px mark, the native welcome heading 64px, and navigation 28px. CSS follows the native system theme outside the dashboard and its explicit `data-dashboard-theme` preference inside it, without client-side asset swapping. No backgrounds, filters, recoloring, external assets or chat behavior changes. The sidebar retains its native collapsed/mobile behavior.

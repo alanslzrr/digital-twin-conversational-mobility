@@ -106,3 +106,52 @@ input,
 textarea {
   font: inherit;
 }
+
+/* Product identity: transparent original SVGs, never tinted or boxed. */
+.mobai-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.mobai-brand-symbol {
+  display: inline-flex;
+  flex: none;
+}
+.mobai-brand-symbol img {
+  display: block;
+  max-width: none;
+}
+.mobai-brand-symbol .mobai-logo-dark {
+  display: none;
+}
+.mobai-brand-name {
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+.mobai-brand[data-size="hero"] {
+  gap: 12px;
+}
+.mobai-brand[data-size="login"] {
+  gap: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  .mobai-brand-symbol .mobai-logo-light {
+    display: none;
+  }
+  .mobai-brand-symbol .mobai-logo-dark {
+    display: block;
+  }
+}
+[data-dashboard-theme="light"] .mobai-brand-symbol .mobai-logo-light {
+  display: block;
+}
+[data-dashboard-theme="light"] .mobai-brand-symbol .mobai-logo-dark {
+  display: none;
+}
+[data-dashboard-theme="dark"] .mobai-brand-symbol .mobai-logo-light {
+  display: none;
+}
+[data-dashboard-theme="dark"] .mobai-brand-symbol .mobai-logo-dark {
+  display: block;
+}

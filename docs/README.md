@@ -1,4 +1,4 @@
-# Documentación de Madrid Mobility Twin
+# Documentación de mobai
 
 [Proyecto](../README.md) · [Índice completo](index.md) · [Glosario](glossary.md)
 
