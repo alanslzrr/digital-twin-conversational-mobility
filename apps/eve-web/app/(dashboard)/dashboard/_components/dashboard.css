@@ -403,6 +403,11 @@
   background: color-mix(in srgb, var(--dash-bg) 86%, transparent);
   backdrop-filter: blur(10px);
 }
+.dc-preferences {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .dc-header-actions {
   display: flex;
   align-items: center;
@@ -2302,7 +2307,7 @@
   }
   .dc-header {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     gap: 0;
     min-height: 52px;
     padding: 4px 8px;
@@ -2310,8 +2315,13 @@
   .dc-header-actions {
     display: contents;
   }
-  .dc-status-toggle {
+  .dc-preferences {
     grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .dc-status-toggle {
+    grid-column: 3;
     grid-row: 1;
     justify-self: end;
   }

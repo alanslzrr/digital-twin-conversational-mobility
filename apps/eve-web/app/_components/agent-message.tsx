@@ -47,6 +47,7 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import { Button } from "@/components/ui/button";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 export type AgentInputResponse = {
@@ -207,6 +208,8 @@ function QuestionRequest({
     responses: readonly AgentInputResponse[],
   ) => void | Promise<void>;
 }) {
+  const { t } = useUi();
+
   const hasOptions = (inputRequest.options?.length ?? 0) > 0;
   const acceptsFreeform = inputRequest.allowFreeform === true || !hasOptions;
   const [questionValue, setQuestionValue] = useState<QuestionValue>({
@@ -280,14 +283,14 @@ function QuestionRequest({
       {acceptsFreeform ? (
         <div className="relative">
           <QuestionInput
-            aria-label="Answer"
+            aria-label={t("agentMessage.answer")}
             className={inputResponse === undefined ? "pr-12 pb-12" : undefined}
-            placeholder="Type your answer…"
+            placeholder={t("agentMessage.typeYourAnswer")}
           />
           {inputResponse === undefined &&
           questionValue.text.trim().length > 0 ? (
             <QuestionSubmit
-              aria-label="Answer"
+              aria-label={t("agentMessage.answer")}
               className="absolute right-2 bottom-2"
               size="icon-sm"
             >
@@ -301,7 +304,8 @@ function QuestionRequest({
 }
 
 function AttachmentPart({ part }: { readonly part: EveFilePart }) {
-  const label = part.filename ?? "Attachment";
+  const { t } = useUi();
+  const label = part.filename ?? t("presentation.attachment");
   const detail = [part.mediaType, formatBytes(part.size)]
     .filter(Boolean)
     .join(" - ");
@@ -347,6 +351,8 @@ function AuthorizationPrompt({
 }: {
   readonly part: EveAuthorizationPart;
 }) {
+  const { t, copy } = useUi();
+
   const isAuthorized =
     part.state === "completed" && part.outcome === "authorized";
   const isCompleted = part.state === "completed";
@@ -384,16 +390,39 @@ function AuthorizationPrompt({
           <Icon className="size-4" />
         </span>
         <div className="min-w-0 flex-1 space-y-2">
-          <p className="font-medium text-sm">{authorizationTitle(part)}</p>
+          <p className="font-medium text-sm">
+            {part.state === "required"
+              ? t("presentation.connect", { name: part.displayName })
+              : part.outcome === "authorized"
+                ? t("presentation.connected", { name: part.displayName })
+                : t("presentation.authorization", {
+                    name: part.displayName,
+                    outcome: copy(formatAuthorizationOutcome(part.outcome)),
+                  })}
+          </p>
           <p className="text-muted-foreground text-sm">
-            {authorizationDescription(part)}
+            {part.state === "required" ? (
+              part.description
+            ) : part.outcome === "authorized" ? (
+              t("presentation.connected", { name: part.displayName })
+            ) : (
+              <>
+                {t("presentation.authorization", {
+                  name: part.displayName,
+                  outcome: copy(formatAuthorizationOutcome(part.outcome)),
+                })}
+                {part.reason ? ` (${part.reason})` : ""}
+              </>
+            )}
           </p>
           {shouldShowInstructions ? (
             <p className="text-muted-foreground text-sm">{instructions}</p>
           ) : null}
           {part.state === "required" && part.authorization?.userCode ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Code</span>
+              <span className="text-muted-foreground">
+                {t("agentMessage.code")}
+              </span>
               <code className="rounded-md bg-background px-2 py-1 font-mono">
                 {part.authorization.userCode}
               </code>
@@ -403,7 +432,7 @@ function AuthorizationPrompt({
             <Button asChild size="sm">
               <a href={part.authorization.url} rel="noreferrer" target="_blank">
                 <ExternalLinkIcon className="size-4" />
-                Sign in with {part.displayName}
+                {t("agentMessage.signInWith")} {part.displayName}
               </a>
             </Button>
           ) : null}
@@ -411,27 +440,6 @@ function AuthorizationPrompt({
       </div>
     </div>
   );
-}
-
-function authorizationTitle(part: EveAuthorizationPart): string {
-  if (part.state === "required") {
-    return `Connect ${part.displayName}`;
-  }
-  if (part.outcome === "authorized") {
-    return `${part.displayName} connected`;
-  }
-  return `${part.displayName} authorization ${formatAuthorizationOutcome(part.outcome)}`;
-}
-
-function authorizationDescription(part: EveAuthorizationPart): string {
-  if (part.state === "required") {
-    return part.description;
-  }
-  if (part.outcome === "authorized") {
-    return `${part.displayName} connected.`;
-  }
-  const tail = part.reason !== undefined ? ` (${part.reason})` : "";
-  return `${part.displayName} authorization ${formatAuthorizationOutcome(part.outcome)}${tail}.`;
 }
 
 function formatAuthorizationOutcome(
@@ -473,11 +481,22 @@ function InputRequestActions({
   ) => void | Promise<void>;
   readonly part: EveDynamicToolPart;
 }) {
+  const { t } = useUi();
+
   const inputRequest = part.toolMetadata?.eve?.inputRequest;
   if (!inputRequest) {
     return null;
   }
 
+  const isLimit = inputRequest.kind === "session-limit";
+  const limitInput = part.input as Record<string, unknown> | undefined;
+  const limit =
+    limitInput?.kind === "token-cost"
+      ? `$${String(limitInput.limitUsd)}`
+      : `${String(limitInput?.limit ?? "")} ${String(limitInput?.kind ?? "")} tokens`;
+  const prompt = isLimit
+    ? t("presentation.sessionLimit", { limit })
+    : inputRequest.prompt;
   const inputResponse = part.toolMetadata?.eve?.inputResponse;
   const selectedOption = inputRequest.options?.find(
     (option) => option.id === inputResponse?.optionId,
@@ -485,13 +504,20 @@ function InputRequestActions({
 
   return (
     <div className="space-y-3 rounded-md border border-yellow-500/30 bg-yellow-500/5 p-3">
-      <p className="text-muted-foreground text-sm">{inputRequest.prompt}</p>
+      <p className="text-muted-foreground text-sm">{prompt}</p>
       {inputResponse ? (
         <p className="font-medium text-sm">
-          Responded:{" "}
-          {selectedOption?.label ??
-            inputResponse.text ??
-            inputResponse.optionId}
+          {t("agentMessage.responded")}{" "}
+          {isLimit &&
+          ["continue", "stop"].includes(inputResponse.optionId ?? "")
+            ? t(
+                inputResponse.optionId === "continue"
+                  ? "presentation.approve"
+                  : "presentation.stop",
+              )
+            : (selectedOption?.label ??
+              inputResponse.text ??
+              inputResponse.optionId)}
         </p>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -511,7 +537,11 @@ function InputRequestActions({
               type="button"
               variant={option.style === "danger" ? "destructive" : "default"}
             >
-              {option.label}
+              {isLimit && ["continue", "stop"].includes(option.id)
+                ? option.id === "continue"
+                  ? t("presentation.approve")
+                  : t("presentation.stop")
+                : option.label}
             </Button>
           ))}
         </div>

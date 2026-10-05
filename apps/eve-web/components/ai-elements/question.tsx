@@ -18,6 +18,7 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 export interface QuestionValue {
@@ -336,12 +337,14 @@ export type QuestionSubmitProps = ComponentProps<typeof Button> & {
 };
 
 export const QuestionSubmit = ({
-  children = "Submit",
+  children,
   className,
   disabled,
   size = "sm",
   ...props
 }: QuestionSubmitProps) => {
+  const { t } = useUi();
+
   const question = useQuestion();
   const hasResponse =
     question.selectedValues.length > 0 || question.text.trim().length > 0;
@@ -354,7 +357,7 @@ export const QuestionSubmit = ({
       type="submit"
       {...props}
     >
-      {children}
+      {children ?? t("promptInput.submit")}
     </Button>
   );
 };

@@ -1,4 +1,5 @@
 "use client";
+
 import type { DashboardEntitySeries } from "@mobility/contracts";
 import { useId, useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
@@ -17,19 +18,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUi } from "@/i18n/provider";
 import { prepareHistory } from "./core";
 
 const config = {
   value: { label: "Recorded value", color: "var(--dash-series)" },
 } satisfies ChartConfig;
-const compactTime = (n: number) =>
-  new Intl.DateTimeFormat("en-GB", {
+const compactTime = (n: number, numberLocale = "en-GB") =>
+  new Intl.DateTimeFormat(numberLocale, {
     timeZone: "Europe/Madrid",
     hour: "2-digit",
     minute: "2-digit",
   }).format(n);
-const fullTime = (n: number) =>
-  new Intl.DateTimeFormat("en-GB", {
+const fullTime = (n: number, numberLocale = "en-GB") =>
+  new Intl.DateTimeFormat(numberLocale, {
     timeZone: "Europe/Madrid",
     day: "2-digit",
     month: "short",
@@ -49,6 +51,8 @@ export function EntityHistoryChart({
   label: string;
   interpolation?: "linear" | "stepAfter";
 }) {
+  const { t, numberLocale } = useUi();
+
   const headingId = useId();
   const prepared = useMemo(
     () => prepareHistory(data.points, data.gapSeconds),
@@ -62,20 +66,24 @@ export function EntityHistoryChart({
         <span className="rf-meta">{data.unit}</span>
       </div>
       <p className="rf-meta">
-        Recorded observations · Europe/Madrid · partial coverage
-        {data.reduced ? " · reduced series" : ""}
+        {t(
+          "EntityHistoryChart.recordedObservationsEuropeMadridPartialCoverage",
+        )}
+        {data.reduced ? t("EntityHistoryChart.reducedSeries") : ""}
       </p>
       <Tabs defaultValue="chart" className="rf-tabs">
         <TabsList aria-label={`${label} representation`}>
-          <TabsTrigger value="chart">Chart</TabsTrigger>
-          <TabsTrigger value="data">Exact data</TabsTrigger>
+          <TabsTrigger value="chart">{t("ActivityLanes.chart")}</TabsTrigger>
+          <TabsTrigger value="data">{t("ActivityLanes.exactData")}</TabsTrigger>
         </TabsList>
         <TabsContent value="chart">
           {tableOnly ? (
-            <p className="rf-meta">{prepared.reason} Use Exact data.</p>
+            <p className="rf-meta">
+              {prepared.reason} {t("EntityHistoryChart.useExactData")}
+            </p>
           ) : data.points.length === 0 ? (
             <p className="rf-meta">
-              No retained observations for this selection.
+              {t("EntityHistoryChart.noRetainedObservationsForThisSelection")}
             </p>
           ) : (
             <ChartContainer
@@ -102,7 +110,7 @@ export function EntityHistoryChart({
                       ? ["dataMin", "dataMax"]
                       : ["dataMin - 30000", "dataMax + 30000"]
                   }
-                  tickFormatter={compactTime}
+                  tickFormatter={(n) => compactTime(n, numberLocale)}
                   tickLine={false}
                   axisLine={false}
                   minTickGap={36}
@@ -118,7 +126,7 @@ export function EntityHistoryChart({
                   content={
                     <ChartTooltipContent
                       className="dashboard-dialog rf-tooltip"
-                      labelFormatter={(v) => fullTime(Number(v))}
+                      labelFormatter={(v) => fullTime(Number(v), numberLocale)}
                     />
                   }
                 />
@@ -137,8 +145,9 @@ export function EntityHistoryChart({
           )}
           {!tableOnly && prepared.gaps > 0 && (
             <p className="rf-meta">
-              {prepared.gaps} capture gap{prepared.gaps === 1 ? "" : "s"}
-              {"; connecting lines stop at gaps."}
+              {prepared.gaps} {t("EntityHistoryChart.captureGap")}
+              {prepared.gaps === 1 ? "" : "s"}
+              {t("EntityHistoryChart.connectingLinesStopAtGaps")}
             </p>
           )}
         </TabsContent>
@@ -147,16 +156,24 @@ export function EntityHistoryChart({
             className="rf-table-region"
             aria-label={`${label} exact observations`}
           >
-            <Table aria-label="Entity observation history">
+            <Table
+              aria-label={t("EntityHistoryChart.entityObservationHistory")}
+            >
               <caption className="sr-only">
-                Every supplied observation, including revisions. {data.unit}.
+                {t(
+                  "EntityHistoryChart.everySuppliedObservationIncludingRevisions",
+                )}
+                {data.unit}.
               </caption>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Observed (ISO)</TableHead>
-                  <TableHead>Value ({data.unit})</TableHead>
-                  <TableHead>Ingested (ISO)</TableHead>
-                  <TableHead>Revision</TableHead>
+                  <TableHead>{t("EntityHistoryChart.observedIso")}</TableHead>
+                  <TableHead>
+                    {t("EntityHistoryChart.value")}
+                    {data.unit})
+                  </TableHead>
+                  <TableHead>{t("EntityHistoryChart.ingestedIso")}</TableHead>
+                  <TableHead>{t("EntityHistoryChart.revision")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

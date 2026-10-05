@@ -65,6 +65,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -408,9 +409,11 @@ export type PromptInputActionAddAttachmentsProps = ComponentProps<
 };
 
 export const PromptInputActionAddAttachments = ({
-  label = "Add photos or files",
+  label,
   ...props
 }: PromptInputActionAddAttachmentsProps) => {
+  const { t } = useUi();
+
   const attachments = usePromptInputAttachments();
 
   const handleSelect = useCallback(
@@ -423,7 +426,8 @@ export const PromptInputActionAddAttachments = ({
 
   return (
     <DropdownMenuItem {...props} onSelect={handleSelect}>
-      <ImageIcon className="mr-2 size-4" /> {label}
+      <ImageIcon className="mr-2 size-4" />{" "}
+      {label ?? t("promptInput.addPhotosOrFiles")}
     </DropdownMenuItem>
   );
 };
@@ -435,10 +439,11 @@ export type PromptInputActionAddScreenshotProps = ComponentProps<
 };
 
 export const PromptInputActionAddScreenshot = ({
-  label = "Take screenshot",
+  label,
   onSelect,
   ...props
 }: PromptInputActionAddScreenshotProps) => {
+  const { t } = useUi();
   const attachments = usePromptInputAttachments();
 
   const handleSelect = useCallback(
@@ -469,7 +474,7 @@ export const PromptInputActionAddScreenshot = ({
   return (
     <DropdownMenuItem {...props} onSelect={handleSelect}>
       <Monitor className="mr-2 size-4" />
-      {label}
+      {label ?? t("promptInput.addScreenshot")}
     </DropdownMenuItem>
   );
 };
@@ -517,6 +522,8 @@ export const PromptInput = ({
   children,
   ...props
 }: PromptInputProps) => {
+  const { t } = useUi();
+
   // Try to use a provider controller if present
   const controller = useOptionalPromptInputController();
   const usingProvider = !!controller;
@@ -900,12 +907,12 @@ export const PromptInput = ({
     <>
       <input
         accept={accept}
-        aria-label="Upload files"
+        aria-label={t("promptInput.uploadFiles")}
         className="hidden"
         multiple={multiple}
         onChange={handleChange}
         ref={inputRef}
-        title="Upload files"
+        title={t("promptInput.uploadFiles")}
         type="file"
       />
       <form className="w-full" onSubmit={handleSubmit} ref={formRef} {...props}>
@@ -953,9 +960,11 @@ export const PromptInputTextarea = ({
   onChange,
   onKeyDown,
   className,
-  placeholder = "What would you like to know?",
+  placeholder,
   ...props
 }: PromptInputTextareaProps) => {
+  const { t } = useUi();
+
   const controller = useOptionalPromptInputController();
   const attachments = usePromptInputAttachments();
   const [isComposing, setIsComposing] = useState(false);
@@ -1060,7 +1069,7 @@ export const PromptInputTextarea = ({
       onCompositionStart={handleCompositionStart}
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("promptInput.whatWouldYouLikeToKnow")}
       {...props}
       {...controlledProps}
     />
@@ -1226,6 +1235,8 @@ export const PromptInputSubmit = ({
   children,
   ...props
 }: PromptInputSubmitProps) => {
+  const { t } = useUi();
+
   const isGenerating = status === "submitted" || status === "streaming";
 
   let Icon = <ArrowUpIcon className="size-4" />;
@@ -1252,7 +1263,7 @@ export const PromptInputSubmit = ({
 
   return (
     <InputGroupButton
-      aria-label={isGenerating ? "Stop" : "Submit"}
+      aria-label={isGenerating ? t("agentChat.stop") : t("promptInput.submit")}
       className={cn("absolute right-2.5 bottom-2.5 rounded-full", className)}
       onClick={handleClick}
       size={size}

@@ -1,6 +1,8 @@
 "use client";
+
 import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { Spinner } from "@/components/ui/spinner";
+import { useUi } from "@/i18n/provider";
 import { readState } from "@/src/dashboard-presentation";
 import { Skeleton } from "./primitives";
 import { RefinedDisclosure } from "./refinement/RefinedDisclosure";
@@ -11,12 +13,14 @@ export function Instant({
   value: unknown;
   compact?: boolean;
 }) {
+  const { t, numberLocale } = useUi();
+
   if (typeof value !== "string" || !Number.isFinite(Date.parse(value)))
-    return <span>Unavailable</span>;
+    return <span>{t("activityView.unavailable")}</span>;
   return (
     <time dateTime={value} title={value}>
       {new Date(value)[compact ? "toLocaleTimeString" : "toLocaleString"](
-        "en-GB",
+        numberLocale,
         {
           timeZone: "Europe/Madrid",
           timeZoneName: "short",
@@ -26,8 +30,10 @@ export function Instant({
   );
 }
 export function Technical({ value }: { value: unknown }) {
+  const { t } = useUi();
+
   return (
-    <RefinedDisclosure title="Sanitized technical details">
+    <RefinedDisclosure title={t("shared.sanitizedTechnicalDetails")}>
       <pre className="mt-3 max-h-[32rem] overflow-auto whitespace-pre-wrap break-all font-mono text-xs leading-5">
         {JSON.stringify(value, null, 2)}
       </pre>
@@ -45,6 +51,8 @@ export function State({
   empty?: boolean;
   data?: unknown;
 }) {
+  const { t } = useUi();
+
   const state = readState(data, loading, error);
   return (
     <>
@@ -52,7 +60,7 @@ export function State({
         <div role="status" className="dc-stack">
           <span className="flex gap-2 items-center">
             <Spinner />
-            Loading stored data…
+            {t("shared.loadingStoredData")}
           </span>
           <Skeleton />
         </div>
@@ -60,12 +68,14 @@ export function State({
       {error ? (
         <p role="alert" className="dc-card dc-error">
           {state === "cached_failure"
-            ? "Refresh failed. Previously loaded evidence remains at its original successful read time."
-            : "Unable to load stored data. This is not an empty result."}
+            ? t(
+                "shared.refreshFailedPreviouslyLoadedEvidenceRemainsAtItsOriginal",
+              )
+            : t("shared.unableToLoadStoredDataThisIsNotAn")}
         </p>
       ) : null}
       {!loading && !error && empty ? (
-        <p className="dc-card">No stored records for this selection.</p>
+        <p className="dc-card">{t("shared.noStoredRecordsForThisSelection")}</p>
       ) : null}
     </>
   );
@@ -217,6 +227,8 @@ export const publicLabel = (key: string) =>
     }) as Record<string, string>
   )[key] ?? key.replace(/([a-z])([A-Z])/g, "$1 $2");
 export function ObjectCards({ value }: { value: unknown }) {
+  const { t, copy } = useUi();
+
   const entries =
     value && typeof value === "object" && !Array.isArray(value)
       ? Object.entries(value)
@@ -230,31 +242,33 @@ export function ObjectCards({ value }: { value: unknown }) {
         )
         .map(([k, v]) => (
           <div key={k} className="rounded-lg border bg-card p-4">
-            <dt className="text-xs text-muted-foreground">{publicLabel(k)}</dt>
+            <dt className="text-xs text-muted-foreground">
+              {copy(publicLabel(k))}
+            </dt>
             <dd className="mt-2 break-words text-sm font-medium">
               {v === null ? (
-                "Unavailable"
+                t("activityView.unavailable")
               ) : typeof v === "boolean" ? (
                 v ? (
-                  "Yes"
+                  t("shared.yes")
                 ) : (
-                  "No"
+                  t("shared.no")
                 )
               ) : typeof v === "string" && /^(?:\d{4}-\d\d-\d\dT)/.test(v) ? (
                 <Instant value={v} />
               ) : typeof v === "string" ? (
                 ((
                   {
-                    best_effort: "Best-effort capture",
-                    partial: "Partial",
-                    unknown: "Unknown",
-                    disabled: "Disabled",
-                    running: "Running",
-                    recent: "Recent",
-                    stale: "Stale",
-                    static: "Static/versioned",
-                    unavailable: "Unavailable",
-                    not_instrumented: "Not instrumented in this period",
+                    best_effort: t("conversationView.bestEffortCapture"),
+                    partial: t("shared.partial"),
+                    unknown: t("conversationView.unknown"),
+                    disabled: t("overviewView.disabled"),
+                    running: t("conversationView.running"),
+                    recent: t("map.recent"),
+                    stale: t("mobilityView.stale"),
+                    static: t("shared.staticVersioned"),
+                    unavailable: t("activityView.unavailable"),
+                    not_instrumented: t("shared.notInstrumentedInThisPeriod"),
                   } as Record<string, string>
                 )[v] ?? v)
               ) : (

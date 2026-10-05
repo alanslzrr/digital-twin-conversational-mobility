@@ -1,8 +1,10 @@
 "use client";
+
 import type { DashboardEntity, DashboardToolName } from "@mobility/contracts";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useUi } from "@/i18n/provider";
 import { useDashboard } from "@/src/dashboard-client";
 import { Segmented } from "./primitives";
 import { publicLabel } from "./shared";
@@ -166,6 +168,8 @@ export function ToolFields({
   onChange: (value: string) => void;
   name: DashboardToolName;
 }) {
+  const { t, copy } = useUi();
+
   const placeTools = [
     "plan_journey",
     "get_departures",
@@ -192,7 +196,7 @@ export function ToolFields({
   } catch {
     return (
       <p className="text-sm">
-        Correct advanced JSON before continuing with the form.
+        {t("toolForm.correctAdvancedJsonBeforeContinuingWithTheForm")}
       </p>
     );
   }
@@ -231,7 +235,7 @@ export function ToolFields({
           )
         }
       >
-        Load example without execution
+        {t("toolForm.loadExampleWithoutExecution")}
       </Button>
       {Object.entries(properties).map(([key, raw]) => {
         const p = record(raw),
@@ -241,7 +245,9 @@ export function ToolFields({
         if (key === "departureTime")
           return (
             <Field key={key}>
-              <FieldLabel htmlFor={id}>Departure time</FieldLabel>
+              <FieldLabel htmlFor={id}>
+                {t("toolForm.departureTime")}
+              </FieldLabel>
               <select
                 id={id}
                 value={
@@ -255,13 +261,15 @@ export function ToolFields({
                 }
                 className="min-h-11 rounded-md border bg-background px-3 text-sm"
               >
-                <option value="now">Ahora</option>
-                <option value="date">Elegir fecha y hora</option>
+                <option value="now">{t("toolForm.ahora")}</option>
+                <option value="date">{t("toolForm.elegirFechaYHora")}</option>
               </select>
               {value[key] && value[key] !== "now" ? (
                 <Input
                   type="datetime-local"
-                  aria-label="Departure date and time, browser local time"
+                  aria-label={t(
+                    "toolForm.departureDateAndTimeBrowserLocalTime",
+                  )}
                   value={new Date(
                     Date.parse(String(value[key])) -
                       new Date(String(value[key])).getTimezoneOffset() * 60000,
@@ -280,11 +288,16 @@ export function ToolFields({
           return (
             <fieldset key={key} className="flex flex-wrap gap-5">
               <legend className="mb-3 text-sm font-medium">
-                Journey preferences
+                {t("toolForm.journeyPreferences")}
               </legend>
               {[
-                ["maxWalkingMinutes", "Maximum walking minutes", 15, 120],
-                ["maxTransfers", "Maximum transfers", 2, 6],
+                [
+                  "maxWalkingMinutes",
+                  t("toolForm.maximumWalkingMinutes"),
+                  15,
+                  120,
+                ],
+                ["maxTransfers", t("toolForm.maximumTransfers"), 2, 6],
               ].map(([field, label, fallback, max]) => (
                 <Field key={String(field)}>
                   <FieldLabel htmlFor={`preference-${field}`}>
@@ -309,7 +322,7 @@ export function ToolFields({
               ))}
               <Field>
                 <FieldLabel htmlFor="preference-wheelchair">
-                  Wheelchair accessibility
+                  {t("toolForm.wheelchairAccessibility")}
                 </FieldLabel>
                 <input
                   id="preference-wheelchair"
@@ -331,7 +344,7 @@ export function ToolFields({
           return (
             <fieldset key={key}>
               <legend className="mb-3 text-sm font-medium">
-                {labels[key] ?? "Travel modes"}
+                {copy(labels[key] ?? "Travel modes")}
               </legend>
               <div className="flex flex-wrap gap-5">
                 {itemOptions.map((option) => (
@@ -363,7 +376,7 @@ export function ToolFields({
                         )
                       }
                     />
-                    {optionNames[String(option)] ?? String(option)}
+                    {copy(optionNames[String(option)] ?? String(option))}
                   </label>
                 ))}
               </div>
@@ -372,14 +385,14 @@ export function ToolFields({
         if (type === "object")
           return (
             <p key={key} className="text-sm text-muted-foreground">
-              {labels[key] ?? publicLabel(key)}: structured configuration in el
-              apartado avanzado.
+              {copy(labels[key]) ?? copy(publicLabel(key))}
+              {t("toolForm.structuredConfigurationInElApartadoAvanzado")}
             </p>
           );
         return (
           <Field key={key}>
             <FieldLabel htmlFor={id}>
-              {labels[key] ?? publicLabel(key)}
+              {copy(labels[key]) ?? copy(publicLabel(key))}
             </FieldLabel>
             {["placeId", "originId", "destinationId"].includes(key) ? (
               <>
@@ -389,7 +402,7 @@ export function ToolFields({
                   onChange={(e) => update(key, e.target.value)}
                   className="min-h-11 rounded-md border bg-background px-3 text-sm"
                 >
-                  <option value="">Select a stored place</option>
+                  <option value="">{t("toolForm.selectAStoredPlace")}</option>
                   {places.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -397,18 +410,19 @@ export function ToolFields({
                   ))}
                 </select>
                 <p className="text-xs text-muted-foreground">
-                  Up to 100 stored reference places. Search for a place or enter
-                  a known ID in advanced configuration; no fabricated location.
+                  {t("toolForm.upTo100StoredReferencePlacesSearchForA")}
                 </p>
               </>
             ) : options && options.length <= 4 ? (
               <Segmented
-                label={labels[key] ?? publicLabel(key)}
+                label={copy(labels[key]) ?? copy(publicLabel(key))}
                 value={String(value[key] ?? "")}
                 onChange={(v) => update(key, v)}
                 options={[
-                  ["", "Default"],
-                  ...options.map((o) => [o, optionNames[o] ?? o] as const),
+                  ["", t("toolForm.default")],
+                  ...options.map(
+                    (o) => [o, copy(optionNames[o] ?? o)] as const,
+                  ),
                 ]}
               />
             ) : options ? (
@@ -418,10 +432,10 @@ export function ToolFields({
                 onChange={(e) => update(key, e.target.value)}
                 className="min-h-11 rounded-md border bg-background px-3 text-sm"
               >
-                <option value="">Use default value</option>
+                <option value="">{t("toolForm.useDefaultValue")}</option>
                 {options.map((option) => (
                   <option key={String(option)} value={String(option)}>
-                    {optionNames[String(option)] ?? String(option)}
+                    {copy(optionNames[String(option)] ?? String(option))}
                   </option>
                 ))}
               </select>
@@ -470,8 +484,7 @@ export function ToolFields({
             )}
             {type === "array" ? (
               <p className="text-xs text-muted-foreground">
-                Separa las opciones por comas; se validan contra el contrato de
-                la herramienta.
+                {t("toolForm.separaLasOpcionesPorComasSeValidanContraEl")}
               </p>
             ) : null}
           </Field>

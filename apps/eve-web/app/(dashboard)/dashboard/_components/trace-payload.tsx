@@ -1,8 +1,10 @@
 "use client";
+
 import {
   dashboardTracePayload,
   resolveTelemetryTool,
 } from "@mobility/contracts";
+import { useUi } from "@/i18n/provider";
 import { number } from "./insights";
 import { InspectionResult } from "./inspection-result";
 import { RefinedDisclosure } from "./refinement/RefinedDisclosure";
@@ -34,12 +36,15 @@ function keyed<T>(values: T[]) {
   });
 }
 export function TracePayload({ value }: { value: unknown }) {
+  const { t, copy, numberLocale } = useUi();
+
   const parsed = dashboardTracePayload.safeParse(value);
   if (!parsed.success)
     return (
       <p role="status" className="text-sm">
-        Content unavailable, omitted or expired. Uncaptured content cannot be
-        recovered.
+        {t(
+          "tracePayload.contentUnavailableOmittedOrExpiredUncapturedContentCannotBe",
+        )}
       </p>
     );
   const data = parsed.data;
@@ -47,23 +52,28 @@ export function TracePayload({ value }: { value: unknown }) {
     <section className="rounded-lg border bg-card p-5">
       <h2 className="text-base font-semibold">{kinds[data.kind]}</h2>
       <p className="mt-2 text-xs text-muted-foreground">
-        Captured: <Instant value={data.capturedAt} /> · Trace ingestion:{" "}
+        {t("tracePayload.captured")}
+        <Instant value={data.capturedAt} /> {t("tracePayload.traceIngestion")}{" "}
         <Instant value={data.recordedAt} />.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">
-        {number(data.retainedBytes)} of {number(data.originalBytes)} retained
-        bytes ·{" "}
+        {number(data.retainedBytes, numberLocale)} {t("commonFragments.of")}{" "}
+        {number(data.originalBytes, numberLocale)}{" "}
+        {t("tracePayload.retainedBytes")}{" "}
         {data.redacted
-          ? "Sanitized content with removals"
-          : "Sanitized projection"}{" "}
+          ? t("tracePayload.sanitizedContentWithRemovals")
+          : t("tracePayload.sanitizedProjection")}{" "}
         ·{" "}
         {data.truncated
-          ? "Truncated: omitted content unavailable"
-          : "Subject to capture limits"}{" "}
-        · Available until <Instant value={data.expiresAt} />.
+          ? t("tracePayload.truncatedOmittedContentUnavailable")
+          : t("tracePayload.subjectToCaptureLimits")}{" "}
+        {t("tracePayload.availableUntil")}
+        <Instant value={data.expiresAt} />.
       </p>
       <p className="mt-2 text-xs text-muted-foreground">
-        Describes transport capture, not semantic influence on the response.
+        {t(
+          "tracePayload.describesTransportCaptureNotSemanticInfluenceOnTheResponse",
+        )}
       </p>
       <div className="mt-4 divide-y">
         {keyed(data.content.messages).map(
@@ -97,8 +107,9 @@ export function TracePayload({ value }: { value: unknown }) {
                 if (part.type === "omitted")
                   return (
                     <p key={partKey} className="mt-2 text-sm">
-                      Content omitted by size, unsupported type or sanitization;
-                      unavailable.
+                      {t(
+                        "tracePayload.contentOmittedBySizeUnsupportedTypeOrSanitizationUnavailable",
+                      )}
                     </p>
                   );
                 const tool =
@@ -109,8 +120,12 @@ export function TracePayload({ value }: { value: unknown }) {
                   <div key={partKey} className="mt-3 text-sm">
                     <p>
                       {part.type === "function_call"
-                        ? `Call to ${tool?.canonicalName ? toolCopy[tool.canonicalName].title : "tool discovery"}`
-                        : "Tool result included in model transport"}
+                        ? t("presentation.callTo", {
+                            name: tool?.canonicalName
+                              ? copy(toolCopy[tool.canonicalName].title)
+                              : t("tracePayload.toolDiscovery"),
+                          })
+                        : t("tracePayload.toolResultIncludedInModelTransport")}
                     </p>
                     <Technical value={part} />
                   </div>
@@ -121,15 +136,19 @@ export function TracePayload({ value }: { value: unknown }) {
         )}
       </div>
       {data.content.functions.length ? (
-        <RefinedDisclosure title="Tools available in this dispatch, not necessarily called">
+        <RefinedDisclosure
+          title={t(
+            "tracePayload.toolsAvailableInThisDispatchNotNecessarilyCalled",
+          )}
+        >
           <ul className="mt-3 space-y-2">
             {data.content.functions.map((f) => {
               const tool = resolveTelemetryTool(f.name);
               return (
                 <li key={f.name}>
                   {tool?.canonicalName
-                    ? toolCopy[tool.canonicalName].title
-                    : "Tool discovery"}
+                    ? copy(toolCopy[tool.canonicalName].title)
+                    : t("conversationView.toolDiscovery")}
                 </li>
               );
             })}

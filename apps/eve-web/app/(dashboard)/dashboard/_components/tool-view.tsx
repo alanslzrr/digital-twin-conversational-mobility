@@ -1,4 +1,5 @@
 "use client";
+
 import type { dashboardToolCatalog } from "@mobility/contracts";
 import * as schemas from "@mobility/contracts";
 import Link from "next/link";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useUi } from "@/i18n/provider";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
 import { unresolvedExecution } from "@/src/dashboard-presentation";
 import { InspectionResult } from "./inspection-result";
@@ -47,6 +49,8 @@ const toolInputs = {
 };
 type Tool = z.infer<typeof dashboardToolCatalog>["tools"][number];
 export function Tools({ name: routeName }: { name?: string }) {
+  const { t, copy } = useUi();
+
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState("stored");
   const [unknownOutcome, setUnknownOutcome] = useState(false);
@@ -136,18 +140,20 @@ export function Tools({ name: routeName }: { name?: string }) {
   return (
     <>
       <PageTitle
-        title="Queries"
-        description="Discover registered tools. Inspection and execution stay separate."
+        title={t("toolView.queries")}
+        description={t(
+          "toolView.discoverRegisteredToolsInspectionAndExecutionStaySeparate",
+        )}
       />
       <State data={q.data} loading={q.isLoading} error={q.error} />
       <div className="dc-inspector-layout">
         <Card className="dc-catalog-card">
           <label htmlFor="tool-search" className="sr-only">
-            Search registered tools
+            {t("toolView.searchRegisteredTools")}
           </label>
           <Input
             id="tool-search"
-            placeholder="Search 16 registered tools"
+            placeholder={t("toolView.search16RegisteredTools")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -178,7 +184,7 @@ export function Tools({ name: routeName }: { name?: string }) {
               const matching = tools.filter(
                 (t) =>
                   names.includes(t.name) &&
-                  `${t.name} ${toolCopy[t.name].title} ${toolCopy[t.name].question}`
+                  `${t.name} ${copy(toolCopy[t.name].title)} ${copy(toolCopy[t.name].question)}`
                     .toLowerCase()
                     .includes(search.toLowerCase()),
               );
@@ -192,7 +198,7 @@ export function Tools({ name: routeName }: { name?: string }) {
                       className="dc-tool-row"
                       aria-current={name === t.name ? "page" : undefined}
                     >
-                      <strong>{toolCopy[t.name].title}</strong>
+                      <strong>{copy(toolCopy[t.name].title)}</strong>
                       <p>{t.name}</p>
                     </Link>
                   ))}
@@ -207,11 +213,11 @@ export function Tools({ name: routeName }: { name?: string }) {
               <header className="dc-inspector-heading">
                 {routeName && (
                   <Link href="/dashboard/tools" className="dc-link">
-                    Back to catalog
+                    {t("toolView.backToCatalog")}
                   </Link>
                 )}
-                <h2>{toolCopy[tool.name].title}</h2>
-                <p>{toolCopy[tool.name].question}</p>
+                <h2>{copy(toolCopy[tool.name].title)}</h2>
+                <p>{copy(toolCopy[tool.name].question)}</p>
                 <code>{tool.name}</code>
               </header>
               <Technical value={JSON.parse(tool.inputSchemaJson)} />
@@ -223,21 +229,26 @@ export function Tools({ name: routeName }: { name?: string }) {
                 }}
               >
                 <Segmented
-                  label="Query mode"
+                  label={t("toolView.queryMode")}
                   value={mode}
                   onChange={(v) => {
                     setMode(v);
                     setConfirmed(false);
                   }}
                   options={[
-                    ["stored", "Stored evidence"],
-                    ["run", "Run query"],
+                    ["stored", t("toolView.storedEvidence")],
+                    ["run", t("toolView.runQuery")],
                   ]}
                 />
                 <p className="dc-meta">
                   {mode === "stored"
-                    ? "Read stored evidence without executing this tool."
-                    : `Explicit execution. Possible effects: ${tool.possibleEffects.map((effect) => effectCopy[effect]).join(" · ") || "stored access only"}`}
+                    ? t("toolView.readStoredEvidenceWithoutExecutingThisTool")
+                    : t("presentation.possibleEffects", {
+                        effects:
+                          tool.possibleEffects
+                            .map((effect) => copy(effectCopy[effect] ?? effect))
+                            .join(" · ") || t("presentation.storedAccessOnly"),
+                      })}
                 </p>
                 <ToolFields
                   name={tool.name}
@@ -246,10 +257,12 @@ export function Tools({ name: routeName }: { name?: string }) {
                   onChange={setInput}
                 />
                 <FieldGroup>
-                  <RefinedDisclosure title="Advanced configuration">
+                  <RefinedDisclosure
+                    title={t("toolView.advancedConfiguration")}
+                  >
                     <Field>
                       <FieldLabel htmlFor="tool-input">
-                        Advanced JSON · maximum 8,192 bytes
+                        {t("toolView.advancedJsonMaximum8192Bytes")}
                       </FieldLabel>
                       <Textarea
                         id="tool-input"
@@ -269,12 +282,14 @@ export function Tools({ name: routeName }: { name?: string }) {
                           checked={confirmed}
                           onChange={(e) => setConfirmed(e.target.checked)}
                         />{" "}
-                        I confirm explicit execution and its declared effects
+                        {t(
+                          "toolView.iConfirmExplicitExecutionAndItsDeclaredEffects",
+                        )}
                       </FieldLabel>
                       <p className="text-xs text-muted-foreground">
-                        One execution reservation per evaluator, six
-                        executions/minute and sixty/day. Address lookup still
-                        requires specific allowExternal consent.
+                        {t(
+                          "toolView.oneExecutionReservationPerEvaluatorSixExecutionsMinuteAnd",
+                        )}
                       </p>
                     </Field>
                   ) : null}
@@ -289,19 +304,20 @@ export function Tools({ name: routeName }: { name?: string }) {
                     }
                   >
                     {mode === "stored"
-                      ? "Inspect stored evidence"
-                      : "Run query"}
+                      ? t("toolView.inspectStoredEvidence")
+                      : t("toolView.runQuery")}
                   </Button>
                   {unknownOutcome ? (
                     <p role="alert">
-                      Execution outcome unknown. Recover this request by ID
-                      before another execution. Cancelling the screen does not
-                      cancel the provider.
+                      {t(
+                        "toolView.executionOutcomeUnknownRecoverThisRequestByIdBefore",
+                      )}
                     </p>
                   ) : null}
                   {requestId.current ? (
                     <p className="dc-meta break-all">
-                      Request ID: {requestId.current}
+                      {t("toolView.requestId")}
+                      {requestId.current}
                     </p>
                   ) : null}
                   {requestId.current ? (
@@ -335,13 +351,13 @@ export function Tools({ name: routeName }: { name?: string }) {
                         }
                       }}
                     >
-                      Recover status by request ID
+                      {t("toolView.recoverStatusByRequestId")}
                     </Button>
                   ) : null}
                 </div>
                 {error ? (
                   <p role="alert" className="dc-status" data-tone="danger">
-                    {error}
+                    {copy(error)}
                   </p>
                 ) : null}
                 {pending ? (
@@ -350,17 +366,17 @@ export function Tools({ name: routeName }: { name?: string }) {
                     variant="outline"
                     onClick={() => ctx.cancelPending()}
                   >
-                    Cancel request
+                    {t("toolView.cancelRequest")}
                   </Button>
                 ) : null}
                 <p className="text-xs text-muted-foreground">
-                  Inspector limit: 256 KB. EVE context: 32 KB. Inspector
-                  evidence does not certify what the model received.
+                  {t("toolView.inspectorLimit256KbEveContext32KbInspector")}
                 </p>
                 {pending ? (
                   <p role="status" className="text-sm">
-                    Request in progress. Cancelling the screen does not prove
-                    provider cancellation.
+                    {t(
+                      "toolView.requestInProgressCancellingTheScreenDoesNotProve",
+                    )}
                   </p>
                 ) : null}
               </form>
@@ -373,10 +389,15 @@ export function Tools({ name: routeName }: { name?: string }) {
             </>
           ) : (
             <Card>
-              <h2>{name ? "Tool not registered" : "Select a query"}</h2>
+              <h2>
+                {name
+                  ? t("toolView.toolNotRegistered")
+                  : t("toolView.selectAQuery")}
+              </h2>
               <p className="dc-meta mt-2">
-                Explore its inputs and stored evidence before choosing explicit
-                execution.
+                {t(
+                  "toolView.exploreItsInputsAndStoredEvidenceBeforeChoosingExplicit",
+                )}
               </p>
             </Card>
           )}

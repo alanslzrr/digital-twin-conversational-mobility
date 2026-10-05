@@ -163,3 +163,15 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 
 - Recorridas las seis vistas al 200 % aplicado por el usuario, más mapa y cinco pestañas de conversación: doce mediciones sin desbordamiento horizontal. Comprobados cabecera, navegación, entrada de formulario y filtros; tres capturas seleccionadas y medidas versionadas en el [acta móvil](acceptance/2026-10-03-core-dashboard-mobile-closure.md).
 - HTTP aislado: 37 comprobaciones correctas. No se modificó código de aplicación ni se ejecutaron modelos o herramientas desde el inspector. Cierre de zoom documentado; merge sujeto a CI final.
+
+## [2026-10-04] mantenimiento | Estado posterior al merge
+
+- PR #45 integrada en main, commit e805ca1; CI posterior al merge correcta. Índice y roadmap actualizados: una entrada vigente del panel sustituye los relatos redundantes de refinamiento; se conservan actas y capturas históricas.
+- Eliminada la rama local del panel ya integrada; GitHub ya había eliminado la remota y se podaron sus referencias. Conservadas ramas con PR abiertas o sin integración demostrada. Detenido el preview QA antes de eliminar tmp; retirada la caché regenerable .turbo. Conservados builds, dependencias, configuración privada y datos.
+- Arranque habitual documentado con pnpm infra:up, pnpm otp:up y pnpm start:local. La actualización del runtime habitual sigue siendo independiente del merge.
+
+## [2026-10-04] operación | Reconstrucción habitual del panel
+
+- Confirmados checksums de las 21 migraciones, incluida 0021, y token válido con permisos del panel; no se modificaron esquema ni credenciales. Detenido únicamente el supervisor identificado; PostgreSQL y OTP conservados.
+- Respaldo privado en data/backups/dashboard-install-20261004-164039: dump legible, archivo de configuración/EVE y checksums verificados. Configuración sin cambios y 10.128 archivos persistentes de workflow idénticos tras el build; excluidos metadatos AppleDouble generados por tar.
+- Instalación frozen-lockfile, pnpm check (510 correctas/100 omitidas), build del agente y auditoría sin vulnerabilidades conocidos correctos. Arranque sin worker en 3000/3001/4274 y smoke productivo correcto, sin modelo. Inspección autenticada pendiente de login; todavía no se declara cierre.

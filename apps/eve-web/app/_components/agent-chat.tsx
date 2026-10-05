@@ -21,6 +21,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
+import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 import { conversationUnavailable } from "@/src/conversation-recovery";
 import { AgentMessage } from "./agent-message";
@@ -34,6 +35,8 @@ export function AgentChat({
   readonly sessionId?: string;
   readonly sessionless?: boolean;
 }) {
+  const { t } = useUi();
+
   const [cancellationError, setCancellationError] = useState<string>();
   const [hasInputText, setHasInputText] = useState(false);
   const agent = useEveAgent({
@@ -126,7 +129,7 @@ export function AgentChat({
         onChange={(event) =>
           setHasInputText(event.currentTarget.value.trim().length > 0)
         }
-        placeholder="Send a message…"
+        placeholder={t("agentChat.sendAMessage")}
       />
       <ComposerAction
         hasInputText={hasInputText}
@@ -176,16 +179,16 @@ export function AgentChat({
             {showPendingThinking ? <PendingThinking /> : null}
             {unavailable ? (
               <div role="alert" className="flex flex-col gap-3">
-                <p>Esta conversación no está disponible</p>
-                <p>Vuelve a Mis conversaciones o abre un nuevo chat.</p>
+                <p>{t("agentChat.estaConversacionNoEstaDisponible")}</p>
+                <p>{t("agentChat.vuelveAMisConversacionesOAbreUnNuevoChat")}</p>
                 <Button asChild variant="outline">
-                  <a href="/s">Nuevo chat</a>
+                  <a href="/s">{t("agentChat.nuevoChat")}</a>
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => window.location.reload()}
                 >
-                  Reintentar
+                  {t("agentChat.reintentar")}
                 </Button>
               </div>
             ) : errorMessage ? (
@@ -228,6 +231,8 @@ function ComposerAction({
   readonly isResuming: boolean;
   readonly onCancel: () => void;
 }) {
+  const { t } = useUi();
+
   const attachments = usePromptInputAttachments();
   const canSubmit = hasInputText || attachments.files.length > 0;
 
@@ -237,7 +242,7 @@ function ComposerAction({
 
   return (
     <PromptInputButton
-      aria-label="Stop"
+      aria-label={t("agentChat.stop")}
       className="absolute right-2.5 bottom-2.5"
       onClick={onCancel}
       variant="outline"
@@ -248,6 +253,8 @@ function ComposerAction({
 }
 
 function ErrorMessage({ message }: { readonly message: string }) {
+  const { t, copy } = useUi();
+
   return (
     <Message className="max-w-full" from="assistant">
       <MessageContent>
@@ -257,8 +264,8 @@ function ErrorMessage({ message }: { readonly message: string }) {
         >
           <AlertCircleIcon className="mt-0.5 size-4 shrink-0 text-destructive" />
           <div>
-            <p className="font-medium">Request failed</p>
-            <p className="mt-0.5 text-muted-foreground">{message}</p>
+            <p className="font-medium">{t("agentChat.requestFailed")}</p>
+            <p className="mt-0.5 text-muted-foreground">{copy(message)}</p>
           </div>
         </div>
       </MessageContent>
@@ -271,6 +278,8 @@ function ChatHeader({
 }: {
   readonly canStartNewChat: boolean;
 }) {
+  const { t } = useUi();
+
   return (
     <header className="pointer-events-none fixed top-0 right-0 left-0 z-20 h-14">
       <div className="relative mx-auto flex h-full w-full max-w-3xl items-center justify-center bg-background px-24">
@@ -279,7 +288,7 @@ function ChatHeader({
         </span>
         {canStartNewChat ? (
           <Button
-            aria-label="Start a new chat"
+            aria-label={t("agentChat.startANewChat")}
             className="pointer-events-auto fixed top-3 right-6 pr-4"
             onClick={() => window.location.assign("/s")}
             size="sm"
@@ -288,7 +297,7 @@ function ChatHeader({
           >
             <PlusIcon className="size-4" />
             <span className="hidden font-normal text-sm sm:inline">
-              New chat
+              {t("agentChat.newChat")}
             </span>
           </Button>
         ) : null}
@@ -298,12 +307,14 @@ function ChatHeader({
 }
 
 function PendingThinking() {
+  const { t } = useUi();
+
   return (
     <Message aria-live="polite" from="assistant">
       <MessageContent>
         <div className="mb-4 flex w-full items-center gap-2 text-muted-foreground text-sm">
           <BrainIcon className="size-4" />
-          <Shimmer duration={1}>Thinking</Shimmer>
+          <Shimmer duration={1}>{t("agentChat.thinking")}</Shimmer>
         </div>
       </MessageContent>
     </Message>

@@ -1,3 +1,4 @@
+import { useUi } from "@/i18n/provider";
 import { type PartitionInput, partitionCounts } from "./core";
 
 const labels = { recent: "Recent", stale: "Stale", unavailable: "Unavailable" };
@@ -9,15 +10,21 @@ export function FreshnessBar({
   unit: string;
   counts: PartitionInput;
 }) {
+  const { t, copy, numberLocale } = useUi();
+
   const partition = partitionCounts(counts);
-  const exact = `Recent ${counts.recent ?? "unknown"} · Stale ${counts.stale ?? "unknown"} · Unavailable ${counts.unavailable ?? "unknown"}`;
+  const exact = t("presentation.freshnessExact", {
+    recent: counts.recent ?? t("conversationView.unknown"),
+    stale: counts.stale ?? t("conversationView.unknown"),
+    unavailable: counts.unavailable ?? t("conversationView.unknown"),
+  });
   return (
     <div className="rf-freshness-row">
       {partition.status === "available" ? (
         <div
           className="rf-freshness-track"
           role="img"
-          aria-label={`${partition.total} ${unit}: ${exact}`}
+          aria-label={`${partition.total.toLocaleString(numberLocale)} ${copy(unit)}: ${exact}`}
         >
           {partition.parts
             .filter((p) => p.count > 0)
@@ -34,10 +41,20 @@ export function FreshnessBar({
       )}
       <span className="rf-freshness-caption">
         {partition.status === "available"
-          ? `${partition.total.toLocaleString("en-GB")} ${partition.total === 1 ? unit.replace(/s$/, "") : unit}`
+          ? [
+              "stations",
+              "measurements",
+              "records",
+              "samples",
+              "resources",
+            ].includes(unit)
+            ? t(`presentation.${unit}` as "presentation.records", {
+                count: partition.total,
+              })
+            : `${partition.total.toLocaleString(numberLocale)} ${copy(unit)}`
           : counts.total === null
-            ? "Count unavailable"
-            : partition.reason.replace(/\.$/, "")}
+            ? t("FreshnessGraphic.countUnavailable")
+            : copy(partition.reason).replace(/\.$/, "")}
       </span>
       <span className="rf-freshness-inline">{exact}</span>
     </div>
@@ -53,17 +70,23 @@ export function FreshnessGraphic({
   unit: string;
   counts: PartitionInput;
 }) {
+  const { t, copy, numberLocale } = useUi();
+
   const partition = partitionCounts(counts);
   if (partition.status !== "available")
     return (
       <div className="rf-meta">
         {counts.total === null
-          ? "Count unavailable"
-          : `${counts.total} ${unit}`}{" "}
-        · {partition.reason}
+          ? t("FreshnessGraphic.countUnavailable")
+          : `${counts.total.toLocaleString(numberLocale)} ${copy(unit)}`}{" "}
+        · {copy(partition.reason)}
         <br />
-        Recent {counts.recent ?? "unknown"} · Stale {counts.stale ?? "unknown"}{" "}
-        · Unavailable {counts.unavailable ?? "unknown"}
+        {t("map.recent")}
+        {counts.recent ?? t("conversationView.unknown")}{" "}
+        {t("FreshnessGraphic.stale")}
+        {counts.stale ?? t("conversationView.unknown")}{" "}
+        {t("FreshnessGraphic.unavailable")}
+        {counts.unavailable ?? t("conversationView.unknown")}
       </div>
     );
   return (
@@ -71,7 +94,7 @@ export function FreshnessGraphic({
       <figcaption>
         {label}{" "}
         <span className="rf-meta">
-          · {partition.total.toLocaleString("en-GB")} {unit}
+          · {partition.total.toLocaleString(numberLocale)} {copy(unit)}
         </span>
       </figcaption>
       <div className="rf-freshness-track" aria-hidden="true">
@@ -86,8 +109,8 @@ export function FreshnessGraphic({
       <dl className="rf-freshness-legend">
         {partition.parts.map((p) => (
           <div key={p.id}>
-            <dt>{labels[p.id]}</dt>
-            <dd>{p.count.toLocaleString("en-GB")}</dd>
+            <dt>{copy(labels[p.id])}</dt>
+            <dd>{p.count.toLocaleString(numberLocale)}</dd>
           </div>
         ))}
       </dl>

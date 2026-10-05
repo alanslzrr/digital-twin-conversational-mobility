@@ -1,10 +1,12 @@
 "use client";
+
 import * as schemas from "@mobility/contracts";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useUi } from "@/i18n/provider";
 import { useDashboard } from "@/src/dashboard-client";
 import { madridCandidates, madridLocal } from "@/src/dashboard-presentation";
 import {
@@ -31,6 +33,8 @@ function list(v: unknown): Record<string, unknown>[] {
   return Array.isArray(v) ? v.map(obj) : [];
 }
 export function Events({ id }: { id?: string }) {
+  const { t, copy, numberLocale } = useUi();
+
   const [range, setRange] = useState(() => ({
     to: new Date().toISOString(),
     from: new Date(Date.now() - 86400000).toISOString(),
@@ -119,13 +123,17 @@ export function Events({ id }: { id?: string }) {
   return (
     <>
       <PageTitle
-        title={id ? "Activity detail" : "Activity"}
-        description="Recorded operational events. Missing capture is not zero activity."
+        title={
+          id ? t("activityView.activityDetail") : t("activityView.activity")
+        }
+        description={t(
+          "activityView.recordedOperationalEventsMissingCaptureIsNotZeroActivity",
+        )}
       />
       {!id ? (
         <div className="dc-toolbar">
           <Segmented
-            label="Activity period"
+            label={t("activityView.activityPeriod")}
             value={customRange ? "custom" : period}
             onChange={(v) => {
               setPeriod(v);
@@ -133,10 +141,12 @@ export function Events({ id }: { id?: string }) {
               setCursor(null);
             }}
             options={[
-              ["1h", "1 hour"],
-              ["24h", "24 hours"],
-              ["7d", "7 days"],
-              ...(customRange ? ([["custom", "Custom"]] as const) : []),
+              ["1h", t("commonFragments.hours1hour")],
+              ["24h", t("commonFragments.hours24hours")],
+              ["7d", t("presentation.days7")],
+              ...(customRange
+                ? ([["custom", t("activityView.custom")]] as const)
+                : []),
             ]}
           />
           <Sheet
@@ -157,21 +167,41 @@ export function Events({ id }: { id?: string }) {
                 setRangeError("");
               }
             }}
-            title="Activity filters"
-            description="Custom dates are Europe/Madrid civil times; transport uses UTC instants."
+            title={t("activityView.activityFilters")}
+            description={t(
+              "activityView.customDatesAreEuropeMadridCivilTimesTransportUses",
+            )}
             trigger={
               <Button variant="outline">
-                Filters
-                {source || severity || eventType || outcome ? " · active" : ""}
+                {t("activityView.filters")}
+                {source || severity || eventType || outcome
+                  ? t("activityView.active")
+                  : ""}
               </Button>
             }
           >
             {(
               [
-                ["source", "Source", schemas.sourceIdSchema.options],
-                ["severity", "Severity", ["info", "warning", "error"]],
-                ["eventType", "Event type", schemas.dashboardEventType.options],
-                ["outcome", "Outcome", schemas.dashboardEventOutcome.options],
+                [
+                  "source",
+                  t("activityView.source"),
+                  schemas.sourceIdSchema.options,
+                ],
+                [
+                  "severity",
+                  t("activityView.severity"),
+                  ["info", "warning", "error"],
+                ],
+                [
+                  "eventType",
+                  t("activityView.eventType"),
+                  schemas.dashboardEventType.options,
+                ],
+                [
+                  "outcome",
+                  t("activityView.outcome"),
+                  schemas.dashboardEventOutcome.options,
+                ],
               ] as const
             ).map(([key, label, options]) => (
               <Field key={key}>
@@ -183,12 +213,12 @@ export function Events({ id }: { id?: string }) {
                     setDraft({ ...draft, [key]: e.target.value })
                   }
                 >
-                  <option value="">All</option>
+                  <option value="">{t("activityView.all")}</option>
                   {options.map((o) => (
                     <option key={o} value={o}>
-                      {eventTypes[o] ??
-                        eventOutcomes[o] ??
-                        severityCopy[o] ??
+                      {copy(eventTypes[o]) ??
+                        copy(eventOutcomes[o]) ??
+                        copy(severityCopy[o]) ??
                         o}
                     </option>
                   ))}
@@ -198,7 +228,8 @@ export function Events({ id }: { id?: string }) {
             {(["from", "to"] as const).map((k) => (
               <Field key={k}>
                 <FieldLabel htmlFor={`event-${k}`}>
-                  {k === "from" ? "From" : "To"} (Europe/Madrid)
+                  {k === "from" ? t("activityView.from") : t("activityView.to")}{" "}
+                  (Europe/Madrid)
                 </FieldLabel>
                 <Input
                   id={`event-${k}`}
@@ -214,7 +245,12 @@ export function Events({ id }: { id?: string }) {
                 />
                 {madridCandidates(draft[k]).length > 1 ? (
                   <Segmented
-                    label={`${k} UTC offset (required)`}
+                    label={t("presentation.utcOffset", {
+                      boundary:
+                        k === "from"
+                          ? t("activityView.from")
+                          : t("activityView.to"),
+                    })}
                     value={draft[`${k}Offset`]}
                     onChange={(v) => setDraft({ ...draft, [`${k}Offset`]: v })}
                     options={madridCandidates(draft[k]).map((c) => [
@@ -225,7 +261,7 @@ export function Events({ id }: { id?: string }) {
                 ) : null}
               </Field>
             ))}
-            {rangeError ? <p role="alert">{rangeError}</p> : null}
+            {rangeError ? <p role="alert">{copy(rangeError)}</p> : null}
             <div className="dc-filter-footer">
               <Button
                 onClick={() => {
@@ -265,18 +301,20 @@ export function Events({ id }: { id?: string }) {
                   setFiltersOpen(false);
                 }}
               >
-                Apply
+                {t("activityView.apply")}
               </Button>
               <Button variant="outline" onClick={() => setFiltersOpen(false)}>
-                Cancel
+                {t("activityView.cancel")}
               </Button>
             </div>
           </Sheet>
-          <span className="dc-meta">Europe/Madrid · Best-effort capture</span>
+          <span className="dc-meta">
+            {t("activityView.europeMadridBestEffortCapture")}
+          </span>
         </div>
       ) : (
         <Link href={`/dashboard/activity?${qs}`} className="text-sm underline">
-          Back to events
+          {t("activityView.backToEvents")}
         </Link>
       )}
       <State
@@ -293,25 +331,29 @@ export function Events({ id }: { id?: string }) {
       <div className="dc-event-region">
         <table className="dc-table">
           <caption className="sr-only">
-            Recorded events on this page; capture is best-effort.
+            {t("activityView.recordedEventsOnThisPageCaptureIsBestEffort")}
           </caption>
           <thead>
             <tr>
-              {["Instant", "Component", "Source / job", "Type", "Outcome"].map(
-                (h) => (
-                  <th
-                    key={h}
-                    scope="col"
-                    className={
-                      h === "Component" || h === "Source / job"
-                        ? "dc-secondary-column"
-                        : undefined
-                    }
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
+              {[
+                t("activityView.instant"),
+                t("activityView.component"),
+                t("activityView.sourceJob"),
+                t("activityView.type"),
+                t("activityView.outcome"),
+              ].map((h) => (
+                <th
+                  key={h}
+                  scope="col"
+                  className={
+                    h === "Component" || h === "Source / job"
+                      ? "dc-secondary-column"
+                      : undefined
+                  }
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -339,23 +381,26 @@ export function Events({ id }: { id?: string }) {
                   </Link>
                 </td>
                 <td className="dc-secondary-column">
-                  {eventComponents[String(e.component)] ?? "Recorded operation"}
+                  {copy(eventComponents[String(e.component)]) ??
+                    "Recorded operation"}
                 </td>
                 <td className="dc-secondary-column dc-meta">
-                  {sourceNames[String(e.source)] ?? String(e.source)} /{" "}
+                  {copy(sourceNames[String(e.source)]) ?? String(e.source)} /{" "}
                   {String(e.job)}
                 </td>
-                <td>{eventTypes[String(e.type)] ?? "Recorded operation"}</td>
+                <td>
+                  {copy(eventTypes[String(e.type)] ?? "Recorded operation")}
+                </td>
                 <td>
                   <span
                     className="dc-status"
                     data-tone={outcomeTones[String(e.outcome)] ?? "muted"}
                   >
-                    {eventOutcomes[String(e.outcome)] ?? "No outcome"}
+                    {copy(eventOutcomes[String(e.outcome)] ?? "No outcome")}
                   </span>
                   {e.errorCode ? (
                     <p className="dc-meta">
-                      Recorded issue. Open details for evidence.
+                      {t("activityView.recordedIssueOpenDetailsForEvidence")}
                     </p>
                   ) : null}
                 </td>
@@ -369,14 +414,16 @@ export function Events({ id }: { id?: string }) {
         onOpenChange={(v) => {
           if (!v) setSelectedEvent(null);
         }}
-        title="Recorded event"
-        description="Retained operational evidence; capture is best-effort."
+        title={t("activityView.recordedEvent")}
+        description={t(
+          "activityView.retainedOperationalEvidenceCaptureIsBestEffort",
+        )}
       >
         {selectedEvent ? (
           <>
             <h2>
-              {eventTypes[String(selectedEvent.type)]} ·{" "}
-              {eventOutcomes[String(selectedEvent.outcome)]}
+              {copy(eventTypes[String(selectedEvent.type)])} ·{" "}
+              {copy(eventOutcomes[String(selectedEvent.outcome)])}
             </h2>
             <dl className="dc-evidence">
               {[
@@ -394,18 +441,18 @@ export function Events({ id }: { id?: string }) {
                   <dt>
                     {(
                       {
-                        job: "Job",
-                        occurredAt: "Occurred",
-                        recordedAt: "Recorded",
-                        operationId: "Operation ID",
+                        job: t("activityView.job"),
+                        occurredAt: t("activityView.occurred"),
+                        recordedAt: t("activityView.recorded"),
+                        operationId: t("activityView.operationId"),
                       } as Record<string, string>
-                    )[key] ?? publicLabel(key)}
+                    )[key] ?? copy(publicLabel(key))}
                   </dt>
                   <dd>
                     {key.endsWith("At") ? (
                       <Instant value={selectedEvent[key]} />
                     ) : selectedEvent[key] == null ? (
-                      "Unavailable"
+                      t("activityView.unavailable")
                     ) : (
                       String(selectedEvent[key])
                     )}
@@ -417,7 +464,7 @@ export function Events({ id }: { id?: string }) {
               href={`/dashboard/activity/${selectedEvent.id}?${qs}`}
               className="dc-link"
             >
-              Open linked event
+              {t("activityView.openLinkedEvent")}
             </Link>
             <Technical value={selectedEvent} />
           </>
@@ -426,10 +473,10 @@ export function Events({ id }: { id?: string }) {
       {cursor ? (
         <>
           <p className="text-sm text-muted-foreground">
-            Historical page: fixed interval, no automatic new events.
+            {t("activityView.historicalPageFixedIntervalNoAutomaticNewEvents")}
           </p>
           <Button variant="outline" onClick={() => setCursor(null)}>
-            Return to first page for current activity
+            {t("activityView.returnToFirstPageForCurrentActivity")}
           </Button>
         </>
       ) : null}
@@ -439,23 +486,24 @@ export function Events({ id }: { id?: string }) {
           className="self-start"
           onClick={() => setCursor(String(value.nextCursor))}
         >
-          Next page
+          {t("activityView.nextPage")}
         </Button>
       ) : null}
       {id ? (
         <>
           <section className="rounded-lg border bg-card p-5">
-            <h2 className="font-semibold">What happened</h2>
+            <h2 className="font-semibold">{t("activityView.whatHappened")}</h2>
             <p className="mt-2 text-sm">
-              {eventTypes[String(events[0]?.type)]} ·{" "}
-              {eventOutcomes[String(events[0]?.outcome)]}
+              {copy(eventTypes[String(events[0]?.type)])} ·{" "}
+              {copy(eventOutcomes[String(events[0]?.outcome)])}
             </p>
             <p className="mt-2 text-sm">
-              Operation duration: {number(events[0]?.durationMs)} ms. Not
-              provider HTTP latency.
+              {t("activityView.operationDuration")}
+              {number(events[0]?.durationMs, numberLocale)}{" "}
+              {t("activityView.msNotProviderHttpLatency")}
             </p>
             <p className="mt-2 text-sm">
-              Partial capture; this event does not certify all entity freshness.
+              {t("activityView.partialCaptureThisEventDoesNotCertifyAllEntity")}
             </p>
           </section>
           <Technical value={events[0]} />

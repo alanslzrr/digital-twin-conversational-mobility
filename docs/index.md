@@ -2,7 +2,7 @@
 
 [Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twin. Actualizado el **2 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twin. Actualizado el **4 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 
@@ -28,10 +28,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twi
 | Diagnóstico | [Problemas frecuentes](troubleshooting.md): qué revisar ante cada síntoma |
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
-| Desarrollo | [Spec original del panel y telemetría](plans/2026-10-02-core-dashboard.md): arquitectura y límites de la implementación inicial; [validación aislada](acceptance/2026-10-02-core-dashboard.md) conservada como evidencia |
-| Refinamiento V2 | [Neutralidad, densidad y gráficos con datos existentes](acceptance/2026-10-03-core-dashboard-refinement-v2.md): PR #45, sin despliegue; aceptación manual y fallo de instalación habitual pendientes. [Continuación](acceptance/2026-10-03-core-dashboard-refinement-v2-continuation.md): sistema visual en las seis vistas y codificación de frescura única. [Tema y cabecera](acceptance/2026-10-03-core-dashboard-theme-header.md): selector claro/oscuro/sistema, sin acentos laterales y controles plegables. [Tercera auditoría](acceptance/2026-10-03-core-dashboard-third-audit.md): hora de observación por fila, leyenda y colores del mapa por tema, títulos animados |
-| Rediseño | [Rediseño de seis vistas](acceptance/2026-10-03-core-dashboard-redesign.md): contratos conservados, validación sintética y aceptación manual pendiente; PR #45 sin integrar |
-| Refinamiento | [Segunda auditoría con agent-browser](acceptance/2026-10-03-core-dashboard-second-audit.md), con nueve hallazgos corregidos y alcance explícito; [Implementación y validación local](acceptance/2026-10-03-core-dashboard-refinement.md), con verificaciones pendientes; [spec-audit de PR #45](audits/2026-10-02-core-dashboard-review.md): corregir captura/datos y completar las seis vistas con lenguaje claro, gráficos, separación de catálogos y criterios de aceptación; sin instalación habitual |
+| Panel | Seis vistas integradas en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45): datos, consultas, fuentes, actividad y telemetría propia. [Operación y actualización](local-runtime.md#actualizar-el-panel) · [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Runtime habitual reconstruido y smoke correcto; inspección autenticada pendiente. El historial de refinamientos permanece en [Actas](acceptance/index.md) |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
 | Fuentes | [CRTM](sources/crtm.md), [DGT](sources/dgt.md), [geocodificación](sources/geocoding.md): semántica específica |
 | Recursos | [Catálogo de referencias](resources/index.md): investigación, documentación oficial y aplicación en el código |
@@ -46,3 +43,5 @@ Guías de uso, arquitectura, instalación y mantenimiento de Madrid Mobility Twi
 ## Guías y archivo
 
 Las guías describen el funcionamiento actual. Las actas, auditorías, planes e investigaciones conservan los resultados y decisiones de cada fecha. Consulta el [roadmap](roadmap.md) para conocer el alcance vigente.
+
+- [Idioma global de interfaz ES/EN](./ui-i18n.md): arquitectura, límites y validación aislada del selector.

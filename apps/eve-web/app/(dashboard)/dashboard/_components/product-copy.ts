@@ -1,3 +1,13 @@
+import { createTranslator } from "next-intl";
+import { formatLocale, type UiLocale } from "@/i18n/config";
+import { messages, ownedCopyKeys } from "@/i18n/messages";
+
+function localCopy(value: string, locale: UiLocale) {
+  const key = ownedCopyKeys[value];
+  return key
+    ? createTranslator({ locale, messages: messages[locale] })(key)
+    : value;
+}
 const products: Record<string, string> = {
   bicimad: "BiciMAD bikes",
   "madrid-parking": "Parking occupancy",
@@ -52,23 +62,27 @@ export function evidenceExplanation(reason: string | null, coverage: string) {
         ? "Complete for this selection, not an availability guarantee."
         : "Insufficient evidence for this selection.";
 }
-export function measurementValue(name: string, value: unknown) {
+export function measurementValue(
+  name: string,
+  value: unknown,
+  locale: UiLocale = "en",
+) {
   if (
     ["arrivalSeconds", "departureSeconds"].includes(name) &&
     typeof value === "number"
   ) {
     const hours = Math.floor(value / 3600),
       minutes = Math.floor((value % 3600) / 60);
-    return `${String(hours % 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}${hours >= 24 ? " (next service day)" : ""}`;
+    return `${String(hours % 24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}${hours >= 24 ? ` (${localCopy("(next service day)", locale).slice(1, -1)})` : ""}`;
   }
   if (name === "wheelchair")
     return value === 1 || value === "1"
-      ? "Declared accessibility"
+      ? localCopy("Declared accessibility", locale)
       : value === 2 || value === "2"
-        ? "Not accessible as declared"
-        : "No verifiable declaration";
+        ? localCopy("Not accessible as declared", locale)
+        : localCopy("No verifiable declaration", locale);
   if (name === "kind")
-    return (
+    return localCopy(
       (
         {
           stop: "Stop",
@@ -77,7 +91,8 @@ export function measurementValue(name: string, value: unknown) {
           address: "Address",
           poi: "Point of interest",
         } as Record<string, string>
-      )[String(value)] ?? "Published source type"
+      )[String(value)] ?? "Published source type",
+      locale,
     );
   const values: Record<string, string> = {
     instant: "Instant measurement",
@@ -90,7 +105,11 @@ export function measurementValue(name: string, value: unknown) {
   };
   return typeof value === "string" &&
     ["basis", "providerValidity", "quality", "status"].includes(name)
-    ? (values[value] ?? "Published classification; technical details available")
+    ? localCopy(
+        values[value] ??
+          "Published classification; technical details available",
+        locale,
+      )
     : String(value);
 }
 
@@ -99,22 +118,24 @@ export function measurementDisplay(
   name: string,
   value: unknown,
   unit?: string | null,
+  locale: UiLocale = "en",
 ) {
-  if (value === null || value === undefined) return "Unknown";
+  if (value === null || value === undefined)
+    return localCopy("Unknown", locale);
   const coded = ["wheelchair", "arrivalSeconds", "departureSeconds"].includes(
     name,
   );
   const formatted = coded
-    ? measurementValue(name, value)
+    ? measurementValue(name, value, locale)
     : typeof value === "number"
-      ? new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 }).format(
-          value,
-        )
+      ? new Intl.NumberFormat(formatLocale(locale), {
+          maximumFractionDigits: 2,
+        }).format(value)
       : typeof value === "boolean"
         ? value
-          ? "Yes"
-          : "No"
-        : measurementValue(name, value);
+          ? localCopy("Yes", locale)
+          : localCopy("No", locale)
+        : measurementValue(name, value, locale);
   return unit && !coded ? `${formatted} ${unit}` : formatted;
 }
 

@@ -31,3 +31,14 @@ public lifecycle/tool hooks now emit best-effort sanitized observability to the
 fixed Core service; failure to capture never substitutes or interrupts chat
 results. Browser code never receives the service token. Detailed payloads are
 loaded only after an owner explicitly opens them.
+
+### Global interface language (ES/EN)
+
+The root UI provider supplies local `next-intl` catalogs without localized routes.
+The reusable ES/EN control lives outside the official chat, beside the evaluation
+access controls; chat adaptations change only owned labels, accessibility text,
+reasoning summaries and native session-limit continuation explanations/options.
+Original messages, Markdown, tool inputs/outputs, provider instructions and ordinary
+agent-authored questions/options remain untouched. Native continuation keeps the
+original request IDs and `continue`/`stop` option IDs. Language never becomes a
+model parameter and never keys or reconstructs EVE, authentication or data providers.
