@@ -231,6 +231,11 @@
 /* ---------- Shell: sidebar ---------- */
 .dashboard-shell [data-slot="sidebar-inner"] {
   background: var(--dash-panel);
+  overflow: hidden;
+}
+/* Keep the animated gap authoritative even while children change their size. */
+.dashboard-shell [data-slot="sidebar"] {
+  flex-shrink: 0;
 }
 .dashboard-shell [data-slot="sidebar-container"] {
   border-color: var(--dash-line-soft);
@@ -253,23 +258,17 @@
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-.dc-brand-mark {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--dash-primary);
-  color: var(--dash-on-primary);
+.dc-brand a {
+  overflow: hidden;
+}
+.dc-brand .mobai-brand {
+  white-space: nowrap;
+}
+.dc-brand-label {
+  transition: opacity 150ms ease;
 }
 [data-collapsible="icon"] .dc-brand-label {
-  display: none;
-}
-[data-collapsible="icon"] .dc-brand a {
-  justify-content: center;
-  padding: 0;
+  opacity: 0;
 }
 .dc-navigation {
   padding: 8px;
@@ -287,6 +286,9 @@
   line-height: 20px;
   color: var(--dash-secondary);
   transition:
+    width 200ms linear,
+    height 200ms linear,
+    padding 200ms linear,
     background-color 120ms ease,
     color 120ms ease;
 }

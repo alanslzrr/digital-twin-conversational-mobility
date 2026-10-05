@@ -22,6 +22,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { MobaiBrand } from "@/components/mobai-brand";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import {
@@ -220,11 +221,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </a>
       <Sidebar collapsible="icon" dashboardScope>
         <SidebarHeader className="dc-brand">
-          <Link href="/dashboard" aria-label={t("shell.mobilityCore")}>
-            <span className="dc-brand-mark" aria-hidden="true">
-              <Blocks size={14} />
-            </span>
-            <span className="dc-brand-label">{t("shell.mobilityCore")}</span>
+          <Link href="/dashboard" aria-label="mobai">
+            <MobaiBrand labelClassName="dc-brand-label" />
           </Link>
         </SidebarHeader>
         <SidebarContent className="dc-navigation">
