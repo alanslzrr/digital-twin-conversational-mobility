@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { MobaiBrand } from "@/components/mobai-brand";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -180,7 +181,7 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
         >
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-medium tracking-tight">
-              Madrid Mobility
+              <MobaiBrand size="login" />
             </h1>
             <p className="text-sm text-muted-foreground">
               {t("evaluation.accedeConTusCredencialesDeEvaluacion")}

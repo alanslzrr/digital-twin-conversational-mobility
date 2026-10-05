@@ -20,13 +20,12 @@ import {
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { MobaiBrand } from "@/components/mobai-brand";
 import { Button } from "@/components/ui/button";
 import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 import { conversationUnavailable } from "@/src/conversation-recovery";
 import { AgentMessage } from "./agent-message";
-
-const AGENT_NAME = "Madrid Mobility";
 
 export function AgentChat({
   sessionId,
@@ -210,7 +209,7 @@ export function AgentChat({
         {showConversationLayout ? null : (
           <div className="flex flex-col items-center gap-3 text-center">
             <h1 className="font-medium text-5xl tracking-tighter">
-              {AGENT_NAME}
+              <MobaiBrand size="hero" />
             </h1>
           </div>
         )}
@@ -284,7 +283,7 @@ function ChatHeader({
     <header className="pointer-events-none fixed top-0 right-0 left-0 z-20 h-14">
       <div className="relative mx-auto flex h-full w-full max-w-3xl items-center justify-center bg-background px-24">
         <span className="hidden truncate text-muted-foreground text-sm md:block">
-          {AGENT_NAME}
+          <MobaiBrand />
         </span>
         {canStartNewChat ? (
           <Button
