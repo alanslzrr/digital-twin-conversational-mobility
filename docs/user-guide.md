@@ -20,6 +20,8 @@
 
 Usa `127.0.0.1`, no alternes con `localhost`: el origen configurado forma parte de la protección de acceso. El chat es el oficial de EVE. Los mensajes admiten hasta 1.800 caracteres y los adjuntos están deshabilitados.
 
+La interfaz empieza en español. El selector **ES/EN** cambia los controles sin recargar ni perder el borrador; conserva la preferencia en este navegador. No traduce conversaciones anteriores ni cambia el idioma del agente. [Alcance del selector](ui-i18n.md).
+
 ## Consultas útiles
 
 Puedes usar estas preguntas como punto de partida y añadir tus preferencias de viaje.
@@ -63,10 +65,10 @@ La preferencia de silla de ruedas se aplica a la planificación. El resultado mu
 
 - **Mis conversaciones** lista tus chats vigentes, con fecha de creación y páginas de veinte.
 - Selecciona una conversación para continuar desde sus mensajes anteriores.
-- **New chat** abre una conversación nueva, sin borrar la anterior.
+- **Nuevo chat / New chat** abre una conversación nueva, sin borrar la anterior.
 - Si el contenido ya no está disponible, el chat muestra ese estado y permite iniciar una conversación nueva.
-- Al alcanzar los límites de continuidad, EVE muestra **Approve / Stop**. Aprobar permite continuar; detener cancela el turno y conserva la historia.
-- Cierra sesión con **Logout** cuando termines.
+- Al alcanzar los límites de continuidad, EVE muestra **Aprobar / Detener** (**Approve / Stop** en inglés). Aprobar permite continuar; detener cancela el turno y conserva la historia.
+- Cierra sesión cuando termines.
 
 El acceso a una conversación caduca por defecto a los siete días de registrarla. Los mensajes permanecen almacenados en EVE tras esa caducidad. [Cuentas y retención](evaluation.md).
 
@@ -77,6 +79,8 @@ El **historial de conversaciones** guarda la conversación. El **histórico de m
 ## Panel privado
 
 Después de [actualizar el runtime](local-runtime.md#actualizar-el-panel), entra con la cuenta de evaluador existente y pulsa **Panel** desde EVE. **Telemetría** abre tus conversaciones; **Volver al chat** conserva la interfaz oficial. El menú se convierte en un diálogo en pantallas pequeñas.
+
+La cabecera permite elegir tema claro, oscuro o del sistema. Esa preferencia solo afecta al panel; el chat conserva el tema del sistema. El selector ES/EN se comparte entre ambos.
 
 | Vista | Uso |
 | --- | --- |
