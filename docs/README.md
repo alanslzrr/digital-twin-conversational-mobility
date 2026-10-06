@@ -4,6 +4,7 @@
 
 ## Entender el proyecto
 
+- [mobai en pantalla](demo.md): conversación, herramientas y métricas del panel con capturas ampliables.
 - [Visión general](overview.md): capacidades y ejemplos de uso.
 - [Arquitectura](architecture.md): EVE, autenticación, MCP, datos y cálculo de rutas, con diagramas de los flujos.
 - [Evolución](evolution.md): etapas de desarrollo y entregas.

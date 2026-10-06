@@ -19,6 +19,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 | Sección | Página y finalidad |
 | --- | --- |
 | Empieza aquí | [Visión general](overview.md): utilidad, capacidades y ejemplos sin tecnicismos |
+| En pantalla | [Demo y capturas](demo.md): chat, herramientas, resumen del panel y estaciones BiciMAD |
 | Cómo funciona | [Arquitectura](architecture.md): componentes, autenticación, consultas, ingestión e historial |
 | Guía de uso | [Conversar con el sistema](user-guide.md): acceso, consultas, historial y continuidad |
 | Instalación | [Preparación inicial](installation.md): requisitos, cuentas, claves, datos y primer arranque |
