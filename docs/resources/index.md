@@ -9,6 +9,7 @@ Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las
 ## En esta página
 
 - [Seguridad de dependencias](#seguridad-de-dependencias--03102026)
+- [Parches y licencia del 06/10/2026](#security-updates-2026-10-06)
 - [Tecnología](#tecnología)
 - [Transporte y routing](#transporte-y-routing)
 - [Meteorología y geografía](#meteorología-y-geografía)
@@ -148,3 +149,13 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | --- | --- |
 | [GitHub Advisory Database: GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | Aviso revisado y actualizado el 02/10/2026: `braces <=3.0.3`, agotamiento de pila, gravedad alta, sin versión corregida. Sustenta el bloqueo histórico de CI y la posterior [retirada de la CLI vulnerable](../acceptance/2026-10-03-core-dashboard-merge-readiness.md). |
 | [Registro npm: braces](https://registry.npmjs.org/braces/latest) y [Vercel](https://registry.npmjs.org/vercel/latest) | Consultados con `pnpm view` el 03/10/2026: braces 3.0.3 y CLI 62.2.0. Los builders de la CLI mantienen ts-morph 12.0.0; una actualización de CLI sola no elimina la cadena. No se cambiaron dependencias ni se relajó la auditoría. |
+
+<a id="security-updates-2026-10-06"></a>
+
+## Parches y licencia · 06/10/2026
+
+| Referencia | Conclusión aplicada | Uso local |
+| --- | --- | --- |
+| [source-map-js 1.2.2](https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2) y [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) | Corregir la validación de offsets en source maps indexados | Override acotado de 1.2.1 a 1.2.2 en [pnpm-workspace.yaml](../../pnpm-workspace.yaml) |
+| [KaTeX GHSA-238p-pmpm-9mq7](https://github.com/KaTeX/KaTeX/security/advisories/GHSA-238p-pmpm-9mq7) | Evitar que propiedades heredadas alteren la confianza y las opciones del renderizador | KaTeX 0.18.2 para el plugin matemático de Streamdown; se comprueba render y rechazo de enlaces no confiables |
+| [Licencia MIT, OSI](https://opensource.org/license/mit) | Licencia permisiva elegida para facilitar la reutilización del código propio | [LICENSE](../../LICENSE); los componentes externos conservan sus licencias y avisos |

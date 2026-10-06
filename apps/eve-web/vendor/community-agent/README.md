@@ -8,9 +8,11 @@ mobile navigation dialog, title and actions. No backend, authentication,
 data, mocked metrics or application theme were imported. The local implementation
 lives in app/(dashboard)/dashboard/_components/shell.tsx.
 
-The header theme switch is intentionally omitted. Geist typography, EVE semantic
-tokens and the existing Button, Dialog, Field, Input, Badge and Spinner components
-remain authoritative. The official EVE chat is not replaced or restyled.
+The header uses a local light/dark/system theme switch, scoped to the dashboard
+through `data-dashboard-theme`, alongside the shared ES/EN interface control.
+Geist typography, EVE semantic tokens and the existing Button, Dialog, Field,
+Input, Badge and Spinner components remain authoritative. The official EVE chat
+keeps its system theme and upstream layout.
 
 The upstream MIT license is retained in LICENSE. OpenStreetMap is a separate,
 anonymous external basemap loaded only when requested; data reads go through the
