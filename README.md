@@ -32,6 +32,7 @@
 
 - [Qué resuelve](#qué-resuelve)
 - [Qué puedes hacer](#qué-puedes-hacer)
+- [Pantallas del producto](#pantallas-del-producto)
 - [Cómo funciona](#cómo-funciona)
 - [Empezar en local](#empezar-en-local)
 - [Datos, privacidad y alcance](#datos-privacidad-y-alcance)
@@ -73,6 +74,22 @@ El término *gemelo digital* se refiere aquí a una representación de la movili
 > ¿Qué sabía el sistema de BiciMAD hace diez minutos?
 
 Si un lugar es ambiguo, el chat pide aclaración antes de planificar. La [guía de uso](docs/user-guide.md) explica cómo interpretar horarios, estimaciones, observaciones y precios.
+
+## Pantallas del producto
+
+### Del viaje a la respuesta
+
+El chat muestra las herramientas que resuelven las estaciones y calculan la ruta. Puedes elegir una alternativa y continuar preguntando por la llegada y el margen de tiempo sin empezar de nuevo.
+
+[![Chat de mobai con herramientas ejecutadas, ruta Atocha–Chamartín y seguimiento del viaje.](docs/assets/demo/chat-conversacion.jpg)](docs/demo.md#planificar-y-continuar-la-conversación)
+
+### Bicicletas y anclajes, estación por estación
+
+Explora BiciMAD en el mapa y compara las bicicletas y los anclajes de cada estación en la lista. Los filtros y las horas de observación permiten interpretar los datos que estás viendo.
+
+[![Panel BiciMAD con el mapa de estaciones, bicicletas, anclajes y horas de observación.](docs/assets/demo/panel-bicimad.jpg)](docs/demo.md#explorar-las-estaciones-bicimad)
+
+**[Ver la galería completa](docs/demo.md)**: herramientas desplegadas, resumen del panel y capturas a tamaño completo del 6 de octubre de 2026.
 
 ## Cómo funciona
 

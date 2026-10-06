@@ -159,3 +159,10 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | [source-map-js 1.2.2](https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2) y [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) | Corregir la validación de offsets en source maps indexados | Override acotado de 1.2.1 a 1.2.2 en [pnpm-workspace.yaml](../../pnpm-workspace.yaml) |
 | [KaTeX GHSA-238p-pmpm-9mq7](https://github.com/KaTeX/KaTeX/security/advisories/GHSA-238p-pmpm-9mq7) | Evitar que propiedades heredadas alteren la confianza y las opciones del renderizador | KaTeX 0.18.2 para el plugin matemático de Streamdown; se comprueba render y rechazo de enlaces no confiables |
 | [Licencia MIT, OSI](https://opensource.org/license/mit) | Licencia permisiva elegida para facilitar la reutilización del código propio | [LICENSE](../../LICENSE); los componentes externos conservan sus licencias y avisos |
+
+## Vídeo y capturas · 06/10/2026
+
+| Referencia | Propósito y conclusión | Uso local |
+| --- | --- | --- |
+| [Adjuntar archivos con GitHub CLI](https://docs.github.com/en/github-cli/github-cli/attaching-files-with-github-cli) y [gh pr edit](https://cli.github.com/manual/gh_pr_edit) | GitHub CLI 2.102.0 permite adjuntar el MP4 a una PR con `--attach` y obtener una URL nativa; el vídeo se presenta como reproductor | Vídeo final en el [README](../../README.md), sin incorporar el archivo pesado al historial Git |
+| [Formatos y límites de adjuntos de GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) | MP4 con H.264 para compatibilidad; los límites y el acceso dependen del plan y la visibilidad del repositorio | Exportación de 56 segundos a 1080p/60; capturas versionadas en la [galería](../demo.md) |
