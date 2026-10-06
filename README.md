@@ -38,6 +38,7 @@
 - [Estructura del repositorio](#estructura-del-repositorio)
 - [Desarrollo y comprobaciones](#desarrollo-y-comprobaciones)
 - [Documentación y evolución](#documentación-y-evolución)
+- [Licencia](#licencia)
 
 ## Qué resuelve
 
@@ -198,3 +199,9 @@ Usa ramas `alanslzrr/<tema>`, commits Conventional Commits y `pnpm check` antes 
 | Consultar investigación y documentación oficial | [Recursos](docs/resources/index.md) y [cuentas/claves](docs/resources/accounts.md) |
 | Saber cómo avanzó y qué se comprobó | [Evolución por etapas](docs/evolution.md), [actas](docs/acceptance/index.md) y [alcance](docs/roadmap.md) |
 | Mantener la documentación | [Reglas de la wiki](docs/AGENTS.md) y [registro de revisiones](docs/log.md) |
+
+## Licencia
+
+El código propio de mobai se distribuye bajo [licencia MIT](LICENSE). Los componentes de terceros conservan sus licencias y avisos: [EVE (Apache-2.0)](apps/eve-web/vendor/eve/LICENSE), [NOTICE de EVE](apps/eve-web/vendor/eve/NOTICE), [Community Agent (MIT)](apps/eve-web/vendor/community-agent/LICENSE) y [shadcn (MIT)](apps/eve-web/vendor/shadcn/LICENSE).
+
+Los datos de los operadores y la cartografía tienen sus propias condiciones de uso y atribución; consulta el [registro de fuentes](docs/sources/README.md). La licencia del código no sustituye esas condiciones.
