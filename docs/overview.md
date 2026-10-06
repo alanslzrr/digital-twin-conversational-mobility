@@ -4,7 +4,7 @@
 
 ## Qué aporta
 
-Madrid Mobility Twin permite preguntar por desplazamientos y por el contexto de movilidad de Madrid en un único chat. Reúne información que, de otro modo, habría que buscar por separado: trenes, autobuses, horarios, incidencias, bicicletas, aparcamiento y meteorología.
+mobai permite preguntar por desplazamientos y por el contexto de movilidad de Madrid en un único chat. Reúne información que, de otro modo, habría que buscar por separado: trenes, autobuses, horarios, incidencias, bicicletas, aparcamiento y meteorología.
 
 El nombre «gemelo digital» describe una representación de esa movilidad, actualizada con publicaciones oficiales. Conserva qué dato recibió, de dónde procede y cuándo se observó.
 

@@ -1,5 +1,7 @@
 # Idioma global de interfaz
 
+[Índice](index.md) · [Guía de uso](user-guide.md) · [Interfaz oficial](../apps/eve-web/vendor/eve/README.md)
+
 ## Alcance
 
 ES/EN en login, historial, controles oficiales EVE y las seis vistas del panel.

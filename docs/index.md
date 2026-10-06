@@ -2,7 +2,7 @@
 
 [Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **5 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **6 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 
@@ -28,6 +28,8 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 | Diagnóstico | [Problemas frecuentes](troubleshooting.md): qué revisar ante cada síntoma |
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
+| Interfaz | [Idioma ES/EN](ui-i18n.md): controles, persistencia y límites de la traducción |
+| Publicación | [Licencia MIT](../LICENSE), [componentes de terceros](../README.md#licencia) y [seguridad](../SECURITY.md) |
 | Panel | Seis vistas integradas en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45): datos, consultas, fuentes, actividad y telemetría propia. [Operación y actualización](local-runtime.md#actualizar-el-panel) · [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Runtime habitual reconstruido y smoke correcto; inspección autenticada pendiente. El historial de refinamientos permanece en [Actas](acceptance/index.md) |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
 | Fuentes | [CRTM](sources/crtm.md), [DGT](sources/dgt.md), [geocodificación](sources/geocoding.md): semántica específica |
@@ -44,4 +46,3 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 
 Las guías describen el funcionamiento actual. Las actas, auditorías, planes e investigaciones conservan los resultados y decisiones de cada fecha. Consulta el [roadmap](roadmap.md) para conocer el alcance vigente.
 
-- [Idioma global de interfaz ES/EN](./ui-i18n.md): arquitectura, límites y validación aislada del selector.
