@@ -1,6 +1,6 @@
 # mobai en pantalla
 
-[Índice](index.md) · [Presentación](../README.md) · [Guía de uso](user-guide.md)
+[Índice](index.md) · [Ver vídeo](https://github.com/user-attachments/assets/8c937e33-bb42-48be-a6e2-2813ea553e41) · [Presentación](../README.md) · [Guía de uso](user-guide.md)
 
 Del viaje que describes en el chat a los datos que puedes explorar en el panel. Las capturas corresponden al **6 de octubre de 2026**; cada vista conserva los valores, las fuentes y las horas que mostraba la aplicación. Pulsa cualquier imagen para abrirla a tamaño completo.
 
@@ -38,7 +38,7 @@ El panel principal reúne bicicletas disponibles, plazas de aparcamiento, avisos
 
 [![Resumen del panel con indicadores de bicicletas, aparcamiento, avisos, evidencia por producto y actividad reciente.](assets/demo/panel-resumen.jpg)](assets/demo/panel-resumen.jpg)
 
-Cada indicador muestra también **cuántas estaciones o aparcamientos entran en el cálculo**. Así se puede interpretar una cifra junto a su cobertura, en lugar de confundirla con un total de toda la ciudad.
+Los indicadores de bicicletas y aparcamiento muestran también **cuántas estaciones o aparcamientos entran en el cálculo**. Así se puede interpretar una cifra junto a su cobertura, en lugar de confundirla con un total de toda la ciudad.
 
 [Datos y funcionamiento del panel](architecture.md#panel-y-captura-de-observabilidad) · [Registro de fuentes](sources/README.md)
 
