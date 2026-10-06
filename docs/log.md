@@ -200,3 +200,9 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Verificado el renderizado del README con la API Markdown de GitHub: enlace del adjunto convertido en elemento de vídeo con controles. Revisadas visualmente las cuatro capturas y siete fotogramas del vídeo; decodificación completa del MP4 con FFmpeg sin errores. Comprobación HyperFrames previa al render correcta.
 - `pnpm check` con Node 24.21.0 correcto: lint, fronteras, tipos, 531 pruebas pasadas y 100 omitidas; builds Web/Core correctos con caché reutilizada. Comprobados 286 enlaces locales y anclas de las páginas editadas; `git diff --check` correcto. Sin diagramas nuevos.
 - Cambios agrupados en [PR #49](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/49), sin merge. Borradores locales de arquitectura y alojamiento excluidos; sin cambios del código de la aplicación, nuevas inferencias, migraciones, despliegues ni cambios de visibilidad del repositorio en esta integración documental.
+
+## [2026-10-06] corrección | Parche de sharp detectado en CI de la demo
+
+- La auditoría de dependencias de [CI de PR #49](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37490835966) detectó `GHSA-wq5f-xc86-pv6w`, publicado en GitHub Advisory Database el 06/10/2026: vulnerabilidad de librsvg en `sharp <0.35.5`, transitiva de Next.js.
+- Aplicado override acotado de `sharp@0.35.4` a `0.35.5` y regenerado el lockfile con los binarios correspondientes. No se omiten avisos ni se relaja la auditoría.
+- Instalación con lockfile congelado, auditorías completa y de producción con umbral `low` sin vulnerabilidades conocidas, y `pnpm check` correctos: 531 pruebas pasadas, 100 omitidas y builds Web/Core reconstruidos sin caché. Comprobada la carga de sharp 0.35.5 con librsvg 2.63.2 y conversión en memoria del SVG de marca a PNG de 534 × 534. Sin cambios de la interfaz ni despliegue.
