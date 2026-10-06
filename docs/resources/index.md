@@ -166,3 +166,9 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | --- | --- | --- |
 | [Adjuntar archivos con GitHub CLI](https://docs.github.com/en/github-cli/github-cli/attaching-files-with-github-cli) y [gh pr edit](https://cli.github.com/manual/gh_pr_edit) | GitHub CLI 2.102.0 permite adjuntar el MP4 a una PR con `--attach` y obtener una URL nativa; el vídeo se presenta como reproductor | Vídeo final en el [README](../../README.md), sin incorporar el archivo pesado al historial Git |
 | [Formatos y límites de adjuntos de GitHub](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) | MP4 con H.264 para compatibilidad; los límites y el acceso dependen del plan y la visibilidad del repositorio | Exportación de 56 segundos a 1080p/60; capturas versionadas en la [galería](../demo.md) |
+
+## Procesado de imágenes · 06/10/2026
+
+| Referencia | Propósito y conclusión | Uso local |
+| --- | --- | --- |
+| [sharp GHSA-wq5f-xc86-pv6w](https://github.com/advisories/GHSA-wq5f-xc86-pv6w) | Aviso incorporado a GitHub Advisory Database el 06/10/2026; sharp 0.35.5 incorpora librsvg 2.63.2 corregida en sus binarios | Override de sharp 0.35.4 a 0.35.5 en [pnpm-workspace.yaml](../../pnpm-workspace.yaml), tras el fallo de auditoría de CI de la demo; [validación](../log.md#2026-10-06-corrección--parche-de-sharp-detectado-en-ci-de-la-demo) |
