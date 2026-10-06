@@ -10,6 +10,10 @@ onlyBuiltDependencies:
 # Scoped security overrides retained for pinned transitive dependencies.
 # Vercel CLI is removed; these also prevent unsafe versions on reintroduction.
 overrides:
+  # GHSA-68fv-2mgg-jv7q: reject invalid indexed source-map offsets.
+  'source-map-js@1.2.1': 1.2.2
+  # GHSA-238p-pmpm-9mq7: ignore inherited renderer trust/settings.
+  'katex@<0.18.2': 0.18.2
   '@tootallnate/once@2.0.0': 2.0.1
   'ajv@8.6.3': 8.20.0
   'js-yaml@4.1.1': 4.3.2
