@@ -13,7 +13,7 @@
 
 ## Servicios y versiones
 
-Configuración versionada al 02/10/2026.
+Configuración contrastada con el código al 06/10/2026.
 
 | Componente | Dirección/configuración | Responsabilidad |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ Usa [los ejemplos raíz](../../.env.example), [Web](../../apps/eve-web/.env.exam
 | Mensajes de conversaciones | Runtime EVE/Workflow | Recuperación nativa; no copia en Core; no purga física implementada |
 | Grafo y releases | `data/routing-releases/`, enlace `data/otp` | Fuentes/configuración/hash; versión anterior conservada para rollback |
 
-Las migraciones 0001–0007 establecieron la base local; 0008–0009 añadieron experimentos conversacionales; 0010–0012 continuidad/destinos/revisiones; 0013 EMT; 0014 CRTM; 0015 geocoder; 0016 releases; 0017 DGT; 0018 meteorología; 0019 accesibilidad; 0020 diaria. El [migrador](../../scripts/migrate.mjs) aplica todas las pendientes con bloqueo, transacción y checksum.
+Las migraciones 0001–0007 establecieron la base local; 0008–0009 añadieron experimentos conversacionales; 0010–0012 continuidad/destinos/revisiones; 0013 EMT; 0014 CRTM; 0015 geocoder; 0016 releases; 0017 DGT; 0018 meteorología; 0019 accesibilidad; 0020 diaria; 0021 observabilidad del panel. El [migrador](../../scripts/migrate.mjs) aplica todas las pendientes con bloqueo, transacción y checksum.
 
 ## Cadencias y frescura
 
