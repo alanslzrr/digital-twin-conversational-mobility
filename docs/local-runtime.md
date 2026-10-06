@@ -129,7 +129,7 @@ No imprimas tokens para diagnosticar ni desactives TLS. Un error de fuente se tr
 
 ## Control conversacional E2
 
-El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Approve/Stop. Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo experimental `campaign` se activa expresamente y mantiene su propio registro de consumo. [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
+El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Aprobar/Detener (Approve/Stop en inglés). Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo experimental `campaign` se activa expresamente y mantiene su propio registro de consumo. [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
 
 ## Actividad y retención
 

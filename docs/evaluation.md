@@ -32,7 +32,7 @@ Para administrar Neon, cargar `.env.cloud.core.local` y exigir `ALLOW_REMOTE_ADM
 
 ## Interfaz oficial
 
-La UI procede del Web Chat de EVE 0.65.0, con Better Auth como puerta de acceso. Las rutas `/`, `/evaluation` y `/s` muestran el chat oficial; `/s/{sessionId}` reanuda la conversación sin eludir los controles de propietario. **New chat** abre `/s` sin borrar ni resetear la sesión previa. Adjuntos deshabilitados; texto limitado a 1.800 caracteres. No se persisten transcripciones ni contraseñas en localStorage.
+La UI procede del Web Chat de EVE 0.65.0, con Better Auth como puerta de acceso. Las rutas `/`, `/evaluation` y `/s` muestran el chat oficial; `/s/{sessionId}` reanuda la conversación sin eludir los controles de propietario. **Nuevo chat / New chat** abre `/s` sin borrar ni resetear la sesión previa. Adjuntos deshabilitados; texto limitado a 1.800 caracteres. No se persisten transcripciones ni contraseñas en localStorage. El selector [ES/EN](ui-i18n.md) cambia los controles, no los mensajes ni los permisos.
 
 ## Límites y retención
 
