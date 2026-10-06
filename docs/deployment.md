@@ -17,7 +17,7 @@ Configuración registrada el **23/09/2026**:
 | Upstash `mobility-twin-cache` | Free, `fra1`, `autoUpgrade=false`, `prodPack=false` | Redis REST |
 | Blob `mobility-twin-raw` | Privado, `fra1`, cuota Hobby de entonces | Archivos |
 
-Los almacenes se conectaron al entorno `production` de Core. En esa preparación se verificaron PostGIS 3.6, tres migraciones y operaciones temporales de escritura, lectura y borrado en Redis/Blob. La base local evolucionó después hasta la migración 0020; los archivos raw y las cachés de dominio pertenecen a la instalación local.
+Los almacenes se conectaron al entorno `production` de Core. En esa preparación se verificaron PostGIS 3.6, tres migraciones y operaciones temporales de escritura, lectura y borrado en Redis/Blob. La base local evolucionó después hasta la migración 0021, que añade observabilidad del panel; los archivos raw y las cachés de dominio pertenecen a la instalación local.
 
 El alta de Upstash requirió aceptar sus condiciones en el navegador, dentro del flujo de integración de Vercel.
 

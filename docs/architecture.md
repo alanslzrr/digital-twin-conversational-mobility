@@ -43,7 +43,7 @@ flowchart TB
 2. La [Web/EVE](../apps/eve-web/agent/agent.ts) conecta el modelo y el [MCP de Core](../apps/mobility-core/app/mcp/route.ts). Existe un servidor con 16 herramientas.
 3. [Core](../apps/mobility-core/src) aplica reglas y guarda datos. [PostGIS](../infra/postgres/migrations) añade consultas geográficas a PostgreSQL.
 4. [OTP local](../infra/local/compose.yaml) carga el grafo de horarios y calles que utiliza para calcular rutas.
-5. Las conexiones externas tienen dos funciones: EVE consulta el modelo y Core adquiere publicaciones de las fuentes. Las consultas de movilidad reutilizan los datos y cachés de PostgreSQL.
+5. EVE consulta el modelo y Core adquiere publicaciones de las fuentes. Las consultas de movilidad reutilizan los datos y cachés de PostgreSQL. Al activar el mapa del panel, el navegador también carga teselas anónimas de OpenStreetMap; ese tráfico está separado de las consultas a Core.
 
 ## Recorrido de una pregunta
 
@@ -76,7 +76,7 @@ sequenceDiagram
 2. El [guard del canal EVE](../apps/eve-web/src/evaluation-guard.ts) consulta la identidad y pide a Core autorización para cada operación. Core comprueba cuenta activa, propietario de la conversación y cuota. Al crear una conversación, el guard registra su identificador y propietario en Core. Así, conocer la URL de otra conversación no da acceso a sus mensajes.
 3. EVE envía el contexto al [modelo configurado](../apps/eve-web/src/model.ts) mediante la API Responses de OpenAI. El modelo solicita herramientas y utiliza sus resultados para elaborar la respuesta.
 4. Las llamadas servidor a servidor usan un JWT con permisos: `mobility.read` para [MCP](reference/mcp.md) y `mobility.evaluation.manage` para gestionar acceso. Esta credencial identifica al servicio Web; la sesión de Better Auth identifica a la persona. Las claves de los proveedores de movilidad permanecen en Core.
-5. EVE puede realizar varios pasos para responder una pregunta. Al alcanzar el límite de continuidad, muestra una pausa: **Approve** permite continuar y **Stop** detiene el turno. [Comportamiento y pruebas](acceptance/2026-09-25-e2-closure.md).
+5. EVE puede realizar varios pasos para responder una pregunta. Al alcanzar el límite de continuidad, muestra una pausa: **Aprobar / Approve** permite continuar y **Detener / Stop** detiene el turno, según el idioma de la interfaz. [Comportamiento y pruebas](acceptance/2026-09-25-e2-closure.md), [localización de controles](ui-i18n.md).
 
 EVE tiene habilitadas las herramientas MCP de movilidad. `defaultTools: false` desactiva las herramientas generales de shell y búsqueda web. La [interfaz de EVE](../apps/eve-web/vendor/eve/README.md) incorpora el acceso autenticado y el listado de conversaciones.
 
