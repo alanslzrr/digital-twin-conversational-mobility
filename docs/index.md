@@ -45,4 +45,3 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 ## Guías y archivo
 
 Las guías describen el funcionamiento actual. Las actas, auditorías, planes e investigaciones conservan los resultados y decisiones de cada fecha. Consulta el [roadmap](roadmap.md) para conocer el alcance vigente.
-

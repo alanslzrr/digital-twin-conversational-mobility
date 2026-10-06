@@ -8,7 +8,7 @@ Localiza el síntoma y comprueba el componente indicado antes de aplicar la corr
 | --- | --- | --- |
 | No abre el chat | Docker, Postgres/OTP y supervisor; puertos de [referencia](reference/system.md#servicios-y-versiones) | Sigue [inicio cotidiano](local-runtime.md#inicio-y-parada); no repitas instalación |
 | Puerto ocupado | Puede existir un supervisor habitual | Reutilízalo o detén su terminal; no mates procesos ajenos por número de puerto |
-| «Credenciales incorrectas o límite…» | Origen `127.0.0.1:3000`, cuenta habilitada/vigente y límite de login | Espera el minuto indicado; el administrador usa `evaluator list` y, si procede, `reset`. No revelar contraseñas en logs |
+| No se puede iniciar sesión | El mensaje distingue credenciales, origen/acceso, límite de intentos y servicio no disponible | Usa `127.0.0.1:3000`; espera si indica límite o comprueba Core si indica indisponibilidad. Para credenciales, el administrador usa `evaluator list` y, si procede, `reset`. No revelar contraseñas en logs |
 | Login permitido, conversación ajena denegada | Propiedad de sesión EVE | Accede con el propietario de la conversación o abre una propia |
 | Chat anterior no disponible | Caducidad de acceso, reset/revoke o mensajes ausentes en EVE | Comprueba el estado de acceso y abre un chat nuevo si el anterior ha caducado o carece de mensajes |
 | MCP rechaza credencial de servicio | JWT local de siete días y configuración Web/Core | `pnpm setup:local --refresh-token`; reiniciar aplicaciones para cargarlo, sin tocar claves de proveedores |
