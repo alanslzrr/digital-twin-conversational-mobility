@@ -154,7 +154,7 @@ export function AgentChat({
             ? { scrollRestorationKey: `eve:web-chat-scroll:${activeSessionId}` }
             : {})}
         >
-          <ConversationTopFade className="top-14" />
+          <ConversationTopFade className="top-[60px] md:top-16" />
           <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
             {agent.data.messages.map((message, index) =>
               showPendingThinking &&
@@ -208,7 +208,7 @@ export function AgentChat({
       >
         {showConversationLayout ? null : (
           <div className="flex flex-col items-center gap-3 text-center">
-            <h1 className="font-medium text-5xl tracking-tighter">
+            <h1 className="font-[family-name:var(--font-display)] font-medium text-5xl tracking-tighter">
               <MobaiBrand size="hero" />
             </h1>
           </div>
@@ -280,15 +280,15 @@ function ChatHeader({
   const { t } = useUi();
 
   return (
-    <header className="pointer-events-none fixed top-0 right-0 left-0 z-20 h-14">
+    <header className="pointer-events-none fixed top-0 right-0 left-0 z-20 h-[60px] md:h-16">
       <div className="relative mx-auto flex h-full w-full max-w-3xl items-center justify-center bg-background px-24">
-        <span className="hidden truncate text-muted-foreground text-sm md:block">
+        <span className="hidden truncate text-muted-foreground text-sm min-[1600px]:block">
           <MobaiBrand />
         </span>
         {canStartNewChat ? (
           <Button
             aria-label={t("agentChat.startANewChat")}
-            className="pointer-events-auto fixed top-3 right-6 pr-4"
+            className="pointer-events-auto fixed top-3 right-3 sm:right-6 pr-4"
             onClick={() => window.location.assign("/s")}
             size="sm"
             type="button"

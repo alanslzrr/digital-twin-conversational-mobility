@@ -918,7 +918,7 @@ export const PromptInput = ({
       <form className="w-full" onSubmit={handleSubmit} ref={formRef} {...props}>
         <InputGroup
           className={cn(
-            "overflow-hidden rounded-2xl bg-card/80 shadow-sm backdrop-blur-md",
+            "overflow-hidden rounded-[var(--radius-panel)] bg-card",
             "focus-within:border-foreground! has-[[data-slot=input-group-control]:focus-visible]:border-foreground!",
             className,
           )}
