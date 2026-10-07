@@ -190,7 +190,9 @@ export function Tools({ name: routeName }: { name?: string }) {
               );
               return matching.length ? (
                 <div key={group}>
-                  <h2 className="dc-group-title">{group}</h2>
+                  <h2 className="dc-group-title">
+                    {group === "Places" ? t("toolView.places") : copy(group)}
+                  </h2>
                   {matching.map((t) => (
                     <Link
                       key={t.name}

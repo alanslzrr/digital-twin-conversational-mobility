@@ -62,7 +62,9 @@ function SourcesContent({ id }: { id?: string }) {
   return (
     <>
       <PageTitle
-        title={id ? (names[id] ?? "Source detail") : t("overviewView.sources")}
+        title={
+          id ? copy(names[id] ?? "Source detail") : t("overviewView.sources")
+        }
         description={t(
           "sourceView.storedProviderEvidenceAndScopedOperationalSignals",
         )}
@@ -128,7 +130,9 @@ function SourcesContent({ id }: { id?: string }) {
               }}
               options={[
                 ["", t("activityView.all")],
-                ...Object.entries(operations),
+                ...Object.entries(operations).map(
+                  ([value, label]) => [value, copy(label)] as const,
+                ),
               ]}
             />
           </div>
@@ -205,7 +209,8 @@ function SourcesContent({ id }: { id?: string }) {
                             className="font-medium hover:underline"
                             href={`/dashboard/sources/${source.id}`}
                           >
-                            {names[String(source.id)] ?? String(source.id)}
+                            {copy(names[String(source.id)]) ??
+                              String(source.id)}
                           </Link>
                         </td>
                         <td>
@@ -328,7 +333,7 @@ function SourcesContent({ id }: { id?: string }) {
                   key={["weather", "transport", "reference"][groupIndex]}
                   className="rounded-lg border bg-card p-5"
                 >
-                  <h2 className="text-base font-semibold">{String(label)}</h2>
+                  <h2 className="text-base font-medium">{String(label)}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {t("sourceView.upTo50ResourcesPerPageNotAGlobal")}
                   </p>
@@ -357,14 +362,15 @@ function SourcesContent({ id }: { id?: string }) {
                           {r.ageBasis ? (
                             <p className="mt-1 text-xs text-muted-foreground">
                               {t("sourceView.dailyAgeEvaluationBasis")}{" "}
-                              <Instant value={r.ageBasis} />. Not a verified
-                              publication time.
+                              <Instant value={r.ageBasis} />.{" "}
+                              {t("sourceView.notVerifiedPublicationTime")}
                             </p>
                           ) : null}
                           {r.checkedAt ? (
                             <p className="mt-1 text-xs text-muted-foreground">
-                              {t("sourceView.checked")}
-                              <Instant value={r.checkedAt} />. Validity:{" "}
+                              {t("sourceView.checked")}{" "}
+                              <Instant value={r.checkedAt} />.{" "}
+                              {t("inspectionResult.validity")}{" "}
                               <Instant value={r.validFrom} /> —{" "}
                               <Instant value={r.validTo} />.
                             </p>
