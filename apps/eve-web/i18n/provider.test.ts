@@ -101,6 +101,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(() => root.unmount());
   vi.unstubAllGlobals();
+  vi.useRealTimers();
   await browser.happyDOM.close();
 });
 it("switches without remounting children, changing drafts, messages, focus or generation", async () => {
@@ -342,4 +343,64 @@ it("supports arrow and Home/End keyboard selection with visible focus", async ()
   );
   expect(document.activeElement).toBe(spanish);
   expect(document.documentElement.lang).toBe("es");
+});
+
+it("shares the persisted root theme with portals without remounting native chat", async () => {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  // Import after the browser globals: next-themes detects its runtime at import.
+  const { ThemeProvider, useTheme } = await import("next-themes");
+  const { ThemeSwitcher } = await import("@/components/theme-switcher");
+  const { createPortal } = await import("react-dom");
+  function PortaledPreference() {
+    const { resolvedTheme } = useTheme();
+    return createPortal(
+      React.createElement("output", {
+        "data-theme-probe": resolvedTheme,
+      }),
+      document.body,
+    );
+  }
+  localStorage.setItem("dashboard-theme", "light");
+  await act(() =>
+    root.render(
+      React.createElement(
+        ThemeProvider,
+        {
+          attribute: "data-dashboard-theme",
+          storageKey: "dashboard-theme",
+          defaultTheme: "system",
+          enableSystem: true,
+          enableColorScheme: false,
+          disableTransitionOnChange: true,
+        },
+        React.createElement(
+          UiProvider,
+          { initialLocale: "es" },
+          React.createElement(ThemeSwitcher),
+          React.createElement(PortaledPreference),
+          React.createElement(AgentChat, { sessionId: runtime.session }),
+        ),
+      ),
+    ),
+  );
+  expect(document.documentElement.dataset.dashboardTheme).toBe("light");
+  const textarea = document.querySelector("textarea");
+  const mounts = runtime.mounts;
+  await act(() =>
+    document
+      .querySelector<HTMLButtonElement>('[aria-label="Tema oscuro"]')!
+      .click(),
+  );
+  expect(document.documentElement.dataset.dashboardTheme).toBe("dark");
+  expect(
+    document
+      .querySelector("[data-theme-probe]")
+      ?.getAttribute("data-theme-probe"),
+  ).toBe("dark");
+  expect(localStorage.getItem("dashboard-theme")).toBe("dark");
+  expect(document.querySelector("textarea")).toBe(textarea);
+  expect(runtime.mounts).toBe(mounts);
+  expect(runtime.unmounts).toBe(0);
+  expect(runtime.requests).toBe(0);
+  await act(() => vi.runAllTimersAsync());
 });
