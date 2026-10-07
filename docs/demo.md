@@ -2,7 +2,7 @@
 
 [Índice](index.md) · [Ver vídeo](https://github.com/user-attachments/assets/8c937e33-bb42-48be-a6e2-2813ea553e41) · [Presentación](../README.md) · [Guía de uso](user-guide.md)
 
-Del viaje que describes en el chat a los datos que puedes explorar en el panel. Las capturas corresponden al **6 de octubre de 2026**; cada vista conserva los valores, las fuentes y las horas que mostraba la aplicación. Pulsa cualquier imagen para abrirla a tamaño completo.
+Del viaje que describes en el chat a los datos que puedes explorar en el panel. Las capturas corresponden al **7 de octubre de 2026**, con la interfaz unificada; cada vista conserva los valores, las fuentes y las horas que mostraba la aplicación. Pulsa cualquier imagen para abrirla a tamaño completo.
 
 ## Recorrido
 
@@ -18,7 +18,7 @@ Del viaje que describes en el chat a los datos que puedes explorar en el panel. 
 
 [![Conversación Atocha–Chamartín: herramientas ejecutadas, alternativas y seguimiento del C7 con 22 minutos de margen.](assets/demo/chat-conversacion.jpg)](assets/demo/chat-conversacion.jpg)
 
-En este ejemplo, el seguimiento toma la llegada estimada a las 16:53 y calcula **22 minutos de margen** respecto al tren de las 17:15. La respuesta distingue el horario previsto de las estimaciones recibidas.
+En este ejemplo, consultado el 6 de octubre, el seguimiento toma la llegada estimada a las 16:53 y calcula **22 minutos de margen** respecto al tren de las 17:15. La respuesta distingue el horario previsto de las estimaciones recibidas.
 
 [Cómo plantear una consulta](user-guide.md) · [Flujo de conversación y routing](architecture.md)
 

@@ -2,7 +2,7 @@
 
 [Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **6 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **7 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 
