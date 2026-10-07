@@ -41,7 +41,7 @@ export function EntityHistory({ entity }: { entity: DashboardEntity }) {
   const data = q.data as DashboardEntitySeries | undefined;
   return (
     <section className="rounded-lg border bg-card p-5">
-      <h2 className="text-base font-semibold">
+      <h2 className="text-base font-medium">
         {t("entityHistory.retainedMeasurementHistory")}
       </h2>
       {!supported ? (

@@ -26,7 +26,7 @@ export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
   return (
     <section className="overflow-hidden rounded-lg border bg-card">
       <div className="border-b p-5">
-        <h2 className="text-lg font-semibold">{e.name}</h2>
+        <h2 className="text-lg font-medium">{e.name}</h2>
         <p className="mt-2 text-sm">
           {copy(productLabel(e.evidence.productId))} ·{" "}
           {copy(states[e.evidence.freshness])}
@@ -69,14 +69,15 @@ export function EntityDetail({ entity: e }: { entity: DashboardEntity }) {
           )}
         </p>
         <p>
-          {t("entityDetail.storageIngestion")}
-          <Instant value={e.evidence.ingestedAt} />. Does not renew the
-          observation.
+          {t("entityDetail.storageIngestion")}{" "}
+          <Instant value={e.evidence.ingestedAt} />.{" "}
+          {t("entityDetail.ingestionDoesNotRenewObservation")}
         </p>
         {e.evidence.checkedAt ? (
           <p>
-            {t("entityDetail.lastSourceCheck")}
-            <Instant value={e.evidence.checkedAt} />. Not a new publication.
+            {t("entityDetail.lastSourceCheck")}{" "}
+            <Instant value={e.evidence.checkedAt} />.{" "}
+            {t("entityDetail.checkIsNotNewPublication")}
           </p>
         ) : null}
         {e.evidence.validFrom || e.evidence.validTo ? (
