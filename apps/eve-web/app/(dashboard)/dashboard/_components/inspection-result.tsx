@@ -64,7 +64,7 @@ export function InspectionResult({ value }: { value: unknown }) {
   const availability = envelope.availability ?? envelope.state ?? root.status;
   return (
     <section className="flex flex-col gap-4 rounded-lg border bg-card p-5">
-      <h2 className="text-base font-semibold">
+      <h2 className="text-base font-medium">
         {t("inspectionResult.queryResult")}
       </h2>
       <p className="text-sm">
