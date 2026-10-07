@@ -1,0 +1,2 @@
+# Reviewed false positive: prose containing the dashboard query path, not a credential.
+e805ca1885417129b719f17c75f9982c5a3158ba:docs/audits/2026-10-02-core-dashboard-review.md:generic-api-key:445
