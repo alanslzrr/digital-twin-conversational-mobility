@@ -7,7 +7,11 @@
 
 <h1 align="center">mobai</h1>
 
-[![M8ven Verified](https://m8ven.ai/badge/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?v=a679bd14a64e34a0229d3869ee1daaa6&variant=verified)](https://m8ven.ai/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?s=readme)
+<p align="center">
+  <a href="https://m8ven.ai/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?s=readme"><img src="https://m8ven.ai/badge/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?v=a679bd14a64e34a0229d3869ee1daaa6&amp;variant=verified" alt="M8ven Verified"></a> &nbsp;
+  <a href="https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/workflows/ci.yml"><img src="https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI: estado de los controles de calidad en main"></a> &nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748b?style=flat" alt="Licencia MIT"></a>
+</p>
 
 <p align="center">
   <strong>La movilidad de Madrid, explicada en una conversación.</strong>
@@ -37,6 +41,7 @@ https://github.com/user-attachments/assets/8c937e33-bb42-48be-a6e2-2813ea553e41
 - [Qué resuelve](#qué-resuelve)
 - [Qué puedes hacer](#qué-puedes-hacer)
 - [Pantallas del producto](#pantallas-del-producto)
+- [Stack tecnológico](#stack-tecnológico)
 - [Cómo funciona](#cómo-funciona)
 - [Empezar en local](#empezar-en-local)
 - [Datos, privacidad y alcance](#datos-privacidad-y-alcance)
@@ -94,6 +99,18 @@ Explora BiciMAD en el mapa y compara las bicicletas y los anclajes de cada estac
 [![Panel BiciMAD con el mapa de estaciones, bicicletas, anclajes y horas de observación.](docs/assets/demo/panel-bicimad.jpg)](docs/demo.md#explorar-las-estaciones-bicimad)
 
 **[Ver la galería completa](docs/demo.md)**: herramientas desplegadas, resumen del panel y capturas a tamaño completo del 6 de octubre de 2026.
+
+## Stack tecnológico
+
+<p align="center">
+  <a href="https://github.com/vercel/eve"><img src="https://img.shields.io/badge/EVE-18181b?style=flat" alt="EVE"></a> &nbsp;
+  <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/MCP-18181b?style=flat" alt="Model Context Protocol"></a> &nbsp;
+  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-18181b?style=flat&amp;logo=nextdotjs&amp;logoColor=white" alt="Next.js"></a> &nbsp;
+  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-4169e1?style=flat&amp;logo=postgresql&amp;logoColor=white" alt="PostgreSQL"></a> &nbsp;
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-3178c6?style=flat&amp;logo=typescript&amp;logoColor=white" alt="TypeScript"></a>
+</p>
+
+EVE coordina el chat; MCP conecta sus herramientas con Mobility Core; Next.js sirve la interfaz web; PostgreSQL almacena los datos del núcleo y TypeScript define los contratos compartidos.
 
 ## Cómo funciona
 
