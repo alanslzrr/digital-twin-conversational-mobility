@@ -5,7 +5,7 @@ The chat, message renderers, UI primitives and global theme were extracted from 
 Upstream: https://github.com/vercel/eve — see the included Apache-2.0 LICENSE and NOTICE. Original generated paths are preserved under `app/_components`, `components`, `lib/utils.ts`, and `app/globals.css`.
 
 Local adaptations:
-- Replace the app-name placeholder with mobai and use the user-approved transparent monochrome mark in the existing welcome heading and header; retain upstream layout, theme, composer, Markdown, tool output and session URL behavior.
+- Replace the app-name placeholder with mobai and use the user-approved transparent monochrome mark in the existing welcome heading and header; retain upstream layout, composer structure, Markdown, tool output and session URL behavior.
 - Mount the official chat behind the existing Better Auth gate at `/`, `/evaluation`, `/s` and `/s/[sessionId]`. Never copy upstream placeholder/local-development authorization.
 - Disable attachments and retain the evaluation text-length limit, matching the protected backend.
 - Preserve strict TypeScript settings with conditional optional properties and checked array access; format with the repository tooling.
@@ -13,20 +13,19 @@ Local adaptations:
 
 When upgrading, compare this exact template version and reapply only these adaptations. Do not replace the official interface with custom chat markup.
 
-Server-side E2 extensions live in `agent/hooks/` and `agent/memory/`: budget admission, numeric telemetry, bounded tool execution and lossless evidence retention. These use EVE public extension points; upstream Web Chat markup and styling are unchanged. See `docs/audits/2026-09-25-e2-instrumentation.md` for limits and offline acceptance.
+Server-side E2 extensions live in `agent/hooks/` and `agent/memory/`: budget admission, numeric telemetry, bounded tool execution and lossless evidence retention. These use EVE public extension points; upstream Web Chat structure and runtime behavior are unchanged; approved cosmetic adaptations are listed below. See `docs/audits/2026-09-25-e2-instrumentation.md` for limits and offline acceptance.
 
 Evidence capture additionally recognizes the EVE 0.65.0 structural user-message kind `context.compaction` and skips its immediately following assistant checkpoint. This is a pinned harness-shape assumption (not text matching or a private import); review it and the consecutive-compaction regression when upgrading EVE. Unexpected checkpoint structure fails before destructive compaction.
 
 Normal operation uses native EVE session-limit continuation (Approve/Stop), verified against installed harness modules in offline tests; no custom approval UI. The nonrenewable campaign ledger is now explicit opt-in via `MOBILITY_BUDGET_MODE=campaign`. Interactive mode still records provider-attempt usage/latency and keeps identity, fixed endpoint, per-request timeout and output bounds.
 
-The login gate links accidental `localhost:3000` visits to the canonical loopback origin without forwarding session URLs, and distinguishes access/origin, rate-limit and service errors from invalid credentials. Upstream chat markup remains unchanged.
+The login gate links accidental `localhost:3000` visits to the canonical loopback origin without forwarding session URLs, and distinguishes access/origin, rate-limit and service errors from invalid credentials. Upstream chat structure remains unchanged.
 
-R2.1 adds a minimal **Mis conversaciones** dialog using the installed Dialog/Button primitives alongside the authentication controls. Its Core-backed owner index returns only creation/access-expiry metadata, twenty records per page; EVE remains the sole message store and performs native `initialSession`/`resume` recovery. The dialog is mounted separately from the chat, refreshes only on open/load-more, aborts late reads on close/logout, and is keyed to the authenticated evaluator. Focus/visibility rechecks identity without interrupting an unchanged chat. Session pages key the native chat by session ID; unsuccessful empty recovery shows a generic unavailable state without a replacement session. On narrow screens only the header name is hidden to leave room for the access controls; composer, messages, streaming and native approval controls remain upstream.
+R2.1 adds a minimal **Mis conversaciones** dialog using the installed Dialog/Button primitives alongside the authentication controls. Its Core-backed owner index returns only creation/access-expiry metadata, twenty records per page; EVE remains the sole message store and performs native `initialSession`/`resume` recovery. The dialog is mounted separately from the chat, refreshes only on open/load-more, aborts late reads on close/logout, and is keyed to the authenticated evaluator. Focus/visibility rechecks identity without interrupting an unchanged chat. Session pages key the native chat by session ID; unsuccessful empty recovery shows a generic unavailable state without a replacement session. Where header space is limited, the centered name is hidden to leave room for the separate access controls; composer, messages, streaming and native approval controls remain upstream.
 
 The independent Core dashboard lives at /dashboard, sharing the existing
-Better Auth evaluator gate, primitives, Geist font and semantic tokens. Two
-minimal navigation buttons (Panel and Telemetría) are added to the existing
-evaluation controls, outside the upstream chat tree. The Responses transport and
+Better Auth evaluator gate, primitives, local fonts and semantic tokens. Dashboard and telemetry
+navigation are added to the existing evaluation controls, outside the upstream chat tree. The Responses transport and
 public lifecycle/tool hooks now emit best-effort sanitized observability to the
 fixed Core service; failure to capture never substitutes or interrupts chat
 results. Browser code never receives the service token. Detailed payloads are
@@ -43,4 +42,56 @@ agent-authored questions/options remain untouched. Native continuation keeps the
 original request IDs and `continue`/`stop` option IDs. Language never becomes a
 model parameter and never keys or reconstructs EVE, authentication or data providers.
 
-Product identity uses `components/mobai-brand.tsx` and local `public/brand/` SVGs. The marks derive from the user-provided `logo_light.svg` and `logo_dark.svg`; shipped assets retain every path and fill (geometry pinned by a SHA-256 regression), with only the viewport tightened to `360 341 534 534` for optical sizing. Login uses a 48px mark, the native welcome heading 64px, and navigation 28px. CSS follows the native system theme outside the dashboard and its explicit `data-dashboard-theme` preference inside it, without client-side asset swapping. No backgrounds, filters, recoloring, external assets or chat behavior changes. The sidebar retains its native collapsed/mobile behavior.
+Product identity uses `components/mobai-brand.tsx` and local `public/brand/` SVGs. The marks derive from the user-provided `logo_light.svg` and `logo_dark.svg`; shipped assets retain every path and fill (geometry pinned by a SHA-256 regression), with only the viewport tightened to `360 341 534 534` for optical sizing. Login uses a 48px mark, the native welcome heading 64px, and navigation 28px. CSS follows the single root `data-dashboard-theme` preference across login, chat, dashboard and portals, with the system theme as the default and without client-side asset swapping. No backgrounds, filters, recoloring, external assets or chat behavior changes. The sidebar retains its native collapsed/mobile behavior.
+### Approved cosmetic interface adaptations (2026-10-07)
+
+- The root owns the existing `dashboard-theme` saved preference. Its semantic
+  roles supply white light surfaces and charcoal dark surfaces to both the owned
+  dashboard and the official chat, including portaled menus and dialogs.
+- Inter interface/body text and Geist display text are bundled locally with
+  their SIL Open Font License notices in `app/fonts/`. Technical content uses
+  system monospace; no font service is required at build time or in the browser.
+- Existing Radix primitives retain their props, keyboard semantics, positioning
+  and focus restoration. Ordinary cards are flat; floating layers alone use
+  elevation. Controls use 36/44/50px sizes, with larger coarse-pointer targets,
+  while native composite chat controls retain their required geometry.
+- Chat adaptations are limited to header height and responsive brand visibility,
+  palette, typography, composer and message surface corners, and shared control
+  styling. The header keeps 60px on mobile and 64px on desktop; its centered
+  name appears only where there is room for the separate navigation controls.
+- Owned mobile access actions are grouped in a Radix menu outside the native
+  chat tree. The same owner-keyed conversation dialog is opened from desktop or
+  mobile, and focus returns to the mobile menu trigger when it closes.
+- Theme and control transitions use short shared timings and honor reduced
+  motion, including the native decorative thinking shimmer. Overlay triggers
+  do not scale while Radix measures them.
+- Mobile menu actions and modal close controls retain 44px targets, including
+  `asChild` triggers whose Radix `data-slot` replaces the shared Button slot.
+  Modal scrolling is contained, and close controls have dedicated heading space.
+
+These adaptations do not replace chat markup, message renderers, streaming,
+recovery, continuation approvals, session IDs, authentication or owner checks.
+They add no model requests, provider queries, datasets or demo records. Brand
+geometry and existing freshness/missing-capture regressions remain unchanged.
+Presentation regressions live in `src/interface-foundation.test.ts`,
+`src/interface-focus.test.ts`, and the root-theme case in
+`i18n/provider.test.ts`. Mobile sidebar dismissal also restores the initiating
+control's focus; its existing navigation and keyboard shortcut are retained.
+
+### Local validation
+
+`pnpm check` passed with the production build and 545 passing tests (100
+existing tests skipped under their opt-in conditions); lint still reports
+warnings, not errors.
+Existing authentication, ownership, conversation recovery, polling, freshness,
+missing-capture and brand-geometry regressions were retained.
+
+Browser inspection used existing stored evidence and a completed two-turn
+conversation. All six dashboard views were checked at 1440px in ES/EN and both
+themes, with 390px and 1024px responsive checks, details, login, native welcome,
+conversation history, keyboard tabs/overflow controls and mobile dialog focus.
+A 720px reflow check was performed separately. Actual 200% browser zoom remains
+unverified because the available browser surface did not expose a working zoom
+control; this is not reported as a zoom test. Live provider updates, new model
+turns and visually forced streaming/approval/error states were not exercised.
+No synthetic records, provider queries, model calls or deployments were needed.
