@@ -24,3 +24,8 @@ body:
       label: Expected and actual behavior
     validations:
       required: true
+  - type: textarea
+    id: release
+    attributes:
+      label: Upgrade and release impact
+      description: Describe affected users, compatibility and any migration needed; the PR must make the final release decision.

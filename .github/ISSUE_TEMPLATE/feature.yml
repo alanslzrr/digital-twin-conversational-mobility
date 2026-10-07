@@ -17,3 +17,13 @@ body:
     id: constraints
     attributes:
       label: Data access, security, costs and dependencies
+  - type: dropdown
+    id: release
+    attributes:
+      label: Expected release impact
+      options:
+        - Requires maintainer decision
+        - User-visible or security change — release expected
+        - Documentation or internal tooling only — release may not be needed
+    validations:
+      required: true
