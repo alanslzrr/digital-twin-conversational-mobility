@@ -61,7 +61,7 @@ const initials = (label: string) =>
     .map((part) => part[0]?.toUpperCase())
     .join("");
 function Navigation() {
-  const { t } = useUi();
+  const { t, copy } = useUi();
 
   const path = usePathname();
   const { setOpenMobile } = useSidebar();
@@ -76,13 +76,13 @@ function Navigation() {
                 href === "/dashboard" ? path === href : path.startsWith(href)
               }
               tooltip={{
-                children: label,
+                children: copy(label),
                 className: "dashboard-dialog dc-tooltip",
               }}
             >
               <Link
                 href={href}
-                aria-label={label}
+                aria-label={copy(label)}
                 onClick={() => setOpenMobile(false)}
                 aria-current={
                   (
@@ -95,7 +95,7 @@ function Navigation() {
                 }
               >
                 <Icon aria-hidden="true" />
-                <span>{label}</span>
+                <span>{copy(label)}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -211,7 +211,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       data-resolved={sidebarResolved}
       style={
         {
-          "--sidebar-width": "200px",
+          "--sidebar-width": "242px",
           "--sidebar-width-icon": "56px",
         } as React.CSSProperties
       }

@@ -1,6 +1,5 @@
 "use client";
 
-import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { Spinner } from "@/components/ui/spinner";
 import { useUi } from "@/i18n/provider";
 import { readState } from "@/src/dashboard-presentation";
@@ -80,12 +79,6 @@ export function State({
     </>
   );
 }
-const titleVariants = {
-  item: {
-    hidden: { opacity: 0, y: 4, filter: "blur(4px)" },
-    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
-  },
-};
 export function PageTitle({
   title,
   description,
@@ -95,15 +88,7 @@ export function PageTitle({
 }) {
   return (
     <div className="dc-page-heading">
-      <TextEffect
-        as="h1"
-        className="dc-page-title"
-        per="word"
-        variants={titleVariants}
-        speedSegment={1.5}
-      >
-        {title}
-      </TextEffect>
+      <h1 className="dc-page-title">{title}</h1>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
         {description}
       </p>
