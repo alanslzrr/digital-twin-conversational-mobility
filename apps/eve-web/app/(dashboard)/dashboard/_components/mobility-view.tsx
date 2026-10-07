@@ -248,7 +248,7 @@ export function Mobility({
               }}
               options={categories
                 .filter(([v]) => v !== "places")
-                .map(([v, l]) => [v ?? "", l ?? ""])}
+                .map(([v, l]) => [v ?? "", copy(l) ?? ""])}
             />
           ) : null}
         </div>
@@ -564,7 +564,7 @@ export function Mobility({
                           className="dc-status"
                           data-tone={freshnessTones[e.evidence.freshness]}
                         >
-                          {freshnessLabels[e.evidence.freshness]}
+                          {copy(freshnessLabels[e.evidence.freshness])}
                         </span>
                         <span>
                           {copy(sourceNames[e.evidence.sourceId]) ??
@@ -573,12 +573,12 @@ export function Mobility({
                         <span>
                           {e.evidence.observedAt ? (
                             <>
-                              {t("mobilityView.observed")}
+                              {t("mobilityView.observed")}{" "}
                               <Instant value={e.evidence.observedAt} />
                             </>
                           ) : e.evidence.issuedAt ? (
                             <>
-                              {t("mobilityView.issued")}
+                              {t("mobilityView.issued")}{" "}
                               <Instant value={e.evidence.issuedAt} />
                             </>
                           ) : (
