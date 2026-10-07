@@ -33,7 +33,7 @@
   <a href="docs/architecture.md"><strong>Arquitectura</strong></a>
 </p>
 
-https://github.com/user-attachments/assets/8c937e33-bb42-48be-a6e2-2813ea553e41
+https://github.com/user-attachments/assets/0e122168-1229-4229-b2bd-24607de5f756
 
 ---
 
