@@ -1,6 +1,6 @@
 # Security
 
-Do not include credentials, tokens, raw conversation contents or personal travel histories in issues or pull requests. Report security problems privately to the repository owner.
+Do not include credentials, tokens, raw conversation contents or personal travel histories in issues or pull requests. Report security problems through [GitHub private vulnerability reporting](https://github.com/alanslzrr/digital-twin-conversational-mobility/security/advisories/new). Sign in to GitHub and submit a sanitized description, affected commit and reproduction steps. The report is shared privately with repository maintainers; do not open a public issue.
 
 ## Current boundaries
 
