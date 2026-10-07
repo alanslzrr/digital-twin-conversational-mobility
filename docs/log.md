@@ -4,6 +4,13 @@
 
 Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza en su página propia; no se inventan entradas retrospectivas.
 
+## [2026-10-07] cierre | OpenSSF Passing y v0.1.0
+
+- Publicada la release v0.1.0, con notas formales, tag sobre SHA validado y alcance de evaluación local.
+- Confirmado Passing al 100 % en la ficha 15273 de OpenSSF; añadido badge dinámico centrado al README.
+- PR #54 y CI de main aprobados; Quality gates y PR policy obligatorios. Conservados borradores locales fuera de los commits.
+- Sugerencias no satisfechas y límites del escaneo permanecen explícitos en el acta; sin nuevos servicios locales ni despliegue cloud.
+
 ## [2026-10-07] mantenimiento | Issues, PR y entregas versionadas
 
 - Cada PR debe asociarse a un issue real y decidir si requiere release, con motivo, versión y notas cuando corresponda.
