@@ -7,6 +7,8 @@
 
 <h1 align="center">mobai</h1>
 
+[![M8ven Verified](https://m8ven.ai/badge/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?v=a679bd14a64e34a0229d3869ee1daaa6&variant=verified)](https://m8ven.ai/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?s=readme)
+
 <p align="center">
   <strong>La movilidad de Madrid, explicada en una conversación.</strong>
 </p>
