@@ -1,6 +1,6 @@
 # mobai en pantalla
 
-[Índice](index.md) · [Ver vídeo](https://github.com/user-attachments/assets/8c937e33-bb42-48be-a6e2-2813ea553e41) · [Presentación](../README.md) · [Guía de uso](user-guide.md)
+[Índice](index.md) · [Ver vídeo](https://github.com/user-attachments/assets/0e122168-1229-4229-b2bd-24607de5f756) · [Presentación](../README.md) · [Guía de uso](user-guide.md)
 
 Del viaje que describes en el chat a los datos que puedes explorar en el panel. Las capturas corresponden al **7 de octubre de 2026**, con la interfaz unificada; cada vista conserva los valores, las fuentes y las horas que mostraba la aplicación. Pulsa cualquier imagen para abrirla a tamaño completo.
 

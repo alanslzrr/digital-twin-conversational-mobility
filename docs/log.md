@@ -8,8 +8,8 @@ Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza
 
 - Renovadas las cuatro imágenes de la [galería](demo.md): conversación, herramientas desplegadas, resumen y mapa BiciMAD, con la interfaz de PR #58. Capturas nativas, sin ampliar las imágenes ni reconstruir componentes o datos.
 - Actualizadas las fechas del README y la galería; el ejemplo conserva la conversación del 6 de octubre y las vistas del panel muestran sus horas de observación del 7 de octubre. Conservadas cobertura, calidad y atribución cartográfica.
-- Preparado el montaje actualizado de 56 segundos, con el mismo guion, indicaciones, música y cierre; encuadres ajustados a los componentes actuales. Previsualización disponible; exportación y sustitución del vídeo pendientes de revisión final.
-- `pnpm check` aprobado: 545 pruebas y 100 opt-in omitidas, tipos y builds con caché. Auditoría moderada sin vulnerabilidades; 165 enlaces locales y 28 anclas de las cuatro páginas revisadas correctos. HyperFrames 0.8.140: sin errores ni advertencias en el montaje, 44 contrastes correctos y revisión visual de las escenas.
+- Publicado el vídeo actualizado de 56 segundos, con el mismo guion, indicaciones, música y cierre. Corregidos los bordes de los encuadres y la inicialización del primer fotograma; nueva pieza nativa de GitHub enlazada desde el README y la galería.
+- `pnpm check` aprobado: 545 pruebas y 100 opt-in omitidas, tipos y builds con caché. Auditoría moderada sin vulnerabilidades; 166 enlaces locales y 28 anclas de las cuatro páginas revisadas correctos. HyperFrames 0.8.140: sin errores ni advertencias en el montaje y 44 contrastes correctos. Exportación 1920 × 1080 a 60 fps, decodificación completa y revisión visual del archivo final correctas.
 - Sin cambios de aplicación, inferencias nuevas, bypass de sesión, migraciones o despliegues. Adquisición local normal y acotada para las tomas; worker detenido. Borradores previos conservados y excluidos.
 
 ## [2026-10-07] preparación | Interfaz unificada para v0.1.1
