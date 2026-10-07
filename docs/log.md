@@ -4,6 +4,11 @@
 
 Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza en su página propia; no se inventan entradas retrospectivas.
 
+## [2026-10-07] revisión | Política de auditoría alineada con CI
+
+- SECURITY refleja el umbral moderado de dependencias y el escaneo fijado/redactado de historial de CI.
+- Conservada la edición local previa de SECURITY fuera del commit. Revisión documental, sin cambio de runtime.
+
 ## [2026-10-07] cierre | OpenSSF Passing y v0.1.0
 
 - Publicada la release v0.1.0, con notas formales, tag sobre SHA validado y alcance de evaluación local.

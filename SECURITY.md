@@ -25,7 +25,9 @@ Before publishing the repository, inspect all branches, tags, historical commits
 
 ## Dependency checks
 
-CI runs `pnpm audit --audit-level=high` against the complete lockfile, including development tooling, followed by `pnpm check`. Scoped overrides in [pnpm-workspace.yaml](pnpm-workspace.yaml) select patched releases rather than suppressing advisories. Remove an override only after checking the resolved tree and rerunning the audit and affected tests.
+CI runs `pnpm audit --audit-level=moderate` against the complete lockfile, including development tooling, followed by `pnpm check`. Scoped overrides in [pnpm-workspace.yaml](pnpm-workspace.yaml) select patched releases rather than suppressing advisories. Remove an override only after checking the resolved tree and rerunning the audit and affected tests.
+
+CI also runs Gitleaks 8.30.1 over reachable Git history with redacted output. The scanner binary and SHA-256 are pinned. The single reviewed documentation-path false positive is excluded by exact fingerprint in `.gitleaksignore`; new exclusions require review. Scanning does not prove absence of every credential format or inspect screenshots through OCR.
 
 The Vercel CLI was removed because its dependency tree included an unpatched advisory. `configure:vercel` fails before reading credentials, changing files or contacting cloud services; see [cloud preparation](docs/deployment.md). Its older scoped overrides remain as guards against reintroduction, not as evidence that the CLI is installed.
 
