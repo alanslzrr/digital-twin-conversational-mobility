@@ -8,10 +8,7 @@ export function LocaleSwitcher() {
     {},
   );
   return (
-    <fieldset
-      aria-label={t("locale.language")}
-      className="inline-flex h-8 shrink-0 items-center rounded-full bg-background p-0.5 inset-ring-1 inset-ring-border"
-    >
+    <fieldset aria-label={t("locale.language")} className="ui-segment">
       {locales.map((value) => (
         <button
           key={value}
@@ -38,7 +35,7 @@ export function LocaleSwitcher() {
           aria-label={value === "es" ? "Español" : "English"}
           aria-pressed={locale === value}
           onClick={() => setLocale(value)}
-          className="h-7 min-w-8 rounded-full px-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-pressed:bg-muted aria-pressed:text-foreground motion-reduce:transition-none"
+          className="ui-segment-option"
         >
           {value.toUpperCase()}
         </button>
