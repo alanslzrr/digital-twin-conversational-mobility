@@ -59,3 +59,15 @@ La [ficha oficial 15273](https://www.bestpractices.dev/en/projects/15273/passing
 - Core rechaza secretos JWT y Better Auth de menos de 32 bytes; el bootstrap genera 32 bytes aleatorios. Scrypt de Better Auth utiliza sal de 16 bytes, N=16384, r=16, p=1 y salida de 64 bytes. No se cambia la criptografía para obtener el badge.
 - La [gobernanza de releases](../releasing.md) exige issue, decisión de versionado, notas formales y CI del commit final. La primera entrega se prepara con alcance de evaluación local, no como habilitación de cloud.
 
+## Resultado confirmado · 07/10/2026
+
+La ficha oficial confirmó **Passing, 100 %**, después de publicar [v0.1.0](https://github.com/alanslzrr/digital-twin-conversational-mobility/releases/tag/v0.1.0) y registrar sus evidencias de versionado y notas. Es una autoevaluación del programa, no una auditoría independiente ni una garantía de seguridad.
+
+- Tag v0.1.0: commit `7d4d936a39cda3d2df89b97eb5ebe7d3f80a3d2b`; marcado como prerelease por su alcance de evaluación local.
+- [PR #54](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/54) y [CI final de main](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37612582724) aprobados.
+- `pnpm check`: 531 tests Vitest aprobados, 100 opt-in omitidos y siete tests del control de metadatos aprobados; lint, tipos y builds correctos.
+- Escaneo posterior a los nuevos commits: 352 commits, sin hallazgos tras la exclusión revisada. Se conserva el recuento inicial de 345 como evidencia de aquella ejecución.
+- `main` exige ahora **Quality gates** y **PR policy**. Se comprobó el nuevo control localmente contra la PR real y la API de issues durante su introducción; las PR posteriores usan el código de la rama base.
+- Cobertura mayoritaria, reglas estáticas dedicadas a seguridad y campaña dinámica permanecen como sugerencias no satisfechas; PFS se declara no verificado para el servicio local. Las justificaciones se publican, no se sustituyen por un Met ficticio.
+- El README incorpora el badge dinámico de la ficha 15273, manteniendo la distribución centrada de estado y stack.
+

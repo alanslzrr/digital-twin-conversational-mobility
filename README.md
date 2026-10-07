@@ -10,7 +10,8 @@
 <p align="center">
   <a href="https://m8ven.ai/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?s=readme"><img src="https://m8ven.ai/badge/mcp/alanslzrr-digital-twin-conversational-mobility-xkwic3?v=a679bd14a64e34a0229d3869ee1daaa6&amp;variant=verified" alt="M8ven Verified"></a> &nbsp;
   <a href="https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/workflows/ci.yml"><img src="https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI: estado de los controles de calidad en main"></a> &nbsp;
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748b?style=flat" alt="Licencia MIT"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748b?style=flat" alt="Licencia MIT"></a> &nbsp;
+  <a href="https://www.bestpractices.dev/en/projects/15273/passing"><img src="https://www.bestpractices.dev/projects/15273/badge" alt="OpenSSF Best Practices: Passing"></a>
 </p>
 
 <p align="center">
