@@ -99,7 +99,7 @@ Explora BiciMAD en el mapa y compara las bicicletas y los anclajes de cada estac
 
 [![Panel BiciMAD con el mapa de estaciones, bicicletas, anclajes y horas de observación.](docs/assets/demo/panel-bicimad.jpg)](docs/demo.md#explorar-las-estaciones-bicimad)
 
-**[Ver la galería completa](docs/demo.md)**: herramientas desplegadas, resumen del panel y capturas a tamaño completo del 6 de octubre de 2026.
+**[Ver la galería completa](docs/demo.md)**: herramientas desplegadas, resumen del panel y capturas a tamaño completo del 7 de octubre de 2026.
 
 ## Stack tecnológico
 
