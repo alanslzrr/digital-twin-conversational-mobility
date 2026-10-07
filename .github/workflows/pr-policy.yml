@@ -1,0 +1,34 @@
+name: PR governance
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  policy:
+    name: PR policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out trusted base code only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+      - name: Initial policy introduction
+        if: hashFiles('scripts/check-pr-policy.mjs') == ''
+        run: echo "::notice::Bootstrap PR; maintainer must run the proposed checker locally before merge."
+      - run: node --test scripts/check-pr-policy.test.mjs
+        if: hashFiles('scripts/check-pr-policy.mjs') != ''
+      - run: node scripts/check-pr-policy.mjs
+        if: hashFiles('scripts/check-pr-policy.mjs') != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
