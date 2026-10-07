@@ -32,6 +32,7 @@
     "cargarMas": "Load more"
   },
   "evaluation": {
+    "menu": "Account and navigation",
     "comprobandoAcceso": "Checking access",
     "panel": "Dashboard",
     "telemetria": "Telemetry",
@@ -206,6 +207,8 @@
     "instantValue": "Instant value",
     "forecastIssuance": "Forecast issuance",
     "publishedObservation": "Published observation",
+    "ingestionDoesNotRenewObservation": "Does not renew the observation.",
+    "checkIsNotNewPublication": "Not a new publication.",
     "storageIngestion": "Storage ingestion:",
     "lastSourceCheck": "Last source check:",
     "forecastInterval": "Forecast interval",
@@ -549,6 +552,7 @@
     "show": "Show"
   },
   "sourceView": {
+    "notVerifiedPublicationTime": "Not a verified publication time.",
     "storedProviderEvidenceAndScopedOperationalSignals": "Stored provider evidence and scoped operational signals.",
     "cachedSourceEvidenceRefreshFailed": "Cached source evidence · refresh failed",
     "sourceEvidenceUnavailable": "Source evidence unavailable",
@@ -694,6 +698,7 @@
     "travelModes": "Travel modes"
   },
   "toolView": {
+    "places": "Places",
     "checkRequiredFieldsAndAllowedValuesBeforeSubmitting": "Check required fields and allowed values before submitting.",
     "maximum8192ArgumentBytes": "Maximum 8,192 argument bytes",
     "queries": "Queries",

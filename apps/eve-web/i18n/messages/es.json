@@ -23,6 +23,7 @@
     "timedOut": "tiempo de espera agotado"
   },
   "evaluation": {
+    "menu": "Cuenta y navegación",
     "panel": "Panel",
     "telemetria": "Telemetría",
     "comprobandoAcceso": "Comprobando acceso",
@@ -197,6 +198,8 @@
     "instantValue": "Valor instantáneo",
     "forecastIssuance": "Emisión de predicción",
     "publishedObservation": "Observación publicada",
+    "ingestionDoesNotRenewObservation": "No renueva la observación.",
+    "checkIsNotNewPublication": "No es una publicación nueva.",
     "storageIngestion": "Ingestión en almacenamiento:",
     "lastSourceCheck": "Última comprobación de fuente:",
     "forecastInterval": "Intervalo de predicción",
@@ -540,6 +543,7 @@
     "show": "Mostrar"
   },
   "sourceView": {
+    "notVerifiedPublicationTime": "No es una hora de publicación verificada.",
     "storedProviderEvidenceAndScopedOperationalSignals": "Evidencia almacenada de proveedores y señales operativas acotadas.",
     "cachedSourceEvidenceRefreshFailed": "Evidencia de fuente en caché · actualización fallida",
     "sourceEvidenceUnavailable": "Evidencia de fuente no disponible",
@@ -685,6 +689,7 @@
     "separaLasOpcionesPorComasSeValidanContraEl": "Separa las opciones por comas; se validan contra el contrato de la herramienta."
   },
   "toolView": {
+    "places": "Lugares",
     "checkRequiredFieldsAndAllowedValuesBeforeSubmitting": "Comprueba los campos obligatorios y los valores permitidos antes de enviar.",
     "maximum8192ArgumentBytes": "Máximo de 8.192 bytes de argumentos",
     "queries": "Consultas",
