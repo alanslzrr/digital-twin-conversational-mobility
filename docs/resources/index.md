@@ -172,3 +172,12 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | Referencia | Propósito y conclusión | Uso local |
 | --- | --- | --- |
 | [sharp GHSA-wq5f-xc86-pv6w](https://github.com/advisories/GHSA-wq5f-xc86-pv6w) | Aviso incorporado a GitHub Advisory Database el 06/10/2026; sharp 0.35.5 incorpora librsvg 2.63.2 corregida en sus binarios | Override de sharp 0.35.4 a 0.35.5 en [pnpm-workspace.yaml](../../pnpm-workspace.yaml), tras el fallo de auditoría de CI de la demo; [validación](../log.md#2026-10-06-corrección--parche-de-sharp-detectado-en-ci-de-la-demo) |
+
+## OpenSSF y gobernanza · 07/10/2026
+
+| Referencia | Propósito y conclusión | Uso local |
+| --- | --- | --- |
+| [OpenSSF Passing](https://www.bestpractices.dev/en/criteria/0) | Autoevaluación con evidencias; las declaraciones del mantenedor no se sustituyen por herramientas | [Acta de preparación](../audits/2026-10-07-openssf-best-practices.md) y [ficha 15273](https://www.bestpractices.dev/en/projects/15273/passing) |
+| [Gitleaks 8.30.1](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1) | Escaneo del historial con redacción; checksum fijado y excepción por fingerprint, no exclusión global de documentación | CI y escaneo local de 345 commits |
+| [SemVer](https://semver.org/) | Versiones únicas y límites explícitos antes de 1.0 | [Procedimiento de releases](../releasing.md) |
+| [Eventos de PR](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request) | El cuerpo de la PR es entrada no confiable; validar metadatos con permisos de lectura y código de base | `pr-policy.yml`, sin ejecución de código del fork ni tokens privilegiados |
