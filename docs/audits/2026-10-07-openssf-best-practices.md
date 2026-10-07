@@ -47,3 +47,15 @@ Las sugerencias no satisfechas deben explicarse, no rellenarse con afirmaciones 
 - [Programa y autoevaluación gratuita](https://www.bestpractices.dev/en)
 - [Criterios Passing](https://www.bestpractices.dev/en/criteria/0)
 
+## Continuación de la evaluación · 07/10/2026
+
+La [ficha oficial 15273](https://www.bestpractices.dev/en/projects/15273/passing) se registró con cuenta independiente, sin autorizar OAuth de GitHub ni acceso a organizaciones. El propietario autorizó publicar los datos de la ficha bajo CDLA-Permissive-2.0; el código conserva MIT. Los pendientes anteriores describen el estado de la primera revisión, no el resultado de esta continuación.
+
+- El mantenedor declaró conocimiento de mínimo privilegio, validación, defensa en profundidad y mitigaciones de inyección, XSS, CSRF y autenticación/autorización. Sus reportes privados recibidos corresponden a otros proyectos; no se usan para inventar tiempos de respuesta de mobai.
+- La ficha pasó de 72 % a 96 % al registrar esas declaraciones y las comprobaciones disponibles. Continúan pendientes versión y release hasta publicar su evidencia.
+- Gitleaks 8.30.1 se descargó del repositorio oficial y su SHA-256 se contrastó con el checksum de la release. Escaneó 345 commits alcanzables de todas las referencias. Un único hallazgo en texto del spec del dashboard era la ruta de queries, no una credencial; se excluyó por fingerprint exacto. La segunda pasada no encontró secretos.
+- El escaneo no verifica credenciales contra proveedores ni hace OCR de binarios/capturas. Solo se documentan resultados sin valores de candidatos.
+- `pnpm audit --audit-level=moderate` no encontró vulnerabilidades conocidas; la API de advisories del repositorio devolvió una lista vacía. No equivale a una auditoría exhaustiva de seguridad.
+- Core rechaza secretos JWT y Better Auth de menos de 32 bytes; el bootstrap genera 32 bytes aleatorios. Scrypt de Better Auth utiliza sal de 16 bytes, N=16384, r=16, p=1 y salida de 64 bytes. No se cambia la criptografía para obtener el badge.
+- La [gobernanza de releases](../releasing.md) exige issue, decisión de versionado, notas formales y CI del commit final. La primera entrega se prepara con alcance de evaluación local, no como habilitación de cloud.
+

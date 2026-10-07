@@ -4,6 +4,15 @@
 
 Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza en su página propia; no se inventan entradas retrospectivas.
 
+## [2026-10-07] mantenimiento | Issues, PR y entregas versionadas
+
+- Cada PR debe asociarse a un issue real y decidir si requiere release, con motivo, versión y notas cuando corresponda.
+- Alineados CONTRIBUTING, plantillas y procedimiento de releases; añadida plantilla formal y preparación de v0.1.0 con alcance de evaluación local.
+- CI incorpora escaneo de secretos del historial con Gitleaks fijado/checksum y auditoría de dependencias desde gravedad moderada. La única exclusión corresponde a un falso positivo documental revisado.
+- OpenSSF: ficha 15273 con cuenta independiente y declaraciones del mantenedor; evidencia y pendientes conservados en el acta. No se habilita cloud ni se concede acceso a organizaciones.
+- Se ejecutan pruebas unitarias del control de PR y `pnpm check`; la release espera los controles del SHA final en main. Sin nuevos servicios locales, inferencias ni benchmarks.
+
+
 ## [2026-10-02] revisión | Wiki navegable y alcance acordado
 
 - Creada la entrada canónica y tres recorridos: comprender, usar/operar y desarrollar.
