@@ -1,7 +1,13 @@
 "use client";
 
 import { type ConversationPage, conversationPage } from "@mobility/contracts";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,10 +19,23 @@ import {
 } from "@/components/ui/dialog";
 import { useUi } from "@/i18n/provider";
 
-export function Conversations() {
+export function Conversations({
+  open: controlledOpen,
+  onOpenChange,
+  onCloseAutoFocus,
+}: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onCloseAutoFocus?: ComponentProps<typeof DialogContent>["onCloseAutoFocus"];
+} = {}) {
   const { t } = useUi();
 
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = controlledOpen ?? localOpen;
+  const setOpen = (next: boolean) => {
+    setLocalOpen(next);
+    onOpenChange?.(next);
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -24,7 +43,10 @@ export function Conversations() {
           {t("conversations.misConversaciones")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto">
+      <DialogContent
+        className="max-h-[85dvh] overflow-y-auto"
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <DialogHeader>
           <DialogTitle>{t("conversations.misConversaciones")}</DialogTitle>
           <DialogDescription>
@@ -98,7 +120,11 @@ function ConversationList() {
       <ul className="flex flex-col gap-2">
         {page.sessions.map((session) => (
           <li key={session.sessionId}>
-            <Button asChild variant="ghost" className="w-full justify-start">
+            <Button
+              asChild
+              variant="ghost"
+              className="ui-conversation-link w-full justify-start"
+            >
               <a href={`/s/${encodeURIComponent(session.sessionId)}`}>
                 {t("conversations.conversacion")}{" "}
                 <time dateTime={session.createdAt}>

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { MobaiBrand } from "@/components/mobai-brand";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import {
   canonicalLocalEvaluationUrl,
   evaluationLoginError,
 } from "@/src/evaluation-login";
-import { Conversations } from "./conversations";
+import { AccessControls } from "./access-controls";
 
 type Identity = { principalId: string; label: string };
 
@@ -78,66 +79,38 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
     return (
       <>
         <div key={`chat:${identity.principalId}`}>{children}</div>
-        <div
+        <AccessControls
           key={`access:${identity.principalId}`}
-          className="fixed top-3 left-2 z-30 flex max-w-[calc(100vw-1rem)] flex-wrap items-center gap-1"
-        >
-          <LocaleSwitcher />
-          <Conversations />
-          <Button variant="ghost" size="sm" asChild>
-            <a href="/dashboard">{t("evaluation.panel")}</a>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              const id = window.location.pathname.split("/")[2];
-              window.location.href = id
-                ? `/dashboard/conversations/${id}`
-                : "/dashboard/conversations";
-            }}
-          >
-            {t("evaluation.telemetria")}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              try {
-                const result = await fetch("/api/auth/sign-out", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: "{}",
-                });
-                if (!result.ok) throw new Error();
-                identityRequest.current?.abort();
-                setIdentity(null);
-                // Unmount the runtime and clear the current session URL on logout.
-                window.location.replace("/evaluation");
-              } catch {
-                setError("No se pudo cerrar sesión. Inténtalo de nuevo.");
-              }
-            }}
-          >
-            {t("evaluation.cerrarSesion")}
-          </Button>
-          {error ? (
-            <p role="alert" className="text-sm text-destructive">
-              {copy(error)}
-            </p>
-          ) : null}
-        </div>
+          error={error}
+          onSignOut={async () => {
+            try {
+              const result = await fetch("/api/auth/sign-out", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: "{}",
+              });
+              if (!result.ok) throw new Error();
+              identityRequest.current?.abort();
+              setIdentity(null);
+              // Unmount the runtime and clear the current session URL on logout.
+              window.location.replace("/evaluation");
+            } catch {
+              setError("No se pudo cerrar sesión. Inténtalo de nuevo.");
+            }
+          }}
+        />
       </>
     );
 
   return (
-    <main className="flex min-h-dvh items-center justify-center px-6">
-      <div className="flex w-full max-w-sm flex-col gap-4">
-        <div className="flex justify-end">
+    <main className="ui-login">
+      <div className="ui-login-panel">
+        <div className="ui-login-preferences ui-preferences">
           <LocaleSwitcher />
+          <ThemeSwitcher />
         </div>
         <form
-          className="flex w-full max-w-sm flex-col gap-5"
+          className="ui-login-form"
           onSubmit={async (event) => {
             event.preventDefault();
             if (canonicalUrl) return;
@@ -194,6 +167,8 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
                 id="email"
                 name="email"
                 type="email"
+                inputMode="email"
+                spellCheck={false}
                 autoComplete="username"
                 required
               />
