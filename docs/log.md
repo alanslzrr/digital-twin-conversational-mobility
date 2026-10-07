@@ -4,6 +4,13 @@
 
 Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza en su página propia; no se inventan entradas retrospectivas.
 
+## [2026-10-07] preparación | Interfaz unificada para v0.1.1
+
+- Preparadas notas formales y CHANGELOG para el issue #57: tema raíz, fuentes locales, componentes, navegación móvil y adaptaciones cosméticas del chat oficial.
+- Documentados actualización sin migraciones, autenticación/contratos sin cambios y rollback de código. Licencias de fuentes y notas upstream conservadas.
+- `pnpm check` aprobado: 545 pruebas, 100 opt-in omitidas y build de producción; auditoría moderada y cloud deshabilitado comprobados. Zoom nativo real al 200 % y nuevos estados de inferencia/proveedor quedan sin verificar.
+- La preparación no publica tag/release ni habilita despliegues. Borradores locales y artefactos privados excluidos de los commits.
+
 ## [2026-10-07] revisión | Política de auditoría alineada con CI
 
 - SECURITY refleja el umbral moderado de dependencias y el escaneo fijado/redactado de historial de CI.
