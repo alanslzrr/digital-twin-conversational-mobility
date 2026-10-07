@@ -492,7 +492,7 @@ export function Events({ id }: { id?: string }) {
       {id ? (
         <>
           <section className="rounded-lg border bg-card p-5">
-            <h2 className="font-semibold">{t("activityView.whatHappened")}</h2>
+            <h2 className="font-medium">{t("activityView.whatHappened")}</h2>
             <p className="mt-2 text-sm">
               {copy(eventTypes[String(events[0]?.type)])} ·{" "}
               {copy(eventOutcomes[String(events[0]?.outcome)])}

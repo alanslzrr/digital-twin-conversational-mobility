@@ -37,7 +37,7 @@ export function AnimatedValue({ value, format, className }: Props) {
         },
         { opacity: 1, transform: "translateY(0)" },
       ],
-      { duration: 180, easing: "cubic-bezier(.2,.8,.2,1)" },
+      { duration: 160, easing: "cubic-bezier(.22,1,.36,1)" },
     );
     const stop = () => {
       if (reduce.matches) animation.current?.cancel();

@@ -646,11 +646,10 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                         </span>
                         <div>
                           <h2>
-                            {t("conversationView.conversation")}
-                            {i + 1}
+                            {t("conversationView.conversation")} {i + 1}
                           </h2>
                           <p className="dc-meta">
-                            {t("conversationView.created")}
+                            {t("conversationView.created")}{" "}
                             <Instant value={e.createdAt} /> ·{" "}
                             {e.captureStatus === "not_instrumented"
                               ? t("conversationView.notInstrumented")
