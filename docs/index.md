@@ -30,7 +30,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
 | Interfaz | [Idioma ES/EN](ui-i18n.md): controles, persistencia y límites de la traducción |
-| Publicación | [Contribuir](../CONTRIBUTING.md), [versionado y releases](releasing.md), [CHANGELOG](../CHANGELOG.md) |
+| Publicación | [Contribuir](../CONTRIBUTING.md), [versionado y releases](releasing.md), [CHANGELOG](../CHANGELOG.md); [v0.1.1 en preparación](releases/v0.1.1.md): interfaz unificada, compatibilidad y validación |
 | Publicación | [Licencia MIT](../LICENSE), [componentes de terceros](../README.md#licencia) y [seguridad](../SECURITY.md) |
 | Panel | Seis vistas integradas en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45): datos, consultas, fuentes, actividad y telemetría propia. [Operación y actualización](local-runtime.md#actualizar-el-panel) · [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Runtime habitual reconstruido y smoke correcto; inspección autenticada pendiente. El historial de refinamientos permanece en [Actas](acceptance/index.md) |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
