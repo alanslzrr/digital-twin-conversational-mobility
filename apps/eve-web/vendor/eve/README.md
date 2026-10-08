@@ -6,7 +6,7 @@ Upstream: https://github.com/vercel/eve — see the included Apache-2.0 LICENSE 
 
 Local adaptations:
 - Replace the app-name placeholder with mobai and use the user-approved transparent monochrome mark in the existing welcome heading and header; retain upstream layout, composer structure, Markdown, tool output and session URL behavior.
-- Mount the official chat behind the existing Better Auth gate at `/`, `/evaluation`, `/s` and `/s/[sessionId]`. Never copy upstream placeholder/local-development authorization.
+- Mount the official chat behind the existing Better Auth gate at `/evaluation`, `/s` and `/s/[sessionId]`. Never copy upstream placeholder/local-development authorization.
 - Disable attachments and retain the evaluation text-length limit, matching the protected backend.
 - Preserve strict TypeScript settings with conditional optional properties and checked array access; format with the repository tooling.
 - Minimal login/logout controls use the same UI primitives. No gateway, provider, quota, ingestion or routing changes.
@@ -95,3 +95,73 @@ unverified because the available browser surface did not expose a working zoom
 control; this is not reported as a zoom test. Live provider updates, new model
 turns and visually forced streaming/approval/error states were not exercised.
 No synthetic records, provider queries, model calls or deployments were needed.
+
+### Public product presentation
+
+The root `/` is a public presentation page for visitors and signed-in evaluators.
+It does not mount the chat, authentication gate, conversation index or dashboard
+providers. Access links point to the unchanged protected `/evaluation` route.
+The landing shares root locale/theme preferences and existing primitives. No
+upstream chat renderer, runtime, tool or provider is replaced by its examples.
+
+The approved presentation-only adaptations are:
+
+- Native React compositions replace screenshots in the four-step scroll story
+  and capability cards. Conversation, tool disclosures, context, overview and
+  bicycle examples explicitly identify their synthetic values. These values
+  never enter tools, operational stores, fixtures or the protected chat.
+  Missing observations stay absent, not zero. The bicycle schematic is explicitly
+  fictional, not a geographic map, and does not load tiles.
+- The SVG/Motion scene uses a 16-second visible-time clock, with bidirectional
+  exchanges and overlapping stored-evidence/planner branches through Core.
+  It illustrates architecture, not measured traffic or infrastructure failover.
+  Selection pauses playback; manual pause, offscreen/hidden-tab suspension,
+  reduced-motion rendering and effect cleanup are retained.
+- A pausable, locally served logo marquee identifies a selection of actual data
+  sources and implementation technologies separately, directly on the page without
+  a surrounding gray panel or logo tiles. Official light/dark variants are used
+  for eve and Next.js; transparent EMT artwork replaces the press thumbnail.
+  AEMET's standalone path replaces the government lockup/yellow background.
+  White CSS negatives for BiciMAD and AEMET preserve their geometry; Renfe
+  retains its original magenta in both themes, and EMT/React keep their blues. Asset provenance and notices live in
+  `public/brand/integrations/`. EMT's press gallery requests authorization before
+  logo use; no permission is claimed, and it must be resolved before publication.
+- The published 56-second demo is integrated with native video controls. The
+  external GitHub video is loaded only after an explicit play action, with an
+  original-file fallback, local captions for its instrumental/no-dialogue audio
+  and an accessible textual summary. It is labeled historical Spanish-interface
+  material, not live evidence; the summary preserves map attribution.
+
+The public route remains `noindex`. No additional libraries, endpoints, identity
+requests, conversations, model calls, provider queries or deployments are needed.
+Menu focus restoration, flat tokens, local fonts and original brand geometry are
+unchanged. The desktop story uses a stable preview and normal document scrolling;
+short/narrow viewports and reduced-motion preferences show stacked examples.
+
+### Landing validation (8 October 2026)
+
+`pnpm check` passed with the production build, 573 passing tests and 100 existing
+opt-in skips. The 28 landing regressions cover public rendering, request-free
+mounting, ES/EN parity, inherited theme, synthetic-example isolation, interactive
+disclosures, evidence selection, manual video loading/fallback, asset safety,
+parallel/bidirectional animation, visible-time playback and teardown. Existing
+authentication, ownership, conversation, freshness and brand regressions remain.
+Lint retains existing warnings outside the landing; it reports no errors.
+
+Local browser checks covered 320, 390, 768, 1024 and 1440 CSS-pixel widths in both
+themes and languages without horizontal overflow or clipped text. The forward
+and reverse story, tool expansion, bicycle view, mobile menu/Escape/focus return,
+FAQ keyboard expansion, manual scene selection and marquee pause were checked.
+The external demo actually reached readyState 4, played past 12 seconds and paused
+through the keyboard. It had no video element before the play action. Native
+200% browser zoom remains unverified; responsive reflow is not reported as a zoom
+test. Reduced motion and hidden-tab timing are covered by controlled tests, not
+by changing the operating-system accessibility preference.
+
+The pre-merge audit identified six advisories in the pre-existing Next.js 16.3.6
+dependency. Web and Core now pin the patched 16.3.8 release; unrelated dependency
+resolutions remain unchanged. `pnpm audit --audit-level=low` reports no known
+vulnerabilities after a frozen-lockfile install. This is not a universal security
+guarantee. EMT logo permission still requires resolution before public product
+deployment. Release preparation and upgrade/security impact are tracked in
+`docs/releases/v0.2.0.md`; no release or deployment is published by this change.
