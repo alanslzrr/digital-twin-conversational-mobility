@@ -1,0 +1,22 @@
+{
+  "retrieved": "2026-10-08",
+  "thesvgCommit": "e0deff4c7dd81e3bfe0e9aa8d98ca75b172ec493",
+  "assets": {
+    "bicimad.svg": "https://www.bicimad.com/themes/custom/bicimad/logo.svg",
+    "react.svg": "https://raw.githubusercontent.com/glincker/thesvg/e0deff4c7dd81e3bfe0e9aa8d98ca75b172ec493/public/icons/react/default.svg",
+    "LICENSE-thesvg": "https://raw.githubusercontent.com/glincker/thesvg/e0deff4c7dd81e3bfe0e9aa8d98ca75b172ec493/LICENSE",
+    "aemet.svg": "https://www.aemet.es/es/imagen-logo1",
+    "renfe.svg": "https://grupo.renfe.com/content/dam/grupo-renfe/logos/logo-renfe.svg",
+    "emt.png": "https://www.emtmadrid.es/App_Themes/EMTMadrid/images/logo_emtmadrid_m.png",
+    "eve-dark.svg": "https://vercel.com/vc-ap-b3331f/_next/static/immutable/media/eve-dark.2l_s1mlvozam3.svg",
+    "eve-light.svg": "https://vercel.com/vc-ap-b3331f/_next/static/immutable/media/eve-light.1e3bxs4ejw62x.svg",
+    "nextjs-dark.svg": "https://vercel.com/vc-ap-b3331f/_next/static/immutable/media/nextjs-logotype-dark.3h4a2z2v_dkod.svg",
+    "nextjs-light.svg": "https://vercel.com/vc-ap-b3331f/_next/static/immutable/media/nextjs-logotype-light.00-_80jv8_dct.svg"
+  },
+  "aemetAdaptation": {
+    "sourceElement": "aemet_institucional_pos",
+    "pathSha256": "28e90d6e16da7fd22c65ee6408709d2e0f1c613bbcae6b024f67ecb43218b346",
+    "viewBox": "238 2 206 55",
+    "description": "Standalone AEMET path from the official header; government lockup omitted, path geometry unchanged. CSS supplies the negative on dark surfaces."
+  }
+}
