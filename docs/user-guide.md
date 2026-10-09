@@ -14,13 +14,15 @@
 
 1. Pide al responsable una cuenta de evaluador. No hay registro público.
 2. Abre [EVE local](http://127.0.0.1:3000/evaluation) en el ordenador que ejecuta el proyecto.
-3. Inicia sesión con las credenciales recibidas por un canal privado.
-4. Describe el desplazamiento o la consulta. Incluye origen, destino y hora si quieres una ruta.
+3. Activa la cuenta desde el correo de invitación y establece tu contraseña; las cuentas existentes conservan la suya.
+4. Configura una credencial propia en **Mi cuenta**, o utiliza un patrocinio asignado. Elige el modelo en el desplegable del chat y describe la consulta; incluye origen, destino y hora si quieres una ruta.
 5. Si aparecen varios lugares, confirma el correcto antes de continuar.
 
 Usa `127.0.0.1`, no alternes con `localhost`: el origen configurado forma parte de la protección de acceso. El chat es el oficial de EVE. Los mensajes admiten hasta 1.800 caracteres y los adjuntos están deshabilitados.
 
 La interfaz empieza en español. El selector **ES/EN** cambia los controles sin recargar ni perder el borrador; conserva la preferencia en este navegador. No traduce conversaciones anteriores ni cambia el idioma del agente. [Alcance del selector](ui-i18n.md).
+
+El selector no cambia un turno en ejecución ni una aprobación pendiente. Al cambiar de proveedor, confirma el nuevo destinatario del contexto. Si no cabe en el modelo elegido, compacta con el anterior (puede consumir presupuesto) o abre otra conversación. Un error con referencia de incidencia se consulta en **Mi cuenta → Consumo**; el gasto incierto no se repite automáticamente. [Guía de cuentas y LLM](accounts-and-llm.md).
 
 ## Consultas útiles
 
@@ -101,4 +103,4 @@ La inspección almacenada no adquiere recursos. Las herramientas sin resultado m
 
 El mapa usa OpenStreetMap y solicita teselas externas sin identidad, búsqueda ni filtros en la URL. OpenStreetMap recibe la dirección IP y las solicitudes de la zona visible. Solo se carga al activar Mapa; no realiza barridos ni descarga offline. La atribución permanece visible. Si las teselas fallan, la tabla sigue disponible; sus puntos son datos almacenados, no posiciones en tiempo real.
 
-Las conversaciones anteriores a esta captura pueden aparecer **sin instrumentar**. Un intento registra la entrada efectiva enviada al proveedor después de los ajustes de presupuesto, no toda la transcripción de EVE. Se excluyen reasoning cifrado, cabeceras y secretos. Las omisiones, truncamientos y uso desconocido permanecen visibles. El detalle técnico no reconstruye contenido perdido. Consulta [límites y retención](reference/system.md#panel-y-telemetría).
+Las conversaciones anteriores a esta captura pueden aparecer **sin instrumentar**. Un intento registra una proyección saneada de la entrada del adaptador, no toda la transcripción ni necesariamente el cuerpo final normalizado por Core. El ledger financiero de Core es independiente de esta captura. Se excluyen reasoning cifrado, cabeceras y secretos. Las omisiones, truncamientos y uso desconocido permanecen visibles. El detalle técnico no reconstruye contenido perdido. Consulta [límites y retención](reference/system.md#panel-y-telemetría).
