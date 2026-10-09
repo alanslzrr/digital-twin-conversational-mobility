@@ -15,7 +15,47 @@ export function projectPayload(
   value: unknown,
   kind: TelemetryPayload["kind"],
 ): TelemetryPayload {
-  const source = record(value);
+  let source = record(value);
+  // Normalize Chat Completions into the same safe projection, without reasoning or provider metadata.
+  if (Array.isArray(source.messages) || Array.isArray(source.choices)) {
+    const values = Array.isArray(source.messages)
+      ? source.messages
+      : (source.choices as unknown[]).map((c) => record(c).message);
+    const items = values.flatMap<Record<string, unknown>>((raw) => {
+      const m = record(raw);
+      if (m.role === "tool")
+        return [
+          {
+            type: "function_call_output",
+            call_id: m.tool_call_id,
+            output: m.content,
+          },
+        ];
+      const calls = (Array.isArray(m.tool_calls) ? m.tool_calls : []).map(
+        (raw) => {
+          const c = record(raw),
+            f = record(c.function);
+          return {
+            type: "function_call",
+            call_id: c.id,
+            name: f.name,
+            arguments: f.arguments,
+          };
+        },
+      );
+      return [{ role: m.role, content: m.content }, ...calls];
+    });
+    source = {
+      ...source,
+      [Array.isArray(source.messages) ? "input" : "output"]: items,
+      tools: Array.isArray(source.tools)
+        ? source.tools.map((raw) => {
+            const t = record(raw);
+            return { type: t.type, ...record(t.function) };
+          })
+        : [],
+    };
+  }
   const messages: TelemetryPayload["content"]["messages"] = [];
   let redacted = false,
     truncated = false;

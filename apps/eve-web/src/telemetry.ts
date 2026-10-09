@@ -4,7 +4,7 @@ import {
   type TelemetryPayload,
   telemetryEvent,
 } from "@mobility/contracts";
-import type { BudgetContext } from "./budgeted-fetch";
+import type { BudgetContext } from "./budget-context";
 import { record } from "./telemetry-projection";
 
 const early = new Map<
