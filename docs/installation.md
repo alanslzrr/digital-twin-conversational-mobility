@@ -23,7 +23,7 @@ Ejecuta los comandos desde la raíz del repositorio.
 | pnpm | 10.30.3 | Dependencias y comandos |
 | Python | 3.11 o posterior | Preparación GTFS/OSM |
 | Docker con Compose | Motor local activo | PostGIS, Redis disponible y OTP |
-| Internet | Acceso a fuentes y OpenAI | Descargas y conversación; los tests offline no lo requieren |
+| Internet | Acceso a fuentes y proveedores LLM | Descargas y conversación; los tests offline no lo requieren |
 | Puertos loopback libres | 3000, 3001, 4274, 8801, 55432, 56379 | [Mapa de servicios](reference/system.md#servicios-y-versiones) |
 
 OTP tiene configurados heap de 4 GiB, límite de contenedor de 6 GiB y 4 CPU. Reserva además recursos de Docker para PostGIS y los demás procesos.
@@ -41,11 +41,10 @@ pnpm setup:local
 
 `setup:local` genera secretos locales aleatorios, no los imprime y conserva los archivos existentes. No uses `pnpm setup`: ese es un comando integrado de pnpm, no este instalador.
 
-1. Solicita las claves siguiendo [las altas oficiales](resources/accounts.md).
-2. Añade `OPENAI_API_KEY` a `.env.local` de la raíz, con un editor privado.
-3. Ejecuta `pnpm configure:openai`. Copia solo esa clave al servidor Web.
-4. Añade `EMT_CLIENT_ID`, `EMT_PASSKEY` y `AEMET_API_KEY` a `apps/mobility-core/.env.local`.
-5. Conserva estos archivos fuera de Git. Nunca uses variables `NEXT_PUBLIC_*` para secretos.
+1. Solicita las claves de fuentes siguiendo [las altas oficiales](resources/accounts.md).
+2. Añade `EMT_CLIENT_ID`, `EMT_PASSKEY` y `AEMET_API_KEY` solo a `apps/mobility-core/.env.local`.
+3. Prepara la clave maestra de Core según [cuentas y LLM](accounts-and-llm.md#migrar-una-instalación). Las keys LLM se incorporan por el formulario de solo escritura, nunca al entorno Web.
+4. Conserva estos archivos fuera de Git. Nunca uses variables `NEXT_PUBLIC_*` para secretos. Deja consumo LLM y correo deshabilitados hasta aprobación explícita.
 
 Consulta las [variables de cada componente](reference/system.md#variables-y-secretos) y la [configuración del modelo](reference/system.md#servicios-y-versiones).
 
@@ -55,12 +54,9 @@ Consulta las [variables de cada componente](reference/system.md#variables-y-secr
 pnpm infra:up
 pnpm db:migrate
 pnpm db:check
-pnpm evaluator create 1 evaluador@example.test Evaluador
 ```
 
-Sustituye el correo y el nombre del ejemplo por los de la cuenta que vas a crear. El comando guarda la contraseña en un archivo privado de `data/evaluators/`. No repitas `create` si el slot ya existe. [Gestión de cuentas](evaluation.md).
-
-Las migraciones se aplican todas, en orden (0001–0021 en esta revisión), incluidas las tablas de experimentos aunque no se utilicen. No migres durante un build.
+Aplica las migraciones 0001–0022 en orden, fuera del build. La primera cuenta administrativa, TOTP y las invitaciones se preparan con el [procedimiento de bootstrap](accounts-and-llm.md#migrar-una-instalación). Las cuentas existentes mantienen sus IDs. No se generan contraseñas en archivos ni financiación implícita.
 
 ## Datos y routing
 
@@ -142,6 +138,6 @@ pnpm start:local
 
 `pnpm check` valida y compila Web/Core. `build:agent` prepara el runtime EVE con Docker local. `start:local` arranca Core, Web/agente y worker, pero no inicia la infraestructura.
 
-Abre [el chat](http://127.0.0.1:3000/evaluation). Usa `pnpm smoke --production` para una comprobación de arranque sin modelo. Enviar un mensaje real sí usa la clave y créditos de OpenAI.
+Abre [el chat](http://127.0.0.1:3000/evaluation). Usa `pnpm smoke --production` para una comprobación de arranque sin modelo. Enviar un mensaje real requiere consumo habilitado y una credencial o patrocinio explícitos; puede generar gasto en el proveedor seleccionado.
 
 Para el próximo uso basta con [el arranque cotidiano](local-runtime.md#inicio-y-parada). Fuentes e implementación de los pasos: [scripts](../scripts), [Compose](../infra/local/compose.yaml), [migraciones](../infra/postgres/migrations), [entrega local](acceptance/2026-09-25-local-delivery.md) y [release multioperador](acceptance/2026-09-25-routing-releases.md).

@@ -25,7 +25,7 @@ pnpm otp:up
 pnpm start:local
 ```
 
-Abre [EVE local](http://127.0.0.1:3000/evaluation) o el [panel](http://127.0.0.1:3000/dashboard) con tu cuenta existente. `start:local` supervisa Core, Web, agente y worker. No arranques otro supervisor en los mismos puertos. Si ya están activos, utiliza esa instalación.
+Abre [EVE local](http://127.0.0.1:3000/evaluation) o el [panel](http://127.0.0.1:3000/dashboard) con tu cuenta existente. El puerto Web se toma de `EVALUATION_ORIGIN` en su `.env.local`; debe coincidir con el origen de Core. La instalación local actual usa `http://127.0.0.1:3010` porque otro proyecto ocupa el 3000. El supervisor y los dos smokes respetan ese origen. `start:local` supervisa Core, Web, agente y worker. No arranques otro supervisor en los mismos puertos. Si ya están activos, utiliza esa instalación.
 
 Para parar:
 
@@ -40,14 +40,15 @@ Para desarrollar, `pnpm dev` y `pnpm worker` se ejecutan por separado, con PostG
 | Comando | Qué comprueba o cambia |
 | --- | --- |
 | `pnpm check` | Lint, fronteras, tipos, tests offline y builds; sin claves cloud ni inferencias |
+| `pnpm test:control:db` | PostgreSQL desechable, migraciones y pruebas de cuentas/financiación con proveedores y correo ficticios; no toca la DB habitual |
 | `pnpm build:agent` | Compila EVE con Docker; sin inferencias |
 | `pnpm env:doctor` | Requisitos, existencia de archivos de entorno y logins opcionales; no imprime su contenido |
 | `pnpm smoke --production` | HTTP, autenticación MCP, health EVE y rechazo anónimo con servicios arrancados |
-| `pnpm smoke:evaluation` | Usa slots temporales 4/5 para login, CSRF, aislamiento, cuotas y revocación; no ejecutar si están ocupados |
+| `pnpm smoke:evaluation` | Crea dos cuentas temporales bajo capacidad para login, CSRF, aislamiento, cuotas y revocación; sin modelo |
 | `pnpm smoke:mobility` | Consulta fuentes reales y MCP/OTP; abre actividad y puede adquirir datos |
 | `pnpm smoke:routing` | Casos MCP/OTP locales; renueva actividad, sin modelo ni reinicio de servicios |
 
-Elige el diagnóstico según el componente modificado o el fallo observado. Los modos `--live*` llaman al modelo y consumen créditos; se ejecutan expresamente, al igual que los benchmarks OTP.
+Elige el diagnóstico según el componente modificado o el fallo observado. Los flags `--live*` del antiguo smoke de evaluación están retirados. Las inferencias reales necesitan selección y financiación explícitas; se autorizan aparte, igual que los benchmarks OTP.
 
 Healths: [Core](http://127.0.0.1:3001/api/health), [Web](http://127.0.0.1:3000/api/health), [EVE a través de Web](http://127.0.0.1:3000/eve/v1/health). Los endpoints de salud comprueban disponibilidad de procesos. `get_source_health` informa de la antigüedad y los errores de las fuentes.
 
@@ -119,7 +120,7 @@ Las llegadas se consultan bajo demanda por parada. Una caché persistente de 30 
 ## Credenciales y caducidades
 
 - JWT de servicio local: siete días; renovar con `pnpm setup:local --refresh-token` y reiniciar aplicaciones para cargarlo. No cambia las claves del proveedor ni cuentas de evaluadores.
-- OpenAI: editar la clave privada raíz y ejecutar `pnpm configure:openai`; reconstruir/reiniciar Web conforme al ciclo anterior.
+- LLM: reemplazar la credencial en **Mi cuenta** o **Administración**. Invalida la versión anterior para nuevos despachos; no requiere copiar claves a Web. Revoca la key antigua en el proveedor por separado.
 - EMT/AEMET: editar solo el entorno privado de Core; reiniciar Core. Si una fuente estaba deshabilitada, volver a `pnpm mobility:enable` tras configurar la clave.
 - AEMET: nuevas claves con tres meses de vigencia según el aviso comprobado el 02/10/2026. [Renovación y alta](resources/accounts.md#aemet).
 - Cuenta evaluador: 30 días; propiedad del chat: siete días. Reset y revoke tienen efectos distintos. [Administración](evaluation.md).
@@ -129,7 +130,7 @@ No imprimas tokens para diagnosticar ni desactives TLS. Un error de fuente se tr
 
 ## Control conversacional E2
 
-El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Aprobar/Detener (Approve/Stop en inglés). Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo experimental `campaign` se activa expresamente y mantiene su propio registro de consumo. [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
+El modo normal es `interactive`: EVE pausa al llegar a sus umbrales y ofrece Aprobar/Detener (Approve/Stop en inglés). Aprobar permite continuar; detener conserva el historial. Los umbrales configurados son 100.000 tokens de entrada y 10.000 de salida por sesión, renovables; no son un coste monetario fijo. El modo experimental `campaign` se activa expresamente y conserva sus límites, con el mismo ID de intento que el ledger Core para no duplicar cargos. Los presupuestos y cuotas Core son independientes de la aprobación nativa y no se renuevan por pulsar Aprobar. [Cuentas y consumo](accounts-and-llm.md). [Acta E2](acceptance/2026-09-25-e2-closure.md) y [guía de uso](user-guide.md#historial-y-continuidad).
 
 ## Actividad y retención
 
