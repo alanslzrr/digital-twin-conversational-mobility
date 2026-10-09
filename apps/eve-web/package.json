@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.60",
+    "@ai-sdk/openai-compatible": "3.0.66",
     "@mobility/contracts": "workspace:*",
     "@radix-ui/react-use-controllable-state": "1.2.2",
     "@shikijs/core": "3.23.0",
