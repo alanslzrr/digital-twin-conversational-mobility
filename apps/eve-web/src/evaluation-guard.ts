@@ -1,4 +1,5 @@
 import type { HttpRouteDefinition } from "eve/channels";
+import { runtimeControl } from "./control-client";
 import {
   accessError,
   allowedBrowserRequest,
@@ -40,6 +41,11 @@ export function protectEvaluationRoute(
           const body = await readBoundedJson(request.clone());
           if (!body || typeof body !== "object" || Array.isArray(body))
             return accessError(400);
+          if (
+            "inputResponses" in body &&
+            !request.headers.get("x-mobai-selection")
+          )
+            return accessError(400);
           // Do not accept caller-defined callbacks, forwarded identities or runtime settings.
           const allowed = new Set([
             "message",
@@ -70,12 +76,22 @@ export function protectEvaluationRoute(
         if (creating && response.ok) {
           const body = await response.clone().json();
           if (typeof body.sessionId !== "string") return accessError(503);
-          const registered = await coreAccess({
-            action: "register",
-            principalId: identity.principalId,
-            sessionId: body.sessionId,
-          });
-          if (!registered.ok) return accessError(503); // Unknown/orphan sessions remain inaccessible.
+          const selectionId = request.headers.get("x-mobai-selection");
+          if (selectionId) {
+            await runtimeControl({
+              action: "session.register",
+              principalId: identity.principalId,
+              sessionId: body.sessionId,
+              selectionId,
+            });
+          } else {
+            const registered = await coreAccess({
+              action: "register",
+              principalId: identity.principalId,
+              sessionId: body.sessionId,
+            });
+            if (!registered.ok) return accessError(503); // Unknown/orphan sessions remain inaccessible.
+          }
         }
         if (sessionId && route.path.endsWith("/reset") && response.ok) {
           const revoked = await coreAccess({
