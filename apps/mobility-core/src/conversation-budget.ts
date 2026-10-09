@@ -18,6 +18,7 @@ export const budgetAction = z.discriminatedUnion("action", [
   z
     .object({
       action: z.literal("budget_begin"),
+      inputKind: z.enum(["exact", "upper_bound"]).optional(),
       ...common,
       attemptId: z.uuid(),
       turnId: id,
@@ -28,6 +29,7 @@ export const budgetAction = z.discriminatedUnion("action", [
   z
     .object({
       action: z.literal("budget_dispatch"),
+      inputKind: z.enum(["exact", "upper_bound"]).optional(),
       ...common,
       attemptId: z.uuid(),
       inputTokens: z.number().int().positive().max(100_000),
@@ -140,7 +142,7 @@ export async function evaluateBudget(input: BudgetAction) {
       );
       // Duplicate admission must never return another reusable dispatch grant.
       const rows =
-        await tx`INSERT INTO conversation_attempt(id,campaign_id,evaluator_id,session_id,turn_id,step_index,purpose,state,reserved_input,reserved_output,deadline,count_requests) VALUES (${input.attemptId},${campaign.id},${input.principalId},${input.sessionId},${input.turnId},${input.stepIndex},${input.purpose},'reserved',${reservedInput},${reservedOutput},${deadline},1) ON CONFLICT DO NOTHING RETURNING id`;
+        await tx`INSERT INTO conversation_attempt(id,campaign_id,evaluator_id,session_id,turn_id,step_index,purpose,state,reserved_input,reserved_output,deadline,count_requests) VALUES (${input.attemptId},${campaign.id},${input.principalId},${input.sessionId},${input.turnId},${input.stepIndex},${input.purpose},'reserved',${reservedInput},${reservedOutput},${deadline},${input.inputKind === "upper_bound" ? 0 : 1}) ON CONFLICT DO NOTHING RETURNING id`;
       if (rows.length !== 1) return denied();
       return {
         status: 200,
@@ -163,7 +165,10 @@ export async function evaluateBudget(input: BudgetAction) {
         input.inputTokens > attempt.reserved_input
       )
         return denied();
-      await tx`UPDATE conversation_attempt SET state='dispatched',dispatched_at=clock_timestamp(),inference_requests=1,counted_input_tokens=${input.inputTokens} WHERE id=${input.attemptId}`;
+      if (input.inputKind === "upper_bound")
+        await tx`UPDATE conversation_attempt SET state='dispatched',dispatched_at=clock_timestamp(),inference_requests=1,count_requests=0,input_upper_bound=${input.inputTokens} WHERE id=${input.attemptId}`;
+      else
+        await tx`UPDATE conversation_attempt SET state='dispatched',dispatched_at=clock_timestamp(),inference_requests=1,counted_input_tokens=${input.inputTokens} WHERE id=${input.attemptId}`;
       return { status: 200, body: { ok: true } };
     }
     // Violations are terminal audit evidence; retries cannot erase or refund them.
