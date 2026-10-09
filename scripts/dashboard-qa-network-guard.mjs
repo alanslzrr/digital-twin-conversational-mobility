@@ -4,6 +4,8 @@ import { appendFileSync } from "node:fs";
 if (
   process.env.INGESTION_ENABLED !== "false" ||
   process.env.OPENAI_API_KEY ||
+  process.env.MOBAI_LLM_ENABLED !== "false" ||
+  process.env.MOBAI_EMAIL_ENABLED !== "false" ||
   !process.env.DASHBOARD_QA_NETWORK_GUARD_REPORT
 )
   throw new Error("Isolated QA network guard requires disabled acquisition");

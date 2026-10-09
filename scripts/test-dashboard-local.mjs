@@ -106,6 +106,8 @@ const common = {
   MOBILITY_MCP_URL: "http://127.0.0.1:3003/mcp",
   MOBILITY_MCP_TOKEN: token,
   OPENAI_API_KEY: "",
+  MOBAI_LLM_ENABLED: "false",
+  MOBAI_EMAIL_ENABLED: "false",
   DASHBOARD_QA_DEV: process.argv.includes("--dev") ? "1" : "",
   NEXT_TELEMETRY_DISABLED: "1",
   DASHBOARD_QA_NETWORK_GUARD_REPORT: new URL(
