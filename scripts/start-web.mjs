@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
+import { webPort } from "./runtime-config.mjs";
 
 // Next serves saved build-time rewrites in `next start`; with the pinned versions
 // it does not invoke the EVE process-start callback. Supervise both explicitly.
@@ -77,7 +78,7 @@ if (!ready) {
       "--hostname",
       "127.0.0.1",
       "--port",
-      "3000",
+      String(webPort()),
     ],
     env,
   );
