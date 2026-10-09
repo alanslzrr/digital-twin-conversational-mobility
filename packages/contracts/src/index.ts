@@ -268,6 +268,7 @@ export type {
   WeatherPeriod,
   WeatherProduct,
 } from "./journey-weather";
+export * from "./llm";
 export { type ParkingTariff, parkingTariffSchema } from "./parking-prices";
 export * from "./safe-data";
 export * from "./telemetry";
