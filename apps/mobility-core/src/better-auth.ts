@@ -1,14 +1,17 @@
 import { type BetterAuthOptions, betterAuth } from "better-auth";
+import { admin, twoFactor } from "better-auth/plugins";
+import { defaultAc } from "better-auth/plugins/admin/access";
 import { Pool } from "pg";
+import { queueAccountMail } from "./control/mail";
 
 export function authOptions(
   pool: Pool,
   secret: string,
   baseURL: string,
   allowSignUp = false,
-): BetterAuthOptions {
+) {
   return {
-    appName: "Madrid Mobility Evaluation",
+    appName: "mobai",
     database: pool,
     secret,
     baseURL,
@@ -20,6 +23,21 @@ export function authOptions(
       minPasswordLength: 12,
       maxPasswordLength: 128,
       requireEmailVerification: false,
+      resetPasswordTokenExpiresIn: 3600,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: async ({ user, url, token }) => {
+        await queueAccountMail(user.id, user.email, url, token);
+      },
+      onPasswordReset: async ({ user }) => {
+        await pool.query(
+          "UPDATE evaluator SET account_state='active' WHERE auth_user_id=$1 AND enabled AND expires_at>now() AND (account_state='active' OR invitation_expires_at>now())",
+          [user.id],
+        );
+        await pool.query(
+          'UPDATE auth_user SET "emailVerified"=true WHERE id=$1',
+          [user.id],
+        );
+      },
     },
     user: { modelName: "auth_user" },
     session: {
@@ -35,15 +53,14 @@ export function authOptions(
       storage: "database",
       modelName: "auth_rate_limit",
       window: 60,
-      max: 100,
-      customRules: { "/sign-in/email": { window: 60, max: 10 } },
+      max: 300,
+      customRules: { "/sign-in/email": { window: 60, max: 60 } },
     },
     advanced: {
       database: { generateId: "uuid" },
       useSecureCookies: baseURL.startsWith("https://"),
       defaultCookieAttributes: { httpOnly: true, sameSite: "strict" },
-      // The authenticated web proxy supplies one fixed bucket for this small demo.
-      // Never trust arbitrary client-provided forwarding headers for rate limiting.
+      // Global proxy bucket; per-account login/recovery limits are enforced at the route.
       ipAddress: { ipAddressHeaders: ["x-evaluation-client-ip"] },
     },
     databaseHooks: {
@@ -51,7 +68,7 @@ export function authOptions(
         create: {
           before: async (session) => {
             const result = await pool.query(
-              "SELECT 1 FROM evaluator WHERE auth_user_id=$1 AND enabled AND expires_at > now()",
+              "SELECT 1 FROM evaluator WHERE auth_user_id=$1 AND enabled AND expires_at > now() AND account_state='active'",
               [session.userId],
             );
             return result.rows.length ? { data: session } : false;
@@ -59,19 +76,36 @@ export function authOptions(
         },
       },
     },
+    plugins: [
+      admin({
+        defaultRole: "evaluator",
+        adminRoles: ["admin"],
+        roles: {
+          admin: defaultAc.newRole({
+            user: ["create", "set-role"],
+            session: [],
+          }),
+          evaluator: defaultAc.newRole({ user: [], session: [] }),
+        },
+      }),
+      twoFactor({
+        issuer: "mobai",
+        skipVerificationOnEnable: false,
+        schema: { twoFactor: { modelName: "auth_two_factor" } },
+        backupCodeOptions: { storeBackupCodes: "encrypted" },
+      }),
+    ],
     telemetry: { enabled: false },
-  };
+  } satisfies BetterAuthOptions;
 }
 
-let auth: ReturnType<typeof betterAuth> | undefined;
-export function getAuth() {
-  if (auth) return auth;
+function createAuth() {
   const url = process.env.DATABASE_URL;
   const secret = process.env.BETTER_AUTH_SECRET;
   const origin = process.env.EVALUATION_ORIGIN;
   if (!url || !secret || Buffer.byteLength(secret) < 32 || !origin)
     throw new Error("Better Auth is not configured");
-  auth = betterAuth(
+  return betterAuth(
     authOptions(
       new Pool({
         connectionString: url,
@@ -83,5 +117,9 @@ export function getAuth() {
       origin,
     ),
   );
+}
+let auth: ReturnType<typeof createAuth> | undefined;
+export function getAuth() {
+  auth ??= createAuth();
   return auth;
 }
