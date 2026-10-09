@@ -131,12 +131,12 @@ El proyecto separa la conversación de las reglas y los datos de movilidad:
 flowchart TB
   Person[Evaluador] --> Web[Web y runtime EVE]
   subgraph Local[Servicios locales]
-    Web -->|MCP y servicios de acceso| Core[Mobility Core y Better Auth]
+    Web -->|MCP, acceso y transporte LLM fijo| Core[Mobility Core y Better Auth]
     Core --> DB[(PostgreSQL y PostGIS)]
     Core --> OTP[OpenTripPlanner]
     Worker[Worker de actualización] --> Core
   end
-  Web -->|Responses directo| Model[Externo: OpenAI gpt-6-luna]
+  Core -->|Chat Completions o Responses| Model[Externo: proveedor LLM autorizado]
   Core -->|adaptadores controlados| Sources[Externos: fuentes oficiales y Nominatim]
 ```
 
@@ -155,18 +155,18 @@ Consulta los [flujos detallados](docs/architecture.md), las [herramientas MCP](d
 
 ### Primera instalación
 
-Requisitos: **Node 24.21.0**, **pnpm 10.30.3**, **Python 3.11 o posterior** y **Docker con Compose**. Se necesita Internet para OpenAI y para adquirir datos de los proveedores.
+Requisitos: **Node 24.21.0**, **pnpm 10.30.3**, **Python 3.11 o posterior** y **Docker con Compose**. Se necesita Internet para el proveedor LLM seleccionado y para adquirir datos de las fuentes.
 
 La **[guía de instalación](docs/installation.md)** prepara el entorno, la base de datos, los catálogos y el grafo multioperador antes de arrancar las aplicaciones.
 
 Las [instrucciones de cuentas y claves](docs/resources/accounts.md) explican cómo configurar:
 
-- `OPENAI_API_KEY` para el servidor Web, usando la clave y créditos de tu cuenta.
+- Credenciales LLM de solo escritura en **Mi cuenta**, o patrocinio explícito, custodiados por Core.
 - `EMT_CLIENT_ID` y `EMT_PASSKEY` para Core, con una aplicación EMT habilitada.
 - `AEMET_API_KEY` para Core, incluida su renovación.
 - Nominatim público como respaldo, con sus restricciones y consentimiento.
 
-Las cuentas se crean mediante [la administración local](docs/evaluation.md). Cada persona inicia sesión con sus credenciales y accede a sus propias conversaciones.
+Las cuentas se crean mediante invitación, con dos roles y TOTP administrativo: [cuentas y consumo multiproveedor](docs/accounts-and-llm.md). Cada persona inicia sesión con sus credenciales y accede a sus propias conversaciones.
 
 ### Instalación ya preparada
 

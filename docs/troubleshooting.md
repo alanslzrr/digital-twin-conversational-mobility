@@ -8,7 +8,7 @@ Localiza el síntoma y comprueba el componente indicado antes de aplicar la corr
 | --- | --- | --- |
 | No abre el chat | Docker, Postgres/OTP y supervisor; puertos de [referencia](reference/system.md#servicios-y-versiones) | Sigue [inicio cotidiano](local-runtime.md#inicio-y-parada); no repitas instalación |
 | Puerto ocupado | Puede existir un supervisor habitual | Reutilízalo o detén su terminal; no mates procesos ajenos por número de puerto |
-| No se puede iniciar sesión | El mensaje distingue credenciales, origen/acceso, límite de intentos y servicio no disponible | Usa `127.0.0.1:3000`; espera si indica límite o comprueba Core si indica indisponibilidad. Para credenciales, el administrador usa `evaluator list` y, si procede, `reset`. No revelar contraseñas en logs |
+| No se puede iniciar sesión | El mensaje distingue credenciales, origen/acceso, límite de intentos y servicio no disponible | Usa `127.0.0.1:3000`; espera si indica límite o comprueba Core si indica indisponibilidad. Para credenciales, el administrador usa **Administración → Recuperar**, enviando el enlace solo al correo guardado. No revelar contraseñas en logs |
 | Login permitido, conversación ajena denegada | Propiedad de sesión EVE | Accede con el propietario de la conversación o abre una propia |
 | Chat anterior no disponible | Caducidad de acceso, reset/revoke o mensajes ausentes en EVE | Comprueba el estado de acceso y abre un chat nuevo si el anterior ha caducado o carece de mensajes |
 | MCP rechaza credencial de servicio | JWT local de siete días y configuración Web/Core | `pnpm setup:local --refresh-token`; reiniciar aplicaciones para cargarlo, sin tocar claves de proveedores |
@@ -30,6 +30,19 @@ Localiza el síntoma y comprueba el componente indicado antes de aplicar la corr
 | Geocoder deshabilitado o busy | Consentimiento, configuración y carril global | Usar catálogo o esperar; no montar una ráfaga de reintentos |
 | Tarifa disponible, ocupación ausente | Son productos independientes | Mostrar el precio y la ausencia de lectura, no cero plazas |
 | Check falla por puerto auxiliar de build | Revisar el error exacto de Turbopack/permisos | Comprueba el permiso del proceso para abrir el puerto indicado y vuelve a ejecutar `pnpm check` |
+
+## Consumo y modelos
+
+| Código | Acción |
+| --- | --- |
+| `feature_disabled` | Consumo/correo externo siguen desactivados; no habilitarlos sin aprobación. |
+| `mfa_required` / `reauth_required` | Completa TOTP en Mi cuenta y confirma contraseña/TOTP para la acción sensible. |
+| `context_exceeded` | Compacta con el modelo anterior si sigue disponible y tiene presupuesto, o abre un chat nuevo. |
+| `credential_invalid` / `model_denied` | Revisa key, perfil y permisos del proveedor; no cambies de pagador automáticamente. |
+| `budget_exhausted` / `prices_unverified` | Comprueba reserva, bolsa compartida, cuotas y validez de tarifas. |
+| `execution_uncertain` | Consulta el intento y su reserva; no repitas automáticamente. Conciliación administrativa con evidencia. |
+
+[Procedimiento completo](accounts-and-llm.md). No uses los configuradores OpenAI ni la administración por slots antiguos.
 
 ## Dónde mirar sin exponer datos
 
