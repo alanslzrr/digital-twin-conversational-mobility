@@ -165,3 +165,40 @@ vulnerabilities after a frozen-lockfile install. This is not a universal securit
 guarantee. EMT logo permission still requires resolution before public product
 deployment. Release preparation and upgrade/security impact are tracked in
 `docs/releases/v0.2.0.md`; no release or deployment is published by this change.
+
+### Account and multiprovider integration (8 October 2026)
+
+The upstream chat markup, rendering, message/tool components, cancellation and
+input-response flow remain intact. The authenticated wrapper adds a provider /
+model / funding selector, explicit old-model compaction, safe error/status text,
+and links to `/account` and `/admin`, using the existing UI primitives and ES/EN
+context. No alternate agent or chat renderer is introduced.
+
+EVE 0.65.0 requires serializable model references at `turn.started`. Core binds the
+selection there; `step.started` rehydrates the concrete AI SDK 7 client from that
+immutable binding without changing provider, credential or funding. Both Responses
+and `@ai-sdk/openai-compatible` 3.0.66 target a fixed internal Core transport.
+Only non-secret binding metadata enters durable state; Core owns provider keys,
+endpoint validation and reservations. Context size is explicit, preventing
+implicit gateway discovery. Cross-provider history adaptation preserves tool
+pairs without forwarding foreign opaque IDs/reasoning. `defaultTools: false`
+and Better Auth ownership checks remain mandatory. Authentication attaches the
+validated selection to `inputResponses` as well: upstream skips `onMessage` for
+that continuation path.
+
+Verification: `pnpm check`, agent compilation, and the dedicated local PostgreSQL
+suite with fake JSON/SSE providers and Resend. Authenticated local account/admin/chat views and a real OpenAI Responses turn
+and manual compaction were verified on 2026-10-08. Other providers and real
+email delivery remain unverified.
+See `docs/accounts-and-llm.md` for activation gates and migration instructions.
+
+### Dynamic model rehydration for manual compaction
+
+`patches/eve@0.65.0.patch` invokes the live `step.started` model resolver before
+manual compaction. Upstream's compact-only branch otherwise resolves a durable
+ID through Gateway instead of reconstructing the Core-only SDK client. The
+patch does not emit a new public step or change the pinned selection; the
+existing `compaction.requested` hook still sets the billing purpose. Recheck
+this branch before upgrading EVE and drop the patch when upstream handles it.
+
+- The chat model selector is a compact dropdown inside the native composer; credential/funding configuration remains in Account. The dropdown includes models across configured connections; changing connection requires explicit confirmation and never falls back to another payer. Compaction is a menu action rather than a separate toolbar.
