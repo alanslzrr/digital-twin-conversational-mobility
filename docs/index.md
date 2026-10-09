@@ -2,7 +2,7 @@
 
 [Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **7 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **8 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 
@@ -24,7 +24,8 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 | Guía de uso | [Conversar con el sistema](user-guide.md): acceso, consultas, historial y continuidad |
 | Instalación | [Preparación inicial](installation.md): requisitos, cuentas, claves, datos y primer arranque |
 | Operación | [Runtime local](local-runtime.md): iniciar, parar, actualizar, respaldar y recuperar |
-| Operación | [Evaluadores](evaluation.md): crear cuentas, resetear, revocar y entender caducidades |
+| Operación | [Evaluadores](evaluation.md): identidad, propiedad y retención |
+| Operación | [Cuentas y LLM](accounts-and-llm.md): migración, roles/MFA, invitaciones, secretos, modelos, patrocinios y ledger |
 | Operación | [Releases de routing](routing-releases.md): cambiar datos y grafo juntos, activar y revertir |
 | Diagnóstico | [Problemas frecuentes](troubleshooting.md): qué revisar ante cada síntoma |
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
@@ -38,6 +39,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 | Recursos | [Catálogo de referencias](resources/index.md): investigación, documentación oficial y aplicación en el código |
 | Recursos | [Cuentas y claves](resources/accounts.md): pasos manuales OpenAI, EMT, AEMET y Nominatim |
 | Alternativa cloud | [Preparación Vercel](deployment.md): recursos y configuración de alojamiento |
+| Arquitectura futura | [Spec para 20–30 usuarios](plans/2026-10-05-scalable-architecture.md): decisiones cloud, persistencia, concurrencia, migración y criterios de aceptación; no implementado |
 | Evolución | [Historia del proyecto](evolution.md): etapas, decisiones, PR y pruebas realizadas |
 | Evolución | [Roadmap vigente](roadmap.md): alcance y estado de las entregas |
 | Evidencia | [Actas](acceptance/index.md), [auditorías](audits/index.md), [planes](plans/index.md), [investigaciones](research/index.md): archivo completo |
@@ -47,3 +49,7 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 ## Guías y archivo
 
 Las guías describen el funcionamiento actual. Las actas, auditorías, planes e investigaciones conservan los resultados y decisiones de cada fecha. Consulta el [roadmap](roadmap.md) para conocer el alcance vigente.
+
+## Alojamiento sin coste
+
+[Comparación de free tiers y candidato inicial, 05/10/2026](research/2026-10-05-zero-cost-hosting.md): presupuesto obligatorio de 0 USD; sustituye el destino inicial pagado del spec, sin desplegar.
