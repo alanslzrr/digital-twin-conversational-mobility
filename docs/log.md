@@ -4,6 +4,16 @@
 
 Registro aditivo de revisiones de esta wiki. La evolución anterior se sintetiza en su página propia; no se inventan entradas retrospectivas.
 
+## [2026-10-08] implementación | Cuentas, roles y consumo LLM multiproveedor
+
+- [Guía vigente](accounts-and-llm.md): migración 0022, bootstrap local explícito, administrador/evaluador, TOTP por sesión, correo cifrado Resend, catálogo administrado, credenciales de solo escritura, patrocinios y ledger transaccional. Actualizadas las guías canónicas, README, fronteras y adaptaciones upstream sin sustituir el chat oficial.
+- Core custodia secretos y transporte externo; EVE fija modelo/protocolo/versión de credencial/pagador/política por turno. Cubiertos el orden variable de registro de la primera sesión, las continuaciones que omiten `onMessage`, el cambio a contexto menor y la recuperación en React Strict Mode. Uso final ausente conserva reservas; la telemetría no factura ni reintenta.
+- `pnpm check` aprobado: **609 pruebas**, **124 opt-in omitidas**, tipos y builds correctos; lint conserva 47 advertencias, sin errores. `pnpm build:agent` aprobado. `pnpm test:control:db`: **24 pruebas** con todas las migraciones en un contenedor desechable, Better Auth real, Resend y proveedores JSON/SSE ficticios. Corregida la sonda de disponibilidad para esperar al servidor TCP final, no al servidor temporal de inicialización de Postgres.
+- Smoke autenticado de dashboard: **37 comprobaciones HTTP** sobre un esquema sintético del contenedor desechable; sin adquisición ni modelo. La suite de cuentas se incorpora a CI; eso no equivale a afirmar que ya se ejecutó en GitHub.
+- La comprobación de dependencias detectó advisories en Undici 7.28.0. Core fija 7.29.1 y un override acotado corrige también la resolución del sandbox existente. `pnpm audit --audit-level=moderate` termina sin vulnerabilidades conocidas; no es una garantía universal.
+- Revisados enlaces locales y anclas de las páginas modificadas; renderizados siete diagramas Mermaid e inspeccionados los tres modificados. No se han probado visualmente los paneles nuevos con login en navegador ni se certifica compatibilidad real de todos los modelos.
+- Conservados los borradores y ediciones locales anteriores. No se aplica 0022 a la instalación habitual, no se migran claves reales, no se envía correo, no se hacen inferencias reales ni se activa OCI/DNS/cloud. Esos pasos siguen separados y requieren autorización.
+
 ## [2026-10-07] revisión | Capturas y montaje de la interfaz unificada
 
 - Renovadas las cuatro imágenes de la [galería](demo.md): conversación, herramientas desplegadas, resumen y mapa BiciMAD, con la interfaz de PR #58. Capturas nativas, sin ampliar las imágenes ni reconstruir componentes o datos.
@@ -219,6 +229,20 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Restauradas transiciones de ancho/alto/padding de botones del panel; marca sin cambios bruscos de display/padding, sin overflow ni encogimiento del contenedor durante la transición. EVE, identidad y selector ES/EN de PR #46 preservados; adaptaciones en `apps/eve-web/vendor/eve/README.md`.
 - Validación final: instalación frozen-lockfile y `pnpm check` correctos (528 pruebas aprobadas, 100 omitidas, builds correctos); diff sin errores ni conflictos. Login comprobado a 390×844 sin desbordamiento; chat/panel autenticados, oscuro y fluidez final de cierre pendientes de confirmación visual. Auditoría de navegador ES/EN no ejecutada por falta de `AGENT_BROWSER_BIN`. Sin llamadas al modelo, migraciones ni cambios de datos.
 
+## 05/10/2026 · Especificación de arquitectura para 20–30 usuarios
+
+- Añadido [spec de escalabilidad](plans/2026-10-05-scalable-architecture.md), contrastado con `105df99`: monolito modular conservado, Vercel Pro para Web/EVE, backend persistente en VM AWS, PostgreSQL/PostGIS gestionado y objetos privados. Destino propuesto, no implementado ni contratado.
+- Definidos acceso para 30 cuentas, admisión interactiva compartida, presupuesto SQL/almacenamiento, proyecciones del panel, interfaces de infraestructura, continuidad de sesiones, mantenimiento de releases y migración reversible.
+- Incorporados hallazgos de revisión cruzada: retención Workflow Hobby/Pro distinta del ownership; campañas no limitan el modo interactivo; fencing SQL no cerca automáticamente streams EVE; GC coordinado con publicaciones y backups; mantenimiento de todos los consumidores de catálogos.
+- Enlazado desde índices, roadmap y preparación cloud; registradas fuentes primarias actuales. No se reabren R2 ni exclusiones funcionales. Instaladas las dos skills solicitadas en el directorio personal, sin dependencias nuevas del repositorio.
+- Verificados enlaces locales/anclas de los documentos modificados y `git diff --check`. Sin diagramas nuevos. No se ejecutaron `pnpm check`, builds, migraciones, carga, llamadas al modelo/proveedores, benchmarks OTP ni operaciones cloud; las verificaciones de implementación quedan en el spec. Sin commit, push o PR.
+
+## [2026-10-05] investigación | Presupuesto inicial de cero dólares
+
+- Comparados planes gratuitos oficiales de doce servicios/productos, separando franquicias recurrentes, trial y restricciones de persistencia.
+- Retirado el destino inicial pagado del spec; [candidato gratuito condicionado](research/2026-10-05-zero-cost-hosting.md): Oracle Always Free y Neon Free, con comprobaciones de ARM, World, memoria, almacenamiento y cuenta pendientes.
+- Actualizados alcance, preparación cloud e índices. Sin cuentas, provisión, pagos, inferencias ni pruebas de carga.
+
 ## [2026-10-06] corrección | Preparación del código para publicación
 
 - Añadida licencia MIT para el código propio y enlaces a licencias/avisos de EVE, Community Agent y shadcn. Las condiciones de datos y cartografía permanecen separadas.
@@ -226,7 +250,7 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - Corregidas las referencias vigentes a migraciones, nombre mobai, selector de tema, controles ES/EN y errores de login. Conservadas las actas y sus resultados históricos, así como los borradores locales de arquitectura y alojamiento.
 - Fijadas versiones corregidas de source-map-js (1.2.2) y KaTeX (0.18.2), sin excluir avisos. Añadidas tres regresiones offline de fórmulas Streamdown, rechazo de enlaces por defecto y opciones de confianza heredadas.
 - `pnpm check` correcto: 531 pruebas pasadas y 100 omitidas, tipos y builds Web/Core; permanecen advertencias no bloqueantes de lint. Instalación con lockfile congelado, auditorías completa y de producción con umbral `low`, comprobación cloud y `git diff --check` correctos. Verificados 1.455 enlaces locales y sus anclas, sin destinos ausentes. No se modificaron diagramas.
-- La revisión inicial se realizó en local, sin commits ni publicación de código. No se ejecutaron pruebas autenticadas, inferencias, adquisiciones de proveedores, migraciones ni despliegues. La eliminación de una rama remota no acredita revocación de credenciales ni retirada de commits históricos accesibles.
+- La revisión inicial se realizó en local, sin commits ni publicación de código. No se ejecutaron pruebas autenticadas, inferencias, adquisiciones de proveedores, migraciones ni despliegues.
 
 ## [2026-10-06] documentación | Demo y pantallas del producto
 
@@ -242,3 +266,25 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 - La auditoría de dependencias de [CI de PR #49](https://github.com/alanslzrr/digital-twin-conversational-mobility/actions/runs/37490835966) detectó `GHSA-wq5f-xc86-pv6w`, publicado en GitHub Advisory Database el 06/10/2026: vulnerabilidad de librsvg en `sharp <0.35.5`, transitiva de Next.js.
 - Aplicado override acotado de `sharp@0.35.4` a `0.35.5` y regenerado el lockfile con los binarios correspondientes. No se omiten avisos ni se relaja la auditoría.
 - Instalación con lockfile congelado, auditorías completa y de producción con umbral `low` sin vulnerabilidades conocidas, y `pnpm check` correctos: 531 pruebas pasadas, 100 omitidas y builds Web/Core reconstruidos sin caché. Comprobada la carga de sharp 0.35.5 con librsvg 2.63.2 y conversión en memoria del SVG de marca a PNG de 534 × 534. Sin cambios de la interfaz ni despliegue.
+
+## [2026-10-08] configuración | Activación de cuentas y LLM en la instalación local
+
+- Aplicada 0022 a PostgreSQL local tras dump privado con índice verificado. Promovida la cuenta existente de Alan a administrador, conservando UUID, contraseña e historial. TOTP queda pendiente de vinculación por el usuario a su autenticador.
+- Inicializado SecretStore con archivo maestro privado fuera del repositorio. Importada y verificada por descifrado la key de prueba existente; retiradas sus copias en texto plano de los entornos raíz y Web, sin rotación externa. Preferencia personal OpenAI Responses / `gpt-6-luna`, ventana operativa 32.768 y salida máxima 2.048. Sin patrocinios ni tarifas supuestas: el coste se mostrará desconocido si el proveedor no lo comunica. Capacidades contrastadas con [la ficha oficial](https://developers.openai.com/api/docs/models/gpt-6-luna).
+- Activado LLM únicamente en Core local y renovado el JWT interno. Resend permanece desactivado; OCI no se ha configurado. La consulta autenticada del modelo con la key importada devuelve HTTP 200; no genera contenido ni certifica el flujo conversacional completo.
+- Puerto Web 3010 para no interrumpir otro proyecto activo en 3000. Supervisor y smokes utilizan el origen configurado. Arrancados PostgreSQL, Redis, OTP con su grafo existente, Core, Web, EVE y worker local. No se ejecutan benchmarks ni reconstrucción del grafo.
+- `pnpm build`, `pnpm build:agent`, `pnpm smoke --production` y `pnpm smoke:evaluation` correctos. Login real con cuentas efímeras, aislamiento, CSRF, historial, cuotas, revocación y logout comprobados; las cuentas efímeras se eliminan. Biome de los cuatro scripts, sintaxis, fronteras, cloud deshabilitado y diff comprobados. La página de acceso se abre en navegador; la revisión autenticada de Alan y el mensaje LLM esperan su login.
+
+## [2026-10-08] corrección | Primera inferencia autenticada con cuentas multiproveedor
+
+- Alan completó TOTP en su autenticador. Verificados la cuenta autenticada, el acceso a Administración y el selector con financiación propia.
+- Corregida la selección dinámica de EVE 0.65.0: referencia serializable por turno y cliente SDK efímero por paso, siempre desde la vinculación fijada. Admitido el identificador de seguridad pseudónimo que añade EVE a Responses, sin permitir metadatos arbitrarios.
+- Corregido un bloqueo del proxy SSE: una lectura que solo contiene una parte del evento debe continuar leyendo hasta emitir datos o alcanzar EOF. La integración ahora fragmenta los eventos byte a byte para ambos protocolos.
+- Prueba real desde el chat oficial: «Conexión correcta», 3.990 tokens de entrada y 8 de salida, intento liquidado en 2.480 ms. Sin herramientas en ese turno. El intento anterior interrumpido se conserva como incierto, sin atribuirle consumo cero ni inventar coste.
+- Reiniciado el supervisor local como proceso independiente para no depender de la vida de la llamada de ejecución. Core, Web y EVE mantienen autenticación; no se alteran roles ni MFA para las pruebas. No se activa Resend ni OCI.
+- 43 pruebas focalizadas y 24 de integración PostgreSQL desechable correctas, incluyendo SSE fragmentado; el smoke productivo también pasa. La prueba real cubre Responses y el primer turno, no certifica todos los proveedores ni la compactación manual.
+
+- Extendida la adaptación fijada de EVE para rehidratar el cliente Core antes de compactación manual, sin resolución externa implícita por Gateway. El propósito de compactación reutiliza el turno de la vinculación, aunque EVE emita otro identificador de evento. Añadidas regresiones de ambos casos.
+
+- Verificada finalmente la compactación manual real tras el ajuste: 325 tokens de entrada, 201 de salida (incluyen 132 de razonamiento), intento liquidado con la credencial y el turno originales. El selector vuelve a estar disponible al finalizar. `pnpm check` final: 612 pruebas pasadas, 124 opt-in omitidas, tipos y builds correctos; agente recompilado.
+- Continuación tras compactar verificada en la misma conversación: «Continuidad correcta», 4.270 tokens de entrada y 19 de salida, otro intento liquidado. Lockfile congelado instalado offline sin cambios.
