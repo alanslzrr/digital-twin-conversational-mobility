@@ -3,9 +3,11 @@ import { readFileSync } from "node:fs";
 import { parseEnv } from "node:util";
 
 const web = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
+const webOrigin = new URL(web.EVALUATION_ORIGIN || "http://127.0.0.1:3000")
+  .origin;
 const base = "http://127.0.0.1:3001";
 for (const [url, expected] of [
-  ["http://127.0.0.1:3000/api/health", "eve-web"],
+  [`${webOrigin}/api/health`, "eve-web"],
   [`${base}/api/health`, "mobility-core"],
 ]) {
   const response = await fetch(url, { signal: AbortSignal.timeout(60_000) });
@@ -85,11 +87,11 @@ assert.equal(typeof health.liveDataReady, "boolean");
 assert.equal(health.sources[0].id, "renfe");
 assert.ok(Array.isArray(health.sources[0].streams));
 if (process.argv.includes("--production")) {
-  const eveHealth = await fetch("http://127.0.0.1:3000/eve/v1/health", {
+  const eveHealth = await fetch(`${webOrigin}/eve/v1/health`, {
     signal: AbortSignal.timeout(60_000),
   });
   assert.equal(eveHealth.status, 200);
-  const session = await fetch("http://127.0.0.1:3000/eve/v1/session", {
+  const session = await fetch(`${webOrigin}/eve/v1/session`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),

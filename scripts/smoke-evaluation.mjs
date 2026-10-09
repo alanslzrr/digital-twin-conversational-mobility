@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { parseEnv } from "node:util";
 import postgres from "postgres";
 import { authOptions } from "../apps/mobility-core/src/better-auth.ts";
 
+if (process.argv.some((arg) => arg.startsWith("--live")))
+  throw new Error(
+    "Legacy implicit-funding smoke is retired. Run an explicitly funded account through EVE; MOBILITY_BUDGET_MODE=campaign remains opt-in. See docs/accounts-and-llm.md.",
+  );
 const root = parseEnv(readFileSync(".env.local", "utf8"));
 const web = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
 if (!["127.0.0.1", "localhost"].includes(new URL(root.DATABASE_URL).hostname))
@@ -20,7 +24,7 @@ const { betterAuth } = await import(
 const { Pool } = require("pg");
 const sql = postgres(root.DATABASE_URL, { max: 1 });
 const pool = new Pool({ connectionString: root.DATABASE_URL, max: 1 });
-const base = "http://127.0.0.1:3000";
+const base = new URL(web.EVALUATION_ORIGIN || "http://127.0.0.1:3000").origin;
 const auth = betterAuth(authOptions(pool, root.BETTER_AUTH_SECRET, base, true));
 const users = [];
 let sessionId;
@@ -48,20 +52,28 @@ async function access(body) {
   });
 }
 try {
-  for (const slot of [4, 5]) {
-    const [existing] = await sql`SELECT id FROM evaluator WHERE slot=${slot}`;
-    if (existing)
-      throw new Error(`Smoke slot ${slot} is occupied; refusing to change it`);
+  for (const index of [1, 2]) {
     const email = `smoke-${randomBytes(8).toString("hex")}@mobility.test`;
     const password = randomBytes(24).toString("base64url");
-    const account = await auth.api.signUpEmail({
-      body: { email, password, name: `Smoke ${slot}` },
+    const user = await sql.begin(async (tx) => {
+      const [settings] =
+        await tx`SELECT capacity FROM control_settings FOR UPDATE`;
+      const [count] =
+        await tx`SELECT count(*)::integer AS count FROM evaluator WHERE enabled AND expires_at>now() AND (account_state='active' OR invitation_expires_at>now())`;
+      assert.ok(
+        settings && count.count < settings.capacity,
+        "Two free account places are required for this local smoke",
+      );
+      const account = await auth.api.createUser({
+        body: { email, password, name: `Smoke ${index}` },
+      });
+      const fixture = { authId: account.user.id, email, password };
+      users.push(fixture);
+      const [row] =
+        await tx`INSERT INTO evaluator(label,auth_user_id) VALUES (${`Smoke ${index}`},${account.user.id}) RETURNING id`;
+      fixture.id = row.id;
+      return fixture;
     });
-    const user = { authId: account.user.id, email, password };
-    users.push(user);
-    const [row] =
-      await sql`INSERT INTO evaluator(slot,label,auth_user_id) VALUES (${slot},${`Smoke ${slot}`},${account.user.id}) RETURNING id`;
-    user.id = row.id;
     const response = await call("/api/auth/sign-in/email", "POST", {
       email,
       password,
@@ -208,181 +220,21 @@ try {
   console.log(
     "Conversation history: authentication, ownership, 20+6 pagination and read-only effects verified.",
   );
+  const [limits] = await sql`SELECT requests_per_minute FROM control_settings`;
   const quota = await Promise.all(
-    Array.from({ length: 18 }, () =>
+    Array.from({ length: limits.requests_per_minute + 2 }, () =>
       access({ action: "authorize", principalId: users[1].id, consume: true }),
     ),
   );
   assert.ok(quota.some((response) => response.status === 429));
   const counters =
     await sql`SELECT requests FROM evaluation_usage WHERE evaluator_id=${users[1].id} AND window_kind='minute'`;
+  const [settings] =
+    await sql`SELECT requests_per_minute FROM control_settings`;
   assert.ok(
-    counters.every((row) => row.requests <= 6),
+    counters.every((row) => row.requests <= settings.requests_per_minute),
     "Concurrent requests exceeded quota",
   );
-  if (
-    process.argv.includes("--live") ||
-    process.argv.includes("--live-emt") ||
-    process.argv.includes("--live-mobility") ||
-    process.argv.includes("--live-weather")
-  ) {
-    const emt = process.argv.includes("--live-emt");
-    const mobility = process.argv.includes("--live-mobility");
-    const weather = process.argv.includes("--live-weather");
-    const response = await call(
-      `/eve/v1/session/${sessionId}`,
-      "POST",
-      {
-        message: emt
-          ? "Consulta con Mobility MCP los avisos de autobuses EMT (get_incidents, source=emt, limit=3). Indica fuente y hora de actualización, advierte si el feed está desactualizado y distingue períodos futuros o desconocidos. No consultes rutas ni llegadas, no asumas que todos los avisos están activos y no repitas consultas."
-          : mobility
-            ? "Prueba de movilidad: quiero ir ahora de la estación Madrid-Atocha Cercanías a la estación Madrid-Chamartín-Clara Campoamor, en Cercanías. Resuelve primero ambas estaciones con MCP en paralelo; elijo explícitamente esas estaciones Renfe, no estaciones de bicis. Después consulta en paralelo la ruta, la observación meteorológica de Madrid-Retiro y el estado de disponibilidad de la fuente EMT. Responde brevemente con el trayecto, base prevista o real, observación meteorológica con hora y fuente, y si EMT está disponible. No repitas consultas ni inventes datos."
-            : weather
-              ? "Consulta con Mobility MCP la última observación meteorológica de Madrid-Retiro (kind=weather, estación3195). Responde brevemente con temperatura, lluvia, fuente y hora de observación. Distingue claramente observación de previsión y lluvia acumulada de lluvia en este instante."
-              : "Consulta el estado de la fuente Renfe usando Mobility MCP. Responde en una frase si hay datos disponibles.",
-      },
-      users[0].cookie,
-    );
-    assert.equal(response.status, 202);
-    const stream = await fetch(
-      `${base}/eve/v1/session/${sessionId}/stream?startIndex=0`,
-      {
-        headers: { Cookie: users[0].cookie },
-        signal: AbortSignal.timeout(120_000),
-      },
-    );
-    assert.equal(stream.status, 200);
-    const reader = stream.body.getReader();
-    const decoder = new TextDecoder();
-    let pending = "";
-    const events = [];
-    let completed = false;
-    try {
-      while (!completed) {
-        const chunk = await reader.read();
-        if (chunk.done) break;
-        pending += decoder.decode(chunk.value, { stream: true });
-        while (pending.includes("\n")) {
-          const index = pending.indexOf("\n");
-          const line = pending.slice(0, index);
-          pending = pending.slice(index + 1);
-          if (!line.trim()) continue;
-          const event = JSON.parse(line);
-          events.push(event);
-          if (
-            event.type === "turn.completed" ||
-            event.type === "turn.failed" ||
-            event.type === "session.failed"
-          ) {
-            completed = true;
-            break;
-          }
-        }
-      }
-    } finally {
-      await reader.cancel();
-    }
-    const types = [...new Set(events.map((event) => event.type))];
-    console.log("Live EVE event types:", types.join(", "));
-    const actions = events.filter((event) => event.type === "action.result");
-    const finalText = events
-      .filter((event) => event.type === "message.completed")
-      .map((event) => event.data.message ?? "")
-      .join("\n");
-    // Persist a bounded report even on failure, not hidden reasoning or raw events.
-    mkdirSync("data/validation", { recursive: true });
-    writeFileSync(
-      `data/validation/conversation-${Date.now()}.json`,
-      JSON.stringify(
-        {
-          verifiedAt: new Date().toISOString(),
-          scenario: emt
-            ? "emt-incidents"
-            : mobility
-              ? "mobility"
-              : weather
-                ? "weather"
-                : "source-health",
-          completed: events.some((event) => event.type === "turn.completed"),
-          completedSteps: events.filter(
-            (event) => event.type === "step.completed",
-          ).length,
-          actions: actions.map((event) => ({
-            tool: event.data.result.toolName,
-            status: event.data.status,
-            isError:
-              event.data.result.isError === true ||
-              event.data.result.output?.isError === true,
-          })),
-          answer: finalText,
-        },
-        null,
-        2,
-      ),
-      { mode: 0o600 },
-    );
-    assert.ok(
-      events.some((event) => event.type === "turn.completed"),
-      "EVE turn did not complete",
-    );
-    const required = emt
-      ? ["get_incidents"]
-      : mobility
-        ? [
-            "resolve_place",
-            "plan_journey",
-            "get_environment",
-            "get_source_health",
-          ]
-        : weather
-          ? ["get_environment"]
-          : ["get_source_health"];
-    for (const tool of required) {
-      const matches = actions.filter((event) =>
-        String(event.data.result.toolName).includes(tool),
-      );
-      assert.ok(
-        matches.some(
-          (event) =>
-            event.data.status === "completed" &&
-            !event.data.result.isError &&
-            !event.data.result.output?.isError,
-        ),
-        `${tool} did not complete`,
-      );
-    }
-    assert.ok(finalText.trim(), "No visible assistant answer");
-    if (mobility) {
-      const results = JSON.stringify(actions);
-      assert.ok(
-        results.includes('"scheduled"') && results.includes('"aemet"'),
-        "Expected real scheduled route and weather observations",
-      );
-    }
-    if (emt) {
-      assert.ok(
-        JSON.stringify(actions).includes('"emt"'),
-        "Expected EMT provenance",
-      );
-    }
-    if (weather) {
-      const measured = actions.find((event) =>
-        String(event.data.result.toolName).includes("get_environment"),
-      )?.data.result.output?.structuredContent;
-      assert.equal(measured?.provenance?.source, "aemet");
-      assert.equal(measured?.readings?.[0]?.stationId, "3195");
-    }
-    // Only visible assistant text and action names: never print hidden reasoning,
-    // provider headers, authentication bodies or the full event stream.
-    console.log(
-      "Completed tools:",
-      actions.map((event) => event.data.result.toolName).join(", "),
-    );
-    console.log("Visible answer:", finalText);
-    console.log(
-      "Live EVE → direct GPT-6 Luna → authenticated Mobility MCP verified.",
-    );
-  }
   const reset = await call(
     `/eve/v1/session/${sessionId}/reset`,
     "POST",
