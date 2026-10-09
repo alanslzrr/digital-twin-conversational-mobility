@@ -1,24 +1,22 @@
+import { llmId } from "@mobility/contracts";
 import { defineChannel } from "eve/channels";
 import { eveChannel } from "eve/channels/eve";
+import { evaluationCaller } from "../../src/evaluation-caller";
 import { protectEvaluationRoute } from "../../src/evaluation-guard";
-import { readIdentity } from "../../src/evaluator-auth";
 
 const channel = eveChannel({
-  auth: [
-    async (request) => {
-      const identity = await readIdentity(request);
-      return identity
-        ? {
-            authenticator: "evaluator-password",
-            attributes: {},
-            issuer: "mobility-evaluation",
-            principalId: identity.principalId,
-            principalType: "user" as const,
-          }
-        : null;
-    },
-  ],
+  auth: [evaluationCaller],
   uploadPolicy: "disabled",
+  onMessage: async ({ eve }) => {
+    const caller = eve.caller;
+    if (!caller) throw new Error("authentication_required");
+    const selectionId = llmId.parse(
+      eve.request.headers.get("x-mobai-selection"),
+    );
+    return {
+      auth: { ...caller, attributes: { mobaiSelectionId: selectionId } },
+    };
+  },
 });
 
 export default defineChannel({
