@@ -1,0 +1,14 @@
+# Install only when deploying. MOBAI_HOST is the chosen public DNS name.
+{$MOBAI_HOST} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	# Only Web is public. Never proxy Core, PostgreSQL, OTP or EVE directly.
+	reverse_proxy 127.0.0.1:3000 {
+		flush_interval -1
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Real-IP {remote_host}
+	}
+}

@@ -1,0 +1,29 @@
+[Unit]
+Description=mobai single-node application runtime
+After=network-online.target docker.service
+Wants=network-online.target
+RequiresMountsFor=/srv/mobai
+ConditionPathExists=/opt/mobai/apps/eve-web/.output/server/index.mjs
+
+[Service]
+Type=simple
+User=mobai
+Group=mobai
+WorkingDirectory=/opt/mobai
+# Node 24 is installed at /usr/bin/node on the target VM.
+# Environment files remain component-specific; do not export Core secrets to Web.
+ExecStartPre=/usr/bin/node scripts/setup-local.mjs --refresh-token
+ExecStart=/usr/bin/node scripts/start-local.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=120
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
