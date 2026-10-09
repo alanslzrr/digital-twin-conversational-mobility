@@ -2,7 +2,7 @@
 
 [Índice](../index.md) · [Recursos](index.md) · [Instalación](../installation.md) · [Variables](../reference/system.md#variables-y-secretos)
 
-OpenAI, EMT y AEMET requieren claves de servidor. Los pasos siguientes explican cómo obtenerlas y dónde configurarlas. Para crear cuentas de acceso al chat, consulta la [administración de cuentas](../evaluation.md).
+Los proveedores LLM, EMT y AEMET utilizan credenciales custodiadas por Core. Los pasos siguientes explican cómo obtenerlas y dónde configurarlas. Para crear cuentas de acceso al chat, consulta la [administración de cuentas](../evaluation.md).
 
 ## En esta página
 
@@ -15,17 +15,13 @@ OpenAI, EMT y AEMET requieren claves de servidor. Los pasos siguientes explican 
 
 ## OpenAI directo
 
-**Aporta:** interpretación de preguntas, selección de herramientas y redacción de respuestas.
+**Aporta:** interpretación de preguntas, selección de herramientas y redacción. OpenAI es ahora una opción del catálogo, no el único proveedor ni un destino directo de Web.
 
-1. Accede a tu proyecto/cuenta en [el panel de claves de OpenAI](https://platform.openai.com/api-keys).
-2. Crea una clave de servidor, siguiendo [el quickstart oficial](https://developers.openai.com/api/docs/quickstart).
-3. Guarda el valor como `OPENAI_API_KEY` en `.env.local` de la raíz. No lo pegues en el chat, Git ni un comando que imprima el entorno.
-4. Ejecuta `pnpm configure:openai` para copiarla solo al servidor Web.
-5. Compila y arranca según [la instalación](../installation.md#compilar-y-arrancar).
+Obtén la credencial en el panel oficial del proveedor elegido; para OpenAI, [panel de claves](https://platform.openai.com/api-keys). Tras habilitar el perfil en Administración, añade la key desde **Mi cuenta**, o recibe un patrocinio sin verla. El formulario es de solo escritura. Los identificadores de modelos son configurables, con capacidades y precios verificados por el administrador.
 
-La [configuración local](../../apps/eve-web/src/model.ts) fija `gpt-6-luna` mediante Responses y `store:false`. `pnpm check:openai` consulta acceso al modelo; `--live` añade una llamada de pago. Las pruebas offline usan respuestas simuladas y no consumen créditos.
+No uses `OPENAI_API_KEY`, `configure:openai` o `check:openai` para esta versión: los scripts antiguos están retirados. Web solo llama al transporte interno fijo de Core. Para rotar, reemplaza desde el panel y revoca la anterior en el proveedor; eliminarla en mobai no la revoca fuera. Guardar una key no realiza inferencias.
 
-Para rotar: crea otra clave, actualiza el archivo privado, configura/reinicia Web y revoca la anterior en el panel tras comprobar el cambio. [Script de configuración](../../scripts/configure-openai.mjs). Referencias de alta consultadas el **02/10/2026**. El panel requiere iniciar sesión.
+[Configuración completa y activaciones posteriores](../accounts-and-llm.md) · [Catálogo y secretos Core](../../apps/mobility-core/src/control/catalog.ts) · [Compatibilidad SDK](https://ai-sdk.dev/providers/openai-compatible-providers).
 
 ## EMT MobilityLabs
 
