@@ -4,7 +4,7 @@
 
 Referencias oficiales e investigaciones utilizadas en la implementación. Cada recurso enlaza con el componente que lo utiliza. Las licencias y la cobertura se detallan en el [registro de fuentes](../sources/README.md).
 
-Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las versiones locales se contrastan con el lockfile/código. Los enlaces de investigaciones originales conservan la fecha de esas investigaciones. [Accesos limitados](#accesos-y-verificación).
+Revisión documental general: **02/10/2026**; referencias de arquitectura cloud ampliadas el **05/10/2026**. Las páginas oficiales pueden cambiar; las versiones locales se contrastan con el lockfile/código. Los enlaces de investigaciones originales conservan la fecha de esas investigaciones. [Accesos limitados](#accesos-y-verificación).
 
 ## En esta página
 
@@ -16,6 +16,7 @@ Revisión documental: **02/10/2026**. Las páginas oficiales pueden cambiar; las
 - [Carreteras y entorno municipal](#carreteras-y-entorno-municipal)
 - [Geocodificación](#geocodificación)
 - [Cloud y alternativas](#cloud-y-alternativas)
+- [Arquitectura para 20–30 usuarios](#arquitectura-para-2030-usuarios)
 - [Investigaciones aplicadas](#investigaciones-aplicadas)
 - [Criterio documental](#criterio-documental)
 - [Accesos y verificación](#accesos-y-verificación)
@@ -105,6 +106,20 @@ La [auditoría de PR #45](../audits/2026-10-02-core-dashboard-review.md) contras
 | [Cron](https://vercel.com/docs/cron-jobs/usage-and-pricing), [precios](https://vercel.com/pricing) y [términos](https://vercel.com/legal/terms) | Frecuencias, cuotas y condiciones de los planes Vercel | Referencias para elegir la configuración de alojamiento |
 | Proveedor externo para Metro/alternativas | Alternativas de cobertura estudiadas; Metro actual quedó excluido de esta versión | [Investigación y decisión](../research/2026-09-29-metro-alternatives.md), [alcance vigente](../roadmap.md) |
 
+## Arquitectura para 20–30 usuarios
+
+Referencias revisadas el **05/10/2026** para el [spec de evolución](../plans/2026-10-05-scalable-architecture.md), no para describir un despliegue existente. Precios y cuotas se vuelven a comprobar antes de contratar.
+
+| Fuente primaria | Conclusión y uso en el spec |
+| --- | --- |
+| [Workflow Vercel](https://vercel.com/docs/workflows/pricing), [Hobby](https://vercel.com/docs/plans/hobby), [Pro](https://vercel.com/docs/plans/pro-plan) y [Functions](https://vercel.com/docs/functions/limitations) | Distinguir ejecución durable, límite de invocación y retención. Hobby retiene un día después de completar el run, Pro siete: condiciona conservar el historial actual. |
+| [World PostgreSQL](https://workflow-sdk.dev/worlds/postgres) y [despliegue Workflow](https://workflow-sdk.dev/docs/deploying) | Self-host exige compatibilidad de versión, proceso persistente, protección de rutas y pruebas; no introducir SQL en Web como sustitución automática. |
+| [Next.js en Cloudflare](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/), [Node](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) y [Containers](https://developers.cloudflare.com/containers/) | La guía actual recomienda vinext beta. Workers no equivale a Node completo; Containers es otro producto. No migrar EVE sin gate del runtime. |
+| [Cloud Run](https://docs.cloud.google.com/run/docs/configuring/billing-settings) y [Compute Engine](https://docs.cloud.google.com/compute/docs/general-purpose-machines) | Distinguir CPU por petición de proceso persistente. GCP es alternativa de hosting, no segunda implementación obligatoria. |
+| [S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html), [IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) y [roles ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-iam-roles.html) | Objetos privados y credenciales de workload con mínimo privilegio; la VM inicial no proporciona aislamiento IAM por contenedor automáticamente. |
+| [Neon](https://neon.com/pricing) | Dimensionar almacenamiento, cómputo, conexiones y recuperación antes de reutilizar el proyecto preparado; free tier no se presume suficiente. |
+| Skills [nextjs-on-cloudflare](https://github.com/cloudflare/skills/tree/main/skills/nextjs-on-cloudflare) y [aws-iam](https://github.com/aws/agent-toolkit-for-aws/tree/main/skills/core-skills/aws-iam) | Instaladas el 05/10 en el directorio personal de skills; leídas como apoyo de arquitectura. No añadidas al lockfile ni ejecutadas para provisionar. |
+
 ## Investigaciones aplicadas
 
 | Investigación original | Síntesis que se conserva | Implementación/evidencia |
@@ -150,6 +165,10 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | [GitHub Advisory Database: GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | Aviso revisado y actualizado el 02/10/2026: `braces <=3.0.3`, agotamiento de pila, gravedad alta, sin versión corregida. Sustenta el bloqueo histórico de CI y la posterior [retirada de la CLI vulnerable](../acceptance/2026-10-03-core-dashboard-merge-readiness.md). |
 | [Registro npm: braces](https://registry.npmjs.org/braces/latest) y [Vercel](https://registry.npmjs.org/vercel/latest) | Consultados con `pnpm view` el 03/10/2026: braces 3.0.3 y CLI 62.2.0. Los builders de la CLI mantienen ts-morph 12.0.0; una actualización de CLI sola no elimina la cadena. No se cambiaron dependencias ni se relajó la auditoría. |
 
+## Free tiers para el despliegue inicial
+
+La [investigación del 05/10/2026](../research/2026-10-05-zero-cost-hosting.md) enlaza las fuentes primarias de Neon, Supabase, Vercel, Railway, Cloudflare, Oracle, Render, Koyeb, Northflank, AWS y GCP junto a sus límites y uso propuesto. Conclusión: priorizar validación de VM persistente Always Free y DB gratuita; no confundir créditos temporales o franquicias con bloqueo de gasto. Neon anunció 1 GB por proyecto el 02/10; Oracle documenta actualmente A1 de 2 OCPU/12 GB totales. Ninguna de esas cuotas certifica capacidad del proyecto.
+
 <a id="security-updates-2026-10-06"></a>
 
 ## Parches y licencia · 06/10/2026
@@ -181,3 +200,17 @@ Las comprobaciones de enlaces y acceso se recogen en el [registro de revisiones]
 | [Gitleaks 8.30.1](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1) | Escaneo del historial con redacción; checksum fijado y excepción por fingerprint, no exclusión global de documentación | CI y escaneo local de 345 commits |
 | [SemVer](https://semver.org/) | Versiones únicas y límites explícitos antes de 1.0 | [Procedimiento de releases](../releasing.md) |
 | [Eventos de PR](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request) | El cuerpo de la PR es entrada no confiable; validar metadatos con permisos de lectura y código de base | `pr-policy.yml`, sin ejecución de código del fork ni tokens privilegiados |
+
+## Cuentas y LLM multiproveedor · 08/10/2026
+
+| Fuente oficial | Conclusión aplicada | Implementación local |
+| --- | --- | --- |
+| [AI SDK: OpenAI-compatible](https://ai-sdk.dev/providers/openai-compatible-providers) | Compatibilidad de protocolo no implica igualdad de parámetros, herramientas, contexto o uso | AI SDK 7.0.112, compatible 3.0.66, adaptador concreto y catálogo por modelo; [transporte](../../apps/eve-web/src/model.ts) |
+| [EVE: capacidades dinámicas](https://eve.dev/docs/guides/dynamic-capabilities) | Resolver al inicio del turno y suministrar contexto explícito; cambiar modelo no conserva necesariamente caché | EVE 0.65.0; [agente](../../apps/eve-web/agent/agent.ts), pruebas de continuidad/compactación |
+| [Better Auth: contraseña](https://www.better-auth.com/docs/authentication/email-password) y [TOTP](https://www.better-auth.com/docs/plugins/2fa) | Tokens de recuperación acotados, revocación de sesiones y verificación MFA; sin impersonación | Better Auth 1.7.5, prueba MFA por sesión y [configuración Core](../../apps/mobility-core/src/better-auth.ts) |
+| [Resend: idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys) y [webhooks](https://resend.com/docs/dashboard/webhooks/verify-webhooks-requests) | Separar aceptación/entrega, verificar firmas y deduplicar; no seguir enlaces de recuperación | SDK 6.32.1, [cola cifrada](../../apps/mobility-core/src/control/mail.ts), sin activación real |
+| [OpenCode Zen](https://opencode.ai/docs/zen/) y [Go](https://opencode.ai/docs/go/) | Usar solo endpoints/modelos compatibles con Chat Completions o Responses; no anunciar Anthropic Messages | Perfiles iniciales desactivados en [0022](../../infra/postgres/migrations/0022_accounts_llm_control.sql) |
+| [Undici: validación TLS, GHSA-w293-vg96-wgc3](https://github.com/advisories/GHSA-w293-vg96-wgc3) | Mantener el transporte y su dependencia de sandbox en la versión 7.x corregida, sin rebajar el gate de seguridad | Core 7.29.1 y override acotado; auditoría del lockfile sin vulnerabilidades conocidas |
+| [DeepSeek: thinking mode](https://api-docs.deepseek.com/guides/thinking_mode/) | El razonamiento y las herramientas tienen requisitos propios; conservarlo dentro de la misma frontera de modelo | [Adaptación no destructiva del historial](../../apps/eve-web/src/model-history.ts) |
+
+[Procedimiento vigente](../accounts-and-llm.md) → [contratos](../../packages/contracts/src/llm.ts) → [pruebas aisladas](../../apps/mobility-core/src/control/control.integration.test.ts). La verificación local usa proveedores ficticios, no certifica todos los modelos de esos servicios.
