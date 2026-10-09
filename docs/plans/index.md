@@ -6,6 +6,7 @@
 
 | Documento | Estado y alcance |
 | --- | --- |
+| [Arquitectura escalable para 20–30 usuarios](2026-10-05-scalable-architecture.md) | Spec propuesto: persistencia portable, admisión distribuida, backend persistente y comparación cloud. Sin implementación, provisión ni capacidad certificada. |
 | [Panel de Mobility Core y telemetría](2026-10-02-core-dashboard.md) | Arquitectura y límites originales; implementación inicial con [evidencia aislada](../acceptance/2026-10-02-core-dashboard.md). Continuar con el [spec-audit de refinamiento de PR #45](../audits/2026-10-02-core-dashboard-review.md#spec-de-refinamiento-para-el-agente). Instalación habitual pendiente. |
 
 ## Archivo de planes originales
