@@ -16,11 +16,16 @@ import {
 } from "@/src/evaluation-login";
 import { AccessControls } from "./access-controls";
 
-type Identity = { principalId: string; label: string };
+type Identity = {
+  principalId: string;
+  label: string;
+  role?: "admin" | "evaluator";
+};
 
 /** Authentication only: the conversation itself is EVE's official Web Chat. */
 export function EvaluationAccess({ children }: { children: ReactNode }) {
-  const { t, copy } = useUi();
+  const { t, copy, locale } = useUi();
+  const [challenge, setChallenge] = useState<"" | "totp" | "backup">("");
 
   const identityRequest = useRef<AbortController | undefined>(undefined);
   const [identity, setIdentity] = useState<Identity | null>(null);
@@ -82,6 +87,7 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
         <AccessControls
           key={`access:${identity.principalId}`}
           error={error}
+          admin={identity.role === "admin"}
           onSignOut={async () => {
             try {
               const result = await fetch("/api/auth/sign-out", {
@@ -116,19 +122,38 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
             if (canonicalUrl) return;
             identityRequest.current?.abort();
             const data = new FormData(event.currentTarget);
+            const passwordInput =
+              event.currentTarget.querySelector<HTMLInputElement>(
+                'input[type="password"]',
+              );
+            if (passwordInput) passwordInput.value = "";
             setLoading(true);
             setError("");
             try {
-              const response = await fetch("/api/auth/sign-in/email", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: data.get("email"),
-                  password: data.get("password"),
-                }),
-              });
+              const response = await fetch(
+                challenge
+                  ? `/api/auth/two-factor/verify-${challenge === "totp" ? "totp" : "backup-code"}`
+                  : "/api/auth/sign-in/email",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(
+                    challenge
+                      ? { code: data.get("code"), trustDevice: false }
+                      : {
+                          email: data.get("email"),
+                          password: data.get("password"),
+                        },
+                  ),
+                },
+              );
               if (!response.ok)
                 throw new Error(evaluationLoginError(response.status));
+              const result = await response.json();
+              if (result.twoFactorRedirect) {
+                setChallenge("totp");
+                return;
+              }
               const access = await fetch("/api/evaluation", {
                 cache: "no-store",
               });
@@ -161,32 +186,68 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
             </p>
           </div>
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="email">{t("evaluation.correo")}</FieldLabel>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                inputMode="email"
-                spellCheck={false}
-                autoComplete="username"
-                required
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="password">
-                {t("evaluation.contrasena")}
-              </FieldLabel>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                minLength={12}
-                maxLength={128}
-                required
-              />
-            </Field>
+            {challenge ? (
+              <Field>
+                <FieldLabel htmlFor="code">
+                  {challenge === "totp"
+                    ? "TOTP"
+                    : locale === "es"
+                      ? "Código de recuperación"
+                      : "Recovery code"}
+                </FieldLabel>
+                <Input
+                  id="code"
+                  name="code"
+                  autoComplete="one-time-code"
+                  required
+                  maxLength={64}
+                />
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() =>
+                    setChallenge(challenge === "totp" ? "backup" : "totp")
+                  }
+                >
+                  {challenge === "totp"
+                    ? locale === "es"
+                      ? "Usar código de recuperación"
+                      : "Use recovery code"
+                    : "Usar TOTP / Use TOTP"}
+                </Button>
+              </Field>
+            ) : (
+              <>
+                <Field>
+                  <FieldLabel htmlFor="email">
+                    {t("evaluation.correo")}
+                  </FieldLabel>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    inputMode="email"
+                    spellCheck={false}
+                    autoComplete="username"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="password">
+                    {t("evaluation.contrasena")}
+                  </FieldLabel>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    minLength={12}
+                    maxLength={128}
+                    required
+                  />
+                </Field>
+              </>
+            )}
           </FieldGroup>
           {error ? (
             <p role="alert" className="text-sm text-destructive">
@@ -205,6 +266,9 @@ export function EvaluationAccess({ children }: { children: ReactNode }) {
           <Button type="submit" disabled={Boolean(canonicalUrl)}>
             {t("evaluation.entrar")}
           </Button>
+          <a href="/account/recover" className="text-sm underline">
+            {locale === "es" ? "Recuperar acceso" : "Recover access"}
+          </a>
           <p className="text-xs text-muted-foreground">
             {t("evaluation.accesoPrivadoSinRegistroPublico")}
           </p>
