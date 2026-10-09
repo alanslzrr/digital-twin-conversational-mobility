@@ -23,7 +23,7 @@ vi.mock("./evaluator-auth", () => ({ coreAccess: access }));
 
 import hook from "../agent/hooks/conversation-budget";
 import memory from "../agent/memory/evidence";
-import { currentBudgetContext } from "./budget-context";
+import { budgetContext, currentBudgetContext } from "./budget-context";
 
 const provider: MemoryProvider = memory.provider;
 const meta = { id: "synthetic-event", at: "2026-09-25T00:00:00Z" };
@@ -76,40 +76,55 @@ describe("EVE authored budget and memory integration", () => {
       sessionId: "session",
     });
   });
-  it("attributes standalone compaction to its current turn rather than a stale model closure", async () => {
-    await hook.events?.["compaction.requested"]?.(
-      {
-        type: "compaction.requested",
-        meta,
-        data: {
-          turnId: "compact-turn",
-          sessionId: "session",
-          sequence: 3,
-          modelId: "gpt-6-luna",
-          usageInputTokens: null,
+  it.each(["", "new-compaction-turn"])(
+    "uses the pinned context rather than standalone compaction event %s",
+    async (eventTurnId) => {
+      budgetContext.update(() => ({
+        principalId: "principal",
+        sessionId: "session",
+        turnId: "compact-turn",
+        stepIndex: 2,
+        purpose: "step",
+      }));
+      state.set("mobility.llm-binding.v1", { turnId: "compact-turn" });
+      await hook.events?.["compaction.requested"]?.(
+        {
+          type: "compaction.requested",
+          meta,
+          data: {
+            turnId: eventTurnId,
+            sessionId: "session",
+            sequence: 3,
+            modelId: "gpt-6-luna",
+            usageInputTokens: null,
+          },
         },
-      },
-      ctx,
-    );
-    expect(currentBudgetContext()).toMatchObject({
-      turnId: "compact-turn",
-      purpose: "compaction",
-    });
-    await hook.events?.["compaction.completed"]?.(
-      {
-        type: "compaction.completed",
-        meta,
-        data: {
-          turnId: "compact-turn",
-          sessionId: "session",
-          sequence: 4,
-          modelId: "gpt-6-luna",
+        ctx,
+      );
+      expect(currentBudgetContext()).toMatchObject({
+        turnId: "compact-turn",
+        purpose: "compaction",
+      });
+      await hook.events?.["compaction.completed"]?.(
+        {
+          type: "compaction.completed",
+          meta,
+          data: {
+            turnId: "compact-turn",
+            sessionId: "session",
+            sequence: 4,
+            modelId: "gpt-6-luna",
+          },
         },
-      },
-      ctx,
-    );
-    expect(currentBudgetContext().purpose).toBe("step");
-  });
+        ctx,
+      );
+      expect(currentBudgetContext()).toMatchObject({
+        purpose: "step",
+        turnId: "compact-turn",
+        stepIndex: 2,
+      });
+    },
+  );
   it("recalls exact evidence after a destructive summary, across replay and the next turn", async () => {
     const messages: ModelMessage[] = [
       {
