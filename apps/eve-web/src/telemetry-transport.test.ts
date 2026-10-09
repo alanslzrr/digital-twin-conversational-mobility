@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { modelProfileInput, type TurnBinding } from "@mobility/contracts";
 import { beforeEach, expect, it, vi } from "vitest";
 
 const sink = vi.hoisted(() => vi.fn());
@@ -7,205 +7,225 @@ vi.mock("./telemetry", async (original) => ({
   sendTelemetry: sink,
 }));
 
-import { budgetedFetch } from "./budgeted-fetch";
+import { observeModelResponse } from "./model-telemetry";
 
-const endpoint = "https://api.openai.com/v1/responses";
-const scope = () => ({
-  principalId: randomUUID(),
-  sessionId: "synthetic",
-  turnId: "turn1",
-  stepIndex: 0,
+const id = "11111111-1111-4111-8111-111111111111";
+const scope = {
+  principalId: id,
+  sessionId: "s",
+  turnId: "t",
   purpose: "step" as const,
-});
+  stepIndex: 0,
+};
+function binding(protocol: "responses" | "chat-completions"): TurnBinding {
+  return {
+    id,
+    ...scope,
+    providerId: id,
+    providerName: "Fixture",
+    credentialId: id,
+    credentialVersion: 1,
+    grantId: null,
+    outputLimit: 128,
+    policyVersion: 1,
+    policy: {
+      capacity: 30,
+      globalConcurrency: 5,
+      userConcurrency: 1,
+      requestsPerMinute: 6,
+      requestsPerDay: 60,
+      inputTokensPerSession: 100000,
+      outputTokensPerSession: 10000,
+      outputTokensPerCall: 128,
+    },
+    model: {
+      ...modelProfileInput.parse({
+        providerId: id,
+        modelId: "fixture",
+        name: "Fixture",
+        protocol,
+        contextTokens: 8192,
+        maxOutputTokens: 1024,
+        tools: true,
+        streaming: true,
+      }),
+      id,
+      version: 1,
+      enabled: true,
+    },
+  };
+}
 beforeEach(() => {
   sink.mockReset();
   sink.mockResolvedValue(undefined);
 });
-it("captures effective request, self-contained terminal and exact sent tool call IDs", async () => {
-  const network = vi.fn<typeof fetch>(async () =>
-    Response.json({
-      id: "response1",
-      status: "completed",
-      output: [
-        {
-          role: "assistant",
-          content: [{ type: "output_text", text: "answer" }],
-        },
-        { type: "reasoning", encrypted_content: "canary" },
-      ],
-      usage: {
-        input_tokens: 10,
-        output_tokens: 4,
-        input_tokens_details: { cached_tokens: 2 },
-      },
-    }),
-  );
-  const fetcher = budgetedFetch(scope, vi.fn(), network, "interactive");
-  const result = await fetcher(endpoint, {
-    method: "POST",
-    headers: { Authorization: "Bearer canary" },
-    body: JSON.stringify({
-      model: "gpt-6-luna",
-      store: true,
-      max_output_tokens: 999999,
-      input: [
-        {
-          type: "function_call_output",
-          call_id: "call_exact",
-          output: '{"status":"found"}',
-        },
-      ],
-    }),
-  });
-  expect(result.status).toBe(200);
-  const prepared = sink.mock.calls.find(
-    (c) => c[2][0].kind === "attempt_prepared",
-  );
-  const terminal = sink.mock.calls.find(
-    (c) => c[2][0].kind === "attempt_completed",
-  );
-  expect(prepared?.[3]).toHaveLength(1);
-  expect(terminal?.[2][0]).toMatchObject({
-    sentCallIds: ["call_exact"],
-    providerResponseId: "response1",
-    usage: { inputTokens: 10, outputTokens: 4, cachedInputTokens: 2 },
-  });
-  expect(terminal?.[3]).toHaveLength(2);
-  expect(JSON.stringify(sink.mock.calls)).not.toContain("canary");
-  expect(network).toHaveBeenCalledTimes(1);
-  expect(JSON.parse(String(network.mock.calls[0]?.[1]?.body))).toMatchObject({
-    store: false,
-    max_output_tokens: 2048,
-  });
-});
-it("sink rejection cannot fail inference or trigger another provider attempt", async () => {
-  sink.mockRejectedValue(new Error("observer offline"));
-  const network = vi.fn<typeof fetch>(async () =>
-    Response.json({
-      status: "completed",
-      output: [],
-      usage: { input_tokens: 3, output_tokens: 1 },
-    }),
-  );
-  const result = await budgetedFetch(
-    scope,
-    vi.fn(),
-    network,
-    "interactive",
-  )(endpoint, {
-    method: "POST",
-    body: JSON.stringify({ model: "gpt-6-luna", input: "synthetic" }),
-  });
-  expect(result.status).toBe(200);
-  expect(network).toHaveBeenCalledTimes(1);
-});
-
-it.each([
-  ["incomplete", "attempt_incomplete"],
-  ["failed", "attempt_failed"],
-] as const)(
-  "records %s as a distinct terminal without inventing usage",
-  async (status, kind) => {
-    const network = vi.fn<typeof fetch>(async () =>
-      Response.json({ id: "response-edge", status, output: [] }),
-    );
-    const response = await budgetedFetch(
+it.each(["responses", "chat-completions"] as const)(
+  "captures %s tool pairs, usage and safe output without reasoning",
+  async (protocol) => {
+    const request =
+      protocol === "responses"
+        ? {
+            input: [
+              {
+                type: "function_call_output",
+                call_id: "call_exact",
+                output: "{}",
+              },
+            ],
+          }
+        : {
+            messages: [
+              { role: "tool", tool_call_id: "call_exact", content: "{}" },
+            ],
+          };
+    const output =
+      protocol === "responses"
+        ? {
+            id: "response1",
+            status: "completed",
+            output: [
+              { role: "assistant", content: "answer" },
+              { type: "reasoning", encrypted_content: "canary" },
+            ],
+            usage: { input_tokens: 10, output_tokens: 4 },
+          }
+        : {
+            id: "response1",
+            choices: [
+              {
+                message: {
+                  role: "assistant",
+                  content: "answer",
+                  reasoning_content: "canary",
+                },
+              },
+            ],
+            usage: { prompt_tokens: 10, completion_tokens: 4 },
+          };
+    const result = await observeModelResponse(
+      binding(protocol),
       scope,
-      vi.fn(),
-      network,
-      "interactive",
-    )(endpoint, {
-      method: "POST",
-      body: JSON.stringify({ model: "gpt-6-luna", input: "synthetic" }),
+      request,
+      Response.json(output, { headers: { "x-mobai-attempt": id } }),
+      performance.now(),
+    );
+    expect(result.ok).toBe(true);
+    expect(
+      sink.mock.calls.find((c) => c[2][0].kind === "attempt_completed")?.[2][0],
+    ).toMatchObject({
+      sentCallIds: ["call_exact"],
+      usage: { inputTokens: 10, outputTokens: 4 },
+      providerResponseId: "response1",
     });
-    await response.text();
-    const terminal = sink.mock.calls.find((c) => c[2][0].kind === kind);
-    expect(terminal?.[2][0].usage).toBeNull();
-    expect(network).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(sink.mock.calls)).not.toContain("canary");
   },
 );
-
-it("captures a split SSE terminal while returning the original bytes", async () => {
-  const wire =
-    "event: response.completed\ndata: " +
-    JSON.stringify({
-      type: "response.completed",
-      response: {
-        id: "response-sse",
-        status: "completed",
-        output: [],
-        usage: { input_tokens: 0, output_tokens: 0 },
+it("projection failure cannot repeat or fail an inference", async () => {
+  sink.mockRejectedValue(new Error("observer offline"));
+  const original = Response.json(
+    { output: [] },
+    { headers: { "x-mobai-attempt": id } },
+  );
+  expect(
+    await observeModelResponse(
+      binding("responses"),
+      scope,
+      { input: [] },
+      original,
+      performance.now(),
+    ),
+  ).toBe(original);
+});
+it.each(["responses", "chat-completions"] as const)(
+  "observes split %s SSE while preserving wire bytes",
+  async (protocol) => {
+    const event =
+      protocol === "responses"
+        ? {
+            type: "response.completed",
+            response: {
+              id: "r",
+              output: [],
+              usage: { input_tokens: 0, output_tokens: 0 },
+            },
+          }
+        : {
+            id: "r",
+            choices: [{ delta: { content: "answer" }, finish_reason: "stop" }],
+            usage: { prompt_tokens: 0, completion_tokens: 0 },
+          };
+    const wire = `data: ${JSON.stringify(event)}\n\n${protocol === "chat-completions" ? "data: [DONE]\n\n" : ""}`;
+    const response = new Response(
+      new ReadableStream({
+        start(c) {
+          c.enqueue(new TextEncoder().encode(wire.slice(0, 19)));
+          c.enqueue(new TextEncoder().encode(wire.slice(19)));
+          c.close();
+        },
+      }),
+      {
+        headers: { "content-type": "text/event-stream", "x-mobai-attempt": id },
       },
-    }) +
-    "\n\n";
-  const network = vi.fn<typeof fetch>(
-    async () =>
-      new Response(
-        new ReadableStream({
-          start(c) {
-            c.enqueue(new TextEncoder().encode(wire.slice(0, 19)));
-            c.enqueue(new TextEncoder().encode(wire.slice(19)));
-            c.close();
-          },
-        }),
-        { headers: { "Content-Type": "text/event-stream" } },
-      ),
-  );
-  const response = await budgetedFetch(
-    scope,
-    vi.fn(),
-    network,
-    "interactive",
-  )(endpoint, {
-    method: "POST",
-    body: JSON.stringify({
-      model: "gpt-6-luna",
-      input: "synthetic",
-      stream: true,
+    );
+    expect(
+      await (
+        await observeModelResponse(
+          binding(protocol),
+          scope,
+          {},
+          response,
+          performance.now(),
+        )
+      ).text(),
+    ).toBe(wire);
+    expect(
+      sink.mock.calls.find((c) => c[2][0].kind === "attempt_completed")?.[2][0]
+        .usage,
+    ).toMatchObject({ inputTokens: 0, outputTokens: 0 });
+  },
+);
+it("records explicit cancellation without inventing usage", async () => {
+  const response = new Response(
+    new ReadableStream({
+      start(c) {
+        c.enqueue(
+          new TextEncoder().encode('data: {"type":"response.created"}\n\n'),
+        );
+      },
     }),
-  });
-  expect(await response.text()).toBe(wire);
-  const terminal = sink.mock.calls.find(
-    (c) => c[2][0].kind === "attempt_completed",
+    { headers: { "content-type": "text/event-stream", "x-mobai-attempt": id } },
   );
-  expect(terminal?.[2][0].usage).toMatchObject({
-    inputTokens: 0,
-    outputTokens: 0,
-  });
-  expect(network).toHaveBeenCalledTimes(1);
+  await (
+    await observeModelResponse(
+      binding("responses"),
+      scope,
+      {},
+      response,
+      performance.now(),
+    )
+  ).body?.cancel();
+  expect(
+    sink.mock.calls.find((c) => c[2][0].kind === "attempt_cancelled")?.[2][0]
+      .usage,
+  ).toBeNull();
 });
 
-it("marks explicit stream cancellation separately from absent terminal usage", async () => {
-  const network = vi.fn<typeof fetch>(
-    async () =>
-      new Response(
-        new ReadableStream({
-          start(c) {
-            c.enqueue(
-              new TextEncoder().encode('data: {"type":"response.created"}\n\n'),
-            );
-          },
-        }),
-        { headers: { "Content-Type": "text/event-stream" } },
-      ),
+it("does not publish interim chat usage as a final reading after interruption", async () => {
+  const response = new Response(
+    'data: {"id":"partial","choices":[{"delta":{"content":"partial"}}],"usage":{"prompt_tokens":20,"completion_tokens":3}}\n\n',
+    { headers: { "content-type": "text/event-stream", "x-mobai-attempt": id } },
   );
-  const response = await budgetedFetch(
-    scope,
-    vi.fn(),
-    network,
-    "interactive",
-  )(endpoint, {
-    method: "POST",
-    body: JSON.stringify({
-      model: "gpt-6-luna",
-      input: "synthetic",
-      stream: true,
-    }),
+  await (
+    await observeModelResponse(
+      binding("chat-completions"),
+      scope,
+      {},
+      response,
+      performance.now(),
+    )
+  ).text();
+  expect(sink.mock.calls.at(-1)?.[2][0]).toMatchObject({
+    status: "unknown",
+    usage: null,
   });
-  await response.body?.cancel();
-  const terminal = sink.mock.calls.find(
-    (c) => c[2][0].kind === "attempt_cancelled",
-  );
-  expect(terminal?.[2][0]).toMatchObject({ status: "cancelled", usage: null });
-  expect(network).toHaveBeenCalledTimes(1);
 });
