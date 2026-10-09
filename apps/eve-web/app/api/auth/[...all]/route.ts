@@ -10,6 +10,11 @@ const allowed = new Set([
   "sign-out",
   "get-session",
   "change-password",
+  "request-password-reset",
+  "reset-password",
+  "two-factor/enable",
+  "two-factor/verify-totp",
+  "two-factor/verify-backup-code",
 ]);
 async function handler(
   request: Request,
