@@ -3,7 +3,8 @@
 import type { UserContent } from "ai";
 import { useEveAgent } from "eve/react";
 import { AlertCircleIcon, BrainIcon, PlusIcon, SquareIcon } from "lucide-react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { errorText, useControlText } from "@/app/account/control-ui";
 import {
   Conversation,
   ConversationContent,
@@ -26,6 +27,7 @@ import { useUi } from "@/i18n/provider";
 import { cn } from "@/lib/utils";
 import { conversationUnavailable } from "@/src/conversation-recovery";
 import { AgentMessage } from "./agent-message";
+import { ModelSelector, useModelSelection } from "./model-selector";
 
 export function AgentChat({
   sessionId,
@@ -36,14 +38,20 @@ export function AgentChat({
 }) {
   const { t } = useUi();
 
+  const { locale, text: controlText } = useControlText();
+  const selection = useModelSelection(sessionId);
+  const [compacting, setCompacting] = useState(false);
   const [cancellationError, setCancellationError] = useState<string>();
   const [hasInputText, setHasInputText] = useState(false);
   const agent = useEveAgent({
+    headers: selection.headers,
+    onFinish: selection.finished,
     ...(sessionId === undefined
       ? {}
       : { initialSession: { sessionId, streamIndex: 0 } }),
     resume: sessionId !== undefined,
     onSessionChange(session) {
+      if (session) selection.rememberSession(session.sessionId);
       if (sessionId === undefined && session !== undefined) {
         // Next patches window.history to navigate, which would detach the active stream.
         History.prototype.replaceState.call(
@@ -58,6 +66,20 @@ export function AgentChat({
 
   const isBusy = agent.status === "submitted" || agent.status === "streaming";
   const isResuming = agent.status === "resuming";
+  const pendingRequests = new Set<string>();
+  for (const event of agent.events) {
+    if (event.type === "input.requested")
+      for (const request of event.data.requests)
+        pendingRequests.add(request.requestId);
+    if (event.type === "input.resolved")
+      for (const resolution of event.data.resolutions)
+        pendingRequests.delete(resolution.requestId);
+    if (
+      ["turn.cancelled", "turn.completed", "turn.failed"].includes(event.type)
+    )
+      pendingRequests.clear();
+  }
+  const pendingApproval = pendingRequests.size > 0;
   const isEmpty = agent.data.messages.length === 0;
   const lastMessage = agent.data.messages.at(-1);
   const isPendingAssistantShell =
@@ -70,7 +92,10 @@ export function AgentChat({
       isPendingAssistantShell);
   const turnFailure =
     isBusy || isResuming ? undefined : getLatestTurnFailure(agent.events);
-  const errorMessage = cancellationError ?? agent.error?.message ?? turnFailure;
+  const rawError = agent.error?.message ?? turnFailure;
+  const errorMessage =
+    cancellationError ??
+    (rawError ? errorText(new Error(rawError), locale) : undefined);
   const hasConversationContent =
     sessionId !== undefined ||
     sessionless ||
@@ -78,6 +103,20 @@ export function AgentChat({
     errorMessage !== undefined;
   const showConversationLayout = isResuming || hasConversationContent;
   const activeSessionId = sessionId ?? agent.session?.sessionId;
+  const composerRef = useRef<HTMLDivElement>(null);
+  const [composerHeight, setComposerHeight] = useState(280);
+  useLayoutEffect(() => {
+    const element = composerRef.current;
+    if (!element || !showConversationLayout) return;
+    const measure = () =>
+      setComposerHeight(
+        Math.max(144, Math.ceil(element.getBoundingClientRect().height)),
+      );
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [showConversationLayout]);
 
   const requestCancellation = () => {
     setCancellationError(undefined);
@@ -88,8 +127,19 @@ export function AgentChat({
 
   const handleSubmit = async (message: PromptInputMessage) => {
     const text = message.text.trim();
-    if ((text.length === 0 && message.files.length === 0) || isResuming) return;
+    if (
+      (text.length === 0 && message.files.length === 0) ||
+      isResuming ||
+      compacting
+    )
+      return;
 
+    try {
+      await selection.prepare(isBusy || pendingApproval);
+    } catch (error) {
+      setCancellationError(errorText(error, locale));
+      return;
+    }
     setHasInputText(false);
     setCancellationError(undefined);
     const options = isBusy ? { turnPolicy: "steer" as const } : undefined;
@@ -123,12 +173,52 @@ export function AgentChat({
   const composer = (
     <PromptInput onSubmit={handleSubmit} maxFiles={0}>
       <PromptInputTextarea
+        className="pb-14"
         maxLength={1800}
-        disabled={isResuming}
+        disabled={isResuming || compacting}
         onChange={(event) =>
           setHasInputText(event.currentTarget.value.trim().length > 0)
         }
         placeholder={t("agentChat.sendAMessage")}
+      />
+      <ModelSelector
+        selection={selection}
+        disabled={isBusy || isResuming || pendingApproval || compacting}
+        canCompact={Boolean(activeSessionId && !isEmpty)}
+        onCompact={async () => {
+          if (
+            !activeSessionId ||
+            !window.confirm(
+              controlText(
+                "Compactar utiliza el modelo y la financiación anteriores y puede generar gasto. ¿Continuar?",
+                "Compaction uses the previous model and funding and may incur charges. Continue?",
+              ),
+            )
+          )
+            return;
+          setCompacting(true);
+          setCancellationError(undefined);
+          try {
+            await selection.prepare(true);
+            const result = await fetch(
+              `/eve/v1/session/${encodeURIComponent(activeSessionId)}/compact`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...selection.headers(),
+                },
+                body: "{}",
+              },
+            );
+            if (!result.ok) throw new Error("operation_conflict");
+            await agent.resume();
+          } catch (error) {
+            setCancellationError(errorText(error, locale));
+          } finally {
+            setCompacting(false);
+          }
+        }}
       />
       <ComposerAction
         hasInputText={hasInputText}
@@ -155,7 +245,10 @@ export function AgentChat({
             : {})}
         >
           <ConversationTopFade className="top-[60px] md:top-16" />
-          <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
+          <ConversationContent
+            className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 sm:px-6"
+            style={{ paddingBottom: composerHeight + 24 }}
+          >
             {agent.data.messages.map((message, index) =>
               showPendingThinking &&
               isPendingAssistantShell &&
@@ -168,9 +261,14 @@ export function AgentChat({
                   }
                   key={message.id}
                   message={message}
-                  onInputResponses={(inputResponses) => {
+                  onInputResponses={async (inputResponses) => {
                     setCancellationError(undefined);
-                    return agent.respond(inputResponses);
+                    try {
+                      await selection.prepare(true);
+                      return await agent.respond(inputResponses);
+                    } catch (error) {
+                      setCancellationError(errorText(error, locale));
+                    }
                   }}
                 />
               ),
@@ -194,11 +292,12 @@ export function AgentChat({
               <ErrorMessage message={errorMessage} />
             ) : null}
           </ConversationContent>
-          <ConversationScrollButton />
+          <ConversationScrollButton style={{ bottom: composerHeight + 16 }} />
         </Conversation>
       ) : null}
 
       <div
+        ref={composerRef}
         className={cn(
           "mx-auto w-full px-4 sm:px-6",
           showConversationLayout
@@ -213,7 +312,18 @@ export function AgentChat({
             </h1>
           </div>
         )}
-        <div className="w-full">{unavailable ? null : composer}</div>
+        <div className="w-full">
+          {unavailable ? null : (
+            <>
+              {composer}
+              {selection.error ? (
+                <p role="alert" className="mt-2 text-xs text-destructive">
+                  {selection.error}
+                </p>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
     </main>
   );
