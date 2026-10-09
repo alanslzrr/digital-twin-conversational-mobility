@@ -13,7 +13,7 @@
     "build": "turbo run build",
     "build:agent": "pnpm --filter @mobility/eve-web build:agent",
     "typecheck": "turbo run typecheck",
-    "lint": "biome check . && node scripts/check-boundaries.mjs && node --test scripts/check-pr-policy.test.mjs",
+    "lint": "biome check . && node scripts/check-boundaries.mjs && node --test scripts/check-pr-policy.test.mjs scripts/runtime-config.test.mjs",
     "format": "biome check --write .",
     "test": "vitest run",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
@@ -28,7 +28,7 @@
     "db:check": "node --env-file-if-exists=.env.local scripts/check-database.mjs",
     "smoke": "node scripts/smoke.mjs",
     "setup:local": "node scripts/setup-local.mjs",
-    "smoke:evaluation": "node --env-file-if-exists=.env.local scripts/smoke-evaluation.mjs",
+    "smoke:evaluation": "node --import tsx --env-file-if-exists=.env.local scripts/smoke-evaluation.mjs",
     "otp:prepare": "python3 scripts/prepare-otp.py",
     "otp:build": "node scripts/build-otp.mjs",
     "otp:up": "docker compose --env-file .env.local -f infra/local/compose.yaml --profile routing up -d otp",
@@ -43,13 +43,17 @@
     "start:local": "node scripts/start-local.mjs",
     "otp:benchmark": "node scripts/benchmark-otp.mjs",
     "budget:report": "node --env-file-if-exists=.env.local scripts/report-conversation-budget.mjs",
-    "test:budget:db": "RUN_BUDGET_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/conversation-budget.integration.test.ts"
+    "test:budget:db": "RUN_BUDGET_DB_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/conversation-budget.integration.test.ts",
+    "accounts": "node --import tsx --env-file-if-exists=apps/mobility-core/.env.local scripts/accounts.ts",
+    "test:control:db": "node scripts/test-control-db.mjs",
+    "check:oci": "node scripts/check-oci.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
     "@types/node": "24.12.0",
     "jose": "6.2.12",
     "postgres": "3.4.9",
+    "tsx": "4.21.0",
     "turbo": "2.11.3",
     "typescript": "7.0.2",
     "vitest": "5.0.1"

@@ -17,7 +17,7 @@ async function files(directory) {
 }
 
 const forbidden =
-  /@mobility\/(?:adapter-[\w-]+|domain|routing|place-resolver)|["']better-auth(?:\/|["'])|["'](?:pg|postgres)["']|@upstash\/redis|@vercel\/(?:blob|queue|sandbox)|\b(?:EMT_PASSKEY|EMT_CLIENT_ID|AEMET_API_KEY|DATABASE_URL|BETTER_AUTH_SECRET|BLOB_READ_WRITE_TOKEN)\b/;
+  /@mobility\/(?:adapter-[\w-]+|domain|routing|place-resolver)|["']better-auth(?:\/|["'])|["'](?:pg|postgres)["']|@upstash\/redis|@vercel\/(?:blob|queue|sandbox)|\b(?:EMT_PASSKEY|EMT_CLIENT_ID|AEMET_API_KEY|OPENAI_API_KEY|RESEND_API_KEY|RESEND_WEBHOOK_SECRET|MOBAI_SECRET_KEY_FILE|DATABASE_URL|BETTER_AUTH_SECRET|BLOB_READ_WRITE_TOKEN)\b/;
 for (const file of await files("apps/eve-web")) {
   if (!/\.(?:tsx?|json)$/.test(file)) continue;
   if (forbidden.test(await readFile(file, "utf8")))

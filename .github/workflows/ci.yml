@@ -45,6 +45,8 @@ jobs:
         run: pnpm audit --audit-level=moderate
       - name: Verify cloud configuration stays disabled
         run: node scripts/check-cloud-disabled.mjs
+      - name: Validate inactive single-node deployment templates
+        run: pnpm check:oci
       - run: pnpm check
       - name: Verify Docker is ready for the existing agent build
         run: |
@@ -83,7 +85,9 @@ jobs:
           RUN_DASHBOARD_DB_TESTS: "1"
         run: |
           node --env-file=.env.local node_modules/vitest/vitest.mjs run apps/mobility-core/src/dashboard apps/mobility-core/src/observability/dashboard.integration.test.ts
-          node --env-file=.env.local scripts/test-dashboard-local.mjs
+          node --import tsx --env-file=.env.local scripts/test-dashboard-local.mjs
+      - name: Verify account and multiprovider controls without external calls
+        run: pnpm test:control:db
       - name: Stop local services
         if: always()
         run: |
