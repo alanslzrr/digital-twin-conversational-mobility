@@ -1,10 +1,25 @@
-# Preparación cloud y alternativa Vercel
+# Preparación de despliegue OCI
 
 [Índice](index.md) · [Arquitectura local](architecture.md) · [Recursos](resources/index.md#cloud-y-alternativas) · [Cuentas](resources/accounts.md#preparación-cloud-anterior)
 
-Vercel es la alternativa de alojamiento preparada para Web y Core. Los proyectos y almacenes están configurados; la aplicación se ejecuta actualmente en local.
+**Destino decidido:** una VM OCI Academy Ampere A1 (4 núcleos / 24 GB), PostgreSQL 17/PostGIS 3.5 y Block Storage. La aplicación sigue en local. No hay provisión, DNS, correo ni despliegue activados.
 
-## Qué se preparó
+## Preparación disponible, sin activar
+
+- [Compose](../infra/oci/compose.yaml): PostgreSQL/PostGIS construido nativamente para ARM desde una revisión oficial fijada, Redis y OTP. Puertos internos en loopback, límites de memoria y directorios persistentes.
+- [Servicio systemd](../infra/oci/mobai.service): supervisa Web/Core/EVE/worker como usuario sin privilegios. [Caddy](../infra/oci/Caddyfile) publica exclusivamente Web con HTTPS y streaming.
+- [Backup manual](../infra/oci/backup.sh): detiene conjuntamente la aplicación, captura dump/configuración/Workflow/datos y la reinicia. Incluye secretos: mantener la copia privada y fuera de la VM.
+- `pnpm check:oci` valida la configuración sin crear servicios, acceder a OCI ni enviar correo.
+
+Al desplegar, instalar Node 24, pnpm 10, Docker Compose y Caddy; clonar en `/opt/mobai` y montar Block Storage en `/srv/mobai`. Usar el usuario `mobai`, con escritura en el checkout y en datos/Workflow, pero sin añadirlo al grupo Docker para el servicio. Enlazar `/opt/mobai/data` a `/srv/mobai/data`; crear `/srv/mobai/workflow`. En la configuración privada raíz, definir `MOBAI_STATE_DIR=/srv/mobai`. En Web, `MOBAI_WEB_PORT=3000` y `WORKFLOW_LOCAL_DATA_DIR=/srv/mobai/workflow`; en Core, `LOCAL_DATA_DIR=/srv/mobai/data` y `MOBAI_SECRET_KEY_FILE=/etc/mobai/master.key`. Conservar los secretos de autenticación y cifrado al trasladar la base; no regenerarlos si se migra el estado existente.
+
+Solo tras decidir desplegar: restaurar PostgreSQL mediante dump/restore (no copiar el volumen amd64), Workflow y datos coherentes; configurar el mismo `EVALUATION_ORIGIN=https://<dominio>` en Web/Core; ejecutar instalación congelada, migraciones y builds; arrancar Compose con `--profile oci` e instalar el servicio y Caddy. `MOBAI_HOST` en el entorno de Caddy debe ser ese dominio. Abrir únicamente 80/443 y SSH restringido. Verificar login, TOTP, continuidad y restauración en esa VM antes de abrir acceso.
+
+El JWT interno se renueva al arrancar el servicio y dura siete días: rotarlo y reiniciar el runtime antes de caducar. El correo permanece desactivado hasta configurar [Resend y DNS](accounts-and-llm.md#correo-transaccional); no hace falta configurarlo ahora. Los modelos y la ingestión conservan sus activaciones explícitas; no habilitarlos en previews.
+
+Fuentes de las plantillas: [PostGIS oficial](https://github.com/postgis/docker-postgis/tree/2bcd236e3af9ec6e668db51eb37162a79f0eaeaa/17-3.5/alpine), [proxy Caddy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).
+
+## Preparación histórica de Vercel (no es el destino actual)
 
 Configuración registrada el **23/09/2026**:
 
@@ -36,14 +51,16 @@ Los entornos privados `.env.cloud.*.local` están ignorados y con permisos restr
 - [Configurador Vercel](../scripts/configure-vercel.mjs): **deshabilitado**, también con `--apply`. Falla antes de leer secretos, escribir archivos o contactar servicios cloud. La CLI se retiró por su dependencia sin parche `braces` (GHSA-vfj7-8cjw-p6xm). No se sustituye por una instalación global ni `pnpm dlx`.
 - [Migrador](../scripts/migrate.mjs): la operación remota requiere `--allow-remote` y el entorno cloud elegido expresamente.
 - [Probe cloud](../scripts/check-cloud.mjs): `--probe` escribe y elimina objetos de prueba.
-- [Administrador de cuentas](../scripts/evaluator.mjs): cloud exige `ALLOW_REMOTE_ADMIN=true`; sus cuentas no son las locales.
+- El administrador por slots anterior está retirado. El [bootstrap de cuentas](accounts-and-llm.md#migrar-una-instalación) actual es local-only; no permite aprovisionamiento cloud.
 
 Vercel puede devolver el marcador `[SENSITIVE]` al descargar secretos sensibles. No sobrescribas una copia privada real con ese marcador.
 
-## Si se decide publicar en el futuro
+## Si se retoma la alternativa Vercel
 
 Primero debe reincorporarse una CLI con árbol auditado y validarse de nuevo el configurador bajo autorización explícita. CI comprueba que el configurador actual falla cerrado, además de auditar todas las dependencias instaladas. Los proyectos remotos y sus secretos no se modificaron al retirar la CLI.
 
 La configuración del destino debe definir el plan contratado, el almacenamiento durable, la ejecución de ingestión, el alojamiento OTP y la retención de conversaciones. Las cuotas y precios se consultan al elegir el plan.
 
 Referencias oficiales: [integraciones](https://vercel.com/docs/integrations), [EVE en Vercel](https://github.com/vercel/eve/blob/main/docs/guides/deployment/vercel.mdx), [precios](https://vercel.com/pricing), [términos](https://vercel.com/legal/terms). [Decisión de alcance vigente](roadmap.md).
+
+La capa de cuentas y consumo LLM de [0022](../infra/postgres/migrations/0022_accounts_llm_control.sql) ya está aplicada en local. No activa ningún despliegue.

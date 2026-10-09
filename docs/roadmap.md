@@ -2,7 +2,7 @@
 
 [Índice](index.md) · [Capacidades](overview.md) · [Evolución y evidencia](evolution.md) · [Fuentes](sources/README.md)
 
-Alcance vigente al **04/10/2026**.
+Alcance vigente al **08/10/2026**.
 
 ## Estado
 
@@ -14,11 +14,13 @@ Alcance vigente al **04/10/2026**.
 | R2.1 — Historial de conversaciones | **Entregado.** Listado propio, paginación y reapertura nativa | [Acta](acceptance/2026-09-28-conversation-history.md) |
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
 | Panel de Core y telemetría propia | **Integrado en PR #45 el 04/10/2026. CI verde en PR y main; revisión móvil y zoom nativo al 200 % completados. Runtime habitual reconstruido y smoke correcto; revisión autenticada pendiente de login; sin despliegue cloud** | [Cierre móvil y zoom](acceptance/2026-10-03-core-dashboard-mobile-closure.md), [actualización local](local-runtime.md#actualizar-el-panel); T10 diferido y lector de pantalla fuera del alcance |
+| Cuentas, roles y consumo LLM | **Implementación local por encargo explícito.** Capacidad inicial 30, administrador/evaluador, TOTP, correo cifrado, catálogo compatible, financiación explícita y ledger. Sin aplicar migración a la instalación habitual ni activar servicios externos | [Guía y controles](accounts-and-llm.md) |
 | Publicación Vercel | Alternativa futura; CLI retirada y configurador bloqueado por dependencia sin parche | [Preparación cloud](deployment.md) |
+| Arquitectura para 20–30 usuarios | **Spec propuesto por nuevo encargo.** Decisiones y migración gradual definidas; implementación, gastos, despliegue y pruebas reales sin autorizar | [Spec de escalabilidad](plans/2026-10-05-scalable-architecture.md) |
 
 ## Capacidades conservadas
 
-- EVE oficial, OpenAI directo con `gpt-6-luna`, Better Auth y aislamiento de conversaciones.
+- EVE oficial, catálogo LLM multiproveedor mediante Core, Better Auth y aislamiento de conversaciones.
 - Dieciséis herramientas MCP con contratos, procedencia, antigüedad y errores explícitos.
 - Ingestión local con ventana de actividad, dos carriles, leases, recuperación y backoff.
 - Renfe, catálogo y llegadas EMT; catálogos/horarios estáticos CRTM y correspondencias existentes.
@@ -52,6 +54,8 @@ La retirada cancela esos requisitos de cierre. Las pruebas ejecutadas se recogen
 
 ## Cómo continuar
 
+El destino decidido es una VM OCI Academy ARM con PostgreSQL/PostGIS y estado en Block Storage. Las [plantillas de preparación](deployment.md) conservan el monolito modular; los borradores anteriores de alojamiento quedan como antecedentes. No se autoriza todavía el despliegue ni se reabre R2.
+
 El alcance funcional anterior está entregado. Para utilizarlo y mantener sus datos, sigue la [operación local](local-runtime.md).
 
 El panel de Mobility Core y la telemetría propia están integrados en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45). Todos los evaluadores acceden a datos y operación saneada; cada usuario solo ve sus conversaciones. Las seis vistas incluyen mapa, consultas explícitas, fuentes y actividad. Las lecturas reutilizan lo almacenado; el panel visible mantiene la ventana existente de ingestión. La nueva telemetría se retiene hasta siete días.
@@ -59,3 +63,5 @@ El panel de Mobility Core y la telemetría propia están integrados en [PR #45](
 La ampliación no reabre E2, R0/R1, R2.1 ni R2. El spec original y los refinamientos son [archivo histórico](acceptance/index.md). La [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md) registra 72 vistas, 52 estados móviles y zoom nativo. La prueba con lector de pantalla fue retirada; T10 sigue diferido.
 
 El 04/10/2026 se verificaron migraciones y token ya preparados, se respaldó la instalación y se reconstruyeron Web/Core y agente. El smoke habitual pasó sin modelo; la revisión autenticada espera el login del usuario. El procedimiento de mantenimiento está en [actualizar el panel](local-runtime.md#actualizar-el-panel). Cloud sigue deshabilitado.
+
+La capa de cuentas, TOTP y consumo multiproveedor está instalada y probada en local. La key de prueba se migró a SecretStore. Resend queda listo para configurarse al desplegar, no antes; OCI permanece sin activar. La ampliación no reabre R0/E2/R1/R2.

@@ -20,22 +20,22 @@ flowchart TB
   subgraph Local[Ordenador local]
     Browser[Navegador: chat oficial EVE]
     Web[Web y runtime EVE]
-    Core[Mobility Core: MCP, acceso y dominio]
+    Core[Mobility Core: MCP, identidad, secretos y dominio]
     Worker[Worker de ingestión]
     DB[(PostgreSQL y PostGIS)]
     Files[(Archivos: fuentes, raw y releases)]
     OTP[OTP: motor de rutas]
     Browser -->|sesión autenticada| Web
-    Web -->|MCP y servicios de acceso| Core
+    Web -->|MCP, acceso y transporte LLM fijo| Core
     Worker -->|gestión autenticada| Core
     Core --> DB
     Core --> Files
     Core -->|consulta de rutas| OTP
     Files -->|grafo preparado| OTP
   end
-  Model[Externo: OpenAI gpt-6-luna]
+  Model[Externo: proveedor y modelo autorizados]
   Sources[Externos: fuentes oficiales y Nominatim]
-  Web -->|Responses directo| Model
+  Core -->|Chat Completions o Responses| Model
   Core -->|adaptadores controlados| Sources
 ```
 
@@ -43,7 +43,7 @@ flowchart TB
 2. La [Web/EVE](../apps/eve-web/agent/agent.ts) conecta el modelo y el [MCP de Core](../apps/mobility-core/app/mcp/route.ts). Existe un servidor con 16 herramientas.
 3. [Core](../apps/mobility-core/src) aplica reglas y guarda datos. [PostGIS](../infra/postgres/migrations) añade consultas geográficas a PostgreSQL.
 4. [OTP local](../infra/local/compose.yaml) carga el grafo de horarios y calles que utiliza para calcular rutas.
-5. EVE consulta el modelo y Core adquiere publicaciones de las fuentes. Las consultas de movilidad reutilizan los datos y cachés de PostgreSQL. Al activar el mapa del panel, el navegador también carga teselas anónimas de OpenStreetMap; ese tráfico está separado de las consultas a Core.
+5. EVE accede al modelo únicamente a través de Core; Core adquiere publicaciones de las fuentes. Las consultas de movilidad reutilizan los datos y cachés de PostgreSQL. Al activar el mapa del panel, el navegador también carga teselas anónimas de OpenStreetMap; ese tráfico está separado de las consultas a Core.
 
 ## Recorrido de una pregunta
 
@@ -55,7 +55,7 @@ sequenceDiagram
   participant W as Web y guard EVE
   participant C as Core y Better Auth
   participant E as Runtime EVE
-  participant M as OpenAI directo
+  participant M as Proveedor LLM autorizado
   U->>W: Iniciar sesión
   W->>C: Proxy de acceso del mismo origen
   C-->>W: Sesión autorizada
@@ -63,19 +63,25 @@ sequenceDiagram
   W->>C: Comprobar identidad, propiedad y cuota
   C-->>W: Autorizar o rechazar
   W->>E: Turno autorizado
-  E->>M: Contexto y herramientas disponibles
-  M-->>E: Solicitud de herramienta
+  E->>C: Vincular turno y enviar contexto
+  C->>C: Autorizar credencial y reservar presupuesto
+  C->>M: Contexto y herramientas
+  M-->>C: Solicitud de herramienta y uso
+  C-->>E: Respuesta saneada
   E->>C: MCP con credencial de servicio
   C-->>E: Datos, procedencia y estado
-  E->>M: Resultado de herramienta
-  M-->>E: Explicación
+  E->>C: Siguiente intento con resultado de herramienta
+  C->>C: Reservar y comprobar límites
+  C->>M: Contexto actualizado
+  M-->>C: Explicación y uso
+  C-->>E: Respuesta saneada
   E-->>U: Respuesta en el chat oficial
 ```
 
 1. [Better Auth](../apps/mobility-core/src/better-auth.ts), en Core, valida las credenciales y guarda usuarios y sesiones de acceso en PostgreSQL. El [proxy de autenticación](../apps/eve-web/app/api/auth/[...all]/route.ts) permite que el navegador use `/api/auth/*` desde el mismo origen de la Web. La cookie de sesión es `HttpOnly` y `SameSite=Strict`; usa `Secure` cuando el origen es HTTPS.
 2. El [guard del canal EVE](../apps/eve-web/src/evaluation-guard.ts) consulta la identidad y pide a Core autorización para cada operación. Core comprueba cuenta activa, propietario de la conversación y cuota. Al crear una conversación, el guard registra su identificador y propietario en Core. Así, conocer la URL de otra conversación no da acceso a sus mensajes.
-3. EVE envía el contexto al [modelo configurado](../apps/eve-web/src/model.ts) mediante la API Responses de OpenAI. El modelo solicita herramientas y utiliza sus resultados para elaborar la respuesta.
-4. Las llamadas servidor a servidor usan un JWT con permisos: `mobility.read` para [MCP](reference/mcp.md) y `mobility.evaluation.manage` para gestionar acceso. Esta credencial identifica al servicio Web; la sesión de Better Auth identifica a la persona. Las claves de los proveedores de movilidad permanecen en Core.
+3. EVE fija el [modelo seleccionado](../apps/eve-web/src/model.ts) al iniciar el turno. Core valida identidad, credencial, financiación y presupuesto antes de cada petición a Chat Completions o Responses. El modelo solicita herramientas y EVE ejecuta el ciclo; no se introduce otro agente. [Selección, secretos y ledger](accounts-and-llm.md).
+4. Las llamadas servidor a servidor usan un JWT con permisos: `mobility.read` para [MCP](reference/mcp.md) y `mobility.evaluation.manage` para gestionar acceso. Esta credencial identifica al servicio Web; la sesión de Better Auth identifica a la persona. Todas las claves externas, tanto de movilidad como LLM, permanecen en Core.
 5. EVE puede realizar varios pasos para responder una pregunta. Al alcanzar el límite de continuidad, muestra una pausa: **Aprobar / Approve** permite continuar y **Detener / Stop** detiene el turno, según el idioma de la interfaz. [Comportamiento y pruebas](acceptance/2026-09-25-e2-closure.md), [localización de controles](ui-i18n.md).
 
 EVE tiene habilitadas las herramientas MCP de movilidad. `defaultTools: false` desactiva las herramientas generales de shell y búsqueda web. La [interfaz de EVE](../apps/eve-web/vendor/eve/README.md) incorpora el acceso autenticado y el listado de conversaciones.
