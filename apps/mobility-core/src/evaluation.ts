@@ -65,15 +65,24 @@ export async function evaluateAccess(
     if (!session)
       return { status: 401, body: { error: "authentication_required" } };
     const [user] =
-      await sql`SELECT id, label FROM evaluator WHERE auth_user_id = ${session.user.id} AND enabled AND expires_at > now()`;
+      await sql`SELECT e.id,e.label,u.role,u."twoFactorEnabled" AS mfa FROM evaluator e JOIN auth_user u ON u.id=e.auth_user_id
+        WHERE e.auth_user_id = ${session.user.id} AND e.enabled AND e.expires_at > now() AND e.account_state='active' AND NOT u.banned`;
     return user
-      ? { status: 200, body: { principalId: user.id, label: user.label } }
+      ? {
+          status: 200,
+          body: {
+            principalId: user.id,
+            label: user.label,
+            role: user.role,
+            mfa: user.mfa,
+          },
+        }
       : { status: 401, body: { error: "evaluator_not_active" } };
   }
   return sql.begin(async (tx) => {
     // Locks one evaluator, serializing concurrent quota updates across instances.
     const [user] =
-      await tx`SELECT id FROM evaluator WHERE id = ${input.principalId} AND enabled AND expires_at > now() FOR UPDATE`;
+      await tx`SELECT id FROM evaluator WHERE id = ${input.principalId} AND enabled AND expires_at > now() AND account_state='active' FOR UPDATE`;
     if (!user) return { status: 401, body: { error: "evaluator_not_active" } };
     if (input.action === "register") {
       await tx`INSERT INTO evaluation_session(session_id, evaluator_id) VALUES (${input.sessionId}, ${input.principalId}) ON CONFLICT DO NOTHING`;
@@ -88,11 +97,17 @@ export async function evaluateAccess(
       await tx`UPDATE evaluation_session SET revoked_at = now() WHERE session_id = ${input.sessionId} AND evaluator_id = ${input.principalId}`;
     }
     if (input.action === "authorize" && input.consume) {
+      const [limits] =
+        await tx`SELECT requests_per_minute,requests_per_day FROM control_settings`;
       const counts =
         await tx`SELECT window_kind, requests FROM evaluation_usage WHERE evaluator_id = ${input.principalId} AND ((window_kind = 'minute' AND window_start = date_trunc('minute', now())) OR (window_kind = 'day' AND window_start = date_trunc('day', now())))`;
       if (
         counts.some(
-          (row) => row.requests >= (row.window_kind === "minute" ? 6 : 60),
+          (row) =>
+            row.requests >=
+            (row.window_kind === "minute"
+              ? (limits?.requests_per_minute ?? 6)
+              : (limits?.requests_per_day ?? 60)),
         )
       ) {
         return { status: 429, body: { error: "evaluation_limit_reached" } };
