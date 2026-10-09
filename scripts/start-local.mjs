@@ -1,9 +1,15 @@
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
+import { parseEnv } from "node:util";
+import { webPort as resolveWebPort } from "./runtime-config.mjs";
+
+const webConfig = parseEnv(readFileSync("apps/eve-web/.env.local", "utf8"));
+const webPort = resolveWebPort(webConfig);
 
 // Infrastructure is explicit (infra:up / otp:up). Only own our application children.
-for (const port of [3000, 3001, 4274]) {
+for (const port of [webPort, 3001, 4274]) {
   try {
     await fetch(`http://127.0.0.1:${port}/api/health`, {
       signal: AbortSignal.timeout(500),
