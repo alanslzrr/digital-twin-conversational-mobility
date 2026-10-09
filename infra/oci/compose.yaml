@@ -1,0 +1,60 @@
+# Inert deployment template. No root command or CI job starts these services.
+name: mobai-oci
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+services:
+  postgres:
+    # Build upstream's pinned recipe natively: the published Debian tag is amd64-only.
+    build:
+      context: https://github.com/postgis/docker-postgis.git#2bcd236e3af9ec6e668db51eb37162a79f0eaeaa:17-3.5/alpine
+      args:
+        NPROC: "2"
+    image: mobai-postgis:17-3.5.7
+    profiles: [oci]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["${MOBAI_STATE_DIR:?}/postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 3g
+    cpus: 2
+    restart: unless-stopped
+    logging: *logging
+  redis:
+    image: redis:7.4-alpine
+    profiles: [oci]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+    command: [sh, -c, 'exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes --maxmemory 384mb --maxmemory-policy noeviction']
+    ports: ["127.0.0.1:56379:6379"]
+    volumes: ["${MOBAI_STATE_DIR:?}/redis:/data"]
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 512m
+    cpus: 1
+    restart: unless-stopped
+    logging: *logging
+  otp:
+    image: opentripplanner/opentripplanner:2.10.0@sha256:8d54e5c589186707ee365417f2202dc878c451fa3001b8edff07019531100933
+    profiles: [oci]
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx4g -XX:ActiveProcessorCount=4
+    ports: ["127.0.0.1:8801:8080"]
+    volumes: ["${MOBAI_STATE_DIR:?}/data/otp:/var/opentripplanner"]
+    command: [--load, --serve]
+    mem_limit: 6g
+    cpus: 4
+    restart: unless-stopped
+    logging: *logging
