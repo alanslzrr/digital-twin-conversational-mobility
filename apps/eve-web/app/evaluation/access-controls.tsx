@@ -19,11 +19,13 @@ import { Conversations } from "./conversations";
 export function AccessControls({
   onSignOut,
   error,
+  admin = false,
 }: {
   onSignOut: () => Promise<void>;
   error: string;
+  admin?: boolean;
 }) {
-  const { t, copy } = useUi();
+  const { t, copy, locale } = useUi();
   const [conversationsOpen, setConversationsOpen] = useState(false);
   const menuTrigger = useRef<HTMLButtonElement>(null);
   const telemetry = () => {
@@ -52,6 +54,14 @@ export function AccessControls({
         <Button variant="ghost" size="sm" asChild>
           <a href="/dashboard">{t("evaluation.panel")}</a>
         </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <a href="/account">{locale === "es" ? "Mi cuenta" : "My account"}</a>
+        </Button>
+        {admin ? (
+          <Button variant="ghost" size="sm" asChild>
+            <a href="/admin">Admin</a>
+          </Button>
+        ) : null}
         <Button variant="ghost" size="sm" onClick={telemetry}>
           {t("evaluation.telemetria")}
         </Button>
@@ -84,6 +94,16 @@ export function AccessControls({
               <DropdownMenuItem asChild>
                 <a href="/dashboard">{t("evaluation.panel")}</a>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href="/account">
+                  {locale === "es" ? "Mi cuenta" : "My account"}
+                </a>
+              </DropdownMenuItem>
+              {admin ? (
+                <DropdownMenuItem asChild>
+                  <a href="/admin">Admin</a>
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem onSelect={telemetry}>
                 {t("evaluation.telemetria")}
               </DropdownMenuItem>
