@@ -2,7 +2,7 @@
 
 - This is an evaluation foundation, not an operational mobility service yet.
 - Node 24 (see `.nvmrc`), pnpm 10, TypeScript strict. Run `pnpm check` before pushing.
-- `apps/eve-web` may call the fixed model provider and Mobility Core MCP/auth and fixed-origin internal dashboard/telemetry services only. The dashboard browser may load anonymous raster tiles exclusively from https://tile.openstreetmap.org; never send cookies or private data to that host. Never import adapters, database clients, or provider secrets into it. Keep EVE default tools disabled.
+- `apps/eve-web` may call Mobility Core MCP/auth and fixed-origin internal LLM/control/dashboard/telemetry services only. All external model endpoints and credentials are owned by Core. The dashboard browser may load anonymous raster tiles exclusively from https://tile.openstreetmap.org; never send cookies or private data to that host. Never import adapters, database clients, or provider secrets into it. Keep EVE default tools disabled.
 - `apps/mobility-core` owns providers, ingestion, normalization, storage and routing.
 - Shared contracts live in `packages/contracts`; domain decisions in `packages/domain`; freshness in `packages/provenance`.
 - Never report simulated, unavailable or stale readings as live. Preserve observation time, ingestion time, source and quality.
