@@ -167,7 +167,7 @@ Los guards de canal EVE siguen siendo obligatorios: Vercel puede enrutar al runt
 
 ### Admisión interactiva distribuida
 
-La configuración habitual es `interactive`. El semáforo de cinco intentos en [conversation-budget](../../apps/mobility-core/src/conversation-budget.ts) pertenece a campañas opt-in; [budgeted-fetch](../../apps/eve-web/src/budgeted-fetch.ts) no lo aplica al modo habitual. Añadir protección propia sin transformar el uso ordinario en campañas ni modificar su evidencia histórica.
+La configuración habitual es `interactive`. El semáforo de cinco intentos en [conversation-budget](../../apps/mobility-core/src/conversation-budget.ts) pertenece a campañas opt-in; [budgeted-fetch](https://github.com/alanslzrr/digital-twin-conversational-mobility/blob/c9fe6ba/apps/eve-web/src/budgeted-fetch.ts) no lo aplica al modo habitual. Añadir protección propia sin transformar el uso ordinario en campañas ni modificar su evidencia histórica.
 
 Tablas conceptuales nuevas: `runtime_capacity_policy`, `runtime_execution` y reservas de uso por ventana. Los nombres finales siguen las convenciones de migración. Core es la autoridad; Web solo utiliza contratos internos autenticados.
 
