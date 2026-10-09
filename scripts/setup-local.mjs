@@ -84,7 +84,7 @@ const token = await new SignJWT({
 const webPath = "apps/eve-web/.env.local";
 create(
   webPath,
-  `MOBILITY_MCP_URL=http://127.0.0.1:3001/mcp\nMOBILITY_MCP_TOKEN=${token}\nOPENAI_API_KEY=\n`,
+  `MOBILITY_MCP_URL=http://127.0.0.1:3001/mcp\nMOBILITY_MCP_TOKEN=${token}\n`,
 );
 const webValues = parseEnv(readFileSync(webPath, "utf8"));
 if (!webValues.EVALUATION_ORIGIN) {
