@@ -2,7 +2,7 @@
 
 [Portada de documentación](README.md) · [Presentación del repositorio](../README.md)
 
-Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **8 de octubre de 2026**.
+Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado el **14 de octubre de 2026**.
 
 **Empieza por [el proyecto en diez minutos](overview.md)** para conocer sus capacidades y ver ejemplos de uso.
 
@@ -30,8 +30,9 @@ Guías de uso, arquitectura, instalación y mantenimiento de mobai. Actualizado 
 | Diagnóstico | [Problemas frecuentes](troubleshooting.md): qué revisar ante cada síntoma |
 | Referencia | [16 herramientas MCP](reference/mcp.md): entradas, permisos, resultados y ejemplos |
 | Referencia | [Sistema y configuración](reference/system.md): código, variables, persistencia y comandos |
+| Observabilidad | [Metadatos OpenTelemetry](reference/system.md#metadatos-opentelemetry-de-eve): spans nativos sobre eventos existentes y [waterfall del panel](user-guide.md#leer-una-traza-visual); [instalación local activada](local-runtime.md#preparar-metadatos-opentelemetry), [prueba real verificada](acceptance/2026-10-14-otel-enrichment.md#resultado-real-final) y [OCI preparado sin activar](deployment.md#opentelemetry-en-la-vm) |
 | Interfaz | [Idioma ES/EN](ui-i18n.md): controles, persistencia y límites de la traducción |
-| Publicación | [Contribuir](../CONTRIBUTING.md), [versionado y releases](releasing.md), [CHANGELOG](../CHANGELOG.md); [v0.1.1 en preparación](releases/v0.1.1.md): interfaz unificada, compatibilidad y validación |
+| Publicación | [Contribuir](../CONTRIBUTING.md), [versionado y releases](releasing.md), [CHANGELOG](../CHANGELOG.md); [v0.2.0 en preparación](releases/v0.2.0.md): presentación pública y trazas; [v0.1.1](releases/v0.1.1.md): antecedente de interfaz unificada |
 | Publicación | [Licencia MIT](../LICENSE), [componentes de terceros](../README.md#licencia) y [seguridad](../SECURITY.md) |
 | Panel | Seis vistas integradas en [PR #45](https://github.com/alanslzrr/digital-twin-conversational-mobility/pull/45): datos, consultas, fuentes, actividad y telemetría propia. [Operación y actualización](local-runtime.md#actualizar-el-panel) · [validación final](acceptance/2026-10-03-core-dashboard-mobile-closure.md). Runtime habitual reconstruido y smoke correcto; inspección autenticada pendiente. El historial de refinamientos permanece en [Actas](acceptance/index.md) |
 | Fuentes | [Registro por producto](sources/README.md): acceso, atribución, cobertura y evidencia |
