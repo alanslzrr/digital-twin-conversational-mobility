@@ -42,3 +42,24 @@ test("OCI templates keep internal services private and activation explicit", () 
   ])
     assert.equal(JSON.parse(readFileSync(config)).git.deploymentEnabled, false);
 });
+
+test("tracing remains opt-in and the local supervisor preserves a preview veto", () => {
+  for (const app of ["eve-web", "mobility-core"])
+    assert.match(
+      readFileSync(`apps/${app}/.env.example`, "utf8"),
+      /^MOBAI_OTEL_ENABLED=false$/m,
+    );
+  const supervisor = readFileSync("scripts/start-web.mjs", "utf8");
+  assert(
+    supervisor.indexOf('env.MOBAI_OTEL_ENABLED = "false"') <
+      supervisor.indexOf("delete env.VERCEL_ENV"),
+  );
+  for (const destination of ["agent-runs", "local"])
+    assert.match(
+      readFileSync(
+        `apps/eve-web/agent/instrumentation/${destination}.ts`,
+        "utf8",
+      ),
+      /export default disableInstrumentation\(\)/,
+    );
+});

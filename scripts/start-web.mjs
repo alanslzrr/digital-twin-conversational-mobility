@@ -42,6 +42,9 @@ function launch(args, env) {
 }
 for (const signal of ["SIGINT", "SIGTERM"]) process.once(signal, () => stop(0));
 const env = { ...process.env, NODE_ENV: "production" };
+// Preserve the preview veto before removing hosting flags for the local runtime.
+if (env.VERCEL_ENV === "preview" || env.DEPLOYMENT_ENV === "preview")
+  env.MOBAI_OTEL_ENABLED = "false";
 // A development flag must never accidentally open the production-mode server.
 delete env.EVE_DEV;
 delete env.VERCEL;
