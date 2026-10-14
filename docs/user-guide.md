@@ -93,6 +93,16 @@ La cabecera permite elegir tema claro, oscuro o del sistema. Esa preferencia sol
 | Eventos | Filtrar eventos operativos saneados por fuente, gravedad, tipo y periodo de hasta siete días. |
 | Conversaciones | Índice propio, resumen por turno, intentos, herramientas, tokens y payloads saneados bajo demanda. |
 
+### Leer una traza visual
+
+En **Mis conversaciones → Inspeccionar conversación**, la pestaña **Traza** muestra la ejecución como una secuencia de barras. Filtra por turno para separar una respuesta de la siguiente. Selecciona una fila para ver duración, estado y, si es una llamada al modelo, sus tokens reportados. **Enfocar este intervalo** amplía la escala; **Ver intervalo completo** la restaura. La búsqueda y el plegado actúan sobre los datos cargados.
+
+Una barra representa un intervalo OTel registrado. Un rombo representa un evento sin span: no significa duración cero ni actividad en vivo. El inspector indica si el padre está presente o si la fila solo se agrupa por turno/paso. Las barras de un turno y sus pasos se solapan; no se suman. **Uso** conserva los totales originales.
+
+Si faltan páginas, pulsa **Cargar siguientes 100 eventos**. La vista acumula hasta 1.000 eventos; para explorar más, filtra por turno (los turnos adicionales se paginan en Uso). La lectura paginada queda congelada hasta volver al inicio. Las omisiones conocidas y las páginas pendientes se indican por separado. En móvil, desplaza el gráfico horizontalmente; el inspector aparece debajo. Abrir contenido saneado lee lo retenido, no repite la llamada al modelo. [Campos y límites](reference/system.md#metadatos-opentelemetry-de-eve).
+
+### Lectura y ejecución
+
 Hay tres mecanismos separados:
 
 1. **Refresco** vuelve a leer datos almacenados. Pausar, ocultar el panel o perder conexión interrumpe el polling y las peticiones. La acción Actualizar respeta la misma cadencia mínima.
