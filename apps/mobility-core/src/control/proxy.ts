@@ -68,6 +68,7 @@ export async function proxyInference(
   let deadline = grant.deadline;
   const started = performance.now();
   let finalized = false;
+  let dispatched = false;
   let revocation: ReturnType<typeof watchRevocation> | undefined;
   const finish = async (
     usage: ReturnType<typeof parseProviderUsage>,
@@ -159,6 +160,7 @@ export async function proxyInference(
       campaignDispatched = true;
     }
     await dispatchAttempt(grant.id, binding);
+    dispatched = true;
     const response = await network(
       `${grant.provider.baseUrl.replace(/\/$/, "")}/${protocol === "responses" ? "responses" : "chat/completions"}`,
       {
@@ -282,7 +284,19 @@ export async function proxyInference(
       error instanceof ControlError ? error.code : "provider_unavailable",
     ).catch(() => {});
     throw error instanceof ControlError
-      ? new ControlError(error.code, error.status, error.retryAfter, grant.id)
-      : new ControlError("provider_unavailable", 502, undefined, grant.id);
+      ? new ControlError(
+          error.code,
+          error.status,
+          error.retryAfter,
+          grant.id,
+          dispatched ? grant.id : undefined,
+        )
+      : new ControlError(
+          "provider_unavailable",
+          502,
+          undefined,
+          grant.id,
+          dispatched ? grant.id : undefined,
+        );
   }
 }

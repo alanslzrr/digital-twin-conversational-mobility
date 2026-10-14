@@ -7,6 +7,7 @@ export class ControlError extends Error {
     readonly status = 400,
     readonly retryAfter?: number,
     readonly incidentId: string = randomUUID(),
+    readonly attemptId?: string,
   ) {
     super(code);
     this.name = "ControlError";
@@ -23,6 +24,7 @@ export function controlError(error: unknown) {
       status: value.status,
       headers: {
         "Cache-Control": "no-store",
+        ...(value.attemptId ? { "x-mobai-attempt": value.attemptId } : {}),
         ...(value.retryAfter
           ? { "Retry-After": String(value.retryAfter) }
           : {}),

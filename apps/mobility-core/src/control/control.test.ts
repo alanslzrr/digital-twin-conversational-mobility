@@ -54,6 +54,12 @@ describe("encrypted Core secrets", () => {
     const response = controlError(new Error("synthetic-secret"));
     expect(await response.text()).not.toContain("synthetic-secret");
     expect(response.status).toBe(503);
+    expect(response.headers.get("x-mobai-attempt")).toBeNull();
+    expect(
+      controlError(
+        new ControlError("model_incompatible", 400, undefined, id, id),
+      ).headers.get("x-mobai-attempt"),
+    ).toBe(id);
   });
 });
 describe("SSRF protection", () => {
