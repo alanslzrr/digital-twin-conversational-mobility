@@ -2,7 +2,7 @@
 
 [Índice](index.md) · [Capacidades](overview.md) · [Evolución y evidencia](evolution.md) · [Fuentes](sources/README.md)
 
-Alcance vigente al **08/10/2026**.
+Alcance vigente al **14/10/2026**.
 
 ## Estado
 
@@ -15,6 +15,7 @@ Alcance vigente al **08/10/2026**.
 | R2 — Obligaciones de cierre de evaluación | **Retiradas por decisión del usuario** | [Decisión sobre R2](#decisión-sobre-r2) |
 | Panel de Core y telemetría propia | **Integrado en PR #45 el 04/10/2026. CI verde en PR y main; revisión móvil y zoom nativo al 200 % completados. Runtime habitual reconstruido y smoke correcto; revisión autenticada pendiente de login; sin despliegue cloud** | [Cierre móvil y zoom](acceptance/2026-10-03-core-dashboard-mobile-closure.md), [actualización local](local-runtime.md#actualizar-el-panel); T10 diferido y lector de pantalla fuera del alcance |
 | Cuentas, roles y consumo LLM | **Implementación local por encargo explícito.** Capacidad inicial 30, administrador/evaluador, TOTP, correo cifrado, catálogo compatible, financiación explícita y ledger. Sin aplicar migración a la instalación habitual ni activar servicios externos | [Guía y controles](accounts-and-llm.md) |
+| OpenTelemetry de EVE | **Implementado, revisado y activado en local el 14/10/2026.** Migración 0023 aplicada tras respaldo. Enriquece eventos existentes, sin nueva contabilidad ni exportación externa. Pruebas autorizadas con cuenta real verificadas; waterfall e inspector propios implementados sobre los registros retenidos, sin nuevas inferencias para validarlos. Ejemplos apagados y OCI sin activar | [Referencia](reference/system.md#metadatos-opentelemetry-de-eve), [evidencia](acceptance/2026-10-14-otel-enrichment.md#pruebas-posteriores-con-cuenta-real) |
 | Publicación Vercel | Alternativa futura; CLI retirada y configurador bloqueado por dependencia sin parche | [Preparación cloud](deployment.md) |
 | Arquitectura para 20–30 usuarios | **Spec propuesto por nuevo encargo.** Decisiones y migración gradual definidas; implementación, gastos, despliegue y pruebas reales sin autorizar | [Spec de escalabilidad](plans/2026-10-05-scalable-architecture.md) |
 
