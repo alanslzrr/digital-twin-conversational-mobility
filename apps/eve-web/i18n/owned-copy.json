@@ -585,7 +585,7 @@
   "Turn cancelled": "conversationView.turnCancelled",
   "Step started": "conversationView.stepStarted",
   "Step completed": "conversationView.stepCompleted",
-  "Request prepared (not dispatched)": "conversationView.requestPreparedNotDispatched",
+  "Request prepared": "conversationView.requestPreparedNotDispatched",
   "Request dispatched to model": "conversationView.requestDispatchedToModel",
   "Model response": "conversationView.modelResponse",
   "Incomplete response": "conversationView.incompleteResponse",
