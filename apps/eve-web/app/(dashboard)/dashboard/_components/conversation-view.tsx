@@ -7,12 +7,14 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useUi } from "@/i18n/provider";
 import { useDashboard, useDashboardContext } from "@/src/dashboard-client";
+import { conversationRefreshInterval } from "@/src/dashboard-polling";
 import { number } from "./insights";
 import { Empty, Segmented, Sheet, Table, Tabs } from "./primitives";
 import { UsagePerTurnRows } from "./refinement/UsagePerTurnRows";
 import { Instant, PageTitle, State, Technical } from "./shared";
 import { toolCopy } from "./tool-form";
 import { TracePayload } from "./trace-payload";
+import { TraceWaterfall } from "./trace-waterfall";
 
 const obj = (v: unknown): Record<string, unknown> =>
   v && typeof v === "object" && !Array.isArray(v)
@@ -27,7 +29,7 @@ const titles: Record<string, string> = {
   turn_cancelled: "Turn cancelled",
   step_started: "Step started",
   step_completed: "Step completed",
-  attempt_prepared: "Request prepared (not dispatched)",
+  attempt_prepared: "Request prepared",
   attempt_dispatched: "Request dispatched to model",
   attempt_completed: "Model response",
   attempt_incomplete: "Incomplete response",
@@ -53,7 +55,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
 
   const ctx = useDashboardContext();
   const [cursor, setCursor] = useState<string | null>(null),
-    [tab, setTab] = useState("Timeline"),
+    [tab, setTab] = useState("Trace"),
     [turn, setTurn] = useState(""),
     [call, setCall] = useState(""),
     [payload, setPayload] = useState<unknown>(null);
@@ -70,7 +72,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
     setTurn("");
     setCall("");
     setPayload(null);
-    setTab("Timeline");
+    setTab("Trace");
   }, [sessionId]);
   const index = useDashboard(
     !sessionId
@@ -91,10 +93,10 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
     counts = obj(s.counts),
     turns = rows(s.turns);
   const events = useDashboard(
-    sessionId
+    sessionId && tab !== "Trace" && tab !== "Usage"
       ? `conversations/${sessionId}/events?${new URLSearchParams({ ...(cursor ? { cursor } : {}), ...(turn ? { turn } : {}), ...(call && tab === "Tools" ? { call } : {}), ...(tab === "Tools" ? { family: "tools" } : tab === "Model" ? { family: "model" } : tab === "Content" ? { family: "content" } : {}) })}`
       : null,
-    s.state === "running" && !cursor ? 3000 : 0,
+    cursor ? 0 : conversationRefreshInterval(s, 3000),
   );
   const data = unwrap(sessionId ? events.data : index.data),
     entries = rows(sessionId ? data.events : data.sessions);
@@ -124,7 +126,9 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
           </p>
         </Sheet>
       </div>
-      <div className="dc-conversation-workspace">
+      <div
+        className={`dc-conversation-workspace ${tab === "Trace" ? "dc-conversation-trace" : ""}`}
+      >
         {sessionId ? (
           <aside className="dc-session-index dc-card">
             <h2>{t("conversationView.sessionsOnThisPage")}</h2>
@@ -215,14 +219,35 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                 <Tabs.List
                   aria-label={t("conversationView.conversationDetail")}
                 >
-                  {["Timeline", "Tools", "Usage", "Model", "Content"].map(
-                    (item) => (
-                      <Tabs.Trigger key={item} value={item}>
-                        {copy(item)}
-                      </Tabs.Trigger>
-                    ),
-                  )}
+                  {[
+                    "Trace",
+                    "Timeline",
+                    "Tools",
+                    "Usage",
+                    "Model",
+                    "Content",
+                  ].map((item) => (
+                    <Tabs.Trigger key={item} value={item}>
+                      {item === "Trace" ? t("waterfall.tab") : copy(item)}
+                    </Tabs.Trigger>
+                  ))}
                 </Tabs.List>
+                <Tabs.Content value="Trace">
+                  {tab === "Trace" ? (
+                    <TraceWaterfall
+                      key={`${sessionId}:${turn}`}
+                      sessionId={sessionId}
+                      turn={turn}
+                      summary={s}
+                      turnOrdinal={
+                        turn && !turnCursor
+                          ? turns.findIndex((row) => row.turnId === turn) + 1 ||
+                            undefined
+                          : undefined
+                      }
+                    />
+                  ) : null}
+                </Tabs.Content>
                 <Tabs.Content value="Usage" className="dc-stack mt-4">
                   <section
                     className="dc-stat-grid"
@@ -487,7 +512,7 @@ export function Conversations({ sessionId }: { sessionId?: string }) {
                     ) : null}
                   </div>
                 </Tabs.Content>
-                {tab !== "Usage" ? (
+                {tab !== "Usage" && tab !== "Trace" ? (
                   <Tabs.Content
                     value={tab}
                     className="mt-4 flex flex-col gap-3"
