@@ -14,6 +14,25 @@ Procedimientos de arranque, actualización y recuperación de una instalación p
 - [Credenciales y caducidades](#credenciales-y-caducidades)
 - [Control conversacional E2](#control-conversacional-e2)
 - [Actividad y retención](#actividad-y-retención)
+- [Preparar metadatos OpenTelemetry](#preparar-metadatos-opentelemetry)
+
+## Preparar metadatos OpenTelemetry
+
+La integración está **implementada y apagada por defecto en los ejemplos**. La instalación local habitual se activó por encargo el 14/10/2026, después de respaldar la base y aplicar 0023; OCI sigue sin activar. EVE 0.65.0 aporta los spans y Core los añade a los eventos existentes. No se necesita Vercel ni un servidor de observabilidad adicional. [Campos, límites y privacidad](reference/system.md#metadatos-opentelemetry-de-eve) · [Revisión e instalación](acceptance/2026-10-14-otel-enrichment.md#revisión-e-instalación-local-posteriores).
+
+Para instalar esta versión en una ventana de mantenimiento aprobada:
+
+1. Respaldar la base y detener conjuntamente la aplicación según el procedimiento de esta página.
+2. Aplicar `pnpm db:migrate`, incluida 0023. Esta migración es necesaria para el lector del panel incluso con captura apagada; no se aplica durante el build.
+3. Reconstruir Web/Core y agente. Mantener `MOBAI_OTEL_ENABLED=false` en ambos entornos privados. No reiniciar el servicio habitual solo para comprobar esta preparación.
+
+Para activar la captura **en una operación posterior expresamente aprobada**, configurar `MOBAI_OTEL_ENABLED=true` en Web y Core y reiniciar los procesos. El transporte sigue usando `MOBILITY_MCP_URL` y el JWT existentes; no añadir destinos o credenciales OTel. Una conversación nueva evita reutilizar una decisión de captura que EVE ya hubiera fijado en otra sesión. En `/dashboard/conversations`, los detalles técnicos de los eventos terminales pueden mostrar `otel` con IDs y tiempos, sin nuevas filas ni sumas de tokens.
+
+Para probar la instalación local actual, entrar en [el chat](http://127.0.0.1:3010), crear una conversación nueva y enviar un mensaje con la selección LLM propia. Después abrir [Telemetría](http://127.0.0.1:3010/dashboard/conversations), seleccionar esa conversación y expandir los detalles técnicos del evento terminal. La captura no añade metadatos retrospectivos a conversaciones antiguas. El panel mantiene una breve ventana de refresco al finalizar para recoger el enriquecimiento asíncrono.
+
+Para desactivarla, poner el flag a `false` en ambos componentes y reiniciarlos. Los metadatos retenidos siguen sujetos a los permisos y a la caducidad del evento original; no se borran conversaciones ni se revierte el esquema. Un valor `null` significa que no existe enriquecimiento retenido: puede deberse a captura apagada, límites, pérdida de confirmación o falta de correspondencia, no a ausencia de ejecución.
+
+Las pruebas offline están incluidas en `pnpm check`; `pnpm test:control:db` prueba también SQL y autorización de este camino en PostgreSQL desechable. Ninguno necesita una inferencia. Este procedimiento también aplica a [OCI](deployment.md#opentelemetry-en-la-vm); las previews no admiten enriquecimiento.
 
 ## Inicio y parada
 

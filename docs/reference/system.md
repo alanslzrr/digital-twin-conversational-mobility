@@ -53,6 +53,7 @@ Usa [los ejemplos raíz](../../.env.example), [Web](../../apps/eve-web/.env.exam
 | `POSTGRES_USER`, `POSTGRES_DB`, `POSTGRES_PASSWORD`, `DATABASE_URL`, `REDIS_PASSWORD` | Raíz local/Compose; DB solo Core y scripts | Generadas/configuradas por `setup:local` |
 | `MOBAI_SECRET_KEY_FILE` | Solo Core | Archivo maestro AES-256 fuera del repositorio/DB, permisos 0600 |
 | `MOBAI_LLM_ENABLED`, `MOBAI_EMAIL_ENABLED` | Solo Core, predeterminado `false` | Opt-in externo; siempre bloqueado en previews |
+| `MOBAI_OTEL_ENABLED` | Web y Core, predeterminado `false` | Enriquecer eventos existentes con metadatos OTel de EVE; siempre bloqueado en previews, sin exportación externa |
 | `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `MOBAI_EMAIL_FROM`, `MOBAI_EMAIL_TRACKING_DISABLED` | Solo Core | Activación/recuperación; habilitación y DNS posteriores |
 | `MOBILITY_JWT_SECRET`, `MOBILITY_JWT_ISSUER`, `MOBILITY_JWT_AUDIENCE` | Core y bootstrap | Verificación de credenciales de servicio |
 | `MOBILITY_MCP_URL`, `MOBILITY_MCP_TOKEN` | Servidor Web | MCP fijo, JWT con caducidad; no navegador |
@@ -142,7 +143,7 @@ JWT de servicio: scopes `mobility.dashboard.read`, `mobility.dashboard.execute`,
 | Control | Límite |
 | --- | --- |
 | Refresco resumen / resto | 3 s / 15 s mínimos por clave; no oculto, offline o pausado |
-| Eventos y conversaciones propias activas | Eventos operativos 15 s; resumen/timeline activo 3 s, conversación terminada congelada |
+| Eventos y conversaciones propias activas | Eventos operativos 15 s; resumen/timeline activo 3 s; al terminar, hasta 35 s desde el último evento antes de congelar |
 | Actividad visible | 60 s; cupo independiente 2/min |
 | Lecturas / ejecución | 120/min por evaluador; ejecución 6/min y 60/día |
 | Manual | Entrada 8 KiB; resultado saneado 256 KiB; deadline 60 s; lease 70 s; una activa por propietario |
@@ -159,7 +160,37 @@ Migración aditiva [0021](../../infra/postgres/migrations/0021_dashboard_observa
 
 La purga física acotada se integra en mantenimiento por actividad del worker existente, sin Cron permanente. El filtro temporal de lectura aplica aunque el worker esté parado. Las referencias y contadores se liberan por lotes de hasta 1.000. Esta retención no cambia la de transcripciones EVE ni el historial de movilidad.
 
-Dependencias Web añadidas: SWR 2.4.1, Leaflet 1.9.4 y tipos; render del mapa diferido. [Adaptación Community Agent fijada](../../apps/eve-web/vendor/community-agent/README.md), MIT conservado. EVE sigue siendo la fuente de tokens visuales y componentes. La [guía](../user-guide.md#panel-privado) explica los tres mecanismos de actualización.
+Dependencias Web añadidas al panel: SWR 2.4.1, Leaflet 1.9.4 y tipos; render del mapa diferido. [Adaptación Community Agent fijada](../../apps/eve-web/vendor/community-agent/README.md), MIT conservado. EVE sigue siendo la fuente de tokens visuales y componentes. La [guía](../user-guide.md#panel-privado) explica los tres mecanismos de actualización.
+
+### Metadatos OpenTelemetry de EVE
+
+La integración opcional usa la API pública incluida en **EVE 0.65.0**. [Configuración](../../apps/eve-web/agent/instrumentation), [proyector y procesador](../../apps/eve-web/src/otel-enrichment.ts), [contrato](../../packages/contracts/src/otel.ts) y [persistencia](../../apps/mobility-core/src/observability/otel.ts). No requiere actualizar EVE, añadir un collector ni instalar otro SDK. El [plan](../plans/2026-10-14-otel-enrichment.md) registra las decisiones.
+
+Un span es un intervalo de ejecución identificado. Solo se conservan spans nativos `eve.agent` de turno, paso, modelo y herramienta: ID de traza, ID de span, padre, inicio, fin y duración. Los destinos Agent Runs y spool local de EVE están desactivados expresamente. No se exportan prompts, resultados, razonamiento, errores libres, credenciales, tokens ni costes por este camino. Tampoco se instrumentan automáticamente HTTP/SQL ni se propaga baggage al proveedor. Los IDs de padre son los nativos: pueden referenciar spans auxiliares excluidos, especialmente en herramientas. Esta proyección no reconstruye el árbol completo de Agent Runs. El waterfall propio distingue sus parentescos nativos de la agrupación visual por turno/paso.
+
+El evento terminal original sigue siendo la única fila. El runtime espera su confirmación desde Core antes de enviar el enriquecimiento al mismo `/internal/telemetry`, con el mismo JWT `mobility.telemetry.write`. Core revalida propietario y vigencia, exige una coincidencia inequívoca y añade `otel_span` sin modificar el hash, las métricas, el ledger o la caducidad. Para modelo, sesión/turno/paso/propósito enlazan con el `attemptId` Core ya almacenado; no se confunden sus IDs con los intentos internos de EVE. La compactación solo se enriquece cuando EVE emite un span correlacionable: nunca se inventa.
+
+El terminal de modelo se emite dentro de su llamada nativa. Core rechaza una coincidencia cuyo instante quede fuera del intervalo del span, con un margen de un milisegundo por precisión temporal. Este filtro solo descarta asociaciones incompatibles: no elige entre varios intentos con las mismas coordenadas. Si hay dos candidatos, ninguno se enriquece aunque uno parezca encajar por tiempo. Los demás tipos conservan su correlación por identidad y no se les atribuye esta garantía de orden.
+
+Un rechazo HTTP del proveedor también conserva el intento: Core devuelve su UUID en `x-mobai-attempt` solo después de marcar su despacho en el ledger. EVE proyecta el terminal fallido y su entrada saneada, sin reenviar el cuerpo de error del proveedor ni repetir la petición. Los rechazos previos al despacho no se presentan como llamadas observadas al modelo. La ausencia de uso sigue siendo desconocida, nunca cero.
+
+Si un lote contiene dos spans distintos para el mismo destino, o el mismo ID de span intenta identificar eventos distintos, se descartan esas correspondencias sin elegir una arbitrariamente. Los demás spans del lote pueden persistirse. Un ID ya asignado a otro evento tampoco se reutiliza.
+
+La migración aditiva [0023](../../infra/postgres/migrations/0023_otel_event_enrichment.sql) añade una columna de hasta 512 bytes por evento y un índice único por sesión/traza/span. El máximo existente de 10.000 eventos limita esta ampliación a 5.120.000 bytes de JSON por sesión, además de los payloads y del coste físico de filas/índices. Los metadatos se eliminan con el evento; no añaden otra retención ni se contabilizan como contenido de los payloads.
+
+El procesador retiene como máximo 128 registros proyectados, durante hasta 30 segundos entre oportunidades de drenaje. La confirmación de terminales usa un índice en memoria de 1.000 claves y 30 minutos. No retiene spans completos. Cada drenaje admite ocho lotes de hasta 32 registros, dos peticiones concurrentes y 200 ms por petición, sin reintentos. Solo programa un drenaje al recibir actividad; no hay un bucle periódico. Los límites, la falta de confirmación, una correlación ambigua o un fallo dejan `otel: null`, sin producir otro evento o repetir una inferencia.
+
+EVE compila hooks e instrumentación por separado. La [coordinación](../../apps/eve-web/src/otel-coordination.ts) comparte un registro de proceso mediante `Symbol.for`, con hasta 100 propietarios de sesión, 30 minutos de vigencia y ocho suscriptores. Solo el hook autenticado registra al propietario; compartir el registro no sustituye la autorización de Core.
+
+La pestaña inicial **Traza** representa esos mismos registros en un waterfall: árbol de operaciones, barras temporales, búsqueda, plegado, enfoque e inspector. El [proyector](../../apps/eve-web/src/trace-waterfall.ts) reúne inicio y terminal por identidad de turno, paso, intento o llamada; los reintentos y compactaciones siguen separados. Solo dibuja una barra con un intervalo OTel retenido. Sin span aparece un marcador en el instante del último evento, nunca un inicio inferido o una duración en vivo. El inspector distingue padre nativo de agrupación lógica, conserva los IDs originales y mantiene JSON como detalle secundario.
+
+La [vista](../../apps/eve-web/app/%28dashboard%29/dashboard/_components/trace-waterfall.tsx) usa el GET autenticado existente, con 100 eventos por página y ampliación explícita hasta 1.000 eventos en memoria. Al paginar se congela el refresco; volver al inicio descarta páginas acumuladas y vuelve a la lectura habitual, respetando su cadencia mínima. Más allá del límite se filtra por turno; la paginación de turnos permanece en Uso. Búsqueda y plegado no consultan al servidor. El contenido saneado solo se lee al pulsar su botón, y una respuesta tardía no se muestra bajo otra operación.
+
+La duración corresponde al intervalo nativo EVE y no se suma a la del transporte ni a otros spans anidados. El eje conserva pausas entre turnos. No representa tiempos internos separados de autorización Core, OTP o proveedor; tampoco reconstruye padres de acción excluidos. El inspector toma los tokens del terminal original del intento, sin sumar caché o razonamiento otra vez. Los totales permanecen en Uso; no se calcula un coste monetario ausente. No hay otro productor, almacén, endpoint, SDK ni llamada al modelo. Permisos, retención y ledger no cambian. [Plan del waterfall](../plans/2026-10-14-trace-waterfall.md) · [Verificación](../acceptance/2026-10-14-trace-waterfall.md).
+
+Resumen y primera página de eventos conservan el refresco de 3 s durante una ventana de hasta 35 s desde el último evento observado, aunque la conversación ya haya terminado. Así pueden recoger metadatos que llegan después del terminal. Luego se congelan incluso si faltan spans; pausa, pestaña oculta, desconexión y paginación siguen suprimiendo el refresco.
+
+`MOBAI_OTEL_ENABLED=false` es el valor predeterminado del repositorio. La instalación local se activó tras la revisión del 14/10/2026; OCI permanece sin activar. El procedimiento está en [operación local](../local-runtime.md#preparar-metadatos-opentelemetry) y se aplica también a [OCI](../deployment.md#opentelemetry-en-la-vm).
 
 ## Control de cuentas y LLM
 
