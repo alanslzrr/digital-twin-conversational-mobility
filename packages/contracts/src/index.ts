@@ -221,7 +221,10 @@ export const resolveAddressInputSchema = z.object({
     .trim()
     .min(3)
     .max(160)
-    .regex(/^\P{Cc}+$/u),
+    // JSON Schema has no regex flags. Explicit C0/C1 ranges preserve the Cc
+    // exclusion in providers that reject Unicode property escapes without /u.
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: deliberately exclude control characters from public address input.
+    .regex(/^[^\u0000-\u001f\u007f-\u009f]+$/),
   allowExternal: z
     .boolean()
     .default(false)
