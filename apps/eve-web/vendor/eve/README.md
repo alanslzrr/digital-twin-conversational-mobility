@@ -192,6 +192,29 @@ and manual compaction were verified on 2026-10-08. Other providers and real
 email delivery remain unverified.
 See `docs/accounts-and-llm.md` for activation gates and migration instructions.
 
+### Optional native OpenTelemetry enrichment (0.65.0)
+
+`agent/instrumentation/` uses the public OTel API shipped with the pinned EVE
+version, without a dependency upgrade or an additional runtime patch. A strict
+metadata-only process policy and destination allowlist feed only the existing
+Core telemetry sink. `agent-runs.ts` and `local.ts` explicitly disable managed
+exports and the local spool. `MOBAI_OTEL_ENABLED` defaults to false in both apps;
+preview writes and capture are vetoed.
+
+Native spans enrich acknowledged terminal events; they never create a second
+event stream or copy usage, costs, prompts or tool results. Core remains the
+ownership and accounting authority. The dashboard renders retained intervals in its own waterfall and keeps native
+IDs/timings in technical details. Missing parents are labelled as logical
+grouping; no additional producer or inference is used. Upstream chat markup is unchanged. The compatibility
+test drives the installed EVE tracer/lifecycle without a model. Review the
+version, scope and structural attribute assumptions before any EVE upgrade.
+EVE bundles hooks and instrumentation separately. Their bounded acknowledgement
+and authenticated-owner registry uses one process-global `Symbol.for` key rather
+than module-local maps; a regression test imports independent module copies.
+The dashboard keeps a bounded 35-second terminal settling window for asynchronous
+enrichment. Ambiguous span mappings are dropped without discarding valid siblings
+in the same batch. Installed-runtime tests cover completion, failure and cancellation.
+
 ### Dynamic model rehydration for manual compaction
 
 `patches/eve@0.65.0.patch` invokes the live `step.started` model resolver before
