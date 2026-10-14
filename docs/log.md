@@ -288,3 +288,39 @@ Validación documental: 75 Markdown, 1.155 enlaces locales y 313 anclas comproba
 
 - Verificada finalmente la compactación manual real tras el ajuste: 325 tokens de entrada, 201 de salida (incluyen 132 de razonamiento), intento liquidado con la credencial y el turno originales. El selector vuelve a estar disponible al finalizar. `pnpm check` final: 612 pruebas pasadas, 124 opt-in omitidas, tipos y builds correctos; agente recompilado.
 - Continuación tras compactar verificada en la misma conversación: «Continuidad correcta», 4.270 tokens de entrada y 19 de salida, otro intento liquidado. Lockfile congelado instalado offline sin cambios.
+
+## [2026-10-14] implementación | OpenTelemetry sin duplicar telemetría
+
+- Contrastada la API pública instalada de EVE 0.65.0 con la documentación oficial. Implementado el [plan de enriquecimiento](plans/2026-10-14-otel-enrichment.md): metadatos nativos sobre eventos terminales existentes, transporte privado y autorización de Core, sin copiar contenido ni modificar consumo, ledger o retención.
+- Añadida migración 0023 y lectura de `otel` en los detalles técnicos del panel. Agent Runs y el spool local quedan desactivados; `MOBAI_OTEL_ENABLED=false` en los ejemplos de Web/Core y veto de previews conservado. El build real detectó y permitió corregir la duplicación de registros de coordinación entre entradas compiladas.
+- `pnpm check` correcto: 636 pruebas pasadas, 132 opt-in omitidas, tipos y builds Web/Core; 47 advertencias de lint no bloqueantes. `pnpm build:agent` correcto y artefacto inspeccionado. `pnpm test:control:db`: 32 pruebas pasadas en PostgreSQL desechable. Plantillas OCI y configurador cloud deshabilitado verificados. [Acta y límites](acceptance/2026-10-14-otel-enrichment.md).
+- Actualizados arquitectura, referencia, operación local/OCI, roadmap, procedencia EVE e índices; registradas las fuentes. Comprobados enlaces y anclas locales, así como `git diff --check`; sin diagramas nuevos ni cambios de interfaz.
+- Sin aplicar la migración a la base habitual, editar entornos privados, reiniciar servicios, activar captura, llamar modelos/proveedores o desplegar. Sin commit, push ni PR en esta entrega.
+
+## [2026-10-14] revisión e instalación | Activación local de OpenTelemetry
+
+- Corregidos tres hallazgos: congelación prematura del panel antes del enriquecimiento asíncrono, rechazo completo de lotes con destinos ambiguos y colisiones de ID que revertían spans válidos. La ventana final de lectura está acotada; no se agregan eventos ni se relajan permisos. [Acta ampliada](acceptance/2026-10-14-otel-enrichment.md#revisión-e-instalación-local-posteriores).
+- Ampliada la prueba del productor EVE a éxito, fallo y cancelación. `pnpm check`: 639 pruebas pasadas, 133 omitidas, tipos y builds correctos; 47 advertencias no bloqueantes. Agente compilado y 33 pruebas PostgreSQL desechables correctas.
+- Tras el nuevo encargo de arranque: detenido el supervisor propio, reactivada infraestructura local existente, respaldadas base/configuración, aplicado 0023 y activado el flag en Web/Core locales. Renovado JWT interno y arrancado supervisor independiente en 3010. Smokes productivo y autenticado correctos; cuentas efímeras retiradas. Sin inferencias del asistente, cambios de MFA, reconstrucción OTP, correo ni OCI.
+- Actualizados estado local, referencia de refresco/correlación, procedimientos, roadmap e índices. Comprobados enlaces/anclas y diff; no hay diagramas nuevos. Sin commit ni push.
+
+## [2026-10-14] pruebas reales | Trazas de modelo y herramientas
+
+- Con autorización expresa, realizadas pruebas desde la cuenta autenticada y el modelo seleccionado, sin cambiar credenciales, MFA, cuotas o despliegues. La conversación final completó dos turnos: ausencia de coincidencia conservada y resolución posterior de Madrid-Atocha Cercanías en Renfe.
+- Corregidos el esquema regex de `resolve_address` rechazado por el proveedor y la ausencia de terminales ante errores HTTP de modelos ya despachados. Los errores previos al despacho no se presentan como envíos. Rectificada la etiqueta «Petición preparada», que afirmaba incorrectamente «no enviada».
+- [Evidencia real](acceptance/2026-10-14-otel-enrichment.md#pruebas-posteriores-con-cuenta-real): seis llamadas, 18 spans, 36 eventos y uso idéntico por intento entre panel/telemetría/ledger; sin duplicados. Se conservan los intentos iniciales fallidos. Documentados coste desconocido, padres auxiliares excluidos y ausencia de waterfall/OCI real.
+- `pnpm check`: 643 pruebas pasadas, 135 omitidas, tipos y builds correctos; 47 advertencias previas. `pnpm test:control:db`: 35 pruebas desechables. Agente recompilado y smoke productivo correcto tras reinicio; servidor local y panel abiertos. Actualizados referencia, acta, índice y roadmap. Sin commit ni push.
+
+## [2026-10-14] interfaz | Waterfall de conversaciones
+
+- Implementada la pestaña Traza sobre eventos/spans existentes: árbol, escala temporal, búsqueda, plegado, enfoque e inspector con contenido bajo demanda. Padres nativos y agrupación lógica separados; ausencia de span representada como marcador. Sin nueva telemetría, ledger o inferencia.
+- Paginación explícita de 100 hasta 1.000 eventos, refresco suspendido al paginar, avisos de cobertura y respuesta tardía aislada por selección. Eliminadas lecturas de eventos innecesarias en Uso y la lectura simultánea de Cronología al mostrar Traza.
+- `pnpm check`: 663 pruebas pasadas, 135 omitidas; tipos y builds correctos, 47 advertencias previas. Veinte pruebas nuevas de proyección/UI. Verificación autenticada con los 18 spans/36 eventos previos, controles, contenido, ES/EN, temas y viewport estrecho; smoke productivo correcto. [Acta](acceptance/2026-10-14-trace-waterfall.md).
+- Actualizados guía de uso, referencia canónica, arquitectura, roadmap e índices. Verificados 556 enlaces/anclas locales y diff, sin errores. OCI permanece sin activar y el servidor local disponible. Sin commit ni push.
+
+## [2026-10-14] revisión final | OpenTelemetry y waterfall para PR
+
+- Corregida la asociación de un span de modelo con un terminal ajeno a su intervalo, sin elegir entre reintentos ambiguos. Corregidos el bloqueo de plegado y el estado accesible incoherente cuando la búsqueda solo contiene espacios. Tres regresiones fallaron antes del arreglo y pasan después.
+- `pnpm check`: 664 pruebas pasadas y 137 opt-in omitidas; tipos y builds correctos, 47 advertencias previas. Las 38 pruebas focalizadas y las 37 de PostgreSQL desechable pasan. Build del agente, auditoría de dependencias, veto cloud y plantillas OCI estáticas correctos.
+- Reiniciado exclusivamente el supervisor local del proyecto con los builds nuevos; smoke productivo correcto. Navegador autenticado verificado sobre los 36 eventos/18 spans retenidos, sin nuevos turnos. Sin activación OCI, inferencias adicionales ni cambios de configuración privada o migración en la base habitual.
+- Actualizadas referencia canónica, actas e índices y ampliadas las notas de v0.2.0 con migración, rollback, privacidad y límites. Seguimiento en [issue #69](https://github.com/alanslzrr/digital-twin-conversational-mobility/issues/69). Comprobados 579 enlaces/anclas locales antes de este registro, sin errores; no se añadieron diagramas documentales. El resultado de CI y los commits se registran en la PR, sin publicar release ni hacer merge.
