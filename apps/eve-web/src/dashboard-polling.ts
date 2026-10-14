@@ -3,6 +3,22 @@ export const dashboardIntervals = {
   view: 15000,
   heartbeat: 60000,
 } as const;
+/** Enrichment follows the terminal event asynchronously (30s queue + transport).
+ * Freeze after a fixed grace window, not when every optional span is present. */
+export function conversationRefreshInterval(
+  summary: { state?: unknown; lastObservedAt?: unknown } | undefined,
+  interval: number,
+  now = Date.now(),
+) {
+  if (!summary || summary.state === "running") return interval;
+  const last =
+    typeof summary.lastObservedAt === "string"
+      ? Date.parse(summary.lastObservedAt)
+      : NaN;
+  return Number.isFinite(last) && now - last < 35_000 && last <= now + 30_000
+    ? interval
+    : 0;
+}
 export function pollingEligible(
   at: number,
   interval: number,
