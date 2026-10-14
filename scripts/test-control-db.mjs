@@ -58,6 +58,8 @@ try {
       "node_modules/vitest/vitest.mjs",
       "run",
       "apps/mobility-core/src/control/control.integration.test.ts",
+      "apps/mobility-core/src/observability/otel.integration.test.ts",
+      "--no-file-parallelism",
     ],
     {
       stdio: "inherit",
