@@ -6,6 +6,8 @@ Resultados ejecutados y límites de cada entrega.
 
 | Documento | Qué encontrarás |
 | --- | --- |
+| [2026-10-14-trace-waterfall](2026-10-14-trace-waterfall.md) | Waterfall propio, inspector y paginación; revisión real sin nuevas inferencias y regresión final del plegado con búsqueda vacía. |
+| [2026-10-14-otel-enrichment](2026-10-14-otel-enrichment.md) | OTel nativo con EVE 0.65.0: entrega inicial, activación y pruebas autorizadas; revisión final de correlación sin nuevas inferencias. |
 | [2026-10-03-core-dashboard-mobile-closure](2026-10-03-core-dashboard-mobile-closure.md) | 72 vistas y 52 estados móviles, cabecera/pestañas corregidas; zoom nativo al 200 % verificado el 4 de octubre. |
 | [2026-10-03-core-dashboard-merge-readiness](2026-10-03-core-dashboard-merge-readiness.md) | Corrección de Sources con release instalada, retirada de CLI vulnerable y validación previa al merge. |
 | [2026-10-03-core-dashboard-refinement-v2](2026-10-03-core-dashboard-refinement-v2.md) | Neutralidad y densidad V2; gráficos existentes, comparaciones guardadas y validación sintética; límites manuales explícitos. |
