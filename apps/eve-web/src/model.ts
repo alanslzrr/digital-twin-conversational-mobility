@@ -63,6 +63,15 @@ export function coreModelFetch(
       });
     });
     if (!response.ok) {
+      // Core supplies an attempt ID only after ledger dispatch. Preserve its
+      // failed terminal projection too, without inventing a second attempt.
+      await observeModelResponse(
+        binding,
+        context,
+        JSON.parse(init.body),
+        response,
+        started,
+      );
       let code = "provider_unavailable";
       let incidentId: string | undefined;
       try {

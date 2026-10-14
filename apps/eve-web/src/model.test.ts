@@ -55,10 +55,52 @@ function setup() {
   vi.stubEnv("MOBILITY_MCP_TOKEN", "synthetic-internal-token");
 }
 afterEach(() => {
+  vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
 });
 describe("Core-only multiprovider model", () => {
+  it.each([true, false])(
+    "projects a rejected request only with a Core attempt ID: %s",
+    async (admitted) => {
+      setup();
+      const batches: {
+        events: { kind: string; attemptId: string; usage: unknown }[];
+      }[] = [];
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (_url, init) => {
+          batches.push(JSON.parse(init.body));
+          return Response.json({});
+        }),
+      );
+      const network = vi.fn(async () =>
+        Response.json(
+          { error: "model_incompatible", incidentId: id },
+          { status: 400, headers: admitted ? { "x-mobai-attempt": id } : {} },
+        ),
+      );
+      const model = createEvaluationModel(binding("responses"), network);
+      await expect(model.doGenerate({ prompt: [] })).rejects.toMatchObject({
+        message: `model_incompatible · ${id}`,
+        isRetryable: false,
+        requestBodyValues: {},
+      });
+      expect(network).toHaveBeenCalledTimes(1);
+      expect(
+        batches
+          .flatMap((b) => b.events)
+          .map((e) => [e.kind, e.attemptId, e.usage]),
+      ).toEqual(
+        admitted
+          ? [
+              ["attempt_prepared", id, null],
+              ["attempt_failed", id, null],
+            ]
+          : [],
+      );
+    },
+  );
   it.each(["responses", "chat-completions"] as const)(
     "uses a concrete %s SDK, the pinned model and only the service credential",
     async (protocol) => {
