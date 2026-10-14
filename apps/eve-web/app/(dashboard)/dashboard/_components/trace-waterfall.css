@@ -1,0 +1,396 @@
+/* ---------- Trace waterfall: a read-only projection of retained events ---------- */
+.dc-conversation-workspace.dc-conversation-trace:has(.dc-session-index) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.dc-conversation-trace .dc-session-index {
+  display: none;
+}
+.dc-trace {
+  container-type: inline-size;
+  overflow: hidden;
+  border: 1px solid var(--dash-line);
+  border-radius: 12px;
+  background: var(--dash-panel);
+}
+.dc-trace [data-kind="turn"] {
+  --trace-color: var(--dash-accent);
+}
+.dc-trace [data-kind="step"] {
+  --trace-color: var(--dash-secondary);
+}
+.dc-trace [data-kind="model"] {
+  --trace-color: light-dark(#2563eb, #6da8ff);
+}
+.dc-trace [data-kind="tool"] {
+  --trace-color: light-dark(#a96008, #eeb75a);
+}
+.dc-trace-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+.dc-trace-heading h2 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.dc-trace-heading p,
+.dc-trace-count {
+  font-size: 12px;
+  color: var(--dash-muted);
+}
+.dc-trace-heading p {
+  margin-top: 4px;
+}
+.dc-trace-count {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.dc-trace-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+.dc-trace-search {
+  display: flex;
+  align-items: center;
+  flex: 1 1 180px;
+  gap: 8px;
+  border: 1px solid var(--dash-line);
+  border-radius: 6px;
+  padding: 0 10px;
+  background: var(--dash-bg);
+}
+.dc-trace-search svg {
+  width: 15px;
+  height: 15px;
+  color: var(--dash-muted);
+  flex-shrink: 0;
+}
+.dc-trace-search input {
+  min-width: 0;
+  width: 100%;
+  min-height: 36px;
+  font-size: 13px;
+  background: transparent;
+}
+.dc-trace-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 20px 14px;
+  font-size: 11px;
+  color: var(--dash-muted);
+}
+.dc-trace-legend span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.dc-trace-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--trace-color);
+}
+.dc-trace-notice {
+  font-size: 12px;
+  color: var(--dash-muted);
+}
+.dc-trace > .dc-trace-notice {
+  padding: 10px 20px;
+  background: var(--dash-well);
+  border-top: 1px solid var(--dash-line-soft);
+}
+.dc-trace-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--dash-line);
+}
+.dc-trace-scroll {
+  overflow: auto;
+  min-width: 0;
+  max-height: 650px;
+}
+.dc-trace-grid {
+  min-width: 590px;
+}
+.dc-trace-axis,
+.dc-trace-row {
+  display: grid;
+  grid-template-columns: 235px minmax(160px, 1fr) 80px;
+  gap: 8px;
+  padding-right: 12px;
+}
+.dc-trace-axis {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  align-items: center;
+  height: 40px;
+  background: var(--dash-panel);
+  border-bottom: 1px solid var(--dash-line);
+  color: var(--dash-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.dc-trace-axis > span:first-child {
+  padding-left: 16px;
+}
+.dc-trace-axis > span:last-child {
+  text-align: right;
+}
+.dc-trace-axis > div {
+  position: relative;
+  height: 100%;
+  margin-inline: 4px;
+}
+.dc-trace-detail-title > span {
+  color: var(--trace-color);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 600;
+}
+.dc-trace-axis > div span {
+  position: absolute;
+  top: 12px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.dc-trace-axis > div span:first-child {
+  transform: none;
+}
+.dc-trace-axis > div span:last-child {
+  transform: translateX(-100%);
+}
+.dc-trace-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dc-trace-row {
+  min-height: 43px;
+  border-bottom: 1px solid var(--dash-line-soft);
+}
+.dc-trace-row[data-kind="turn"] {
+  background: var(--dash-well);
+}
+.dc-trace-row:hover {
+  background: var(--dash-hover);
+}
+.dc-trace-row[data-selected="true"] {
+  background: var(--dash-selected);
+  box-shadow: inset 3px 0 var(--trace-color);
+}
+.dc-trace-label {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  padding-left: calc(8px + var(--trace-depth) * 13px);
+}
+.dc-trace-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 32px;
+  border-radius: 4px;
+  color: var(--dash-muted);
+}
+.dc-trace-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+.dc-trace-select {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  height: 40px;
+  flex: 1;
+  text-align: left;
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.dc-trace-select > svg {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--trace-color);
+}
+.dc-trace-select > span:not(.sr-only) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dc-trace-failure {
+  color: var(--dash-danger);
+  font-weight: 700;
+}
+.dc-trace-track {
+  position: relative;
+  min-width: 0;
+  margin: 0 4px;
+  background-image: linear-gradient(
+    to right,
+    var(--dash-line-soft) 1px,
+    transparent 1px
+  );
+  background-size: 25% 100%;
+  border-right: 1px solid var(--dash-line-soft);
+  border-radius: 2px;
+}
+.dc-trace-bar {
+  position: absolute;
+  top: 13px;
+  height: 16px;
+  min-width: 2px;
+  max-width: 100%;
+  border: 1px solid var(--trace-color);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--trace-color) 35%, var(--dash-panel));
+}
+.dc-trace-point {
+  position: absolute;
+  top: 18px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--trace-color);
+  background: var(--dash-panel);
+  transform: translateX(-50%) rotate(45deg);
+}
+.dc-trace-outside {
+  color: var(--dash-muted);
+  font-size: 9px;
+}
+.dc-trace-duration {
+  align-self: center;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dash-secondary);
+  white-space: nowrap;
+}
+.dc-trace-empty {
+  padding: 32px 20px;
+  font-size: 13px;
+  color: var(--dash-muted);
+}
+.dc-trace-inspector {
+  min-width: 0;
+  padding: 20px;
+  border-top: 1px solid var(--dash-line);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.dc-trace-detail-title h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 5px 0;
+}
+.dc-trace-detail-title p {
+  color: var(--dash-muted);
+}
+.dc-trace-detail-title p:is([data-status="failed"], [data-status="rejected"]) {
+  color: var(--dash-danger);
+}
+.dc-trace-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+  margin: 20px 0 12px;
+}
+.dc-trace-metrics dt {
+  color: var(--dash-muted);
+  font-size: 11px;
+}
+.dc-trace-metrics dd {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  margin-top: 3px;
+}
+.dc-trace-metrics .dc-trace-wide {
+  grid-column: 1 / -1;
+}
+.dc-trace-metrics .dc-trace-wide dd {
+  font-size: 12px;
+}
+.dc-trace-inspector > button {
+  margin-top: 12px;
+}
+.dc-trace-detail-section {
+  padding-block: 18px;
+  border-top: 1px solid var(--dash-line-soft);
+  margin-top: 18px;
+}
+.dc-trace-detail-section h4 {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.dc-trace-detail-section > p + p {
+  margin-top: 6px;
+}
+.dc-trace-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dc-trace-event-list li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+.dc-trace-event-list code {
+  font-size: 11px;
+}
+.dc-trace-event-list time {
+  color: var(--dash-muted);
+  font-size: 10px;
+}
+.dc-trace-inspector .dc-trace-detail-section .dc-stack {
+  gap: 12px;
+}
+.dc-trace-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--dash-line);
+  font-size: 11px;
+  color: var(--dash-muted);
+  background: var(--dash-well);
+}
+@container (min-width: 940px) {
+  .dc-trace-workspace {
+    grid-template-columns: minmax(590px, 1fr) 300px;
+  }
+  .dc-trace-inspector {
+    border-top: 0;
+    border-left: 1px solid var(--dash-line);
+    max-height: 650px;
+    overflow-y: auto;
+  }
+}
+@container (max-width: 540px) {
+  .dc-trace-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 8px;
+  }
+  .dc-trace-toolbar {
+    padding-inline: 12px;
+  }
+  .dc-trace-search {
+    flex-basis: 100%;
+  }
+  .dc-trace-legend {
+    padding-inline: 16px;
+  }
+}
