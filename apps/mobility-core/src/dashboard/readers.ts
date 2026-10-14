@@ -543,7 +543,7 @@ export async function readTrace(
       )
         throw new DashboardAccessError(400, "invalid_cursor");
       const rows =
-        await sql`SELECT id::text,event_key,kind,status,turn_id,step_index,purpose,attempt_id,call_id,tool,provider_response_id,duration_ms,is_error,input_tokens,output_tokens,cached_input_tokens,reasoning_tokens,payload_1,payload_2,payload_3,payload_4,capture_status,sent_call_ids,
+        await sql`SELECT id::text,event_key,kind,status,turn_id,step_index,purpose,attempt_id,call_id,tool,provider_response_id,duration_ms,is_error,input_tokens,output_tokens,cached_input_tokens,reasoning_tokens,payload_1,payload_2,payload_3,payload_4,capture_status,sent_call_ids,otel_span,
       to_char(occurred_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS occurred_at FROM conversation_trace_event
       WHERE session_id IN (${owned}) AND expires_at>now() AND (${turn}::text IS NULL OR turn_id=${turn}) AND (${kind}::text IS NULL OR kind=${kind})
       AND (${call}::text IS NULL OR call_id=${call})
@@ -552,6 +552,7 @@ export async function readTrace(
       const events = rows.slice(0, limit).map((r) => ({
         id: r.id,
         eventKey: r.event_key,
+        otel: r.otel_span ?? null,
         kind: r.kind,
         status: r.status,
         turnId: r.turn_id,
