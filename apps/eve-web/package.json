@@ -11,8 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "4.0.83",
-    "@ai-sdk/openai-compatible": "3.0.66",
+    "@ai-sdk/openai": "4.0.91",
+    "@ai-sdk/openai-compatible": "3.0.67",
     "@mobility/contracts": "workspace:*",
     "@radix-ui/react-use-controllable-state": "1.2.6",
     "@shikijs/core": "3.23.0",
@@ -23,7 +23,7 @@
     "@streamdown/math": "1.0.3",
     "@streamdown/mermaid": "1.0.3",
     "@tailwindcss/postcss": "4.3.3",
-    "ai": "7.0.127",
+    "ai": "7.0.137",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
@@ -46,12 +46,12 @@
     "tailwind-merge": "3.7.0",
     "tailwindcss": "4.3.3",
     "use-stick-to-bottom": "1.1.6",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/leaflet": "1.9.22",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "happy-dom": "20.14.5"
+    "happy-dom": "20.14.6"
   }
 }
