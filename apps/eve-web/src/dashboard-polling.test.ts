@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import {
+  conversationRefreshInterval,
   dashboardIntervals,
   dashboardRetryDelay,
   pollingEligible,
@@ -7,6 +8,33 @@ import {
 } from "./dashboard-polling";
 
 afterEach(() => vi.useRealTimers());
+it("keeps recent terminal reads alive for enrichment and freezes without waiting for missing spans", () => {
+  const now = Date.parse("2026-10-14T10:00:00Z");
+  for (const state of ["succeeded", "failed", "cancelled", "unknown"]) {
+    const summary = { state, lastObservedAt: new Date(now).toISOString() };
+    expect(conversationRefreshInterval(summary, 3000, now + 100)).toBe(3000);
+    expect(conversationRefreshInterval(summary, 3000, now + 30_000)).toBe(3000);
+    expect(conversationRefreshInterval(summary, 3000, now + 35_000)).toBe(0);
+    expect(conversationRefreshInterval(summary, 0, now)).toBe(0);
+  }
+  expect(conversationRefreshInterval({ state: "running" }, 3000, now)).toBe(
+    3000,
+  );
+  expect(conversationRefreshInterval(undefined, 3000, now)).toBe(3000);
+  expect(
+    conversationRefreshInterval({ state: "not_instrumented" }, 3000, now),
+  ).toBe(0);
+  expect(
+    conversationRefreshInterval({ lastObservedAt: "invalid" }, 3000, now),
+  ).toBe(0);
+  expect(
+    conversationRefreshInterval(
+      { lastObservedAt: "2099-01-01T00:00:00Z" },
+      3000,
+      now,
+    ),
+  ).toBe(0);
+});
 it("keeps independent status/view/heartbeat cadences and suppresses focus within eligibility", () => {
   vi.useFakeTimers();
   vi.setSystemTime(100000);

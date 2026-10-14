@@ -29,6 +29,7 @@ import {
 import useSWR, { type State, SWRConfig } from "swr";
 import { useUi } from "@/i18n/provider";
 import {
+  conversationRefreshInterval,
   type DashboardRead,
   dashboardRetryDelay,
   eligibleDashboardRead,
@@ -325,8 +326,10 @@ export function useDashboard(
       isPaused: () => ctx.paused || !ctx.visible,
       refreshInterval: (data: unknown) => {
         if (path?.includes("/summary")) {
-          const d = data as { data?: { state?: string } };
-          return !d?.data || d.data.state === "running" ? interval : 0;
+          const d = data as {
+            data?: { state?: unknown; lastObservedAt?: unknown };
+          };
+          return conversationRefreshInterval(d?.data, interval);
         }
         return interval;
       },
