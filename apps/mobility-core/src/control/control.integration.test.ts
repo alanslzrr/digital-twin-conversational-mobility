@@ -18,6 +18,7 @@ import { getAuth } from "../better-auth";
 import { database } from "../database";
 import { accountAction } from "./accounts";
 import { catalogAction } from "./catalog";
+import { controlError } from "./errors";
 import {
   type ControlIdentity,
   controlIdentity,
@@ -26,6 +27,7 @@ import {
 import { dispatchAttempt, reserveAttempt, settleAttempt } from "./ledger";
 import { acceptMailEvent, drainAccountMail } from "./mail";
 import { proxyInference } from "./proxy";
+import { secretStore } from "./secrets";
 import { prepareSelection, runtimeSelection } from "./selection";
 import { snapshot } from "./snapshot";
 
@@ -729,6 +731,74 @@ describe.skipIf(!enabled)(
       await expect(reserveAttempt(context(b), "{}")).rejects.toThrow(
         "authentication_required",
       );
+    });
+    it("returns the admitted attempt identity on provider rejection without retrying or leaking its body", async () => {
+      const b = await binding();
+      const network = vi.fn(async () =>
+        Response.json(
+          { error: { message: fakeSecret, code: "invalid_schema" } },
+          { status: 400 },
+        ),
+      );
+      const request = new Request("http://localhost/internal/llm", {
+        method: "POST",
+        headers: {
+          "x-mobai-principal": user.id,
+          "x-mobai-session": b.sessionId,
+          "x-mobai-turn": b.turnId,
+          "x-mobai-binding": b.id,
+          "x-mobai-step": "0",
+          "x-mobai-purpose": "step",
+        },
+        body: JSON.stringify({ model: "fixture", input: [] }),
+      });
+      const response = await proxyInference(
+        request,
+        "responses",
+        network,
+      ).catch(controlError);
+      expect(response.status).toBe(400);
+      const attempts =
+        await database()`SELECT id,state,usage FROM llm_attempt WHERE session_id=${b.sessionId}`;
+      expect(attempts).toHaveLength(1);
+      expect(response.headers.get("x-mobai-attempt")).toBe(attempts[0]?.id);
+      expect(attempts[0]).toMatchObject({ state: "unknown", usage: null });
+      expect(await response.text()).not.toContain(fakeSecret);
+      expect(network).toHaveBeenCalledTimes(1);
+    });
+    it("does not present a reserved but undispatched failure as an observed model call", async () => {
+      const b = await binding();
+      const read = vi
+        .spyOn(secretStore, "read")
+        .mockRejectedValueOnce(new Error("synthetic private detail"));
+      const network = vi.fn();
+      try {
+        const response = await proxyInference(
+          new Request("http://localhost/internal/llm", {
+            method: "POST",
+            headers: {
+              "x-mobai-principal": user.id,
+              "x-mobai-session": b.sessionId,
+              "x-mobai-turn": b.turnId,
+              "x-mobai-binding": b.id,
+              "x-mobai-step": "0",
+              "x-mobai-purpose": "step",
+            },
+            body: JSON.stringify({ model: "fixture", input: [] }),
+          }),
+          "responses",
+          network,
+        ).catch(controlError);
+        expect(response.headers.get("x-mobai-attempt")).toBeNull();
+        expect(await response.text()).not.toContain("synthetic private detail");
+        expect(network).not.toHaveBeenCalled();
+        const attempts =
+          await database()`SELECT state FROM llm_attempt WHERE session_id=${b.sessionId}`;
+        expect(attempts).toHaveLength(1);
+        expect(attempts[0]?.state).toBe("not_sent");
+      } finally {
+        read.mockRestore();
+      }
     });
     it.each(["responses", "chat-completions"] as const)(
       "keeps interrupted %s streams and absent usage reserved",
