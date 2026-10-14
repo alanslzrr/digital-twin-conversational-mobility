@@ -3,8 +3,13 @@ import {
   type TelemetryEvent,
   type TelemetryPayload,
   telemetryEvent,
+  traceEnrichmentEnabled,
 } from "@mobility/contracts";
 import type { BudgetContext } from "./budget-context";
+import {
+  acknowledgeTerminals,
+  registerTracePrincipal,
+} from "./otel-coordination";
 import { record } from "./telemetry-projection";
 
 const early = new Map<
@@ -100,13 +105,18 @@ export async function sendTelemetry(
       body,
       signal: AbortSignal.timeout(200),
     });
-    await response.body?.cancel();
+    if (traceEnrichmentEnabled(process.env) && response.ok) {
+      const result = record(await response.json());
+      if (result.accepted === true)
+        acknowledgeTerminals(sessionId, batch.events, result.acknowledged);
+    } else await response.body?.cancel();
   } catch {
     /* Capturing is best-effort and cannot change inference behavior. */
   }
 }
 export async function bindTelemetry(principalId: string, sessionId: string) {
   sweep();
+  registerTracePrincipal(principalId, sessionId);
   registered.set(sessionId, { principalId, at: Date.now() });
   const queued = early.get(sessionId);
   early.delete(sessionId);
