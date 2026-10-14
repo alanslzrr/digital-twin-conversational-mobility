@@ -2,6 +2,7 @@ import { dashboardScopes } from "@mobility/contracts";
 import { authorize } from "../../../src/auth";
 import { DashboardAccessError } from "../../../src/dashboard/access";
 import { readBoundedJson } from "../../../src/dashboard/body";
+import { enrichTelemetry } from "../../../src/observability/otel";
 import { storeTelemetry } from "../../../src/observability/telemetry";
 export const runtime = "nodejs";
 export const maxDuration = 5;
@@ -18,8 +19,14 @@ export async function POST(request: Request) {
   if (service instanceof Response) return service;
   const headers = { "Cache-Control": "no-store" };
   try {
+    const value = await readBoundedJson(request, 1048576);
     return Response.json(
-      await storeTelemetry(await readBoundedJson(request, 1048576)),
+      value &&
+        typeof value === "object" &&
+        "type" in value &&
+        value.type === "otel_enrichment"
+        ? await enrichTelemetry(value)
+        : await storeTelemetry(value),
       { headers },
     );
   } catch (e) {
