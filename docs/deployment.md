@@ -19,6 +19,12 @@ El JWT interno se renueva al arrancar el servicio y dura siete días: rotarlo y 
 
 Fuentes de las plantillas: [PostGIS oficial](https://github.com/postgis/docker-postgis/tree/2bcd236e3af9ec6e668db51eb37162a79f0eaeaa/17-3.5/alpine), [proxy Caddy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).
 
+## OpenTelemetry en la VM
+
+La integración de [metadatos OTel](reference/system.md#metadatos-opentelemetry-de-eve) usa el mismo proceso EVE y el sink privado de Core en local y OCI. No necesita collector, contenedor, puerto, dominio, credencial de exportación o servicio Vercel adicional. Caddy sigue publicando únicamente Web. PostgreSQL conserva los metadatos junto al evento existente y el backup los incluye con la base.
+
+Dejar `MOBAI_OTEL_ENABLED=false` en Web y Core durante la preparación. La migración 0023 es necesaria para ejecutar la nueva versión del lector del panel, incluso con captura apagada, y no se aplica durante builds. Tras una aprobación posterior, seguir [el procedimiento local](local-runtime.md#preparar-metadatos-opentelemetry) y reiniciar el servicio para recoger la configuración. Activar OTel no habilita ingestión, inferencias ni correo. No configurar exportadores `OTEL_EXPORTER_*`: no son un destino de esta integración. Las previews siguen vetadas por código.
+
 ## Preparación histórica de Vercel (no es el destino actual)
 
 Configuración registrada el **23/09/2026**:
