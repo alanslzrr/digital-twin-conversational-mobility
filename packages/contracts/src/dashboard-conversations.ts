@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { conversationPage } from "./conversations";
 import { dashboardData, dashboardToolName } from "./dashboard";
+import { otelSpan } from "./otel";
 import {
   telemetryEvent,
   telemetryProjection,
@@ -89,6 +90,7 @@ export const dashboardTracePage = z.strictObject({
         .omit({ sequence: true, errorCode: true, usage: true })
         .extend({
           id: z.string().regex(/^\d+$/),
+          otel: otelSpan.nullable().default(null),
           inputTokens: nullableCount,
           outputTokens: nullableCount,
           cachedInputTokens: nullableCount,
